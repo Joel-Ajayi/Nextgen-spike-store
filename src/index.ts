@@ -1,9 +1,22 @@
-import express, { Application, NextFunction, Request, Response } from "express";
+import express, { Application } from "express";
+import morgan from "morgan";
+import cors from "cors";
+import graphql from "./servers/graphql/graphql";
+import 'dotenv/config';
 
-const app: Application = express();
+const { PORT } = process.env;
 
-app.get("/", (req: Request, res: Response, next: NextFunction) => {
-  res.send({ hey: "hi" });
-});
+(async () => {
+  const app: Application = express();
+  app.use(morgan("dev"));
 
-app.listen(5000, () => console.log("done"));
+  // set up cors
+  app.use(cors({ origin: [process.env.CLIENT_URL as string, 'https://studio.apollographql.com'], credentials: true }));
+  
+  // servers
+  await graphql(app)
+
+  app.listen({ port: PORT }, () => {
+    console.log(`Server started at PORT ${process.env.PORT}`);
+  });
+})();
