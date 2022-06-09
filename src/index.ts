@@ -1,7 +1,7 @@
-import express, { Application, NextFunction } from "express";
+import express, { Application } from "express";
 import morgan from "morgan";
 import cors from "cors";
-import redis from "redis";
+import { createClient } from "redis";
 import session from "express-session";
 import connectRedis from "connect-redis";
 import graphql from "./servers/graphql/graphql";
@@ -24,19 +24,22 @@ const {
 
   // connect redis
   const RedisStore = connectRedis(session);
-  const client = await redis.createClient({
+  const redisClient = createClient({
     password: REDIS_PASS,
     url: REDIS_URL,
     username: REDIS_USERNAME,
   });
 
+  redisClient.on("error", (err) => {
+    throw new Error("Redis Client Error", err);
+  });
+  await redisClient.connect();
+
   // connect prisma and mongodb
   const prisma = new PrismaClient();
   try {
-    // Connect the client
     await prisma.$connect();
-  } catch (error) {
-    // disconnect the client
+  } catch {
     await prisma.$disconnect();
     throw new Error("An error occured in the server");
   }
@@ -45,7 +48,7 @@ const {
   // session setup
   app.use(
     session({
-      store: new RedisStore({ client }),
+      store: new RedisStore({ client: redisClient }),
       name: SESSION_NAME,
       secret: SESSION_SECRET as string,
       rolling: true,
