@@ -7,6 +7,9 @@ import connectRedis from "connect-redis";
 import graphql from "./servers/graphql/graphql";
 import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
+const https = require("https");
+const fs = require("fs");
+const path = require("path");
 
 const {
   PORT,
@@ -57,7 +60,7 @@ const {
       cookie: {
         maxAge: 60 * 60 * 24 * parseInt(SESSION_LIFETIME as string),
         sameSite: "lax",
-        secure: NODE_ENV !== "development" ? true : false,
+        secure: true,
       },
     })
   );
@@ -77,7 +80,12 @@ const {
   // servers
   await graphql(app, prisma);
 
-  app.listen({ port: PORT }, () => {
+  const options = {
+    key: fs.readFileSync(path.join(__dirname, "../config/key.pem")),
+    cert: fs.readFileSync(path.join(__dirname, "../config/cert.pem")),
+  };
+
+  https.createServer(options, app).listen(PORT, () => {
     console.log(`Server started at PORT ${process.env.PORT}`);
   });
 })();
