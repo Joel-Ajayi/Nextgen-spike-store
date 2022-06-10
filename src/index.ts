@@ -59,15 +59,17 @@ const {
     })
   );
 
-  // servers
-  await graphql(app);
-
   const options = {
     key: fs.readFileSync(join(__dirname, "../config/key.pem")),
     cert: fs.readFileSync(join(__dirname, "../config/cert.pem")),
   };
 
-  https.createServer(options, app).listen(PORT, () => {
-    console.log(`Server started at PORT ${process.env.PORT}`);
-  });
+  const httpServer = https.createServer(options, app);
+
+  // graphql servers
+  await graphql(app, httpServer);
+
+  httpServer.listen(PORT, () =>
+    console.log(`Server started at PORT ${process.env.PORT}`)
+  );
 })();

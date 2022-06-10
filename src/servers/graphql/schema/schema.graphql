@@ -4,6 +4,7 @@
 
 type Post {
   body: String
+  hey: String
   id: Int
   published: Boolean
   title: String

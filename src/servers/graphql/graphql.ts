@@ -6,8 +6,9 @@ import GraphqlUploadExpress from "graphql-upload/graphqlUploadExpress.js";
 import { schema } from "./schema/index";
 import "dotenv/config";
 import { createContext } from "./schema/context";
+import { Server } from "https";
 
-export default async (app: Application) => {
+export default async (app: Application, httpServer: Server) => {
   // graphql files
   app.use(GraphqlUploadExpress({ maxFileSize: 1000000, maxFiles: 4 }));
   const server = new ApolloServer({
