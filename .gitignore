@@ -2,3 +2,7 @@
 .env
 /src/.env
 config
+
+src/servers/graphql/schema/nexus-typegen.ts
+
+package-lock.json
