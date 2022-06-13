@@ -1,11 +1,25 @@
-import { objectType } from "nexus";
+import { queryType } from "nexus";
 
-export const User = objectType({
-  name: "Post", // <- Name of your type
+export const User = queryType({
   definition(t) {
-    t.int("id"); // <- Field named `id` of type `Int`
-    t.string("title"); // <- Field named `title` of type `String`
-    t.string("body"); // <- Field named `body` of type `String`
-    t.boolean("published"); // <- Field named `published` of type `Boolean`
+    t.field("hey", {
+      type: "String",
+      resolve: async (_, arg, ctx) => {
+        console.log(ctx.user);
+        if (!ctx.user) {
+          ctx.req.session.user = "62a3ce4c79b0d28e0537ee47";
+        }
+        // await ctx.db.user.create({
+        //   data: {
+        //     lname: "hey",
+        //     fname: "k,fdj",
+        //     email: ".kdfjkd@gmail.com",
+        //     username: "kfdjfj",
+        //     password: "klfjkfj",
+        //   },
+        // });
+        return "user created";
+      },
+    });
   },
 });

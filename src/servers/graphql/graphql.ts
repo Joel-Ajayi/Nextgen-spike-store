@@ -1,4 +1,4 @@
-import { Application } from "express";
+import { Application, NextFunction } from "express";
 import { ApolloServer } from "apollo-server-express";
 
 // @ts-ignore: Unreachable code error
@@ -7,6 +7,7 @@ import { schema } from "./schema/index";
 import "dotenv/config";
 import { createContext } from "./schema/context";
 import { Server } from "https";
+import { CONST } from "../../@types/conts";
 
 export default async (app: Application, httpServer: Server) => {
   // graphql files
@@ -14,6 +15,7 @@ export default async (app: Application, httpServer: Server) => {
   const server = new ApolloServer({
     schema,
     context: createContext,
+    csrfPrevention: true,
   });
 
   await server.start();
@@ -22,12 +24,9 @@ export default async (app: Application, httpServer: Server) => {
     app,
     path: "/api/graphql",
     cors: {
-      origin: [
-        process.env.CLIENT_URL as string,
-        "https://studio.apollographql.com",
-      ],
+      origin: CONST.request.origins,
       credentials: true,
-      methods: ["POST", "GET"],
+      methods: CONST.request.methods,
     },
   });
 };

@@ -1,8 +1,6 @@
-import express, { Application } from "express";
+import express from "express";
 import morgan from "morgan";
-import { createClient } from "redis";
 import session from "express-session";
-import connectRedis from "connect-redis";
 import graphql from "./servers/graphql/graphql";
 import "dotenv/config";
 import https from "https";
@@ -10,36 +8,20 @@ import fs from "fs";
 import { join } from "path";
 // @ts-ignore: Unreachable code error
 import cookieParser from "cookie-parser";
-// @ts-ignore: Unreachable code error
-import csurf from "csurf";
+import initRedis from "./db/redis/init";
+const { PORT, SESSION_NAME, SESSION_SECRET, SESSION_LIFETIME } = process.env;
 
-const {
-  PORT,
-  NODE_ENV,
-  REDIS_PASS,
-  REDIS_URL,
-  REDIS_USERNAME,
-  SESSION_NAME,
-  SESSION_SECRET,
-  SESSION_LIFETIME,
-} = process.env;
+declare module "express-session" {
+  interface SessionData {
+    user: string;
+  }
+}
 
 (async () => {
-  const app: Application = express();
+  // init redis store
+  const { redisClient, RedisStore } = await initRedis();
 
-  // connect redis
-  const RedisStore = connectRedis(session);
-  const redisClient = createClient({
-    password: REDIS_PASS,
-    url: REDIS_URL,
-    username: REDIS_USERNAME,
-  });
-
-  redisClient.on("error", (err) => {
-    throw new Error("Redis Client Error", err);
-  });
-  await redisClient.connect();
-
+  const app = express();
   app.use(morgan("dev"));
   app.use(cookieParser());
   // session setup
@@ -52,7 +34,8 @@ const {
       resave: true,
       saveUninitialized: false,
       cookie: {
-        maxAge: 60 * 60 * 24 * parseInt(SESSION_LIFETIME as string),
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 * parseInt(SESSION_LIFETIME as string),
         sameSite: "none",
         secure: true,
       },
@@ -68,7 +51,6 @@ const {
 
   // graphql servers
   await graphql(app, httpServer);
-
   httpServer.listen(PORT, () =>
     console.log(`Server started at PORT ${process.env.PORT}`)
   );

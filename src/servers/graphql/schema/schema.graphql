@@ -2,16 +2,31 @@
 ### Do not make changes to this file directly
 
 
-type Post {
-  body: String
-  hey: String
-  id: Int
-  published: Boolean
-  title: String
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type Message {
+  message: String!
+}
+
+type Mutation {
+  adminsignup(data: SignupInput): Message!
+  login(data: LoginInput): Message!
+  logout: Message!
+  signup(data: SignupInput): Message!
 }
 
 type Query {
   ok: Boolean!
+}
+
+input SignupInput {
+  email: String!
+  fname: String!
+  lname: String!
+  password: String!
 }
 
 """The `Upload` scalar type represents a file upload."""
