@@ -12,7 +12,6 @@ type Message {
 }
 
 type Mutation {
-  adminsignup(data: SignupInput): Message!
   login(data: LoginInput): Message!
   logout: Message!
   signup(data: SignupInput): Message!
@@ -22,11 +21,17 @@ type Query {
   ok: Boolean!
 }
 
+enum SignUpType {
+  ADMIN
+  USER
+}
+
 input SignupInput {
   email: String!
   fname: String!
   lname: String!
   password: String!
+  role: SignUpType!
 }
 
 """The `Upload` scalar type represents a file upload."""

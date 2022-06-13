@@ -12,6 +12,7 @@ import { CONST } from "../../@types/conts";
 export default async (app: Application, httpServer: Server) => {
   // graphql files
   app.use(GraphqlUploadExpress({ maxFileSize: 1000000, maxFiles: 4 }));
+  
   const server = new ApolloServer({
     schema,
     context: createContext,
