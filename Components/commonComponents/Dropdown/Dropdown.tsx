@@ -3,6 +3,7 @@ import React, { useState, CSSProperties, useMemo } from "react";
 import Styles from "./dropdown.module.scss";
 import Caret from "./../../images/icons/caret.svg";
 import DropdownItem, { DropdownItemProps } from "./DropdownItem/DropdownItem";
+import uniqId from "uniqid";
 
 export type DropdownProps = {
   title: string;
@@ -52,6 +53,7 @@ export default function Dropdown({
       if ((item as DropdownItemProps)?.title) {
         return (
           <DropdownItem
+            key={uniqId()}
             title={(item as DropdownItemProps).title}
             icon={(item as DropdownItemProps).icon}
             link={(item as DropdownItemProps).link}

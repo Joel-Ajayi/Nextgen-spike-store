@@ -14,12 +14,13 @@ import RewardIcon from "../../images/icons/badge.svg";
 import OrderIcon from "../../images/icons/order.svg";
 import GiftIcon from "../../images/icons/gift-card.svg";
 import { DropdownItemProps } from "../Dropdown/DropdownItem/DropdownItem";
+import uniqId from 'uniqid'
 
 function Header() {
   const handleLoginButton = () => {};
 
   const loginDropdown = [
-    <div className={Styles.signup_item}>
+    <div className={Styles.signup_item} key={uniqId()}>
       <div>New Customer ?</div>
       <Link href="/#">Sign Up</Link>
     </div>,
