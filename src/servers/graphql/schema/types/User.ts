@@ -7,8 +7,10 @@ import {
 } from "../../../../helpers/users";
 import { loginArgs, signupArgs } from "../../../../helpers/validators/input";
 import bcrypt from "bcryptjs";
-import { AuthenticationError } from "apollo-server-express";
-import { signupInput } from "./inputs";
+import { AuthenticationError, UserInputError } from "apollo-server-express";
+import { randomUUID } from "crypto";
+
+const { SESSION_NAME } = process.env;
 
 export const UserSignUp = extendType({
   type: "Mutation",
@@ -17,8 +19,12 @@ export const UserSignUp = extendType({
       type: "Message",
       args: { data: "SignupInput" },
       resolve: async (_, { data }, ctx) => {
-        // validates arguments
-        await signupArgs.validate(data);
+        try {
+          // validates arguments
+          await signupArgs.validate(data);
+        } catch (error) {
+          throw new UserInputError((error as any).message);
+        }
 
         // check if user is already loggedIn
         if (ctx.user) throw new Error(CONST.errors.alreadyLoggedIn);
@@ -29,10 +35,10 @@ export const UserSignUp = extendType({
         const password = await bcrypt.hash(data?.password as string, 12);
 
         const userCount = await ctx.db.user.count();
-        const role = userCount === 0 ? "SUPER_ADMIN" : data?.role;
+        const role = userCount === 0 ? "SUPER_ADMIN" : "USER";
 
         const user = await ctx.db.user.create({
-          data: { ...(data as User), password, role },
+          data: { ...(data as User), password, role, username: `${data?.fname}${Buffer.from(randomUUID(), 'hex').toString('base64')}`  },
         });
         ctx.req.session.user = user.id;
         return { message: CONST.messages.user.signup };
@@ -78,9 +84,13 @@ export const Logout = extendType({
         // check if logged_in
         if (!ctx.user)
           throw new AuthenticationError(CONST.errors.login, {
-            statusCode: 400,
+            statusCode: 401,
           });
 
+        ctx.res.clearCookie(SESSION_NAME as string);
+        ctx.req.session.destroy((err) => {
+          if (err) throw new Error(CONST.errors.server);
+        });
         return { message: CONST.messages.user.logged_out };
       },
     });

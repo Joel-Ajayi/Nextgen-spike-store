@@ -29,9 +29,10 @@ export const alreadySignedUp = async (
   email: string,
   db: PrismaClient
 ): Promise<void> => {
-  const user = await db.user.findUnique({ where: { email } });
-  if (user)
-    throw new UserInputError(CONST.errors.userAlreadyExist, {
-      statusCode: 400,
-    });
+  try {
+    const user = await db.user.findUnique({ where: { email } });
+    if (user) throw new Error();
+  } catch (error) {
+    throw new Error(CONST.errors.unknown);
+  }
 };

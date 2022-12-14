@@ -9,10 +9,10 @@ import { createContext } from "./schema/context";
 import { Server } from "https";
 import { CONST } from "../../@types/conts";
 
-export default async (app: Application, httpServer: Server) => {
+export default async (app: Application) => {
   // graphql files
   app.use(GraphqlUploadExpress({ maxFileSize: 1000000, maxFiles: 4 }));
-  
+
   const server = new ApolloServer({
     schema,
     context: createContext,
@@ -25,7 +25,10 @@ export default async (app: Application, httpServer: Server) => {
     app,
     path: "/api/graphql",
     cors: {
-      origin: CONST.request.origins,
+      origin:
+        process.env.NODE_ENV === "production"
+          ? process.env.CLIENT_URL
+          : CONST.request.origins,
       credentials: true,
       methods: CONST.request.methods,
     },

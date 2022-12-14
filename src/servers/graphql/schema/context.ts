@@ -32,7 +32,7 @@ export async function createContext({
           username: true,
           avatar: true,
           role: true,
-          contactNumber: true,
+          contactNumber: false,
           password: false,
           passwordReset: false,
         },

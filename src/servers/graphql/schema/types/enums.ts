@@ -1,6 +1,6 @@
 import { enumType } from "nexus";
 
-export const signUpType = enumType({
-    name: 'SignUpType',
+export const UserRoleType = enumType({
+    name: 'UserRole',
     members: ['ADMIN', 'USER'],
   })

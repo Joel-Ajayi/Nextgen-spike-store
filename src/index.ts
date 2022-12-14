@@ -8,8 +8,9 @@ import fs from "fs";
 import { join } from "path";
 // @ts-ignore: Unreachable code error
 import cookieParser from "cookie-parser";
-import initRedis from "./db/redis/init";
-const { PORT, SESSION_NAME, SESSION_SECRET, SESSION_LIFETIME } = process.env;
+import initSessionStore from "./db/session/session";
+const { PORT, SESSION_NAME, SESSION_SECRET, SESSION_LIFETIME, NODE_ENV } =
+  process.env;
 
 declare module "express-session" {
   interface SessionData {
@@ -19,7 +20,7 @@ declare module "express-session" {
 
 (async () => {
   // init redis store
-  const { redisClient, RedisStore } = await initRedis();
+  const sessionStore = await initSessionStore();
 
   const app = express();
   app.use(morgan("dev"));
@@ -27,7 +28,7 @@ declare module "express-session" {
   // session setup
   app.use(
     session({
-      store: new RedisStore({ client: redisClient }),
+      store: sessionStore,
       name: SESSION_NAME,
       secret: SESSION_SECRET as string,
       rolling: true,
@@ -35,8 +36,8 @@ declare module "express-session" {
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
-        maxAge: 1000 * 60 * 60 * 24 * parseInt(SESSION_LIFETIME as string),
-        sameSite: "none",
+        maxAge: 1000 * 3600 * parseInt(SESSION_LIFETIME as string),
+        sameSite: NODE_ENV === "production" ? true : "none",
         secure: true,
       },
     })
@@ -50,7 +51,7 @@ declare module "express-session" {
   const httpServer = https.createServer(options, app);
 
   // graphql servers
-  await graphql(app, httpServer);
+  await graphql(app);
   httpServer.listen(PORT, () =>
     console.log(`Server started at PORT ${process.env.PORT}`)
   );

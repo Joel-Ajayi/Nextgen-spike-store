@@ -13,7 +13,6 @@ export const signupInput = inputObjectType({
     t.nonNull.string("email"),
     t.nonNull.string("password"),
     t.nonNull.string("fname"),
-    t.nonNull.string("lname"),
-    t.nonNull.field("role", { type: "SignUpType" });
+    t.nonNull.string("lname");
   },
 });

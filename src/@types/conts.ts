@@ -7,6 +7,7 @@ export const CONST = {
     signup: "Please sign up for an account",
     invalidLoginCredentials: "Invalid username or password",
     userAlreadyExist: "User already exist",
+    server: "An error occured on the server"
   },
   request: {
     methods: ["POST", "GET"],

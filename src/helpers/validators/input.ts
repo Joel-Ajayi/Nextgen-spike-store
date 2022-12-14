@@ -26,4 +26,9 @@ const age = number().max(120).min(10);
 
 export const loginArgs = object().shape({ email, password });
 
-export const signupArgs = object().shape({ email, password, lName, fName });
+export const signupArgs = object().shape({
+  email,
+  password,
+  lname: lName,
+  fname: fName,
+});
