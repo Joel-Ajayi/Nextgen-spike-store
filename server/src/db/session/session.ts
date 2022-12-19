@@ -5,7 +5,6 @@ export default async (): Promise<MongoStore> => {
   try {
     return MongoStore.create({
       mongoUrl: process.env.DATABASE_URL,
-      ttl: parseInt(process.env.SESSION_LIFETIME as string),
       touchAfter: parseInt(process.env.SESSION_TOUCH as string),
     });
   } catch (error) {
