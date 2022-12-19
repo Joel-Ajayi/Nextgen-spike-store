@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { IUserInitailState } from "../types/user";
 
-const initialState: IUserInitailState = {
+export const initialState: IUserInitailState = {
   isAuthenticated: false,
   email: "",
   lName: "",
@@ -16,11 +16,11 @@ const userSlice = createSlice({
   name: "User",
   initialState,
   reducers: {
-    setUserState: (state, action: PayloadAction<IUserInitailState>) => {
-      state = action.payload;
+    setUserState: (_, action: PayloadAction<IUserInitailState>) => {
+      return action.payload;
     },
-    resetUserState: (state) => {
-      state = initialState;
+    resetUserState: () => {
+      return initialState;
     },
   },
 });
