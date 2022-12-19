@@ -19,7 +19,7 @@ declare module "express-session" {
 }
 
 (async () => {
-  // init redis store
+  // init session store
   const sessionStore = await initSessionStore();
 
   const app = express();
@@ -32,11 +32,11 @@ declare module "express-session" {
       name: SESSION_NAME,
       secret: SESSION_SECRET as string,
       rolling: true,
-      resave: true,
+      resave: false,
       saveUninitialized: false,
       cookie: {
         httpOnly: true,
-        maxAge: 1000 * 3600 * parseInt(SESSION_LIFETIME as string),
+        maxAge: 1000 * parseInt(SESSION_LIFETIME as string),
         sameSite: NODE_ENV === "production" ? true : "none",
         secure: true,
       },
@@ -44,8 +44,8 @@ declare module "express-session" {
   );
 
   const options = {
-    key: fs.readFileSync(join(__dirname, "../config/key.pem")),
-    cert: fs.readFileSync(join(__dirname, "../config/cert.pem")),
+    key: fs.readFileSync(join(__dirname, "../../../../../key.pem")),
+    cert: fs.readFileSync(join(__dirname, "../../../../../cert.pem")),
   };
 
   const httpServer = https.createServer(options, app);

@@ -1,4 +1,4 @@
-import { Application, NextFunction } from "express";
+import { Application } from "express";
 import { ApolloServer } from "apollo-server-express";
 
 // @ts-ignore: Unreachable code error
@@ -6,7 +6,6 @@ import GraphqlUploadExpress from "graphql-upload/graphqlUploadExpress.js";
 import { schema } from "./schema/index";
 import "dotenv/config";
 import { createContext } from "./schema/context";
-import { Server } from "https";
 import { CONST } from "../../@types/conts";
 
 export default async (app: Application) => {
@@ -23,7 +22,7 @@ export default async (app: Application) => {
 
   await server.applyMiddleware({
     app,
-    path: "/api/graphql",
+    path: "/api",
     cors: {
       origin:
         process.env.NODE_ENV === "production"

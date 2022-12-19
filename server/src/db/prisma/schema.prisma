@@ -10,12 +10,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum ROLE {
-  USER
-  ADMIN
-  SUPER_ADMIN
-}
-
 enum PAYMENTSTATUS {
   pending
   cancelled
@@ -62,12 +56,12 @@ enum ADDRESSTYPE {
 model User {
   id                String     @id @default(auto()) @map("_id") @db.ObjectId
   email             String     @unique
-  fname             String
-  lname             String
+  fName             String
+  lName             String
   username          String     @unique
   password          String
   avatar            String?
-  role              ROLE       @default(USER)
+  role              Int       @default(0) // 0=user, 1 = seller, 2 = admin, 3 = super-admin
   contactNumber     String?
   passwordReset     String?
   createdCategories Category[]
@@ -81,9 +75,10 @@ model User {
 model Category {
   id          String    @id @default(auto()) @map("_id") @db.ObjectId
   name        String
-  parentId    String?   @unique @db.ObjectId
-  current     Category? @relation("Category")
-  parent      Category? @relation("Category", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  childrenId  String[]   @unique @db.ObjectId
+  children    Category[] @relation("Category", fields: [childrenId], references: [id])
+  parentsId   String[]   @unique @db.ObjectId
+  parents     Category[] @relation("Category", fields: [parentsId], references: [id])
   desciption  String?
   title       String?
   view        String?

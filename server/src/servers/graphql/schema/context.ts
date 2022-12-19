@@ -28,13 +28,12 @@ export async function createContext({
         select: {
           id: true,
           email: true,
-          fname: true,
+          fName: true,
+          lName: true,
           username: true,
           avatar: true,
           role: true,
-          contactNumber: false,
-          password: false,
-          passwordReset: false,
+          contactNumber: true,
         },
       })) as User | null;
     }

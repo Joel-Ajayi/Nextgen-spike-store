@@ -29,6 +29,6 @@ export const loginArgs = object().shape({ email, password });
 export const signupArgs = object().shape({
   email,
   password,
-  lname: lName,
-  fname: fName,
+  lName,
+  fName,
 });
