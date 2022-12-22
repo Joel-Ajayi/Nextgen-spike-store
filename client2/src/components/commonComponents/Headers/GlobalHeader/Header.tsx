@@ -3,21 +3,29 @@ import Styles from "./header.module.scss";
 import { Link } from "react-router-dom";
 import ProductsSearch from "../../Search/ProductsSearch/ProductsSearch";
 import Dropdown, { DropdownProps } from "../../Dropdown/Dropdown";
-import { ReactComponent as ProfileIcon } from "../../images/icons/account.svg";
-import { ReactComponent as CartIcon } from "../../images/icons/cart.svg";
-import { ReactComponent as FavoriteIcon } from "../../images/icons/favorite.svg";
-import { ReactComponent as NotificationIcon } from "../../images/icons/notifications.svg";
-import { ReactComponent as QuestionIcon } from "../../images/icons/question-mark.svg";
-import { ReactComponent as DownloadIcon } from "../../images/icons/download.svg";
-import { ReactComponent as GrowthIcon } from "../../images/icons/growth.svg";
-import { ReactComponent as RewardIcon } from "../../images/icons/badge.svg";
-import { ReactComponent as OrderIcon } from "../../images/icons/order.svg";
-import { ReactComponent as GiftIcon } from "../../images/icons/gift-card.svg";
+import { ReactComponent as ProfileIcon } from "../../../../images/icons/account.svg";
+import { ReactComponent as CartIcon } from "../../../../images/icons/cart.svg";
+import { ReactComponent as FavoriteIcon } from "../../../../images/icons/favorite.svg";
+import { ReactComponent as NotificationIcon } from "../../../../images/icons/notifications.svg";
+import { ReactComponent as QuestionIcon } from "../../../../images/icons/question-mark.svg";
+import { ReactComponent as DownloadIcon } from "../../../../images/icons/download.svg";
+import { ReactComponent as GrowthIcon } from "../../../../images/icons/growth.svg";
+import { ReactComponent as RewardIcon } from "../../../../images/icons/badge.svg";
+import { ReactComponent as OrderIcon } from "../../../../images/icons/order.svg";
+import { ReactComponent as GiftIcon } from "../../../../images/icons/gift-card.svg";
 import { DropdownItemProps } from "../../Dropdown/DropdownItem/DropdownItem";
 import uniqId from "uniqid";
+import ModalWrapper from "../../Modal/Wrapper/Wrapper";
+import UserLogin from "../../../Authentication/UserAuth/Login/Login";
+import appSlice from "../../../../store/appState";
+import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 
 function Header() {
-  const handleLoginButton = () => {};
+  const isVisible = useAppSelector((state) => state.app.showModal);
+  const dispatch = useAppDispatch();
+  const actions = appSlice.actions;
+
+  const handleLoginButton = () => dispatch(actions.setShowModal(true));
 
   const loginDropdown = [
     <div className={Styles.signup_item} key={uniqId()}>
@@ -120,55 +128,59 @@ function Header() {
   ] as (JSX.Element | DropdownProps | DropdownItemProps)[];
 
   return (
-    <div className={Styles.headerWrapper}>
-      <div className={Styles.content}>
-        <Link to="#" className={Styles.flipkartpluswrapper_tab}>
-          <div className={Styles.logoname}>
-            <i>Flipkart</i>
-          </div>
-          <div className={Styles.plus}>
-            <span>
-              <i>Explore</i>
-            </span>
-            <span>
+    <>
+      <ModalWrapper>
+        <UserLogin />
+      </ModalWrapper>
+      <div className={Styles.headerWrapper}>
+        <div className={Styles.content}>
+          <Link to="#" className={Styles.flipkartpluswrapper_tab}>
+            <div className={Styles.logoname}>
+              <i>Flipkart</i>
+            </div>
+            <div className={Styles.plus}>
               <span>
-                <i>Plus</i>
+                <i>Explore</i>
               </span>
-              <img
-                src="https://res.cloudinary.com/dbmumpbin/image/upload/v1669970819/Flipkart/plus_icon.png"
-                alt="flipkart-plus-icon"
-                width={10}
-                height={10}
-              />
-            </span>
-          </div>
-        </Link>
-        <ProductsSearch />
-        <Dropdown
-          wrapperClassName={Styles.dropdown_wrapper}
-          onClick={handleLoginButton}
-          title="Login"
-          titleClassName={Styles.login_button}
-          showCaret={false}
-          items={loginDropdown}
-          level={1}
-        />
-        <Link to="#" className={Styles.seller_tab}>
-          <span>Become a seller</span>
-        </Link>
-        <Dropdown
-          wrapperClassName={Styles.dropdown_wrapper}
-          title="More"
-          listOnHover
-          level={1}
-          items={moreDropdown}
-        />
-        <Link to="#" className={Styles.cart_tab}>
-          <CartIcon className={Styles.cart_icon} />
-          <span>Cart</span>
-        </Link>
+              <span>
+                <span>
+                  <i>Plus</i>
+                </span>
+                <img
+                  src="https://res.cloudinary.com/dbmumpbin/image/upload/v1669970819/Flipkart/plus_icon.png"
+                  alt="flipkart-plus-icon"
+                  width={10}
+                  height={10}
+                />
+              </span>
+            </div>
+          </Link>
+          <ProductsSearch />
+          <Dropdown
+            wrapperClassName={Styles.dropdown_wrapper}
+            onClick={handleLoginButton}
+            title="Login"
+            titleClassName={Styles.login_button}
+            showCaret={false}
+            items={loginDropdown}
+            level={1}
+          />
+          <Link to="#" className={Styles.seller_tab}>
+            <span>Become a seller</span>
+          </Link>
+          <Dropdown
+            wrapperClassName={Styles.dropdown_wrapper}
+            title="More"
+            level={1}
+            items={moreDropdown}
+          />
+          <Link to="#" className={Styles.cart_tab}>
+            <CartIcon className={Styles.cart_icon} />
+            <span>Cart</span>
+          </Link>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

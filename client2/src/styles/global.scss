@@ -1,14 +1,53 @@
+@import "./vars.scss";
+
+* {
+  box-sizing: border-box;
+}
+
 body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-      sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+.svg-white-fill {
+  path {
+    fill: white !important;
   }
-  
-  code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-      monospace;
+}
+
+.svg-brand-fill {
+  path {
+    fill: $brand-color !important;
   }
-  
+}
+
+.svg-white-stroke {
+  path {
+    stroke: white !important;
+  }
+}
+
+.svg-brand-stroke {
+  path {
+    stroke: $brand-color !important;
+  }
+}
+
+.svg-white {
+  path {
+    fill: white !important;
+  }
+}
+
+.svg-brand {
+  fill: $brand-color !important;
+}

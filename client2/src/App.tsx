@@ -3,11 +3,12 @@ import {
   createBrowserRouter,
   createRoutesFromElements,
   Route,
-  RouteProps,
   RouterProvider,
   Outlet,
   Navigate,
 } from "react-router-dom";
+
+import Home from "./pages/Home";
 import { getUser } from "./requests/user";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import userSlice from "./store/userState";
@@ -50,7 +51,7 @@ function Routes() {
   const routes = createBrowserRouter(
     createRoutesFromElements(
       <Route element={<GetUserWrapper />}>
-        <Route path="/" element={<div>hi</div>} />
+        <Route path="/" element={<Home />} />
         <Route path="*" element={<h1>404</h1>} />
       </Route>
     )

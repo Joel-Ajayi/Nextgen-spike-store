@@ -1,3 +1,3 @@
-export interface ILocalStorage {
-  productsSearch: string[];
+export interface IAppInitailState {
+  showModal: boolean;
 }

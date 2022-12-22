@@ -1,4 +1,4 @@
-@import "../../../styles//vars.module.scss";
+@import "../../../styles//vars.scss";
 
 .title {
   display: flex;
@@ -15,7 +15,7 @@
     width: 20px;
     height: 12px;
     margin-top: 3px;
-    path {
+    polyline {
       stroke: white;
     }
   }

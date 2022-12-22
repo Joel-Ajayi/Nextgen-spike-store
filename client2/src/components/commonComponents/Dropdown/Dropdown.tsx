@@ -1,7 +1,7 @@
 import React, { useState, CSSProperties, useMemo } from "react";
 import { Link } from "react-router-dom";
 import Styles from "./dropdown.module.scss";
-import { ReactComponent as CaretIcon } from "./../../images/icons/caret.svg";
+import { ReactComponent as CaretIcon } from "./../../../images/icons/caret.svg";
 import DropdownItem, { DropdownItemProps } from "./DropdownItem/DropdownItem";
 import uniqId from "uniqid";
 
