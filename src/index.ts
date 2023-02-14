@@ -9,12 +9,20 @@ import path, { join } from "path";
 // @ts-ignore: Unreachable code error
 import cookieParser from "cookie-parser";
 import initSessionStore from "./db/session/session";
-const { PORT, SESSION_NAME, SESSION_SECRET, SESSION_LIFETIME, NODE_ENV } =
-  process.env;
+const {
+  PORT,
+  SESSION_NAME,
+  SELLER_SESSION_NAME,
+  SESSION_SECRET,
+  SELLER_SESSION_SECRET,
+  SESSION_LIFETIME,
+  NODE_ENV,
+} = process.env;
 
 declare module "express-session" {
   interface SessionData {
     user: string;
+    seller: string;
   }
 }
 
@@ -32,10 +40,29 @@ declare module "express-session" {
 
   // session setup
   app.use(
+    "/api",
     session({
       store: sessionStore,
       name: SESSION_NAME,
       secret: SESSION_SECRET as string,
+      rolling: true,
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        httpOnly: true,
+        maxAge: 1000 * parseInt(SESSION_LIFETIME as string),
+        sameSite: NODE_ENV === "production",
+        secure: true,
+      },
+    })
+  );
+
+  app.use(
+    "/api/seller",
+    session({
+      store: sessionStore,
+      name: SELLER_SESSION_NAME,
+      secret: SELLER_SESSION_SECRET as string,
       rolling: true,
       resave: false,
       saveUninitialized: false,
@@ -57,7 +84,7 @@ declare module "express-session" {
   // graphql servers
   await graphql(app);
   app.use(express.static(path.join(__dirname, "../client/build")));
-  app.get("/uploads", express.static(path.join(__dirname, "uploads")));
+  app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
   app.get("*", (_, res) =>
     res.sendFile(path.join(__dirname, "../client/build/index.html"))
   );

@@ -1,8 +1,5 @@
 /node_modules
 .env
 /src/.env
-config
-
-src/servers/graphql/schema/nexus-typegen.ts
-
+/src/schema/typegen
 package-lock.json

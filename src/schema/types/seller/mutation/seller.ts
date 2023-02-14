@@ -3,51 +3,54 @@ import { randomUUID } from "crypto";
 import { mutationField } from "nexus";
 import {
   validateLogin,
-  validateSignUp,
-} from "../../../helpers/validators/input";
-import { User } from "@prisma/client";
-import { CONST } from "../../../@types/conts";
+  validateSellerSignUp,
+} from "../../../../helpers/validators/input";
+import { Seller } from "@prisma/client";
+import { CONST } from "../../../../@types/conts";
 import { MessageObj } from "../objects";
 import { SignupInput } from "../inputs";
 import {
-  alreadySignedUp,
-  checkLoginCredentials,
-} from "../../../middlewares/middlewares";
+  alreadySignedUpSeller,
+  checkSellerLoginCredentials,
+} from "../../../../middlewares/middlewares";
 
 const { SESSION_NAME } = process.env;
 
-export const LignUp = mutationField("Signup", {
+export const SellerSignUp = mutationField("SellerSignUp", {
   type: MessageObj,
   args: { data: SignupInput },
   resolve: async (_, { data }, ctx) => {
     // validates arguments
-    await validateSignUp(data);
+    await validateSellerSignUp(data);
     // check if user already exist
-    await alreadySignedUp(data?.email as string, ctx.db);
+    await alreadySignedUpSeller(data?.email as string);
 
+    // new seller
+    const sellerCount = await ctx.db.seller.count();
     const password = await bcrypt.hash(data?.password as string, 12);
-    const user = await ctx.db.user.create({
+    const seller = await ctx.db.seller.create({
       data: {
-        ...(data as User),
+        ...(data as Seller),
         password,
+        role: sellerCount === 0 ? 2 : 0,
         username: `${data?.fName}${Buffer.from(randomUUID(), "hex").toString(
           "base64"
         )}`,
       },
     });
-    ctx.req.session.user = user.id;
+    ctx.req.session.user = seller.id;
     return { message: CONST.messages.user.signup };
   },
 });
 
-export const Login = mutationField("Login", {
+export const SellerLogin = mutationField("SellerLogin", {
   type: MessageObj,
   args: { data: "LoginInput" },
   resolve: async (_, { data }, ctx) => {
     // validates arguments
     await validateLogin(data);
     // check user credentials
-    const user = await checkLoginCredentials(
+    const user = await checkSellerLoginCredentials(
       data?.email as string,
       data?.password as string
     );
@@ -57,7 +60,7 @@ export const Login = mutationField("Login", {
   },
 });
 
-export const Logout = mutationField("Logout", {
+export const SellerLogout = mutationField("SellerLogout", {
   type: MessageObj,
   resolve: async (_, args, ctx) => {
     if (ctx.user) {

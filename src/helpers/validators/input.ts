@@ -1,4 +1,5 @@
-import { object, string, number, date } from "yup";
+import { GraphQLError } from "graphql";
+import { object, string } from "yup";
 
 const password = string()
   .required("Password is required")
@@ -14,21 +15,58 @@ const fName = string()
   .min(2, "first name is 2 chars minimum")
   .required("first name is required");
 
-const usertype = string()
-  .matches(/USER | ADMIN/, { message: "type must be USER or ADMIN" })
-  .required("signup type is required");
-
 const lName = string()
   .min(2, "last name is 2 chars minimum")
   .required("last name is required");
 
-const age = number().max(120).min(10);
-
-export const loginArgs = object().shape({ email, password });
-
-export const signupArgs = object().shape({
+const signupArgs = object().shape({
   email,
   password,
   lName,
   fName,
 });
+
+const sellerSignUpArgs = object().shape({
+  email,
+  password,
+  lName,
+  fName,
+});
+
+const loginArgs = object().shape({ email, password });
+
+export const validateLogin = async (data: any) => {
+  try {
+    await loginArgs.validate(data);
+  } catch (error) {
+    throw new GraphQLError((error as any).message, {
+      extensions: {
+        statusCode: 400,
+      },
+    });
+  }
+};
+
+export const validateSignUp = async (data: any) => {
+  try {
+    await signupArgs.validate(data);
+  } catch (error) {
+    throw new GraphQLError((error as any).message, {
+      extensions: {
+        statusCode: 400,
+      },
+    });
+  }
+};
+
+export const validateSellerSignUp = async (data: any) => {
+  try {
+    await sellerSignUpArgs.validate(data);
+  } catch (error) {
+    throw new GraphQLError((error as any).message, {
+      extensions: {
+        statusCode: 400,
+      },
+    });
+  }
+};

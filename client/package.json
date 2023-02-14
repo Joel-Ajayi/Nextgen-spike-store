@@ -49,5 +49,6 @@
   "devDependencies": {
     "@types/react-redux": "^7.1.24",
     "sass": "^1.57.0"
-  }
+  },
+  "proxy": "https://localhost:5000"
 }

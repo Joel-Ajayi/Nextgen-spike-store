@@ -59,6 +59,23 @@ enum OPTIONTYPE {
 }
 
 model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  email         String    @unique
+  fName         String
+  lName         String
+  username      String    @unique
+  password      String
+  avatar        String?
+  contactNumber String?
+  passwordReset String?
+  reviews       Reviews[]
+  address       Address[]
+  orders        Order[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Seller {
   id                String     @id @default(auto()) @map("_id") @db.ObjectId
   email             String     @unique
   fName             String
@@ -66,12 +83,12 @@ model User {
   username          String     @unique
   password          String
   avatar            String?
-  role              Int        @default(0) // 0=user, 1 = seller, 2 = admin, 3 = super-admin
-  contactNumber     String?
+  verified          Boolean    @default(false)
+  role              Int        @default(0) // 0=seller, 1=admin, 2=super-admin
+  contactNumber     String
   passwordReset     String?
   createdCategories Category[]
-  reviews           Reviews[]
-  address           Address[]
+  businessAdress    Address[]
   orders            Order[]
   products          Product[]
   createdAt         DateTime   @default(now())
@@ -79,29 +96,29 @@ model User {
 }
 
 model Category {
-  id          String         @id @default(auto()) @map("_id") @db.ObjectId
+  id          String           @id @default(auto()) @map("_id") @db.ObjectId
   name        String
-  parentId    String?         @unique @db.ObjectId
-  parent      Category?       @relation("Category", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  children    Category[]     @relation("Category")
-  filterIds   String[]       @db.ObjectId
+  parentId    String?          @unique @db.ObjectId
+  parent      Category?        @relation("Category", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children    Category[]       @relation("Category")
+  filterIds   String[]         @db.ObjectId
   filters     CategoryFilter[] @relation(fields: [filterIds], references: [id])
   image       String?
   banners     String[]
   desciption  String?
-  createdById String         @db.ObjectId
-  createdBy   User           @relation(fields: [createdById], references: [id])
-  createdAt   DateTime       @default(now())
-  updatedAt   DateTime       @updatedAt
+  createdById String           @db.ObjectId
+  createdBy   Seller           @relation(fields: [createdById], references: [id])
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
 }
 
 model CategoryFilter {
   id            String          @id @default(auto()) @map("_id") @db.ObjectId
   name          String
   type          OPTIONTYPE
-  categories    Category[] @relation(fields: [categoryIds], references: [id])
-  categoryIds   String[]   @db.ObjectId
-  isRequired    Boolean @default(true)
+  categories    Category[]      @relation(fields: [categoryIds], references: [id])
+  categoryIds   String[]        @db.ObjectId
+  isRequired    Boolean         @default(true)
   productFilter ProductFilter[]
 }
 
@@ -115,7 +132,6 @@ model Product {
   reviews      Reviews[]
   rating       Int             @default(0)
   countInStock Int             @default(0)
-  availability Boolean         @default(false)
   allowCod     Boolean         @default(false)
   discount     Int             @default(0)
   brandId      String          @db.ObjectId
@@ -124,8 +140,8 @@ model Product {
   filters      ProductFilter[] @relation(fields: [filterIds], references: [id])
   OrderItemIds String[]        @db.ObjectId
   OrderItems   OrderItem[]     @relation(fields: [OrderItemIds], references: [id])
-  userId       String          @db.ObjectId
-  user         User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sellerId     String          @db.ObjectId
+  seller       Seller          @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
 }
@@ -155,18 +171,21 @@ model Reviews {
 }
 
 model Address {
-  id           String      @id @default(auto()) @map("_id") @db.ObjectId
-  userId       String      @db.ObjectId
-  user         User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  address      String
-  pinCode      String?
-  city         String
-  locality     String
-  State        String
-  addressType  ADDRESSTYPE
-  mobileNumber String
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId        String?     @db.ObjectId
+  user          User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sellerId      String?     @db.ObjectId
+  seller        Seller?     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  address       String
+  pinCode       String?
+  city          String
+  locality      String
+  State         String
+  addressType   ADDRESSTYPE
+  mobileNumber  String
+  mobileNumber2 String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
 }
 
 model Order {
@@ -179,6 +198,8 @@ model Order {
   orderStatus   OrderStatus[]
   totalAmount   Float
   items         OrderItem[]
+  Seller        Seller?       @relation(fields: [sellerId], references: [id])
+  sellerId      String?       @db.ObjectId
 }
 
 model OrderItem {

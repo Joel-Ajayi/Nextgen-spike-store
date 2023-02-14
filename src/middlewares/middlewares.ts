@@ -1,45 +1,12 @@
-import { User } from "@prisma/client";
-import { ExpressContext } from "apollo-server-express";
+import { PrismaClient, User } from "@prisma/client";
 import { GraphQLError } from "graphql";
 import { CONST } from "../@types/conts";
 import { prisma as db } from "../db/prisma/connect";
 import { Context } from "../schema/context";
-
-export async function createContext({
-  req,
-  res,
-}: ExpressContext): Promise<Context> {
-  // gets user from session
-  const userId = req.session.user;
-  let user: User | null = null;
-
-  try {
-    if (userId) {
-      user = (await db.user.findUnique({
-        where: {
-          id: userId,
-        },
-        select: {
-          id: true,
-          email: true,
-          fName: true,
-          lName: true,
-          username: true,
-          avatar: true,
-          role: true,
-          contactNumber: true,
-        },
-      })) as User | null;
-    }
-  } catch (error) {
-    throw new Error(CONST.errors.unknown);
-  }
-
-  return { req, res, db, user };
-}
+import bcrypt from "bcryptjs";
 
 export const checkUser = (ctx: Context) => {
-  if (!ctx.user) {
+  if (!ctx.user?.id) {
     throw new GraphQLError(CONST.errors.login, {
       extensions: {
         statusCode: 401,
@@ -49,8 +16,7 @@ export const checkUser = (ctx: Context) => {
 };
 
 export const checkSeller = (ctx: Context) => {
-  checkUser(ctx);
-  if (ctx.user && ctx.user.role < 1) {
+  if (!ctx.seller?.id) {
     throw new GraphQLError(CONST.errors.unAuthorized, {
       extensions: {
         statusCode: 403,
@@ -59,9 +25,20 @@ export const checkSeller = (ctx: Context) => {
   }
 };
 
-export const checkAdmin = (ctx: Context) => {
-  checkUser(ctx);
-  if (ctx.user && ctx.user.role < 2) {
+export const checkSellerAdmin = (ctx: Context) => {
+  checkSeller(ctx);
+  if (ctx.seller?.role !== 1) {
+    throw new GraphQLError(CONST.errors.login, {
+      extensions: {
+        statusCode: 401,
+      },
+    });
+  }
+};
+
+export const checkSellerSuperAdmin = (ctx: Context) => {
+  checkSeller(ctx);
+  if (ctx.seller?.role !== 2) {
     throw new GraphQLError(CONST.errors.unAuthorized, {
       extensions: {
         statusCode: 403,
@@ -70,13 +47,74 @@ export const checkAdmin = (ctx: Context) => {
   }
 };
 
-export const checkSuperAdmin = (ctx: Context) => {
-  checkUser(ctx);
-  if (ctx.user && ctx.user.role < 3) {
-    throw new GraphQLError(CONST.errors.unAuthorized, {
+export const checkLoginCredentials = async (
+  email: string,
+  password: string
+): Promise<User> => {
+  const user = await db.user.findUnique({ where: { email } });
+
+  if (!user) {
+    throw new GraphQLError(CONST.errors.invalidLoginCredentials, {
       extensions: {
-        statusCode: 403,
+        statusCode: 400,
       },
     });
   }
+
+  const isMatched = await bcrypt.compare(password, user.password);
+  if (!isMatched) {
+    throw new GraphQLError(CONST.errors.invalidLoginCredentials, {
+      extensions: {
+        statusCode: 400,
+      },
+    });
+  }
+  return user;
+};
+
+export const alreadySignedUp = async (
+  email: string,
+  db: PrismaClient
+): Promise<void> => {
+  const user = await db.user.findUnique({ where: { email } });
+  if (user) {
+    throw new GraphQLError(CONST.errors.userAlreadyExist, {
+      extensions: {
+        statusCode: 400,
+      },
+    });
+  }
+};
+
+export const checkSellerLoginCredentials = async (
+  email: string,
+  password: string
+): Promise<User> => {
+  const user = await db.user.findUnique({ where: { email } });
+
+  if (!user) {
+    throw new GraphQLError(CONST.errors.invalidLoginCredentials, {
+      extensions: {
+        statusCode: 400,
+      },
+    });
+  }
+
+  const isMatched = await bcrypt.compare(password, user.password);
+  if (!isMatched) {
+    throw new GraphQLError(CONST.errors.invalidLoginCredentials, {
+      extensions: {
+        statusCode: 400,
+      },
+    });
+  }
+  return user;
+};
+
+export const alreadySignedUpSeller = async (
+  email: string
+): Promise<boolean> => {
+  const seller = await db.seller.findUnique({ where: { email } });
+  if (seller) true;
+  return false;
 };

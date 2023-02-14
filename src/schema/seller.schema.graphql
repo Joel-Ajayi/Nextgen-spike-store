@@ -18,10 +18,10 @@ type Message {
 }
 
 type Mutation {
-  CreateCategory(data: NewCategoryInput): Message
-  Login(data: LoginInput): Message
-  Logout: Message
-  Signup(data: SignupInput): Message
+  SellerLogin(data: LoginInput): Message
+  SellerLogout: Message
+  SellerSignUp(data: SignupInput): Message
+  createCategory(data: NewCategoryInput): Message
 }
 
 input NewCategoryInput {
@@ -34,7 +34,18 @@ input NewCategoryInput {
 }
 
 type Query {
-  UserQuery: User
+  userQuery: Seller
+}
+
+type Seller {
+  avatar: String
+  contactNumber: String!
+  email: String!
+  fName: String!
+  id: ID!
+  lName: String!
+  role: Int!
+  username: String!
 }
 
 input SignupInput {
@@ -46,20 +57,3 @@ input SignupInput {
 
 """The `Upload` scalar type represents a file upload."""
 scalar Upload
-
-type User {
-  avater: String
-  contactNumber: String
-  email: String!
-  fName: String!
-  id: ID!
-  lName: String!
-  username: String!
-}
-
-enum UserRole {
-  ADMIN
-  SELLER
-  SUPER_ADMIN
-  USER
-}

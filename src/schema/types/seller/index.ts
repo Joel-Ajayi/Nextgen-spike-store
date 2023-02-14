@@ -1,4 +1,4 @@
-export * from "./scalar";
+export * from "../../types/scalar";
 export * from "./mutation";
 export * from "./query";
 export * from "./objects";

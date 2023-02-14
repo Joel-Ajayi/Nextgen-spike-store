@@ -1,10 +1,11 @@
 import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
+
 import path from "path";
-import { Upload } from "../../../@types";
-import { GraphQLError} from "graphql";
-import { CONST } from "../../../@types/conts";
-export * from "./user";
+import { Upload } from "../../../../@types";
+import { GraphQLError } from "graphql";
+import { CONST } from "../../../../@types/conts";
+export * from "./seller";
 export * from "./category";
 
 export const validateFiles = async (
