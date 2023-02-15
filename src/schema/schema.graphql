@@ -8,9 +8,13 @@ input CategoryFilterInput {
   type: String!
 }
 
+input ForgotPasswordInput {
+  email: String!
+}
+
 input LoginInput {
   email: String!
-  password: String!
+  pwd: String!
 }
 
 type Message {
@@ -19,9 +23,12 @@ type Message {
 
 type Mutation {
   CreateCategory(data: NewCategoryInput): Message
+  ForgotPassword(data: ForgotPasswordInput): Message
   Login(data: LoginInput): Message
   Logout: Message
   Signup(data: SignupInput): Message
+  VerifyPasswordToken(data: VerificationTokenInput): Message
+  VerifyToken(data: VerificationTokenInput): Message
 }
 
 input NewCategoryInput {
@@ -39,9 +46,7 @@ type Query {
 
 input SignupInput {
   email: String!
-  fName: String!
-  lName: String!
-  password: String!
+  pwd: String!
 }
 
 """The `Upload` scalar type represents a file upload."""
@@ -57,7 +62,11 @@ type User {
   username: String!
 }
 
-enum UserRole {
+input VerificationTokenInput {
+  token: String!
+}
+
+enum userRole {
   ADMIN
   SELLER
   SUPER_ADMIN

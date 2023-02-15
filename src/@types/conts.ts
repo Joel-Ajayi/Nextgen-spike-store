@@ -10,6 +10,7 @@ export const CONST = {
     unAuthenticated: "unAuthenticated",
     userAlreadyExist: "User already exist",
     server: "An error occured on the server",
+    invalidToken: "Invalid token",
     files: {
       inCorrectImageFormat: "Image file format not supported",
       inCorrectVideoFormat: "Video file format not supported",
@@ -28,13 +29,16 @@ export const CONST = {
   },
   request: {
     methods: ["POST", "GET"],
-    origins: ["https://studio.apollographql.com"],
+    origins: ["https://localhost:3000", "https://studio.apollographql.com"],
   },
   messages: {
-    user: {
-      logged_in: "logged in",
-      logged_out: "logged out",
-      signup: "Account created",
-    },
+    logged_in: "logged in",
+    logged_out: "logged out",
+    signup: "Account created",
+    emailVerification:
+      "An email has been sent to this email address for validation",
+    emailVerified: "Email has been verified",
+    forgotPwdEmail: "Forgot password email has been sent",
+    passwordChange:"Password has been Changed. Please SignIn"
   },
 };

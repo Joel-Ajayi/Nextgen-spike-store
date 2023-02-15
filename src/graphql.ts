@@ -8,7 +8,7 @@ import { NexusGraphQLSchema } from "nexus/dist/core";
 import { sellerSchema } from "./schema/seller";
 
 export default async (app: Application) => {
-  await setUpGraphql(app, userSchema, "/api");
+  await setUpGraphql(app, userSchema, "/api/app");
   await setUpGraphql(app, sellerSchema, "/api/seller");
 };
 
@@ -19,9 +19,7 @@ const setUpGraphql = async (
 ) => {
   const cors = {
     origin:
-      process.env.NODE_ENV === "production"
-        ? process.env.CLIENT_URL
-        : CONST.request.origins,
+      process.env.NODE_ENV === "production" ? undefined : CONST.request.origins,
     credentials: process.env.NODE_ENV !== "production",
     methods: CONST.request.methods,
   };

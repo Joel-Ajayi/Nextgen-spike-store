@@ -1,7 +1,7 @@
 import { GraphQLError } from "graphql";
 import { object, string } from "yup";
 
-const password = string()
+const pwd = string()
   .required("Password is required")
   .min(8, "Password should be 8 chars minimum")
   .matches(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/, {
@@ -21,19 +21,15 @@ const lName = string()
 
 const signupArgs = object().shape({
   email,
-  password,
-  lName,
-  fName,
+  pwd,
 });
 
 const sellerSignUpArgs = object().shape({
   email,
-  password,
-  lName,
-  fName,
+  pwd,
 });
 
-const loginArgs = object().shape({ email, password });
+const loginArgs = object().shape({ email, pwd });
 
 export const validateLogin = async (data: any) => {
   try {

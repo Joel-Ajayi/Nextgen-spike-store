@@ -18,9 +18,8 @@ export async function appContext({
 }: ExpressContext): Promise<Context> {
   // gets user from session
   const userId = req.session.user;
-  let user: User = {} as any;
-
   const sellerId = req.session.seller;
+  let user: User = {} as any;
   let seller: Seller = {} as any;
 
   try {

@@ -4,6 +4,7 @@ import { CONST } from "../@types/conts";
 import { prisma as db } from "../db/prisma/connect";
 import { Context } from "../schema/context";
 import bcrypt from "bcryptjs";
+import { SellerRoles } from "../@types/User";
 
 export const checkUser = (ctx: Context) => {
   if (!ctx.user?.id) {
@@ -27,7 +28,7 @@ export const checkSeller = (ctx: Context) => {
 
 export const checkSellerAdmin = (ctx: Context) => {
   checkSeller(ctx);
-  if (ctx.seller?.role !== 1) {
+  if (ctx.seller?.role !== SellerRoles.Seller) {
     throw new GraphQLError(CONST.errors.login, {
       extensions: {
         statusCode: 401,
@@ -38,7 +39,7 @@ export const checkSellerAdmin = (ctx: Context) => {
 
 export const checkSellerSuperAdmin = (ctx: Context) => {
   checkSeller(ctx);
-  if (ctx.seller?.role !== 2) {
+  if (ctx.seller?.role === SellerRoles.SUPER_ADMIN) {
     throw new GraphQLError(CONST.errors.unAuthorized, {
       extensions: {
         statusCode: 403,
@@ -61,7 +62,7 @@ export const checkLoginCredentials = async (
     });
   }
 
-  const isMatched = await bcrypt.compare(password, user.password);
+  const isMatched = await bcrypt.compare(password, user.pwd);
   if (!isMatched) {
     throw new GraphQLError(CONST.errors.invalidLoginCredentials, {
       extensions: {
@@ -86,6 +87,16 @@ export const alreadySignedUp = async (
   }
 };
 
+export const alreadySignedIn = async (ctx: Context): Promise<void> => {
+  if (ctx.user) {
+    throw new GraphQLError(CONST.errors.alreadyLoggedIn, {
+      extensions: {
+        statusCode: 400,
+      },
+    });
+  }
+};
+
 export const checkSellerLoginCredentials = async (
   email: string,
   password: string
@@ -100,7 +111,7 @@ export const checkSellerLoginCredentials = async (
     });
   }
 
-  const isMatched = await bcrypt.compare(password, user.password);
+  const isMatched = await bcrypt.compare(password, user.pwd);
   if (!isMatched) {
     throw new GraphQLError(CONST.errors.invalidLoginCredentials, {
       extensions: {
@@ -117,4 +128,14 @@ export const alreadySignedUpSeller = async (
   const seller = await db.seller.findUnique({ where: { email } });
   if (seller) true;
   return false;
+};
+
+export const alreadySignedInSeller = async (ctx: Context): Promise<void> => {
+  if (ctx.seller) {
+    throw new GraphQLError(CONST.errors.alreadyLoggedIn, {
+      extensions: {
+        statusCode: 400,
+      },
+    });
+  }
 };

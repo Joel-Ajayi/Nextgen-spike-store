@@ -3,17 +3,28 @@ import { inputObjectType, list, nonNull } from "nexus";
 export const LoginInput = inputObjectType({
   name: "LoginInput",
   definition(t) {
-    t.nonNull.string("email"), t.nonNull.string("password");
+    t.nonNull.string("email"), t.nonNull.string("pwd");
   },
 });
 
 export const SignupInput = inputObjectType({
   name: "SignupInput",
   definition(t) {
-    t.nonNull.string("email"),
-      t.nonNull.string("password"),
-      t.nonNull.string("fName"),
-      t.nonNull.string("lName");
+    t.nonNull.string("email"), t.nonNull.string("pwd");
+  },
+});
+
+export const VerificationTokenInput = inputObjectType({
+  name: "VerificationTokenInput",
+  definition(t) {
+    t.nonNull.string("token");
+  },
+});
+
+export const ForgotPasswordInput = inputObjectType({
+  name: "ForgotPasswordInput",
+  definition(t) {
+    t.nonNull.string("email");
   },
 });
 

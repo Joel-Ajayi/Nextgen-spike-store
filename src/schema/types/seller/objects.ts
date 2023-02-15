@@ -12,9 +12,9 @@ export const SellerObj = objectType({
   definition(t) {
     t.nonNull.field("id", { type: "ID" });
     t.nonNull.field("email", { type: "String" });
-    t.nonNull.field("fName", { type: "String" });
-    t.nonNull.field("lName", { type: "String" });
-    t.nonNull.field("username", { type: "String" });
+    t.nonNull.field("fullName", { type: "String" });
+    t.nonNull.field("displayName", { type: "String" });
+    t.nonNull.field("businessName", { type: "String" });
     t.nonNull.field("role", { type: "Int" });
     t.nonNull.field("contactNumber", { type: "String" });
     t.nullable.field("avatar", { type: "String" });

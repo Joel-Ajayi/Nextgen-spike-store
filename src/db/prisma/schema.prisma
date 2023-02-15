@@ -29,23 +29,9 @@ enum ORDERSTATUS {
   delivered
 }
 
-enum BRANDS {
-  HP
-  DELL
-  Nike
-  PUMA
-  Adidas
-  Google
-  TECNO
-  Apple
-  Amazon
-  SAMSUNG
-  Gucci
-  Xiaomi
-  Lenovo
-  ASUS
-  LOUIS_VUITTON
-  Dior
+enum SellerType {
+  all
+  books
 }
 
 enum ADDRESSTYPE {
@@ -61,38 +47,44 @@ enum OPTIONTYPE {
 model User {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
   email         String    @unique
-  fName         String
-  lName         String
-  username      String    @unique
-  password      String
+  fName         String?
+  lName         String?
+  displayName   String?
   avatar        String?
   contactNumber String?
-  passwordReset String?
   reviews       Reviews[]
   address       Address[]
   orders        Order[]
+  verified      Boolean   @default(false)
+  pwd           String
+  pwdToken      String?   @unique
+  vToken        String?   @unique
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
 
 model Seller {
-  id                String     @id @default(auto()) @map("_id") @db.ObjectId
-  email             String     @unique
-  fName             String
-  lName             String
-  username          String     @unique
-  password          String
-  avatar            String?
-  verified          Boolean    @default(false)
-  role              Int        @default(0) // 0=seller, 1=admin, 2=super-admin
-  contactNumber     String
-  passwordReset     String?
-  createdCategories Category[]
-  businessAdress    Address[]
-  orders            Order[]
-  products          Product[]
-  createdAt         DateTime   @default(now())
-  updatedAt         DateTime   @updatedAt
+  id                  String     @id @default(auto()) @map("_id") @db.ObjectId
+  email               String     @unique
+  fullName            String
+  displayName         String?
+  businessName        String
+  businessDescription String
+  avatar              String?
+  role                Int        @default(0) // 0=seller, 1=admin, 2=super-admin
+  verified            Boolean    @default(false)
+  accountName         String?
+  accountNumber       Int?
+  contactNumber       String
+  createdCategories   Category[]
+  businessAdress      Address[]
+  orders              Order[]
+  products            Product[]
+  pwd                 String
+  pwdToken            String?    @unique
+  vToken              String?    @unique
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
 }
 
 model Category {
@@ -171,21 +163,21 @@ model Reviews {
 }
 
 model Address {
-  id            String      @id @default(auto()) @map("_id") @db.ObjectId
-  userId        String?     @db.ObjectId
-  user          User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sellerId      String?     @db.ObjectId
-  seller        Seller?     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
-  address       String
-  pinCode       String?
-  city          String
-  locality      String
-  State         String
-  addressType   ADDRESSTYPE
-  mobileNumber  String
-  mobileNumber2 String?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id             String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String?     @db.ObjectId
+  user           User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sellerId       String?     @db.ObjectId
+  seller         Seller?     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
+  address        String
+  address2       String?
+  pinCode        String?
+  city           String
+  state          String
+  addressType    ADDRESSTYPE
+  contactNumber  String
+  contactNumber2 String?
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
 }
 
 model Order {

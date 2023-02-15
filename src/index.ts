@@ -40,7 +40,7 @@ declare module "express-session" {
 
   // session setup
   app.use(
-    "/api",
+    "/api/app",
     session({
       store: sessionStore,
       name: SESSION_NAME,
