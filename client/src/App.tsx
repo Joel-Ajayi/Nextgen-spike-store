@@ -12,18 +12,9 @@ import HomePage from "./pages/Home";
 import { getUser } from "./requests/user";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import userSlice from "./store/userState";
-import sellerSlice from "./store/sellerState";
 import appSlice from "./store/appState";
-import {
-  IError,
-  ISellerInitailState,
-  IUserInitailState,
-  SellerRoles,
-} from "./types";
-import SellerSignInPage from "./pages/Seller/SellerSignIn";
-import SellerDashboardPage from "./pages/Seller/SellerDashboard";
+import { IError, IUserInitailState, Roles } from "./types";
 import DashboardPage from "./pages/Dashboard";
-import { getSeller } from "./requests/seller";
 import LogoLoader from "./components/shared/Loader/LogoLoader";
 
 function UserRoute() {
@@ -31,33 +22,20 @@ function UserRoute() {
   return isAuthenticated ? <Outlet /> : <Navigate to="/signin" replace />;
 }
 
-function SellerRoute() {
-  const { isAuthenticated } = useAppSelector((state) => state.seller);
-  return isAuthenticated ? (
-    <Outlet />
-  ) : (
-    <Navigate to="/seller/signin" replace />
-  );
-}
-
-function AdminSellerRoute() {
-  const { isAuthenticated, role } = useAppSelector((state) => state.seller);
+function AdminRoute() {
+  const { isAuthenticated, role } = useAppSelector((state) => state.user);
   // check authentication
   if (!isAuthenticated) return <Navigate to="/seller/signin" replace />;
   // check authorization
-  return role >= SellerRoles.Admin ? (
-    <Outlet />
-  ) : (
-    <Navigate to="/404" replace />
-  );
+  return role >= Roles.Admin ? <Outlet /> : <Navigate to="/404" replace />;
 }
 
-function SuperAdminSellerRoute() {
-  const { isAuthenticated, role } = useAppSelector((state) => state.seller);
+function SuperAdminRoute() {
+  const { isAuthenticated, role } = useAppSelector((state) => state.user);
   // check authentication
   if (!isAuthenticated) return <Navigate to="/seller/signin" replace />;
   // check authorization
-  return role === SellerRoles.SuperAdmin ? (
+  return role === Roles.SuperAdmin ? (
     <Outlet />
   ) : (
     <Navigate to="/404" replace />
@@ -98,38 +76,6 @@ function GetUser() {
   return isLoading ? <LogoLoader /> : <Outlet />;
 }
 
-function GetSeller() {
-  const dispatch = useAppDispatch();
-  const { resetSellerState, setSellerState } = sellerSlice.actions;
-  const { setAppLoading, setNetworkError } = appSlice.actions;
-  const isLoading = useAppSelector((state) => state.app.isLoading);
-
-  useEffect(() => {
-    (async () => {
-      const seller = await getSeller();
-      if (!seller || (seller as IError).message || (seller as IError).code) {
-        dispatch(resetSellerState());
-        dispatch(setNetworkError(true));
-      } else {
-        dispatch(
-          setSellerState({
-            ...(seller as ISellerInitailState),
-            isAuthenticated: true,
-          })
-        );
-        dispatch(setNetworkError(false));
-      }
-      dispatch(setAppLoading(false));
-    })();
-
-    return () => {
-      dispatch(setAppLoading(true));
-    };
-  }, []);
-
-  return isLoading ? <LogoLoader /> : <Outlet />;
-}
-
 function Routes() {
   const routes = createBrowserRouter(
     createRoutesFromElements(
@@ -140,12 +86,6 @@ function Routes() {
           <Route element={<UserRoute />}>
             <Route path="/dashboard" element={<DashboardPage />} />
           </Route>
-        </Route>
-        <Route element={<GetSeller />}>
-          <Route element={<SellerRoute />}>
-            <Route path="/seller" element={<SellerDashboardPage />} />
-          </Route>
-          <Route path="/seller/signin" element={<SellerSignInPage />} />
         </Route>
         <Route path="*" element={<h1>404</h1>} />
       </Route>

@@ -64,10 +64,3 @@ type User {
 input VerificationTokenInput {
   token: String!
 }
-
-enum userRole {
-  ADMIN
-  SELLER
-  SUPER_ADMIN
-  USER
-}

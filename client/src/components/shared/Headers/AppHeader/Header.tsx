@@ -16,7 +16,7 @@ import { ReactComponent as GiftIcon } from "../../../../images/icons/gift-card.s
 import { DropdownItemProps } from "../../Dropdown/DropdownItem/DropdownItem";
 import uniqId from "uniqid";
 import ModalWrapper from "../../Modal/Wrapper/Wrapper";
-import UserLogin from "../../../SignIn/UserSignIn";
+import UserLogin from "../../../SignIn/SignIn";
 import appSlice from "../../../../store/appState";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 

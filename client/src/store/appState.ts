@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { IAppInitailState, IMessage, MessageType } from "../types";
+import { IAppInitailState, IMessage } from "../types";
 
 export const initialState: IAppInitailState = {
   showModal: false,

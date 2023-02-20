@@ -22,7 +22,6 @@ const {
 declare module "express-session" {
   interface SessionData {
     user: string;
-    seller: string;
   }
 }
 
@@ -40,29 +39,10 @@ declare module "express-session" {
 
   // session setup
   app.use(
-    "/api/app",
     session({
       store: sessionStore,
       name: SESSION_NAME,
       secret: SESSION_SECRET as string,
-      rolling: true,
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        httpOnly: true,
-        maxAge: 1000 * parseInt(SESSION_LIFETIME as string),
-        sameSite: NODE_ENV === "production",
-        secure: true,
-      },
-    })
-  );
-
-  app.use(
-    "/api/seller",
-    session({
-      store: sessionStore,
-      name: SELLER_SESSION_NAME,
-      secret: SELLER_SESSION_SECRET as string,
       rolling: true,
       resave: false,
       saveUninitialized: false,

@@ -4,6 +4,7 @@ import { IUserInitailState } from "../types";
 export const initialState: IUserInitailState = {
   isAuthenticated: false,
   email: "",
+  role: 0,
   fullName: "",
   avatar: null,
   contactNumber: null,

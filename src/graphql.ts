@@ -5,11 +5,9 @@ import "dotenv/config";
 import { appContext } from "./schema/context";
 import { CONST } from "./@types/conts";
 import { NexusGraphQLSchema } from "nexus/dist/core";
-import { sellerSchema } from "./schema/seller";
 
 export default async (app: Application) => {
-  await setUpGraphql(app, userSchema, "/api/app");
-  await setUpGraphql(app, sellerSchema, "/api/seller");
+  await setUpGraphql(app, userSchema, "/api");
 };
 
 const setUpGraphql = async (

@@ -6,8 +6,8 @@ export interface IAppInitailState {
   message: IMessage;
 }
 
-export enum SellerRoles {
-  Seller = 0,
+export enum Roles {
+  User = 0,
   Admin = 1,
   SuperAdmin = 2,
 }
@@ -33,6 +33,7 @@ export interface IError {
 export interface IUserInitailState {
   isAuthenticated?: boolean;
   email: string;
+  role: Roles;
   fullName?: string;
   avatar?: string | null;
   contactNumber?: string | null;

@@ -1,4 +1,4 @@
-import React, { FormEventHandler, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Styles from "./userSignIn.module.scss";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Input from "../shared/Input/Input";
@@ -70,6 +70,7 @@ function SignIn() {
         setUserState({
           email: formData[SignInFieds.Email]?.value as string,
           isAuthenticated: true,
+          role: 0,
         })
       );
     }

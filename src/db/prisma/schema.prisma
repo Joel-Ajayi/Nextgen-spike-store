@@ -55,35 +55,12 @@ model User {
   address       Address[]
   orders        Order[]
   verified      Boolean   @default(false)
+  role          Int       @default(0)
   pwd           String
   pwdToken      String?   @unique
   vToken        String?   @unique
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
-}
-
-model Seller {
-  id                  String     @id @default(auto()) @map("_id") @db.ObjectId
-  email               String     @unique
-  fullName            String
-  displayName         String?
-  businessName        String
-  businessDescription String
-  avatar              String?
-  role                Int        @default(0) // 0=seller, 1=admin, 2=super-admin
-  verified            Boolean    @default(false)
-  accountName         String?
-  accountNumber       Int?
-  contactNumber       String
-  createdCategories   Category[]
-  businessAdress      Address[]
-  orders              Order[]
-  products            Product[]
-  pwd                 String
-  pwdToken            String?    @unique
-  vToken              String?    @unique
-  createdAt           DateTime   @default(now())
-  updatedAt           DateTime   @updatedAt
 }
 
 model Category {
@@ -98,7 +75,6 @@ model Category {
   banners     String[]
   desciption  String?
   createdById String           @db.ObjectId
-  createdBy   Seller           @relation(fields: [createdById], references: [id])
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
 }
@@ -132,7 +108,6 @@ model Product {
   OrderItemIds String[]        @db.ObjectId
   OrderItems   OrderItem[]     @relation(fields: [OrderItemIds], references: [id])
   sellerId     String          @db.ObjectId
-  seller       Seller          @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   createdAt    DateTime        @default(now())
   updatedAt    DateTime        @updatedAt
 }
@@ -165,8 +140,6 @@ model Address {
   id             String      @id @default(auto()) @map("_id") @db.ObjectId
   userId         String?     @db.ObjectId
   user           User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  sellerId       String?     @db.ObjectId
-  seller         Seller?     @relation(fields: [sellerId], references: [id], onDelete: Cascade)
   address        String
   address2       String?
   pinCode        String?
@@ -189,8 +162,6 @@ model Order {
   orderStatus   OrderStatus[]
   totalAmount   Float
   items         OrderItem[]
-  Seller        Seller?       @relation(fields: [sellerId], references: [id])
-  sellerId      String?       @db.ObjectId
 }
 
 model OrderItem {

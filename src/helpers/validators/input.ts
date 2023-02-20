@@ -21,11 +21,6 @@ const signupArgs = object({
   pwd,
 });
 
-const sellerSignUpArgs = object({
-  email,
-  pwd,
-});
-
 const loginArgs = object({ email, pwd });
 
 export const validateLogin = async (data: any) => {
@@ -43,18 +38,6 @@ export const validateLogin = async (data: any) => {
 export const validateSignUp = async (data: any) => {
   try {
     await signupArgs.validate(data);
-  } catch (error) {
-    throw new GraphQLError((error as any).message, {
-      extensions: {
-        statusCode: 400,
-      },
-    });
-  }
-};
-
-export const validateSellerSignUp = async (data: any) => {
-  try {
-    await sellerSignUpArgs.validate(data);
   } catch (error) {
     throw new GraphQLError((error as any).message, {
       extensions: {

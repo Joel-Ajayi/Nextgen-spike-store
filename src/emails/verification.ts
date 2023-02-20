@@ -39,22 +39,3 @@ export const forgotPasswordEmail = async (to: string, link: string) => {
     console.log(error);
   }
 };
-
-export const sellerVerificationEmail = async (to: string, link: string) => {
-  const msg = {
-    to, // Change to your recipient
-    from: "ajayiayotunde13@gmail.com", // Change to your verified sender
-    subject: "Flipkart Seller Account Verification",
-    html: `<div>
-           <h1>Let's verify your new seller account</h1>
-           <h5>Your link is active for 24 hours. After that, you will need to resend the verification email.</h5>
-           <a href="${link}">Verify seller account</a>
-          </div>`,
-  };
-
-  try {
-    await sgMail.send(msg);
-  } catch (error) {
-    console.log(error);
-  }
-};
