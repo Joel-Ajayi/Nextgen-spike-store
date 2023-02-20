@@ -1,13 +1,15 @@
 import React from "react";
-import Header from "../components/commonComponents/Headers/GlobalHeader/Header";
+import BackgroundMsg from "../components/shared/BackgroundMsg/BackgroundMsg";
+import Header from "../components/shared/Headers/AppHeader/Header";
 
-function Home() {
+function HomePage() {
   return (
     <>
+      <BackgroundMsg />
       <Header />
       <p>is updated</p>
     </>
   );
 }
 
-export default Home;
+export default HomePage;

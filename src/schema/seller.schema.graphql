@@ -8,24 +8,16 @@ input CategoryFilterInput {
   type: String!
 }
 
-input ForgotPasswordInput {
-  email: String!
-}
-
-input LoginInput {
-  email: String!
-  pwd: String!
-}
-
 type Message {
   message: String!
 }
 
 type Mutation {
-  ForgotPassword(data: ForgotPasswordInput): Message
-  SellerLogin(data: LoginInput): Message
+  ForgotPassword(data: SetTokenInput): Message
   SellerLogout: Message
-  SellerSignUp(data: SignupInput): Message
+  SellerSignIn(data: SignInInput): Message
+  SellerSignUp(data: SignUpInput): Message
+  VerifyAccount(data: SetTokenInput): Message
   VerifyPasswordToken(data: VerificationTokenInput): Message
   VerifyToken(data: VerificationTokenInput): Message
   createCategory(data: NewCategoryInput): Message
@@ -55,7 +47,16 @@ type Seller {
   role: Int!
 }
 
-input SignupInput {
+input SetTokenInput {
+  email: String!
+}
+
+input SignInInput {
+  email: String!
+  pwd: String!
+}
+
+input SignUpInput {
   email: String!
   pwd: String!
 }

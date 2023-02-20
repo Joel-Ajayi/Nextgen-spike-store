@@ -1,6 +1,6 @@
 import React from "react";
 import Styles from "./header.module.scss";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import ProductsSearch from "../../Search/ProductsSearch/ProductsSearch";
 import Dropdown, { DropdownProps } from "../../Dropdown/Dropdown";
 import { ReactComponent as ProfileIcon } from "../../../../images/icons/account.svg";
@@ -16,21 +16,28 @@ import { ReactComponent as GiftIcon } from "../../../../images/icons/gift-card.s
 import { DropdownItemProps } from "../../Dropdown/DropdownItem/DropdownItem";
 import uniqId from "uniqid";
 import ModalWrapper from "../../Modal/Wrapper/Wrapper";
-import UserLogin from "../../../Authentication/UserAuth/Login/Login";
+import UserLogin from "../../../SignIn/UserSignIn";
 import appSlice from "../../../../store/appState";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 
 function Header() {
-  const isVisible = useAppSelector((state) => state.app.showModal);
+  const { pathname } = useLocation();
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const actions = appSlice.actions;
 
-  const handleLoginButton = () => dispatch(actions.setShowModal(true));
+  const handleSignInButton = () => {
+    if (!pathname.includes("/signin")) {
+      dispatch(actions.setShowModal(true));
+    }
+  };
 
   const loginDropdown = [
     <div className={Styles.signup_item} key={uniqId()}>
       <div>New Customer ?</div>
-      <Link to="/#">Sign Up</Link>
+      <Link to="/?signup=true" onClick={handleSignInButton}>
+        Sign Up
+      </Link>
     </div>,
     {
       icon: (
@@ -147,7 +154,7 @@ function Header() {
                   <i>Plus</i>
                 </span>
                 <img
-                  src="https://res.cloudinary.com/dbmumpbin/image/upload/v1669970819/Flipkart/plus_icon.png"
+                  src="/uploads/plus_icon.png"
                   alt="flipkart-plus-icon"
                   width={10}
                   height={10}
@@ -158,7 +165,7 @@ function Header() {
           <ProductsSearch />
           <Dropdown
             wrapperClassName={Styles.dropdown_wrapper}
-            onClick={handleLoginButton}
+            onClick={handleSignInButton}
             title="Login"
             titleClassName={Styles.login_button}
             showCaret={false}

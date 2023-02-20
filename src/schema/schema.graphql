@@ -8,25 +8,17 @@ input CategoryFilterInput {
   type: String!
 }
 
-input ForgotPasswordInput {
-  email: String!
-}
-
-input LoginInput {
-  email: String!
-  pwd: String!
-}
-
 type Message {
   message: String!
 }
 
 type Mutation {
   CreateCategory(data: NewCategoryInput): Message
-  ForgotPassword(data: ForgotPasswordInput): Message
-  Login(data: LoginInput): Message
-  Logout: Message
-  Signup(data: SignupInput): Message
+  ForgotPassword(data: SetTokenInput): Message
+  SignIn(data: SignInInput): Message
+  SignOut: Message
+  SignUp(data: SignUpInput): Message
+  VerifyAccount(data: SetTokenInput): Message
   VerifyPasswordToken(data: VerificationTokenInput): Message
   VerifyToken(data: VerificationTokenInput): Message
 }
@@ -44,8 +36,17 @@ type Query {
   UserQuery: User
 }
 
-input SignupInput {
+input SetTokenInput {
   email: String!
+}
+
+input SignInInput {
+  email: String
+  pwd: String
+}
+
+input SignUpInput {
+  email: String
   pwd: String!
 }
 
@@ -56,10 +57,8 @@ type User {
   avater: String
   contactNumber: String
   email: String!
-  fName: String!
+  fullName: String
   id: ID!
-  lName: String!
-  username: String!
 }
 
 input VerificationTokenInput {

@@ -2,14 +2,14 @@ export const CONST = {
   errors: {
     database: "An error occured in the data base",
     unknown: "An unknown error occured",
-    login: "Please login",
-    alreadyLoggedIn: "Already loggedin",
+    signIn: "Please login",
+    alreadySignedIn: "Already loggedin",
     signup: "Please sign up for an account",
-    invalidLoginCredentials: "Invalid username or password",
+    invalidSignIn: "Invalid username or password",
     unAuthorized: "unAuthorized",
     unAuthenticated: "unAuthenticated",
     userAlreadyExist: "User already exist",
-    server: "An error occured on the server",
+    server: "An error occured",
     invalidToken: "Invalid token",
     files: {
       inCorrectImageFormat: "Image file format not supported",
@@ -32,13 +32,13 @@ export const CONST = {
     origins: ["https://localhost:3000", "https://studio.apollographql.com"],
   },
   messages: {
-    logged_in: "logged in",
-    logged_out: "logged out",
-    signup: "Account created",
+    signedIn: "Signed in",
+    signedOut: "Signed out",
+    signedUp: "Account created",
     emailVerification:
-      "An email has been sent to this email address for validation",
+      "If email exist, an email has been sent to validate account",
     emailVerified: "Email has been verified",
-    forgotPwdEmail: "Forgot password email has been sent",
-    passwordChange:"Password has been Changed. Please SignIn"
+    forgotPwdEmail: "If email exist, an email has been sent to reset password",
+    passwordChange: "Password has been Changed. Please SignIn",
   },
 };

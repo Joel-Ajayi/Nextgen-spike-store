@@ -29,9 +29,7 @@ export async function appContext({
         select: {
           id: true,
           email: true,
-          fName: true,
-          lName: true,
-          username: true,
+          fullName: true,
           avatar: true,
           contactNumber: true,
         },
@@ -44,9 +42,7 @@ export async function appContext({
         select: {
           id: true,
           email: true,
-          fName: true,
-          lName: true,
-          username: true,
+          fullName: true,
           avatar: true,
           contactNumber: true,
         },

@@ -1,0 +1,119 @@
+@import "../../../styles/vars.scss";
+
+@mixin message-animation($name, $property) {
+  animation: $name 8s ease;
+  @keyframes #{$name} {
+    0% {
+      #{$property}: -100%;
+    }
+    10% {
+      #{$property}: -50%;
+    }
+    15% {
+      #{$property}: 10px;
+    }
+    75% {
+      #{$property}: 10px;
+    }
+    90% {
+      #{$property}: -50%;
+    }
+    100% {
+      #{$property}: -100%;
+    }
+  }
+}
+
+.from_left,
+.from_right,
+.from_bottom,
+.from_top {
+  position: fixed;
+  z-index: $z-index5;
+  display: flex;
+  background-color: white;
+  border-radius: 4px;
+  min-height: 50px;
+  min-width: 200px;
+  max-width: 300px;
+
+  .msg {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 10px;
+    font-size: 12px;
+    font-weight: 400;
+
+    span {
+      width: 100%;
+      margin-top: 3px;
+      text-align: left;
+      word-break: break-all;
+      font-weight: bold;
+      color: $color-gray-text2;
+    }
+
+    .header {
+      font-weight: bold;
+      font-size: 14px;
+      color: $color-gray-text;
+    }
+  }
+
+  .icon {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    height: inherit;
+    border-radius: 4px;
+    div {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: auto 0;
+      height: 20px;
+      width: 20px;
+      border-radius: 50%;
+      transform: scale(1.5);
+    }
+
+    span {
+      padding: 10px;
+      margin-bottom: 2px;
+      font-size: 13px;
+    }
+  }
+}
+
+.from_bottom,
+.from_top {
+  left: 50%;
+  transform: translate(-50%, 0);
+}
+
+.from_left,
+.from_right {
+  top: 10px;
+}
+
+.from_right {
+  right: -100%;
+  @include message-animation(message-animation-right, right);
+}
+
+.from_left {
+  left: -100%;
+  @include message-animation(message-animation-left, left);
+}
+
+.from_bottom {
+  bottom: -100%;
+  @include message-animation(message-animation-bottom, bottom);
+}
+
+.from_top {
+  top: -100%;
+  @include message-animation(message-animation-top, top);
+}

@@ -1,0 +1,116 @@
+@import "../../styles/vars.scss";
+
+.content_wrapper {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+
+  .content {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    background-color: $color-gray;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .login_wrapper {
+      display: flex;
+      width: 700px;
+      background-color: white;
+      border-radius: 2px;
+      box-shadow: 2px 2px 4px $color-gray2;
+      height: 550px;
+
+      @media screen and (max-width: 800px) {
+        width: 85vw;
+      }
+
+      @media screen and (max-width: 700px) {
+        flex-direction: column;
+      }
+
+      .info_wrapper {
+        width: 45%;
+        padding: 20px 30px;
+        background-color: $brand-color;
+        background-image: url("https://localhost:5000/uploads/login_img_c4a81e_uejbv1.png");
+        background-position: center 85%;
+        background-repeat: no-repeat;
+
+        @media screen and (max-width: 700px) {
+          width: 100%;
+          height: 500px;
+        }
+
+        .info {
+          h1 {
+            color: white;
+          }
+          p {
+            color: $white-gray-text1;
+            font-size: 18px;
+            width: 200px;
+          }
+        }
+      }
+
+      .form_wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        padding: 50px 30px;
+
+        @media screen and (max-width: 700px) {
+          padding: 20px 30px;
+        }
+
+        form {
+          flex: 1;
+          display: flex;
+          flex-direction: column;
+          row-gap: 15px;
+          .info {
+            p {
+              font-weight: 400;
+              color: $color-gray-text3;
+              font-size: 12px;
+            }
+          }
+
+          .login_button {
+            font-weight: 500;
+            color: white;
+            width: 100%;
+            height: 45px;
+            border-radius: 2px;
+            box-shadow: 1px 1px 2px $color-gray-text3;
+            border: none;
+            font-weight: bold;
+            background-color: $color-orange;
+            font-size: 16px;
+            cursor: pointer;
+
+            &:hover {
+              opacity: 0.8;
+            }
+
+            @media screen and (max-width: 700px) {
+              height: 35px;
+            }
+          }
+        }
+
+        .toggle_auth {
+          text-align: center;
+          p {
+            font-weight: 500;
+            font-size: 14px;
+            color: $brand-color;
+            cursor: pointer;
+          }
+        }
+      }
+    }
+  }
+}

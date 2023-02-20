@@ -12,12 +12,13 @@
     "postinstall": "npm -s run generate",
     "generate": "npm -s run generate:prisma && npm -s run generate:nexus",
     "generate:prisma": "prisma generate --schema=src/db/prisma/schema.prisma && prisma db push --schema=src/db/prisma/schema.prisma",
-    "generate:nexus": "ts-node --transpile-only src/schema/index.ts && ts-node --transpile-only src/schema/seller.ts"
+    "generate:nexus": "ts-node --transpile-only src/schema/index.ts"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@prisma/client": "^4.7.1",
+    "@sendgrid/mail": "^7.7.0",
     "apollo-server-express": "^3.8.2",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.30.0",
@@ -31,6 +32,7 @@
     "express-session": "^1.17.3",
     "graphql": "^16.6.0",
     "graphql-upload": "^15.0.1",
+    "jsonwebtoken": "^9.0.0",
     "mongoose": "^6.3.5",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
@@ -44,6 +46,7 @@
     "@types/connect-redis": "^0.0.18",
     "@types/express": "^4.17.13",
     "@types/graphql-upload": "^15.0.2",
+    "@types/jsonwebtoken": "^9.0.1",
     "@types/morgan": "^1.9.3",
     "@types/node": "^17.0.40",
     "@types/uuid": "^9.0.0",

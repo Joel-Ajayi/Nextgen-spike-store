@@ -47,8 +47,7 @@ enum OPTIONTYPE {
 model User {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
   email         String    @unique
-  fName         String?
-  lName         String?
+  fullName      String?
   displayName   String?
   avatar        String?
   contactNumber String?

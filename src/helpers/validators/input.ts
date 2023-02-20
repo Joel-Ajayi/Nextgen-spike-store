@@ -11,25 +11,22 @@ const pwd = string()
 
 const email = string().email("invalid email");
 
-const fName = string()
-  .min(2, "first name is 2 chars minimum")
-  .required("first name is required");
-
-const lName = string()
-  .min(2, "last name is 2 chars minimum")
+const fullName = string()
+  .min(2, "Name is 2 chars minimum")
+  .max(50, "Name should not exceed 50 characters")
   .required("last name is required");
 
-const signupArgs = object().shape({
+const signupArgs = object({
   email,
   pwd,
 });
 
-const sellerSignUpArgs = object().shape({
+const sellerSignUpArgs = object({
   email,
   pwd,
 });
 
-const loginArgs = object().shape({ email, pwd });
+const loginArgs = object({ email, pwd });
 
 export const validateLogin = async (data: any) => {
   try {

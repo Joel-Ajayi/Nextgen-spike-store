@@ -16,12 +16,18 @@
     transform: translate(-50%, -50%);
     display: flex;
     column-gap: 10px;
+    padding: 0 30px;
 
     .cancel {
       fill: white;
       height: 35px;
       margin-top: -5px;
       cursor: pointer;
+
+      @media screen and (max-width: 750px) {
+        height: 25px;
+        margin-top: 0;
+      }
     }
   }
 }

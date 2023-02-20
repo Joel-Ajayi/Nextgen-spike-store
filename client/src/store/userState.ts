@@ -1,14 +1,11 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { IUserInitailState } from "../types/user";
+import { IUserInitailState } from "../types";
 
 export const initialState: IUserInitailState = {
   isAuthenticated: false,
   email: "",
-  lName: "",
-  fName: "",
-  username: "",
+  fullName: "",
   avatar: null,
-  role: null,
   contactNumber: null,
 };
 

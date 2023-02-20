@@ -1,5 +1,4 @@
 import bcrypt from "bcryptjs";
-import { randomUUID } from "crypto";
 import { mutationField } from "nexus";
 import {
   validateLogin,
@@ -9,14 +8,15 @@ import { Seller } from "@prisma/client";
 import { CONST } from "../../../../@types/conts";
 import { MessageObj } from "../objects";
 import {
-  ForgotPasswordInput,
-  SignupInput,
+  SetTokenInput,
+  SignInInput,
+  SignUpInput,
   VerificationTokenInput,
 } from "../inputs";
 import {
-  alreadySignedIn,
   alreadySignedInSeller,
   alreadySignedUpSeller,
+  checkSeller,
   checkSellerLoginCredentials,
 } from "../../../../middlewares/middlewares";
 import { SellerRoles } from "../../../../@types/User";
@@ -26,6 +26,7 @@ import {
   sellerVerificationEmail,
 } from "../../../../emails/verification";
 import { GraphQLError } from "graphql";
+import { verifyJWT } from "../../../../helpers";
 
 const {
   SELLER_SESSION_NAME,
@@ -35,7 +36,7 @@ const {
 
 export const SellerSignUp = mutationField("SellerSignUp", {
   type: MessageObj,
-  args: { data: SignupInput },
+  args: { data: SignUpInput },
   resolve: async (_, { data }, ctx) => {
     await alreadySignedInSeller(ctx);
     // validates arguments
@@ -53,32 +54,54 @@ export const SellerSignUp = mutationField("SellerSignUp", {
         role: sellerCount === 0 ? SellerRoles.SUPER_ADMIN : SellerRoles.Seller,
       },
     });
+    // set session cookie
+    ctx.req.session.seller = seller.id;
+    return { message: CONST.messages.signedUp };
+  },
+});
 
-    //save token to db
-    const vToken = `${seller.id}${Math.floor(1000 + Math.random() * 9000)}`;
-    ctx.db.user.update({ where: { id: seller.id }, data: { vToken } });
+export const VerifyAccount = mutationField("VerifyAccount", {
+  type: MessageObj,
+  args: { data: SetTokenInput },
+  resolve: async (_, { data }, ctx) => {
+    await checkSeller(ctx);
 
-    // send token to email
-    const token = await jwt.sign(vToken, EMAIL_VERIFICATION_SECRET as string, {
-      expiresIn: "24h",
+    const seller = await ctx.db.seller.findUnique({
+      where: { email: data?.email },
     });
-    await sellerVerificationEmail(
-      seller.email,
-      `${ctx.req.headers.host}/verify_account?token=${token}`
-    );
-    return { message: CONST.messages.emailVerification };
+
+    if (!!seller) {
+      //save token to db
+      const vToken = `${seller.id}${Math.floor(1000 + Math.random() * 9000)}`;
+      ctx.db.user.update({ where: { id: seller.id }, data: { vToken } });
+
+      // send token to email
+      const token = await jwt.sign(
+        vToken,
+        EMAIL_VERIFICATION_SECRET as string,
+        {
+          expiresIn: "24h",
+        }
+      );
+      await sellerVerificationEmail(
+        seller.email,
+        `${ctx.req.headers.host}/verify_account?token=${token}`
+      );
+    }
+    return { message: CONST.messages.forgotPwdEmail };
   },
 });
 
 export const ForgotPassword = mutationField("ForgotPassword", {
   type: MessageObj,
-  args: { data: ForgotPasswordInput },
+  args: { data: SetTokenInput },
   resolve: async (_, { data }, ctx) => {
     await alreadySignedInSeller(ctx);
 
     const seller = await ctx.db.seller.findUnique({
       where: { email: data?.email },
     });
+
     if (!!seller) {
       //save token to db
       const pwdToken = `${seller.id}${Math.floor(1000 + Math.random() * 9000)}`;
@@ -104,13 +127,7 @@ export const VerifyToken = mutationField("VerifyToken", {
   type: MessageObj,
   args: { data: VerificationTokenInput },
   resolve: async (_, { data }, ctx) => {
-    await alreadySignedInSeller(ctx);
-
-    const vToken = (await jwt.verify(
-      data?.token as string,
-      EMAIL_VERIFICATION_SECRET as string
-    )) as string;
-
+    const vToken = await verifyJWT(data?.token, EMAIL_VERIFICATION_SECRET);
     if (!vToken) {
       throw new GraphQLError(CONST.errors.invalidToken, {
         extensions: {
@@ -119,7 +136,9 @@ export const VerifyToken = mutationField("VerifyToken", {
       });
     }
 
-    const seller = await ctx.db.seller.findUnique({ where: { vToken } });
+    const seller = await ctx.db.seller.findUnique({
+      where: { vToken: vToken as string },
+    });
     if (!seller) {
       throw new GraphQLError(CONST.errors.invalidToken, {
         extensions: {
@@ -148,11 +167,7 @@ export const VerifyPasswordToken = mutationField("VerifyPasswordToken", {
   type: MessageObj,
   args: { data: VerificationTokenInput },
   resolve: async (_, { data }, ctx) => {
-    const pwdToken = (await jwt.verify(
-      data?.token as string,
-      PASSWORD_VERIFICATION_SECRET as string
-    )) as string;
-
+    const pwdToken = await verifyJWT(data?.token, PASSWORD_VERIFICATION_SECRET);
     if (!pwdToken) {
       throw new GraphQLError(CONST.errors.invalidToken, {
         extensions: {
@@ -161,16 +176,10 @@ export const VerifyPasswordToken = mutationField("VerifyPasswordToken", {
       });
     }
 
-    const seller = await ctx.db.seller.findUnique({ where: { pwdToken } });
+    const seller = await ctx.db.seller.findUnique({
+      where: { pwdToken: pwdToken as string },
+    });
     if (!seller) {
-      throw new GraphQLError(CONST.errors.invalidToken, {
-        extensions: {
-          statusCode: 400,
-        },
-      });
-    }
-
-    if (seller.verified) {
       throw new GraphQLError(CONST.errors.invalidToken, {
         extensions: {
           statusCode: 400,
@@ -186,9 +195,9 @@ export const VerifyPasswordToken = mutationField("VerifyPasswordToken", {
   },
 });
 
-export const SellerLogin = mutationField("SellerLogin", {
+export const SellerSignIn = mutationField("SellerSignIn", {
   type: MessageObj,
-  args: { data: "LoginInput" },
+  args: { data: SignInInput },
   resolve: async (_, { data }, ctx) => {
     await alreadySignedInSeller(ctx);
     // validates arguments
@@ -200,7 +209,7 @@ export const SellerLogin = mutationField("SellerLogin", {
     );
     // set session cookie
     ctx.req.session.seller = seller.id;
-    return { message: CONST.messages.logged_in };
+    return { message: CONST.messages.signedIn };
   },
 });
 
@@ -213,6 +222,6 @@ export const SellerLogout = mutationField("SellerLogout", {
         if (err) throw new Error(CONST.errors.server);
       });
     }
-    return { message: CONST.messages.logged_out };
+    return { message: CONST.messages.signedOut };
   },
 });
