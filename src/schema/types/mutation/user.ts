@@ -25,6 +25,7 @@ import {
 import jwt from "jsonwebtoken";
 import { GraphQLError } from "graphql";
 import { verifyJWT } from "../../../helpers";
+import { Roles } from "../../../@types/User";
 
 const {
   SESSION_NAME,
@@ -44,8 +45,13 @@ export const SignUp = mutationField("SignUp", {
 
     const pwd = await bcrypt.hash(data?.pwd as string, 12);
     try {
+      const userCount = await ctx.db.user.count();
       const user = await ctx.db.user.create({
-        data: { pwd, email: data?.email as string },
+        data: {
+          pwd,
+          email: data?.email as string,
+          role: userCount > 1 ? Roles.User : Roles.SuperAdmin,
+        },
       });
       // set session cookie
       ctx.req.session.user = user.id;

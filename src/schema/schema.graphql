@@ -54,11 +54,12 @@ input SignUpInput {
 scalar Upload
 
 type User {
-  avater: String
+  avatar: String!
   contactNumber: String
   email: String!
   fullName: String
   id: ID!
+  role: Int!
 }
 
 input VerificationTokenInput {

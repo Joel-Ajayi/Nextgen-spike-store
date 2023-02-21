@@ -14,6 +14,6 @@ export const CreateCategory = mutationField("CreateCategory", {
     console.log(args);
 
     // if(!ctx.user.role !== )
-    return { message: CONST.messages.user.logged_out };
+    return { message: CONST.messages.signedIn };
   },
 });

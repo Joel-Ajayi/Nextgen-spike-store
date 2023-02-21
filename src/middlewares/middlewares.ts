@@ -29,7 +29,7 @@ export const checkAdmin = (ctx: Context) => {
 
 export const checkSuperAdmin = (ctx: Context) => {
   checkUser(ctx);
-  if (ctx.user?.role === Roles.SUPER_ADMIN) {
+  if (ctx.user?.role === Roles.SuperAdmin) {
     throw new GraphQLError(CONST.errors.unAuthorized, {
       extensions: {
         statusCode: 403,

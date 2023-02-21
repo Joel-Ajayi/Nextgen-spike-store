@@ -35,7 +35,7 @@ export interface IUserInitailState {
   email: string;
   role: Roles;
   fullName?: string;
-  avatar?: string | null;
+  avatar: string | null;
   contactNumber?: string | null;
 }
 

@@ -3,7 +3,7 @@ import { CONSTS } from "../const";
 import { IUserInitailState, IError, IMessage, MessageType } from "../types";
 import { SignInFieds, SignInForm } from "../types/user";
 
-const url = "/api/app";
+const url = "/api";
 const config: AxiosRequestConfig<string> = {
   headers: {
     "Content-type": "application/json",
@@ -14,7 +14,7 @@ const config: AxiosRequestConfig<string> = {
 export const getUser = async (): Promise<IUserInitailState | null | IError> => {
   try {
     const body = JSON.stringify({
-      query: `query { UserQuery { contactNumber avater email fullName id }}`,
+      query: `query { UserQuery { contactNumber avatar email role fullName id }}`,
     });
     const res = (await axios.post(url, body, config)).data as any;
     if (!res.data.UserQuery) throw new Error();

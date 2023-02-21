@@ -28,6 +28,7 @@ export async function appContext({
           email: true,
           fullName: true,
           avatar: true,
+          role: true,
           contactNumber: true,
         },
       })) as User;

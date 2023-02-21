@@ -3,37 +3,60 @@
 
 .headerWrapper {
   width: 100vw;
-  height: 56px;
   display: flex;
   justify-content: center;
+  align-items: stretch;
   background-color: $brand-color;
+
+  @media screen and (min-width: 850px) {
+    height: 55px;
+  }
 
   .content {
     @include desktop-wrapper;
-    display: flex;
+    display: grid;
     align-items: center;
     height: inherit;
     column-gap: 3.5%;
     width: 100%;
-    justify-content: center;
+    grid-template-columns: 18px auto auto 20px;
+    grid-template-rows: 45px 50px;
+    margin-top: -3px;
+
+    @media screen and (max-width: 849px) {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+
+    @media screen and (min-width: 850px) {
+      display: flex;
+      justify-content: center;
+    }
   }
 }
 
-.dropdown_wrapper {
-  position: relative;
-  height: inherit;
-  display: flex;
-  align-items: center;
-  z-index: $z-index;
+.side_bar {
+  order: 1;
+  @media screen and (min-width: 850px) {
+    display: none !important;
+  }
 }
 
 .flipkartpluswrapper_tab {
+  order: 2;
+
+  @media screen and (min-width: 850px) {
+    order: 1;
+  }
   text-decoration: none;
   margin-right: -2%;
   .logoname {
     color: white;
     font-weight: bolder;
-    font-size: 19px;
+    font-size: 16px;
+    @media screen and (min-width: 850px) {
+      font-size: 19px;
+    }
   }
 
   .plus {
@@ -66,6 +89,33 @@
   }
 }
 
+.search_bar {
+  order: 5;
+  grid-column: span 4;
+  min-width: 100%;
+  margin-bottom: 8px;
+  margin-top: 5px;
+
+  @media screen and (max-width: 849px) {
+    min-width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  @media screen and (min-width: 850px) {
+    order: 2;
+    margin-bottom: 0px;
+  }
+}
+
+.user_dropdown,
+.more_dropdown {
+  position: relative;
+  height: inherit;
+  display: flex;
+  align-items: center;
+  z-index: $z-index;
+}
+
 .seller_tab,
 .cart_tab,
 .login_button {
@@ -74,31 +124,50 @@
   text-decoration: none;
 }
 
-.login_button {
-  background-color: white;
-  color: $brand-color;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 30px;
-  width: 120px;
-  border-radius: 1px;
-  padding-bottom: 4px;
-  box-shadow: 1px 1px 5px rgb(134, 134, 134);
-  cursor: pointer;
+.user_dropdown {
+  order: 3;
+  margin-left: auto;
+
+  .login_button {
+    background-color: white;
+    color: $brand-color;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px;
+    width: 120px;
+    border-radius: 1px;
+    padding-bottom: 4px;
+    box-shadow: 1px 1px 5px rgb(134, 134, 134);
+    cursor: pointer;
+  }
+
+  .signup_item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    font-size: 0.9em;
+    font-weight: 600;
+
+    a {
+      color: $brand-color;
+      text-decoration: none;
+    }
+  }
 }
 
-.signup_item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 20px;
-  font-size: 0.9em;
-  font-weight: 600;
+.user_dropdown_list {
+  @media screen and (max-width: 849px) {
+    display: none !important;
+  }
+}
 
-  a {
-    color: $brand-color;
-    text-decoration: none;
+.more_dropdown {
+  order: 4;
+  display: none;
+  @media screen and (min-width: 850px) {
+    display: flex;
   }
 }
 
@@ -106,9 +175,22 @@
   display: flex;
   align-items: center;
   margin-left: -20px;
+  order: 3;
+
+  @media screen and (min-width: 850px) {
+    order: 5;
+  }
   .cart_icon {
-    transform: scale(0.4);
+    transform: scale(0.45);
     fill: white;
     margin-right: -10px;
+  }
+
+  span {
+    display: none;
+
+    @media screen and (min-width: 1000px) {
+      display: block;
+    }
   }
 }

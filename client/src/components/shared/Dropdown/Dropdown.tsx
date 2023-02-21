@@ -6,7 +6,7 @@ import DropdownItem, { DropdownItemProps } from "./DropdownItem/DropdownItem";
 import uniqId from "uniqid";
 
 export type DropdownProps = {
-  title: string;
+  title: string | JSX.Element;
   level: number;
   wrapperClassName: string;
   icon?: JSX.Element;
@@ -31,7 +31,7 @@ export default function Dropdown({
   onClick,
   items,
   titleClassName,
-  listClassName,
+  listClassName = "",
   isDropdown = true,
   listOnLoad = false,
   listOnHover = true,
@@ -73,7 +73,7 @@ export default function Dropdown({
     >
       <div className={titleClassName || Styles.title} onClick={handleOnClick}>
         {!!icon ? icon : null}
-        {!link ? <span>{title}</span> : <Link to={link as string}></Link>}
+        {!link ? <div>{title}</div> : <Link to={link as string}>{title}</Link>}
         {showCaret && (
           <CaretIcon
             className={Styles.caret}
@@ -95,9 +95,13 @@ export default function Dropdown({
           }
         >
           {showToolTip && (
-            <div className={showToolTip ? Styles.tooltip : undefined} />
+            <div
+              className={`${
+                showToolTip ? Styles.tooltip : undefined
+              } ${listClassName}`}
+            />
           )}
-          <div className={Styles.items}>
+          <div className={`${Styles.items} ${listClassName}`}>
             <ul>{listItems}</ul>
           </div>
         </div>

@@ -14,8 +14,9 @@ import { useAppDispatch, useAppSelector } from "./store/hooks";
 import userSlice from "./store/userState";
 import appSlice from "./store/appState";
 import { IError, IUserInitailState, Roles } from "./types";
-import DashboardPage from "./pages/Dashboard";
+import ControllerPage from "./pages/Controller";
 import LogoLoader from "./components/shared/Loader/LogoLoader";
+import ProfilePage from "./pages/Profile";
 
 function UserRoute() {
   const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
@@ -25,7 +26,7 @@ function UserRoute() {
 function AdminRoute() {
   const { isAuthenticated, role } = useAppSelector((state) => state.user);
   // check authentication
-  if (!isAuthenticated) return <Navigate to="/seller/signin" replace />;
+  if (!isAuthenticated) return <Navigate to="/signin" replace />;
   // check authorization
   return role >= Roles.Admin ? <Outlet /> : <Navigate to="/404" replace />;
 }
@@ -33,7 +34,7 @@ function AdminRoute() {
 function SuperAdminRoute() {
   const { isAuthenticated, role } = useAppSelector((state) => state.user);
   // check authentication
-  if (!isAuthenticated) return <Navigate to="/seller/signin" replace />;
+  if (!isAuthenticated) return <Navigate to="/signin" replace />;
   // check authorization
   return role === Roles.SuperAdmin ? (
     <Outlet />
@@ -84,7 +85,10 @@ function Routes() {
           <Route path="/" element={<HomePage />} />
           <Route path="/signin" element={<SignInPage />} />
           <Route element={<UserRoute />}>
-            <Route path="/dashboard" element={<DashboardPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+          </Route>
+          <Route element={<AdminRoute />}>
+            <Route path="/controller" element={<ControllerPage />} />
           </Route>
         </Route>
         <Route path="*" element={<h1>404</h1>} />

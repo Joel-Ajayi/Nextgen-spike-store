@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import Styles from "./userSignIn.module.scss";
+import Styles from "./signIn.module.scss";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Input from "../shared/Input/Input";
 import appSlice from "../../store/appState";
@@ -71,8 +71,10 @@ function SignIn() {
           email: formData[SignInFieds.Email]?.value as string,
           isAuthenticated: true,
           role: 0,
+          avatar: "",
         })
       );
+      dispatch(setShowModal(false));
     }
   };
 

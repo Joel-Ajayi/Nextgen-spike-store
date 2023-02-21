@@ -6,4 +6,7 @@ export const CONSTS = {
     },
     errorOccured: "Sorry, an Error occured",
   },
+  ids: {
+    appSideBar: "APP_SIDE_BAR1",
+  },
 };
