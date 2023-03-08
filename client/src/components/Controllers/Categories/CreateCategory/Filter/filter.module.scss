@@ -1,0 +1,33 @@
+@import "../../../../../styles/vars.scss";
+
+.filter_option {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+
+  .options_actions {
+    display: flex;
+    position: absolute;
+    right: 0px;
+    top: -10px;
+    column-gap: 5px;
+    z-index: 1;
+
+    svg {
+      transform: scale(1.1);
+      width: 17px;
+      stroke: $color-gray5;
+      fill: $color-gray5;
+      cursor: pointer;
+    }
+
+    .save_icon {
+      width: 13px;
+    }
+
+    .disabled {
+      cursor: not-allowed !important;
+    }
+  }
+}

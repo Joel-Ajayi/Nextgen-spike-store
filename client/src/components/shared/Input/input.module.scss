@@ -48,11 +48,13 @@
       font-size: 15px;
       z-index: $z-index;
 
-      &:-internal-autofill-selected {
-        appearance: inherit;
-        background-image: inherit !important;
-        background-color: inherit !important;
-        color: inherit !important;
+      &:-webkit-autofill,
+      &:-webkit-autofill:hover,
+      &:-webkit-autofill:focus {
+        appearance: none;
+        background-image: none;
+        outline: none;
+        transition: background-color 5000s ease-in-out 0s;
       }
     }
 

@@ -1,40 +1,23 @@
-import axios, { AxiosRequestConfig } from "axios";
-import { CONSTS } from "../const";
-import { IUserInitailState, IError, IMessage, MessageType } from "../types";
-import { SignInFieds, SignInForm } from "../types/user";
+import axios from "axios";
+import { makeRequest } from ".";
+import { IMessage, MessageType } from "../types";
+import { IUserInitailState, SignInFieds, SignInForm } from "../types/user";
 
-const url = "/api";
-const config: AxiosRequestConfig<string> = {
-  headers: {
-    "Content-type": "application/json",
-    Accept: "application/json",
-  },
-};
-
-export const getUser = async (): Promise<IUserInitailState | null | IError> => {
-  try {
+class UserReq {
+  public async getUser(): Promise<IUserInitailState | null | IMessage> {
     const body = JSON.stringify({
       query: `query { UserQuery { contactNumber avatar email role fullName id }}`,
     });
-    const res = (await axios.post(url, body, config)).data as any;
-    if (!res.data.UserQuery) throw new Error();
-    return res.data.UserQuery;
-  } catch (err) {
-    if (
-      (err as any)?.code === CONSTS.errors.code.network ||
-      (err as any)?.code === CONSTS.errors.code.badResponse
-    ) {
-      return { code: (err as any)?.code, message: (err as any)?.message };
-    }
-    return null;
-  }
-};
 
-export const signIn = async (
-  data: SignInForm,
-  isSignIn: boolean
-): Promise<IMessage> => {
-  try {
+    try {
+      const res = await makeRequest(body);
+      return res.UserQuery;
+    } catch (err) {
+      return { msg: (err as any)?.message, type: MessageType.Error };
+    }
+  }
+
+  public async signIn(data: SignInForm, isSignIn: boolean): Promise<IMessage> {
     const query = isSignIn
       ? `mutation ($data: SignInInput){ SignIn (data: $data) { message }}`
       : `mutation ($data: SignUpInput){ SignUp (data: $data) { message }}`;
@@ -48,12 +31,14 @@ export const signIn = async (
       },
     });
 
-    const res = (await axios.post(url, body, config)).data as any;
-    if (res?.errors?.length) {
-      return { msg: res.errors[0].message, type: MessageType.Error };
+    try {
+      const res = await makeRequest(body);
+      return { msg: res.data.SignUp?.message, type: MessageType.Success };
+    } catch (err) {
+      return { msg: (err as any)?.message, type: MessageType.Error };
     }
-    return { msg: res.data.SignUp?.message, type: MessageType.Success };
-  } catch (error) {
-    return { msg: CONSTS.errors.errorOccured, type: MessageType.Error };
   }
-};
+}
+
+const userReq = new UserReq();
+export default userReq;

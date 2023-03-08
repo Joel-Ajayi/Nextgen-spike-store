@@ -22,7 +22,7 @@ type BarProps = {
 };
 
 function AppSideBar({ className = "" }: BarProps) {
-  const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
+  const { isAuthenticated, role } = useAppSelector((state) => state.user);
 
   const [showBar, setShowBar] = useState(false);
   const [style, setStyle] = useState<CSSProperties>({});
@@ -78,49 +78,46 @@ function AppSideBar({ className = "" }: BarProps) {
       />
       <div className={Styles.content} style={wrapperStyle} ref={wrapperRef}>
         <div className={Styles.bar} style={style} id={CONSTS.ids.appSideBar}>
-          <section>
-            <UserAvatar />
+          <section className={Styles.avatar}>
+            <UserAvatar showInfo />
           </section>
           <section>
             <ul>
-              {loginDropdown(isAuthenticated as boolean).map((item) => (
-                <DropdownItem
-                  key={uniqId()}
-                  title={(item as DropdownItemProps).title}
-                  icon={(item as DropdownItemProps).icon}
-                  link={(item as DropdownItemProps).link}
-                />
-              ))}
+              {loginDropdown(isAuthenticated as boolean, role).map(
+                (item) =>
+                  !!item && (
+                    <DropdownItem
+                      key={uniqId()}
+                      title={item.title}
+                      icon={item.icon}
+                      link={item.link}
+                    />
+                  )
+              )}
             </ul>
           </section>
           <section>
             <ul>
               <DropdownItem
                 title="All Categories"
-                icon={
-                  <CategoryIcon
-                    className="svg-brand-fill"
-                    style={{
-                      transform: "scale(0.9)",
-                      width: 24,
-                      margin: "0 12px",
-                    }}
-                  />
-                }
+                icon={<CategoryIcon className="svg-brand-fill" />}
                 link="/categories"
               />
             </ul>
           </section>
           <section>
             <ul>
-              {moreDropdown.map((item) => (
-                <DropdownItem
-                  key={uniqId()}
-                  title={(item as DropdownItemProps).title}
-                  icon={(item as DropdownItemProps).icon}
-                  link={(item as DropdownItemProps).link}
-                />
-              ))}
+              {moreDropdown.map(
+                (item) =>
+                  !!item && (
+                    <DropdownItem
+                      key={uniqId()}
+                      title={item.title}
+                      icon={item.icon}
+                      link={item.link}
+                    />
+                  )
+              )}
             </ul>
           </section>
         </div>

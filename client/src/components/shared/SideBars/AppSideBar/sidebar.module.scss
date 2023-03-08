@@ -22,17 +22,26 @@
 
     .bar {
       position: relative;
-      width: 70%;
+      width: 80%;
       left: -100%;
       height: inherit;
       background-color: white;
       transition: 0.15s;
       overflow: hidden;
 
+      .avatar {
+        & > a > div {
+          justify-content: left;
+          svg {
+            width: 22px !important;
+          }
+        }
+      }
+
       section {
         &:first-child {
-          & > div {
-            padding: 15px;
+          & > a > div {
+            padding: 15px 10px;
           }
         }
 
@@ -47,7 +56,16 @@
 
           li {
             border: none !important;
-            height: 35px;
+            height: 40px;
+
+            a {
+              font-size: 14px !important;
+
+              svg {
+                width: 20px;
+                height: 20px;
+              }
+            }
           }
         }
       }

@@ -1,0 +1,341 @@
+import React, {
+  CSSProperties,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import Styles from "./input.module.scss";
+import { ReactComponent as CaretIcon } from "./../../../../images/icons/caret.svg";
+import { ReactComponent as AddIcon } from "./../../../../images/icons/add.svg";
+import { ReactComponent as DownloadIcon } from "./../../../../images/icons/download.svg";
+
+import uniqid from "uniqid";
+import { CONSTS } from "../../../../const";
+
+type InputProps = {
+  name?: string;
+  isMultiInput?: boolean;
+  asInfo?: boolean;
+  changeOnMount?: boolean;
+  onChange?: (
+    val: (string | File)[] | string | boolean | null,
+    name: string
+  ) => Promise<string | void>;
+  label?: string;
+  span?: boolean;
+  type?:
+    | "number"
+    | "color"
+    | "date"
+    | "text"
+    | "textarea"
+    | "select"
+    | "image"
+    | "video"
+    | "checkbox";
+  opt?: string;
+  rows?: number;
+  cols?: number;
+  multipleFiles?: boolean;
+  defaultValue?: string;
+  defaultValues?: (string | File)[];
+  defaultChecked?: boolean;
+  unit?: string;
+  options?: InputProps[];
+};
+
+function Input({
+  name,
+  onChange,
+  asInfo = false,
+  label,
+  type = "text",
+  defaultValue = type === "number" ? "0" : "",
+  opt = "",
+  isMultiInput = false,
+  defaultChecked = false,
+  unit = "",
+  rows = 3,
+  defaultValues = [],
+  multipleFiles = false,
+  options,
+  span = false,
+  changeOnMount = false,
+}: InputProps) {
+  const [error, setError] = useState("");
+  const [showOptions, setShowOptions] = useState(false);
+  const [inputs, setInputs] = useState<(String | File | number)[]>([]);
+  const [caretStyle, setCaretStyle] = useState<CSSProperties>({
+    display: "none",
+  });
+
+  const inputRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (isMultiInput || type === "image" || type === "video") {
+      setInputs(defaultValues);
+      handleChange(defaultValues);
+    } else if (type === "checkbox") {
+      handleChange(defaultChecked);
+    } else {
+      handleChange(defaultValue);
+    }
+  }, []);
+
+  const changeCaretPos = () => {
+    setTimeout(() => {
+      if (inputRef.current) {
+        setCaretStyle({
+          transform: `rotate(${!showOptions ? 180 : 0}deg)`,
+        });
+      }
+    }, 100);
+  };
+
+  useEffect(() => {
+    changeCaretPos();
+    window.addEventListener("resize", changeCaretPos);
+    return () => {
+      window.removeEventListener("resize", changeCaretPos);
+    };
+  }, []);
+
+  const handleChange = async (
+    value: string | (string | File)[] | boolean | null
+  ) => {
+    if (onChange) {
+      let error: string | void = "";
+      if (type === "image" || type === "video") {
+        const files = value as (string | File)[];
+        setInputs(files);
+        error = await onChange(files, name as string);
+      } else if (!isMultiInput) {
+        error = await onChange(value, name as string);
+      }
+      setError(error || "");
+    }
+  };
+
+  const handleMultiItemsChange = async () => {
+    if (inputRef.current && onChange) {
+      const value = inputRef.current.value;
+      const alreadyAdded = inputs.findIndex((val) => val === value) !== -1;
+      if (value && !alreadyAdded) {
+        const newInputs = [...inputs, value];
+        const error = await onChange(newInputs, name as string);
+        setInputs(newInputs);
+        setError(error || "");
+      }
+    }
+  };
+
+  const handleOptionsChange = (opt: string, value: string) => {
+    setShowOptions((preVal) => !preVal);
+    if (inputRef.current) {
+      inputRef.current.value = opt;
+      setCaretStyle({
+        left: inputRef.current.getBoundingClientRect().width - 22,
+        transform: "rotate(180deg)",
+      });
+    }
+    handleChange(value);
+  };
+
+  const handleFocus = () => {
+    if (type === "select" && inputRef.current) {
+      inputRef.current.blur();
+      setShowOptions((preVal) => !preVal);
+      setCaretStyle({
+        left: inputRef.current.getBoundingClientRect().width - 22,
+        transform: `rotate(${showOptions ? 180 : 0}deg)`,
+      });
+    }
+
+    if (asInfo && inputRef.current) {
+      inputRef.current.blur();
+    }
+  };
+
+  const removeFromInputs = (index: number) => {
+    const currentInputs = inputs.filter((_, i) => i !== index);
+    if (type === "image" || type === "video") {
+      const ref = inputRef.current as HTMLInputElement;
+      ref.files = null;
+      ref.value = "";
+      handleChange(currentInputs as any);
+      return;
+    }
+    setInputs(() => currentInputs);
+  };
+
+  const inputClassName = () => {
+    const className = type !== "checkbox" ? Styles.input_box : Styles.check_box;
+    return !asInfo || type === "checkbox"
+      ? className
+      : `${className} ${Styles.box_as_info}`;
+  };
+
+  return (
+    <div
+      className={Styles.input_wrapper}
+      style={
+        span || asInfo ? { alignItems: "center" } : { flexDirection: "column" }
+      }
+    >
+      <div className={Styles.label}>
+        {label}
+        {asInfo && ":"}
+        {!!unit && <span className={Styles.unit}>{`(${unit})`}</span>}
+      </div>
+      {!(asInfo && isMultiInput) && (
+        <div className={Styles.input}>
+          <div style={type === "checkbox" ? { display: "flex" } : {}}>
+            {/* // text/boolean input */}
+            {type !== "textarea" && type !== "image" && type !== "video" && (
+              <input
+                ref={inputRef}
+                name={name}
+                type={type}
+                className={inputClassName()}
+                defaultValue={defaultValue}
+                defaultChecked={defaultChecked}
+                onChange={(e) =>
+                  handleChange(
+                    type === "checkbox" ? e.target.checked : e.target.value
+                  )
+                }
+                onFocus={handleFocus}
+                style={{
+                  cursor:
+                    type === "select" || type === "checkbox"
+                      ? "pointer"
+                      : "auto",
+                  minHeight: asInfo ? "min-content" : 33,
+                  margin: asInfo && type !== "checkbox" ? "3px 0" : 0,
+                }}
+                disabled={asInfo}
+              />
+            )}
+            {/* // files input */}
+            {(type === "image" || type === "video") && (
+              <div className={Styles.files_area}>
+                <DownloadIcon className={Styles.download_icon} />
+                <div>
+                  <b>Choose a file </b>or drag it here
+                </div>
+                <input
+                  ref={inputRef}
+                  type="file"
+                  title=" "
+                  className={Styles.input_box}
+                  multiple={multipleFiles}
+                  required
+                  accept={CONSTS.files.mimeType.supportedImg}
+                  onChange={(e) =>
+                    handleChange([...inputs, ...(e.target.files as any)])
+                  }
+                />
+              </div>
+            )}
+            {/* // textarea input */}
+            {type === "textarea" && (
+              <textarea
+                ref={inputRef}
+                name={name}
+                rows={rows}
+                className={inputClassName()}
+                defaultValue={defaultValue}
+                onChange={(e) => {
+                  handleChange(e.target.value);
+                }}
+                onFocus={handleFocus}
+                disabled={asInfo}
+              />
+            )}
+            {/* //select input caret | */}
+            {!asInfo && (
+              <div className={Styles.actions}>
+                {type === "select" && (
+                  <CaretIcon
+                    className={Styles.caret}
+                    style={caretStyle}
+                    onClick={handleFocus}
+                  />
+                )}
+                {!(type === "image" || type === "video") && isMultiInput && (
+                  <AddIcon onClick={handleMultiItemsChange} />
+                )}
+              </div>
+            )}
+          </div>
+          {/* //dropdown selection options */}
+          {type === "select" && showOptions && (
+            <div className={Styles.options}>
+              {options?.map(
+                ({ opt, defaultValue }) =>
+                  defaultValue && (
+                    <div
+                      key={uniqid()}
+                      className={Styles.option}
+                      onClick={() =>
+                        handleOptionsChange(opt as any, defaultValue)
+                      }
+                    >
+                      {opt}
+                    </div>
+                  )
+              )}
+            </div>
+          )}
+        </div>
+      )}
+      {/* //error message */}
+      {error && <div className={Styles.error}>{error}</div>}
+      {/* // multiple added inputs */}
+      {(isMultiInput || type === "image" || type === "video") &&
+        !!inputs.length && (
+          <div
+            className={Styles.added_inputs}
+            style={asInfo ? {} : { marginTop: 5 }}
+          >
+            {inputs.map((input, index) => {
+              return (
+                <div className={Styles.added_input} key={uniqid()}>
+                  {!asInfo && (
+                    <span
+                      onClick={() => removeFromInputs(index)}
+                      className={Styles.close}
+                    >
+                      &#10006;
+                    </span>
+                  )}
+                  {type === "image" && (
+                    <img
+                      className={Styles.img}
+                      src={window.URL.createObjectURL(input as File)}
+                    />
+                  )}
+                  {type === "video" && (
+                    <div className={Styles.video}>
+                      <video controls>
+                        <source
+                          src={window.URL.createObjectURL(input as File)}
+                          type={(input as File).type}
+                        />
+                      </video>
+                    </div>
+                  )}
+                  {!(type === "image" || type === "video") && (
+                    <span className={Styles.item}>{input as string}</span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
+    </div>
+  );
+}
+
+export default Input;

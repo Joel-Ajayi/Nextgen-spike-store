@@ -1,0 +1,35 @@
+@import "./../../styles//vars.scss";
+
+.wrapper {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  .sec_header {
+    background-color: $color-gray;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 10px 15px;
+    gap: 10px 20px;
+
+    @media screen and (min-width: 850px) {
+      padding: 20px 25px;
+    }
+
+    .title {
+      display: flex;
+      font-size: x-large;
+      font-weight: 500;
+      color: $color-gray5;
+    }
+
+    & > div {
+      &:last-child {
+        display: flex;
+        flex-wrap: wrap;
+      }
+    }
+  }
+}

@@ -10,7 +10,7 @@ function SignInPage() {
 
   return (
     <>
-      {isAuthenticated && <Navigate to="/dashboard" replace />}
+      {isAuthenticated && <Navigate to="/controller" replace />}
       {!isAuthenticated && (
         <>
           <BackgroundMsg />

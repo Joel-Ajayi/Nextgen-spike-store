@@ -4,8 +4,8 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Input from "../shared/Input/Input";
 import appSlice from "../../store/appState";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { valEmail, valSignInPwd } from "../../helpers/validators";
-import { signIn } from "../../requests/user";
+import validator from "../../helpers/validators";
+import userReq from "../../requests/user";
 import { SignInForm } from "../../types/user";
 import { MessageType } from "../../types";
 import userSlice from "../../store/userState";
@@ -46,7 +46,8 @@ function SignIn() {
     name: string
   ): Promise<string | void> => {
     try {
-      const valFunc = name === SignInFieds.Pwd ? valSignInPwd : valEmail;
+      const valFunc =
+        name === SignInFieds.Pwd ? validator.signInPwd() : validator.email();
       await valFunc.validate(value);
       setFormData({ ...formData, [name]: { value, err: "" } });
     } catch (error) {
@@ -62,7 +63,7 @@ function SignIn() {
     e.preventDefault();
     e.stopPropagation();
 
-    const msg = await signIn(formData, isSignIn);
+    const msg = await userReq.signIn(formData, isSignIn);
     if (msg.type === MessageType.Error) {
       dispatch(setBackgroundMsg(msg));
     } else {
