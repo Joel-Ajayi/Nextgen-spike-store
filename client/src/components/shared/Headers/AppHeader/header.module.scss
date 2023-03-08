@@ -109,10 +109,6 @@
 
 .user_dropdown,
 .more_dropdown {
-  position: relative;
-  height: inherit;
-  display: flex;
-  align-items: center;
   z-index: $z-index;
 }
 
@@ -165,9 +161,9 @@
 
 .more_dropdown {
   order: 4;
-  display: none;
+  display: none !important;
   @media screen and (min-width: 850px) {
-    display: flex;
+    display: flex !important;
   }
 }
 

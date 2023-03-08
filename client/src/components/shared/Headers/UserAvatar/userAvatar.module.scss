@@ -1,5 +1,8 @@
 @import "../../../../styles/vars.scss";
 
+a {
+  text-decoration: none;
+}
 
 .avatar_wrapper {
   height: inherit;
@@ -13,9 +16,34 @@
   .avatar {
     width: 20px;
     margin-right: 10px;
+    border-radius: 50%;
     @media screen and (min-width: 500px) {
       width: 22px;
       margin-right: 0px;
+    }
+  }
+
+  .name_initials {
+    height: 38px;
+    width: 38px;
+    border: 2px solid rgb(74, 74, 100);
+    background-color: rgb(96, 100, 112);
+    font-size: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    span {
+      margin-top: -2px;
+      color: white;
+      font-weight: 500;
+    }
+  }
+
+  .default {
+    path {
+      fill: white;
     }
   }
 
@@ -34,5 +62,9 @@
       overflow: hidden;
       text-overflow: ellipsis;
     }
+  }
+
+  .show_info {
+    display: flex !important;
   }
 }

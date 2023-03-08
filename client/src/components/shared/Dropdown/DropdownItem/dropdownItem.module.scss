@@ -1,15 +1,22 @@
 @import "../../../../styles/vars.scss";
 
 .dropdown_item {
+  padding: 0;
   .link {
     display: flex;
     align-items: center;
     text-decoration: none;
+    column-gap: 6px;
+    padding: 0 10px;
 
     .title {
       color: $color-gray-text;
-      font-weight: 400;
       font-size: 0.9em;
+    }
+
+    svg {
+      width: 23px;
+      height: 23px;
     }
   }
 }

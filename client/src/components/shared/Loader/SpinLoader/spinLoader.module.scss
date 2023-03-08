@@ -1,0 +1,26 @@
+@import "../../../../styles/vars.scss";
+.big {
+  width: 120px;
+  height: 120px;
+}
+
+.small {
+  width: 30px;
+  height: 30px;
+}
+
+.custom_loader {
+  animation: spin 1s linear infinite;
+  border: 3px solid white;
+  border-bottom: 3px solid transparent;
+  border-radius: 50%;
+
+  @keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
+}

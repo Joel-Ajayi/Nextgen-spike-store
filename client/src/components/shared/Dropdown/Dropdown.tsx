@@ -67,7 +67,7 @@ export default function Dropdown({
 
   return (
     <div
-      className={`${wrapperClassName} ${
+      className={`${wrapperClassName} ${Styles.dropdown_wrapper} ${
         listOnHover ? Styles.dropdown_on_hover : null
       }`}
     >

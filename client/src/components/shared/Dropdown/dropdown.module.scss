@@ -1,10 +1,18 @@
 @import "../../../styles//vars.scss";
 
+.dropdown_wrapper {
+  position: relative;
+  height: inherit;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
 .title {
   display: flex;
   align-items: center;
   cursor: pointer;
-  span {
+  div {
     color: white;
     font-weight: 500;
     text-decoration: none;
@@ -15,6 +23,7 @@
     width: 20px;
     height: 12px;
     margin-top: 3px;
+    margin-left: 3px;
     polyline {
       stroke: white;
     }
@@ -54,13 +63,7 @@
   }
 
   .items {
-    &:nth-child(even) {
-      background-color: white;
-    }
-    &:nth-child(odd) {
-      background-color: $color-gray;
-    }
-
+    background-color: white;
     ul {
       list-style-type: none;
       margin: 0;

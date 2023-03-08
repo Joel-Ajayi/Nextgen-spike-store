@@ -9,14 +9,16 @@ import {
 } from "react-router-dom";
 import SignInPage from "./pages/SignIn";
 import HomePage from "./pages/Home";
-import { getUser } from "./requests/user";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import userSlice from "./store/userState";
 import appSlice from "./store/appState";
-import { IError, IUserInitailState, Roles } from "./types";
+import { IError, IMessage, MessageType, Roles } from "./types";
 import ControllerPage from "./pages/Controller";
-import LogoLoader from "./components/shared/Loader/LogoLoader";
+import LogoLoader from "./components/shared/Loader/LogoLoader/LogoLoader";
 import ProfilePage from "./pages/Profile";
+import Page404 from "./components/shared/Page404/Page404";
+import { IUserInitailState } from "./types/user";
+import userReq from "./requests/user";
 
 function UserRoute() {
   const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
@@ -28,7 +30,7 @@ function AdminRoute() {
   // check authentication
   if (!isAuthenticated) return <Navigate to="/signin" replace />;
   // check authorization
-  return role >= Roles.Admin ? <Outlet /> : <Navigate to="/404" replace />;
+  return role >= Roles.Admin ? <Outlet /> : <Page404 />;
 }
 
 function SuperAdminRoute() {
@@ -36,11 +38,7 @@ function SuperAdminRoute() {
   // check authentication
   if (!isAuthenticated) return <Navigate to="/signin" replace />;
   // check authorization
-  return role === Roles.SuperAdmin ? (
-    <Outlet />
-  ) : (
-    <Navigate to="/404" replace />
-  );
+  return role === Roles.SuperAdmin ? <Outlet /> : <Page404 />;
 }
 
 function GetUser() {
@@ -53,8 +51,8 @@ function GetUser() {
 
   useEffect(() => {
     (async () => {
-      const user = await getUser();
-      if (!user || (user as IError).message || (user as IError).code) {
+      const user = await userReq.getUser();
+      if ((user as IMessage)?.type === MessageType.Error) {
         dispatch(resetUserState());
         dispatch(setNetworkError(true));
       } else {
@@ -77,11 +75,15 @@ function GetUser() {
   return isLoading ? <LogoLoader /> : <Outlet />;
 }
 
+function ErrorElement() {
+  return <div>Error</div>;
+}
+
 function Routes() {
   const routes = createBrowserRouter(
     createRoutesFromElements(
       <Route>
-        <Route element={<GetUser />}>
+        <Route element={<GetUser />} errorElement={<ErrorElement />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/signin" element={<SignInPage />} />
           <Route element={<UserRoute />}>
@@ -91,7 +93,7 @@ function Routes() {
             <Route path="/controller" element={<ControllerPage />} />
           </Route>
         </Route>
-        <Route path="*" element={<h1>404</h1>} />
+        <Route path="*" element={<Page404 />} />
       </Route>
     )
   );

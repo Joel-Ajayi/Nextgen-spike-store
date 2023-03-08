@@ -1,0 +1,59 @@
+@import "../../../../styles/vars.scss";
+@import "../../../../styles/mixins.scss";
+
+.headerWrapper {
+  width: 100vw;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  background-color: $brand-color;
+
+  .content {
+    @include desktop-wrapper;
+    display: flex;
+    align-items: center;
+    height: inherit;
+    column-gap: 3%;
+    width: 100%;
+    justify-content: center;
+
+    .logo {
+      a {
+        display: flex;
+        align-items: center;
+        img {
+          width: 30px;
+        }
+
+        div {
+          font-size: 18px;
+          font-weight: bold;
+          margin-left: 5px;
+          color: white;
+        }
+      }
+    }
+
+    .nav_item_dropdown {
+      font-weight: 500;
+    }
+
+    .nav_item {
+      font-size: 13px !important;
+      font-weight: 500;
+      color: white;
+      cursor: pointer;
+
+      a {
+        color: white;
+        text-decoration: none;
+      }
+    }
+
+    .nav_avatar {
+      @media screen and (max-width: 850px) {
+        display: none !important;
+      }
+    }
+  }
+}

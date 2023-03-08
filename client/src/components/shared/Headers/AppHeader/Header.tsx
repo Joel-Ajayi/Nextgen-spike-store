@@ -7,6 +7,7 @@ import { ReactComponent as ProfileIcon } from "../../../../images/icons/account.
 import { ReactComponent as AdminIcon } from "../../../../images/icons/admin.svg";
 import { ReactComponent as CartIcon } from "../../../../images/icons/cart.svg";
 import { ReactComponent as FavoriteIcon } from "../../../../images/icons/favorite.svg";
+import { ReactComponent as LogoutIcon } from "../../../../images/icons/logout.svg";
 import { ReactComponent as NotificationIcon } from "../../../../images/icons/notifications.svg";
 import { ReactComponent as QuestionIcon } from "../../../../images/icons/question-mark.svg";
 import { ReactComponent as DownloadIcon } from "../../../../images/icons/download.svg";
@@ -22,27 +23,22 @@ import appSlice from "../../../../store/appState";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import UserAvatar from "../UserAvatar/UserAvatar";
 import AppSideBar from "../../SideBars/AppSideBar/AppSideBar";
+import { Roles } from "../../../../types";
 
-export const loginDropdown = (isAuthenticated: boolean) => {
+export const loginDropdown = (
+  isAuthenticated: boolean,
+  role: Roles = Roles.User,
+  logoutFunc?: () => {}
+) => {
   return [
     {
-      icon: (
-        <ProfileIcon
-          className="svg-brand"
-          style={{ transform: "scale(0.45)" }}
-        />
-      ),
+      icon: <ProfileIcon className="svg-brand-fill" />,
       title: "My Profile",
       link: "/profile",
     },
-    isAuthenticated
+    isAuthenticated && role > Roles.User
       ? {
-          icon: (
-            <AdminIcon
-              className="svg-brand"
-              style={{ transform: "scale(0.45)", width: 48 }}
-            />
-          ),
+          icon: <AdminIcon className="svg-brand" />,
           title: "Controller",
           link: "/controller",
         }
@@ -51,43 +47,40 @@ export const loginDropdown = (isAuthenticated: boolean) => {
       icon: (
         <OrderIcon
           className="svg-brand-fill"
-          style={{ transform: "scale(0.36)", width: 48 }}
+          style={{ transform: "scale(0.8)" }}
         />
       ),
       title: "Orders",
       link: "/profile?dir=ord",
     },
+    // {
+    //   icon: <FavoriteIcon className="svg-brand" />,
+    //   title: "Whishlist",
+    //   link: "/#",
+    // },
     {
-      icon: (
-        <FavoriteIcon
-          className="svg-brand"
-          style={{ transform: "scale(0.4)" }}
-        />
-      ),
-      title: "Whishlist",
-      link: "/#",
-    },
-    {
-      icon: (
-        <RewardIcon
-          className="svg-brand-fill"
-          style={{ transform: "scale(0.9)", margin: "0 12px" }}
-        />
-      ),
+      icon: <RewardIcon className="svg-brand-fill" />,
       title: "Rewards",
       link: "/#",
     },
     {
-      icon: (
-        <GiftIcon
-          className="svg-brand-fill"
-          style={{ transform: "scale(0.9)", width: 24, margin: "0 12px" }}
-        />
-      ),
+      icon: <GiftIcon className="svg-brand-fill" />,
       title: "Gift cards",
       link: "/#",
     },
-  ] as (DropdownProps | DropdownItemProps)[];
+    isAuthenticated
+      ? {
+          icon: (
+            <LogoutIcon
+              className="svg-brand"
+              style={{ transform: "scale(0.9)" }}
+            />
+          ),
+          title: "Logout",
+          onClick: logoutFunc,
+        }
+      : null,
+  ] as DropdownItemProps[];
 };
 
 export const moreDropdown = [
@@ -95,7 +88,7 @@ export const moreDropdown = [
     icon: (
       <NotificationIcon
         className="svg-brand"
-        style={{ transform: "scale(0.8)", margin: "0 12" }}
+        style={{ transform: "scale(0.9)" }}
       />
     ),
     title: "Notification Perferences",
@@ -105,7 +98,7 @@ export const moreDropdown = [
     icon: (
       <QuestionIcon
         className="svg-brand-fill"
-        style={{ transform: "scale(0.32)" }}
+        style={{ transform: "scale(0.65)" }}
       />
     ),
     title: "24x7 Customer Care",
@@ -113,31 +106,23 @@ export const moreDropdown = [
   },
   {
     icon: (
-      <GrowthIcon
-        className="svg-brand"
-        style={{ transform: "scale(0.45)", width: 48 }}
-      />
+      <GrowthIcon className="svg-brand" style={{ transform: "scale(0.9)" }} />
     ),
     title: "Advertise",
     link: "/#",
   },
-  {
-    icon: (
-      <DownloadIcon
-        className="svg-brand"
-        style={{ transform: "scale(0.45)" }}
-      />
-    ),
-    title: "Download App",
-    link: "/#",
-  },
-] as (DropdownProps | DropdownItemProps)[];
+  // {
+  //   icon: <DownloadIcon className="svg-brand" />,
+  //   title: "Download App",
+  //   link: "/#",
+  // },
+] as DropdownItemProps[];
 
 function Header() {
   const { pathname } = useLocation();
   const dispatch = useAppDispatch();
 
-  const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
+  const { isAuthenticated, role } = useAppSelector((state) => state.user);
 
   const actions = appSlice.actions;
 
@@ -158,10 +143,10 @@ function Header() {
             Sign Up
           </Link>
         </div>,
-        ...loginDropdown(false),
+        ...loginDropdown(false, role),
       ];
     }
-    return loginDropdown(true);
+    return loginDropdown(true, role);
   }, [isAuthenticated]);
 
   return (
