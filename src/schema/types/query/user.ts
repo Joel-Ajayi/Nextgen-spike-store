@@ -1,15 +1,14 @@
 import { queryField } from "nexus";
-import { checkUser } from "../../../middlewares/middlewares";
+import middleware from "../../../middlewares/middlewares";
 import { UserObj } from "../objects";
 
 export const UserQuery = queryField("UserQuery", {
   type: UserObj,
   resolve(_, args, ctx) {
-    checkUser(ctx);
-    const defaultAvatar = "/uploads/user.png";
+    middleware.checkUser(ctx);
     return {
       ...ctx.user,
-      avatar: !ctx.user.avatar ? defaultAvatar : ctx.user.avatar,
+      avatar: ctx.user.avatar || "",
     };
   },
 });

@@ -9,15 +9,11 @@ import path, { join } from "path";
 // @ts-ignore: Unreachable code error
 import cookieParser from "cookie-parser";
 import initSessionStore from "./db/session/session";
-const {
-  PORT,
-  SESSION_NAME,
-  SELLER_SESSION_NAME,
-  SESSION_SECRET,
-  SELLER_SESSION_SECRET,
-  SESSION_LIFETIME,
-  NODE_ENV,
-} = process.env;
+import graphqlUpload from "graphql-upload/graphqlUploadExpress.js";
+import { CONST } from "./@types/conts";
+
+const { PORT, SESSION_NAME, SESSION_SECRET, SESSION_LIFETIME, NODE_ENV } =
+  process.env;
 
 declare module "express-session" {
   interface SessionData {
@@ -30,9 +26,16 @@ declare module "express-session" {
   const sessionStore = await initSessionStore();
 
   const app = express();
+
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
   app.use(cookieParser());
+  app.use(
+    graphqlUpload({
+      maxFileSize: CONST.files.vdSize,
+      maxFiles: 4,
+    })
+  );
   if (NODE_ENV !== "production") {
     app.use(morgan("dev"));
   }

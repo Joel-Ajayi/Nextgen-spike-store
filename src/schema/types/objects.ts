@@ -1,4 +1,5 @@
-import { objectType } from "nexus";
+import { list, nonNull, nullable, objectType } from "nexus";
+import { CatFilterTypeEnum, CatTypeEnum } from "./enums";
 
 export const MessageObj = objectType({
   name: "Message",
@@ -16,5 +17,48 @@ export const UserObj = objectType({
     t.nonNull.field("avatar", { type: "String" });
     t.nullable.field("fullName", { type: "String" });
     t.nullable.field("contactNumber", { type: "String" });
+  },
+});
+
+export const CategoryObj = objectType({
+  name: "CategoryObj",
+  definition(t) {
+    t.nonNull.string("id"),
+      t.nonNull.string("name"),
+      t.nonNull.field("type", {
+        type: CatTypeEnum,
+      });
+    t.string("parent"),
+      t.nonNull.string("description"),
+      t.nonNull.upload("image"),
+      t.nonNull.list.nonNull.upload("banners"),
+      t.field("filters", {
+        type: nonNull(list(nonNull(CategoryFilterObj))),
+      });
+  },
+});
+
+export const CategoryMiniObj = objectType({
+  name: "CategoryMiniObj",
+  definition(t) {
+    t.nonNull.string("name"),
+      t.nonNull.field("type", {
+        type: CatTypeEnum,
+      }),
+      t.nonNull.string("parent");
+  },
+});
+
+export const CategoryFilterObj = objectType({
+  name: "CategoryFilterObj",
+  definition(t) {
+    t.nonNull.string("id"),
+      t.nonNull.string("name"),
+      t.nonNull.field("type", {
+        type: CatFilterTypeEnum,
+      }),
+      t.nullable.string("unit"),
+      t.nonNull.list.nonNull.string("options"),
+      t.nonNull.boolean("isRequired");
   },
 });

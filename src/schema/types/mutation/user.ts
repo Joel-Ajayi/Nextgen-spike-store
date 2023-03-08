@@ -1,10 +1,6 @@
 import bcrypt from "bcryptjs";
 import { mutationField } from "nexus";
 import {
-  validateLogin,
-  validateSignUp,
-} from "../../../helpers/validators/input";
-import {
   forgotPasswordEmail,
   userVerificationEmail,
 } from "../../../emails/verification";
@@ -16,16 +12,12 @@ import {
   SignUpInput,
   VerificationTokenInput,
 } from "../inputs";
-import {
-  alreadySignedIn,
-  alreadySignedUp,
-  checkLoginCredentials,
-  checkUser,
-} from "../../../middlewares/middlewares";
 import jwt from "jsonwebtoken";
 import { GraphQLError } from "graphql";
 import { verifyJWT } from "../../../helpers";
 import { Roles } from "../../../@types/User";
+import { validator } from "../../../helpers/validator";
+import middleware from "../../../middlewares/middlewares";
 
 const {
   SESSION_NAME,
@@ -37,11 +29,11 @@ export const SignUp = mutationField("SignUp", {
   type: MessageObj,
   args: { data: SignUpInput },
   resolve: async (_, { data }, ctx) => {
-    await alreadySignedIn(ctx);
+    await middleware.alreadySignedIn(ctx);
     // validates arguments
-    await validateSignUp(data);
+    await validator.signIn(data);
     // check if user already exist
-    await alreadySignedUp(data?.email as string, ctx.db);
+    await middleware.alreadySignedUp(data?.email as string, ctx.db);
 
     const pwd = await bcrypt.hash(data?.pwd as string, 12);
     try {
@@ -66,7 +58,7 @@ export const VerifyAccount = mutationField("VerifyAccount", {
   type: MessageObj,
   args: { data: SetTokenInput },
   resolve: async (_, { data }, ctx) => {
-    await checkUser(ctx);
+    await middleware.checkUser(ctx);
 
     const user = await ctx.db.user.findUnique({
       where: { email: data?.email },
@@ -98,7 +90,7 @@ export const ForgotPassword = mutationField("ForgotPassword", {
   type: MessageObj,
   args: { data: SetTokenInput },
   resolve: async (_, { data }, ctx) => {
-    await alreadySignedIn(ctx);
+    await middleware.alreadySignedIn(ctx);
 
     const user = await ctx.db.user.findUnique({
       where: { email: data?.email },
@@ -200,11 +192,11 @@ export const SignIn = mutationField("SignIn", {
   type: MessageObj,
   args: { data: SignInInput },
   resolve: async (_, { data }, ctx) => {
-    await alreadySignedIn(ctx);
+    await middleware.alreadySignedIn(ctx);
     // validates arguments
-    await validateLogin(data);
+    await validator.signIn(data);
     // check user credentials
-    const user = await checkLoginCredentials(
+    const user = await middleware.checkLoginCredentials(
       data?.email as string,
       data?.pwd as string
     );

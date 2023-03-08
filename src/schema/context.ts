@@ -34,7 +34,7 @@ export async function appContext({
       })) as User;
     }
   } catch (error) {
-    throw new Error(CONST.errors.unknown);
+    throw new Error(CONST.errors.server);
   }
 
   return { req, res, db, user };

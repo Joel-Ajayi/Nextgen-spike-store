@@ -2,10 +2,79 @@
 ### Do not make changes to this file directly
 
 
+enum CatFilterType {
+  Num
+  Range
+  Txt
+}
+
+enum CatTypeEnum {
+  Basic
+  SubOrd
+  SuperOrd
+}
+
 input CategoryFilterInput {
   isRequired: Boolean!
   name: String!
-  type: String!
+  options: [String!]!
+  type: CatFilterType!
+  unit: String
+}
+
+type CategoryFilterObj {
+  id: String!
+  isRequired: Boolean!
+  name: String!
+  options: [String!]!
+  type: CatFilterType!
+  unit: String
+}
+
+input CategoryFilterUpdateInput {
+  id: String!
+  isRequired: Boolean!
+  name: String!
+  options: [String!]!
+  type: CatFilterType!
+  unit: String
+}
+
+input CategoryInput {
+  banners: [Upload!]!
+  description: String!
+  filters: [CategoryFilterInput!]!
+  image: Upload!
+  name: String!
+  parent: String
+  type: CatTypeEnum!
+}
+
+type CategoryMiniObj {
+  name: String!
+  parent: String!
+  type: CatTypeEnum!
+}
+
+type CategoryObj {
+  banners: [Upload!]!
+  description: String!
+  filters: [CategoryFilterObj!]!
+  id: String!
+  image: Upload!
+  name: String!
+  parent: String
+  type: CatTypeEnum!
+}
+
+input CategoryUpdateInput {
+  banners: [Upload!]!
+  description: String!
+  filters: [CategoryFilterUpdateInput!]!
+  id: String!
+  image: Upload!
+  name: String!
+  parent: String
 }
 
 type Message {
@@ -13,26 +82,20 @@ type Message {
 }
 
 type Mutation {
-  CreateCategory(data: NewCategoryInput): Message
+  CreateCategory(data: CategoryInput): CategoryMiniObj
   ForgotPassword(data: SetTokenInput): Message
   SignIn(data: SignInInput): Message
   SignOut: Message
   SignUp(data: SignUpInput): Message
+  UpdateCategory(data: CategoryUpdateInput): CategoryMiniObj
   VerifyAccount(data: SetTokenInput): Message
   VerifyPasswordToken(data: VerificationTokenInput): Message
   VerifyToken(data: VerificationTokenInput): Message
 }
 
-input NewCategoryInput {
-  banners: [Upload]!
-  description: String
-  filters: [CategoryFilterInput]!
-  image: Upload
-  name: String!
-  parentId: String
-}
-
 type Query {
+  GetCategories: [CategoryMiniObj!]!
+  GetCategory(name: String!): CategoryObj
   UserQuery: User
 }
 
