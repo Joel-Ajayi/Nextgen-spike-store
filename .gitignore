@@ -2,4 +2,6 @@
 .env
 /src/.env
 /src/schema/typegen
+/src/uploads/vd
+/src/uploads/img
 package-lock.json

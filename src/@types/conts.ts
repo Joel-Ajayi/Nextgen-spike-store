@@ -1,7 +1,6 @@
 export const CONST = {
   errors: {
     database: "An error occured in the data base",
-    unknown: "An unknown error occured",
     signIn: "Please login",
     alreadySignedIn: "Already loggedin",
     signup: "Please sign up for an account",
@@ -16,16 +15,27 @@ export const CONST = {
       inCorrectVideoFormat: "Video file format not supported",
       exceededMaxNumber: `Number of files should not exceed`,
       exceededMaxSize: `File size should not exceed`,
+      duplicate: "Duplicate files detected",
+      alreadyExist: "File already exist",
       leastFileUpload: "Number of files should be at least",
+    },
+    categories: {
+      catNotFound: "Category not found",
     },
   },
   files: {
     mimeType: {
-      images: ["jpg", "png", "gif", "jpeg", "tiff"],
-      videos: ["mp4", "mkv"],
+      supportedImg: [
+        "image/jpg",
+        "image/png",
+        "image/gif",
+        "image/jpeg",
+        "image/tiff",
+      ],
+      supportedVd: ["video/mp4", "video/mkv"],
     },
-    maxVideoSize: 5000000,
-    maxImageSize: 100000,
+    vdSize: 5 * 1024 * 1024,
+    imgSize: 100 * 1024,
   },
   request: {
     methods: ["POST", "GET"],

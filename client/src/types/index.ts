@@ -29,23 +29,3 @@ export interface IError {
   code?: string | number;
   message: string;
 }
-
-export interface IUserInitailState {
-  isAuthenticated?: boolean;
-  email: string;
-  role: Roles;
-  fullName?: string;
-  avatar: string | null;
-  contactNumber?: string | null;
-}
-
-export interface ISellerInitailState {
-  isAuthenticated?: boolean;
-  email: string;
-  fullName: string;
-  displayName: string;
-  businessName: string;
-  avatar?: string | null;
-  contactNumber: string | null;
-  role: number;
-}

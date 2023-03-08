@@ -11,37 +11,39 @@ datasource db {
 }
 
 enum PAYMENTSTATUS {
-  pending
-  cancelled
-  refund
-  completed
+  PENDING
+  CANCELLED
+  REFUND
+  COMPLETED
 }
 
 enum PAYMENTMETHOD {
   COD
-  card
+  CARD
 }
 
 enum ORDERSTATUS {
-  ordered
-  packed
-  shipped
-  delivered
-}
-
-enum SellerType {
-  all
-  books
+  ORDERED
+  PACKED
+  SHIPPED
+  DELIVERED
 }
 
 enum ADDRESSTYPE {
-  home
-  work
+  HOME
+  WORK
 }
 
-enum OPTIONTYPE {
-  text
-  number
+enum CatFilterType {
+  Txt
+  Num
+  Range
+}
+
+enum CategoryType {
+  SuperOrd
+  Basic
+  SubOrd
 }
 
 model User {
@@ -52,7 +54,7 @@ model User {
   avatar        String?
   contactNumber String?
   reviews       Reviews[]
-  address       Address[]
+  address       Address?
   orders        Order[]
   verified      Boolean   @default(false)
   role          Int       @default(0)
@@ -64,65 +66,87 @@ model User {
 }
 
 model Category {
-  id          String           @id @default(auto()) @map("_id") @db.ObjectId
-  name        String
-  parentId    String?          @unique @db.ObjectId
-  parent      Category?        @relation("Category", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  children    Category[]       @relation("Category")
-  filterIds   String[]         @db.ObjectId
-  filters     CategoryFilter[] @relation(fields: [filterIds], references: [id])
-  image       String?
+  id          String       @id @default(auto()) @map("_id") @db.ObjectId
+  name        String       @unique
+  description String
+  parentId    String?      @unique @db.ObjectId
+  parent      Category?    @relation("Category", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children    Category[]   @relation("Category")
+  type        CategoryType
+  filterIds   String[]     @db.ObjectId
+  filters     CatFilter[]
+  image       String
   banners     String[]
-  desciption  String?
-  createdById String           @db.ObjectId
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
-model CategoryFilter {
-  id            String          @id @default(auto()) @map("_id") @db.ObjectId
-  name          String
-  type          OPTIONTYPE
-  categories    Category[]      @relation(fields: [categoryIds], references: [id])
-  categoryIds   String[]        @db.ObjectId
-  isRequired    Boolean         @default(true)
-  productFilter ProductFilter[]
+model CatFilter {
+  id             String          @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  type           CatFilterType
+  unit           String?
+  options        String[]
+  category       Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId     String          @unique @db.ObjectId
+  isRequired     Boolean         @default(true)
+  productFilters ProductFilter[]
 }
 
 model Product {
-  id           String          @id @default(auto()) @map("_id") @db.ObjectId
-  categoryId   String          @db.ObjectId
-  description  String
-  amount       Float
-  images       String[]
-  video        String
-  reviews      Reviews[]
-  rating       Int             @default(0)
-  countInStock Int             @default(0)
-  allowCod     Boolean         @default(false)
-  discount     Int             @default(0)
-  brandId      String          @db.ObjectId
-  brand        Brand           @relation(fields: [brandId], references: [id])
-  filterIds    String[]        @db.ObjectId
-  filters      ProductFilter[] @relation(fields: [filterIds], references: [id])
-  OrderItemIds String[]        @db.ObjectId
-  OrderItems   OrderItem[]     @relation(fields: [OrderItemIds], references: [id])
-  sellerId     String          @db.ObjectId
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  id             String                    @id @default(auto()) @map("_id") @db.ObjectId
+  name           String
+  sku            String                    @unique
+  categoryId     String                    @db.ObjectId
+  description    String
+  amount         Float
+  images         Bytes[]
+  video          String
+  reviews        Reviews[]
+  rating         Int                       @default(0)
+  countInStock   Int                       @default(0)
+  allowCod       Boolean                   @default(false)
+  discount       Int                       @default(0)
+  brandId        String                    @db.ObjectId
+  brand          Brand                     @relation(fields: [brandId], references: [id])
+  colors         String[]
+  deleveryRange  Int
+  pkgHeight      Int
+  pkgWidth       Int
+  pkgBreath      Int
+  pkgWeight      Int
+  productionInfo ProductManufacturingInfo?
+  filterIds      String[]                  @db.ObjectId
+  filters        ProductFilter[]
+  OrderItemIds   String[]                  @db.ObjectId
+  OrderItems     OrderItem[]               @relation(fields: [OrderItemIds], references: [id])
+  sellerId       String                    @db.ObjectId
+  createdAt      DateTime                  @default(now())
+  updatedAt      DateTime                  @updatedAt
+}
+
+model ProductManufacturingInfo {
+  id                String   @id @default(auto()) @map("_id") @db.ObjectId
+  country           String
+  productionDate    DateTime
+  productionDetails String
+  packerDetails     String
+  productId         String   @unique @db.ObjectId
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 model ProductFilter {
-  id         String         @id @default(auto()) @map("_id") @db.ObjectId
-  filterId   String         @db.ObjectId
-  filter     CategoryFilter @relation(fields: [filterId], references: [id])
-  productIds String[]       @db.ObjectId
-  product    Product[]      @relation(fields: [productIds], references: [id])
+  id        String    @id @default(auto()) @map("_id") @db.ObjectId
+  value     String[]
+  optionId  String    @db.ObjectId
+  option    CatFilter @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  productId String    @db.ObjectId
+  product   Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
 }
 
 model Brand {
   id       String    @id @default(auto()) @map("_id") @db.ObjectId
-  name     String
+  name     String    @unique
   products Product[]
 }
 
@@ -138,7 +162,7 @@ model Reviews {
 
 model Address {
   id             String      @id @default(auto()) @map("_id") @db.ObjectId
-  userId         String?     @db.ObjectId
+  userId         String?     @unique @db.ObjectId
   user           User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
   address        String
   address2       String?
