@@ -12,6 +12,8 @@ import { ReactComponent as DownloadIcon } from "./../../../../images/icons/downl
 
 import uniqid from "uniqid";
 import { CONSTS } from "../../../../const";
+import filesHelper from "../../../../helpers/files";
+import { IFile } from "../../../../types";
 
 type InputProps = {
   name?: string;
@@ -19,7 +21,7 @@ type InputProps = {
   asInfo?: boolean;
   changeOnMount?: boolean;
   onChange?: (
-    val: (string | File)[] | string | boolean | null,
+    val: (string | IFile)[] | string | boolean | null,
     name: string
   ) => Promise<string | void>;
   label?: string;
@@ -39,7 +41,7 @@ type InputProps = {
   cols?: number;
   multipleFiles?: boolean;
   defaultValue?: string;
-  defaultValues?: (string | File)[];
+  defaultValues?: (string | IFile | number)[];
   defaultChecked?: boolean;
   unit?: string;
   options?: InputProps[];
@@ -65,7 +67,7 @@ function Input({
 }: InputProps) {
   const [error, setError] = useState("");
   const [showOptions, setShowOptions] = useState(false);
-  const [inputs, setInputs] = useState<(String | File | number)[]>([]);
+  const [inputs, setInputs] = useState<(string | IFile | number)[]>([]);
   const [caretStyle, setCaretStyle] = useState<CSSProperties>({
     display: "none",
   });
@@ -75,7 +77,11 @@ function Input({
   useEffect(() => {
     if (isMultiInput || type === "image" || type === "video") {
       setInputs(defaultValues);
-      handleChange(defaultValues);
+      if ((defaultValues[0] as IFile)?.file) {
+        handleChange(defaultValues.map((file) => (file as any).file));
+      } else {
+        handleChange(defaultValues as any);
+      }
     } else if (type === "checkbox") {
       handleChange(defaultChecked);
     } else {
@@ -107,11 +113,14 @@ function Input({
     if (onChange) {
       let error: string | void = "";
       if (type === "image" || type === "video") {
-        const files = value as (string | File)[];
+        const files = (value as File[]).map(
+          (file) =>
+            ({ file, b64: window.URL.createObjectURL(file as File) } as any)
+        );
         setInputs(files);
         error = await onChange(files, name as string);
       } else if (!isMultiInput) {
-        error = await onChange(value, name as string);
+        error = await onChange(value as any, name as string);
       }
       setError(error || "");
     }
@@ -311,17 +320,14 @@ function Input({
                     </span>
                   )}
                   {type === "image" && (
-                    <img
-                      className={Styles.img}
-                      src={window.URL.createObjectURL(input as File)}
-                    />
+                    <img className={Styles.img} src={(input as IFile).b64} />
                   )}
                   {type === "video" && (
                     <div className={Styles.video}>
                       <video controls>
                         <source
-                          src={window.URL.createObjectURL(input as File)}
-                          type={(input as File).type}
+                          src={(input as IFile).b64}
+                          type={(input as IFile).file.type}
                         />
                       </video>
                     </div>

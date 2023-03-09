@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { Pages, PageSections } from "../../../../types/controller";
 import Button from "../../../shared/Button/Button";
@@ -14,48 +14,88 @@ import {
   CatFilter,
 } from "../../../../types/category";
 import categoryReq from "../../../../requests/category";
-import { useAppDispatch } from "../../../../store/hooks";
-import { IMessage } from "../../../../types";
+import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
+import { IFile, IMessage } from "../../../../types";
 import controllerCatSlice from "../../../../store/controller/categories";
 import Filter from "./Filter/Filter";
 import appSlice from "../../../../store/appState";
+import Page404 from "../../../shared/Page404/Page404";
+import SpinLoader from "../../../shared/Loader/SpinLoader/SpinLoader";
 
 type CreateCategoryProps = {
   isUpdate?: boolean;
+  cat_id?: string;
+  parent?: string;
+  type: CategoryType;
 };
 
-function CreateCategory({ isUpdate = false }: CreateCategoryProps) {
+const defaultData: Category = {
+  id: "",
+  name: "",
+  description: "",
+  parent: "",
+  image: [],
+  banners: [],
+  filters: [],
+};
+
+function CreateCategory({
+  cat_id,
+  parent = "",
+  isUpdate = false,
+  type,
+}: CreateCategoryProps) {
   let [params] = useSearchParams();
-  const parent = params.get("parent") || "";
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { updateCategory, addCategory } = controllerCatSlice.actions;
-  const { setBackgroundMsg } = appSlice.actions;
 
-  const defaultData: Category = {
-    id: "",
-    name: "",
-    type: CategoryType.SuperOrd,
-    description: "",
-    parent,
-    image: [],
-    banners: [],
-    filters: [],
-  };
-
-  if (!isUpdate) delete defaultData.id;
+  const [isLoading, setIsLoading] = useState(!!cat_id);
   const [isSaving, setIsSaving] = useState(false);
-  const [form, setFormData] = useState(defaultData);
+  const [form, setForm] = useState(defaultData);
   const [errors, setErrors] = useState<{ [key in string]: string }>({});
+
+  const statusCode = useAppSelector((state) => state.app.statusCode);
+  const categories = useAppSelector(
+    (state) => state.controller.category.categories
+  );
+
+  const { updateCategory, addCategory } = controllerCatSlice.actions;
+  const { setStatusCode } = appSlice.actions;
+  const { setBackgroundMsg } = appSlice.actions;
+  defaultData.parent = parent;
+  const index = categories.findIndex((cat) => cat.name === cat_id);
+
+  useEffect(() => {
+    (async () => {
+      if (!!cat_id) {
+        const cat = await categoryReq.getCategory(cat_id);
+        if ((cat as IMessage)?.statusCode === 404) {
+          setStatusCode((cat as IMessage)?.statusCode as number);
+        } else {
+          const image = await categoryReq.getImageFiles(
+            (cat as Category).image as any
+          );
+          const banners = await categoryReq.getImageFiles(
+            (cat as Category).banners as any
+          );
+          setForm({ ...(cat as Category), image, banners });
+        }
+        setIsLoading(false);
+      }
+    })();
+  }, []);
+
   const isValid = useMemo(() => {
-    return Object.keys(errors).findIndex((err) => !!errors[err]) === -1;
-  }, [errors]);
+    return (
+      Object.keys(errors).findIndex((err) => !!errors[err]) === -1 && !isLoading
+    );
+  }, [errors, isLoading]);
 
   const onInputChange = async (
-    value: string | (File | string | CatFilter)[] | boolean | [] | null,
+    value: string | (IFile | string | CatFilter)[] | boolean | [] | null,
     name: string
   ): Promise<string | void> => {
-    setFormData((preVal) => ({ ...preVal, [name]: value }));
+    setForm((preVal) => ({ ...preVal, [name]: value }));
     const getError = async (name: string) => {
       switch (name) {
         case "name":
@@ -65,9 +105,19 @@ function CreateCategory({ isUpdate = false }: CreateCategoryProps) {
         case "filters":
           return await validator.catFilter(value as CatFilter[]);
         case "image":
-          return await validator.files(value as File[], 1, 1, "image");
+          return await validator.files(
+            (value as IFile[]).map((f) => f.file),
+            1,
+            0,
+            "image"
+          );
         case "banners":
-          return await validator.files(value as File[], 3, 0, "image");
+          return await validator.files(
+            (value as IFile[]).map((f) => f.file),
+            3,
+            0,
+            "image"
+          );
         default:
           return "";
       }
@@ -95,21 +145,23 @@ function CreateCategory({ isUpdate = false }: CreateCategoryProps) {
   const onSave = async () => {
     if (isValid) {
       setIsSaving(true);
-      const cat = await categoryReq.createCat(form);
+      const cat = isUpdate
+        ? await categoryReq.updateCat(form)
+        : await categoryReq.createCat(form);
       if ((cat as IMessage)?.msg) {
         dispatch(
           setBackgroundMsg({ msg: (cat as any).msg, type: (cat as any).type })
         );
       } else {
-        if (isUpdate) {
-          // dispatch(updateCategory(form));
+        if (isUpdate && categories.length) {
+          dispatch(updateCategory({ index, cat: cat as CategoryMini }));
         } else {
           dispatch(addCategory(cat as CategoryMini));
-          navigate(
-            `/controller?pg=${Pages.Categories}&sec=${PageSections.Listing}`,
-            { replace: false }
-          );
         }
+        navigate(
+          `/controller?pg=${Pages.Categories}&sec=${PageSections.Listing}`,
+          { replace: false }
+        );
       }
       setIsSaving(false);
     }
@@ -145,96 +197,100 @@ function CreateCategory({ isUpdate = false }: CreateCategoryProps) {
   );
 
   return (
-    <div className={ControllerStyles.wrapper}>
-      <div className={ControllerStyles.sec_header}>
-        <div className={ControllerStyles.title}>Create Category</div>
-        <div>
-          <Button
-            value="ALL CATEGORIES"
-            type="button"
-            className={Styles.all_cat_button}
-            link={`/controller?pg=${Pages.Categories}&sec=${PageSections.Listing}`}
-          />
-        </div>
-      </div>
-      <div className={Styles.content}>
-        <div>
-          <form
-            className={`${
-              form.type === CategoryType.Basic ? Styles.grid_display : ""
-            }`}
-          >
-            <section
-              className={`${
-                form.type !== CategoryType.Basic ? Styles.grid_display : ""
-              }`}
-            >
-              <section className={Styles.section}>
-                <Input
-                  name="name"
-                  label="Name"
-                  defaultValue={form.name}
-                  onChange={onInputChange}
-                  changeOnMount
-                />
-                <Input
-                  name="type"
-                  label="Category Type"
-                  type="select"
-                  opt={form.type as any}
-                  defaultValue={form.type as any}
-                  changeOnMount
-                  options={Object.keys(CategoryType).map((type, i) => ({
-                    opt: Object.values(CategoryType)[i],
-                    defaultValue: type,
-                  }))}
-                  onChange={onInputChange}
-                />
-                <Input
-                  name="description"
-                  label="Description"
-                  defaultValue={form.description}
-                  rows={6}
-                  type="textarea"
-                  onChange={onInputChange}
-                  changeOnMount
-                />
-              </section>
-              <section className={Styles.section} style={{ marginTop: 15 }}>
-                {imageInput}
-                {bannerInput}
-                <Button
-                  value="Save"
-                  type="button"
-                  isLoading={isSaving}
-                  disabled={!isValid}
-                  onClick={onSave}
-                />
-              </section>
-            </section>
+    <>
+      {statusCode === 404 && <Page404 />}
+      {statusCode !== 404 && (
+        <div className={ControllerStyles.wrapper}>
+          {isLoading && <SpinLoader brandColor />}
+          {!isLoading && (
+            <>
+              <div className={ControllerStyles.sec_header}>
+                <div className={ControllerStyles.title}>Create Category</div>
+                <div>
+                  <Button
+                    value="ALL CATEGORIES"
+                    type="button"
+                    className={Styles.all_cat_button}
+                    link={`/controller?pg=${Pages.Categories}&sec=${PageSections.Listing}`}
+                  />
+                </div>
+              </div>
+              <div className={Styles.content}>
+                <div>
+                  <form
+                    className={`${
+                      form.type === CategoryType.Basic
+                        ? Styles.grid_display
+                        : ""
+                    }`}
+                  >
+                    <section
+                      className={`${
+                        form.type !== CategoryType.Basic
+                          ? Styles.grid_display
+                          : ""
+                      }`}
+                    >
+                      <section className={Styles.section}>
+                        <Input
+                          name="name"
+                          label="Name"
+                          defaultValue={form.name}
+                          onChange={onInputChange}
+                          changeOnMount
+                        />
+                        <Input
+                          name="description"
+                          label="Description"
+                          defaultValue={form.description}
+                          rows={6}
+                          type="textarea"
+                          onChange={onInputChange}
+                          changeOnMount
+                        />
+                      </section>
+                      <section
+                        className={Styles.section}
+                        style={{ marginTop: 15 }}
+                      >
+                        {imageInput}
+                        {bannerInput}
+                        <Button
+                          value="Save"
+                          type="button"
+                          isLoading={isSaving}
+                          disabled={!isValid}
+                          onClick={onSave}
+                        />
+                      </section>
+                    </section>
 
-            {form.type === CategoryType.Basic && (
-              <section className={Styles.section}>
-                <div className={Styles.filter_options_title}>
-                  Filter Options
+                    {type === CategoryType.Basic && (
+                      <section className={Styles.section}>
+                        <div className={Styles.filter_options_title}>
+                          Filter Options
+                        </div>
+                        <div className={Styles.filter_options}>
+                          <Filter index={-1} onChange={onFilterChange} />
+                          {form.filters.map((filter, index) => (
+                            <Filter
+                              key={uniqid()}
+                              data={filter}
+                              index={index}
+                              onChange={onFilterChange}
+                            />
+                          ))}
+                        </div>
+                      </section>
+                    )}
+                  </form>
                 </div>
-                <div className={Styles.filter_options}>
-                  <Filter index={-1} onChange={onFilterChange} />
-                  {form.filters.map((filter, index) => (
-                    <Filter
-                      key={uniqid()}
-                      data={filter}
-                      index={index}
-                      onChange={onFilterChange}
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-          </form>
+              </div>
+            </>
+          )}
         </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }
 

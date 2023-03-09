@@ -6,6 +6,7 @@ export const initialState: IAppInitailState = {
   isLoading: true,
   requestTimeout: false,
   networkError: false,
+  statusCode: 200,
   message: {
     header: "",
     msg: "",
@@ -32,6 +33,9 @@ const appSlice = createSlice({
     },
     setBackgroundMsg: (state, action: PayloadAction<IMessage>) => {
       return { ...state, message: action.payload };
+    },
+    setStatusCode: (state, action: PayloadAction<number>) => {
+      return { ...state, statusCode: action.payload };
     },
   },
 });

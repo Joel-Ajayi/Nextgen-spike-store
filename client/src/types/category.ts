@@ -1,3 +1,5 @@
+import { IFile } from ".";
+
 export type InitialCategoryController = {
   categories: CategoryMini[];
 };
@@ -9,9 +11,9 @@ export enum CatFilterType {
 }
 
 export enum CategoryType {
-  SuperOrd = "SuperOrdinate",
+  SuperOrd = "SuperOrd",
   Basic = "Basic",
-  SubOrd = "SubOrdinate",
+  SubOrd = "SubOrd",
 }
 
 export type CatFilter = {
@@ -32,10 +34,10 @@ export type CategoryMini = {
 export type Category = {
   id?: string;
   name: string;
-  type: CategoryType;
+  type?: CategoryType;
   parent: string;
   description: string;
-  image: File[] | String[];
-  banners: File[] | String[];
+  image: IFile[];
+  banners: IFile[];
   filters: CatFilter[];
 };

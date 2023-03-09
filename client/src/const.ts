@@ -31,7 +31,7 @@ export const CONSTS = {
       supportedVd: ".mp4,.mkv",
     },
     vdSize: 5 * 1024 * 1024,
-    imgSize: 100 * 1024,
+    imgSize: 30 * 1024,
   },
   ids: {
     appSideBar: "APP_SIDE_BAR1",

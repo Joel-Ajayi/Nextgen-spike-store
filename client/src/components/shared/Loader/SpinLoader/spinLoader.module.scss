@@ -24,3 +24,8 @@
     }
   }
 }
+
+.brand_color {
+  border: 3px solid $brand-color;
+  border-bottom: 3px solid transparent;
+}

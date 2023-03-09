@@ -6,6 +6,7 @@ import { CatFilter, CatFilterType } from "../../../../../types/category";
 import Input from "../../../../shared/Input/Controller/Input";
 import validator from "../../../../../helpers/validators";
 import Styles from "./filter.module.scss";
+import { IFile } from "../../../../../types";
 
 type FilterProps = {
   index: number;
@@ -13,7 +14,8 @@ type FilterProps = {
   data?: CatFilter;
 };
 
-const defaultData = {
+const defaultData: CatFilter = {
+  id: "",
   name: "",
   unit: "",
   type: CatFilterType.Txt,
@@ -31,7 +33,7 @@ const Filter = ({ onChange, index, data }: FilterProps) => {
   }, [errors]);
 
   const onInputChange = async (
-    value: string | (File | string)[] | boolean | null,
+    value: string | (IFile | string)[] | boolean | null,
     name: string
   ): Promise<string | void> => {
     const newForm = { ...form, [name]: value };

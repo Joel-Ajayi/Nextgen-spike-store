@@ -7,6 +7,7 @@ import Dropdown from "../../Dropdown/Dropdown";
 import { Link } from "react-router-dom";
 import userSlice from "../../../../store/userState";
 import { Pages, PageSections } from "../../../../types/controller";
+import { CategoryType } from "../../../../types/category";
 
 function ControllerHeader() {
   const { role } = useAppSelector((state) => state.user);
@@ -24,7 +25,7 @@ function ControllerHeader() {
     },
     {
       title: "Add Category",
-      link: `/controller?pg=${Pages.Categories}&sec=${PageSections.CreateCat}`,
+      link: `/controller?pg=${Pages.Categories}&sec=${PageSections.CreateCat}&type=${CategoryType.SuperOrd}`,
     },
   ];
 
