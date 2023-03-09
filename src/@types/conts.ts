@@ -35,7 +35,7 @@ export const CONST = {
       supportedVd: ["video/mp4", "video/mkv"],
     },
     vdSize: 5 * 1024 * 1024,
-    imgSize: 100 * 1024,
+    imgSize: 30 * 1024,
   },
   request: {
     methods: ["POST", "GET"],

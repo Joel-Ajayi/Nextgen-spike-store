@@ -1,5 +1,4 @@
-import { mutationField } from "nexus";
-import { CONST } from "../../../@types/conts";
+import { mutationField, nonNull, stringArg } from "nexus";
 import middleware from "../../../middlewares/middlewares";
 import { CategoryMiniObj } from "../objects";
 import { validator } from "../../../helpers/validator";
@@ -7,6 +6,7 @@ import { GraphQLError } from "graphql";
 import { CategoryInput, CategoryUpdateInput } from "../inputs";
 import { CategoryType } from "@prisma/client";
 import { cloneDeep } from "lodash";
+import { CONST } from "../../../@types/conts";
 
 export const CreateCategory = mutationField("CreateCategory", {
   type: CategoryMiniObj,
@@ -14,14 +14,15 @@ export const CreateCategory = mutationField("CreateCategory", {
   resolve: async (_, { data }, ctx) => {
     // check if logged_in
     middleware.checkSuperAdmin(ctx);
-    // validate data
-    await validator.category(data as any);
 
     if (!data) {
       throw new GraphQLError("No data provided", {
         extensions: { statusCode: 400 },
       });
     }
+
+    // validate data
+    await validator.category(data as any);
 
     // check if already added
     const addedCat = await ctx.db.category.findUnique({
@@ -30,12 +31,6 @@ export const CreateCategory = mutationField("CreateCategory", {
     });
     if (addedCat) {
       throw new GraphQLError("Category already added", {
-        extensions: { statusCode: 400 },
-      });
-    }
-
-    if (data.type === CategoryType.SuperOrd && !!data?.parent) {
-      throw new GraphQLError("Category should not have parent", {
         extensions: { statusCode: 400 },
       });
     }
@@ -52,54 +47,74 @@ export const CreateCategory = mutationField("CreateCategory", {
       });
       if (!parent) {
         throw new GraphQLError("Parent category does not exist", {
-          extensions: { statusCode: 400 },
+          extensions: { statusCode: 404 },
         });
       }
     }
 
-    if (
-      (data.type === CategoryType.Basic &&
-        parent?.type !== CategoryType.SuperOrd) ||
-      (data.type === CategoryType.SubOrd && parent?.type !== CategoryType.Basic)
-    ) {
-      throw new GraphQLError("Sorry, you can't add to this category", {
-        extensions: { statusCode: 400 },
-      });
-    }
-
     // validate image/
-    const imgLink = (await validator.files([data?.image], 1, 1))[0] || "";
+    const imgLink =
+      (await validator.files(!!data?.image ? [data?.image] : [], 1, 0))[0] ||
+      "";
     const bannerLinks = await validator.files(data?.banners as any, 3, 0);
 
-    // add category
-    const newCat = await ctx.db.category.create({
-      data: {
-        name: data.name,
-        type: data.type,
-        description: data.description,
-        parentId: parent?.id || null,
-        image: imgLink,
-        banners: bannerLinks,
-      },
-      select: {
-        id: true,
-        name: true,
-        type: true,
-        parent: {
-          select: {
-            name: true,
+    // category type
+    let type: CategoryType = CategoryType.SuperOrd;
+    if (!!parent) {
+      if (parent.type === CategoryType.SubOrd) {
+        throw new GraphQLError("Sorry, you can't add to this category", {
+          extensions: { statusCode: 400 },
+        });
+      }
+      type =
+        parent.type === CategoryType.SuperOrd
+          ? CategoryType.Basic
+          : CategoryType.SubOrd;
+    }
+
+    let newCat: {
+      type: CategoryType;
+      name: string;
+      id: string;
+      parent: {
+        name: string;
+      };
+    } = null as any;
+    try {
+      // add category
+      newCat = (await ctx.db.category.create({
+        data: {
+          name: data.name,
+          type,
+          description: data.description,
+          image: imgLink,
+          banners: bannerLinks,
+          parentId: !parent?.id ? undefined : parent.id,
+        },
+        select: {
+          id: true,
+          name: true,
+          type: true,
+          parent: {
+            select: {
+              name: true,
+            },
           },
         },
-      },
-    });
-
-    if (!newCat) {
+      })) as any;
+    } catch (error) {
       throw new GraphQLError(CONST.errors.server, {
-        extensions: { statusCode: 400 },
+        extensions: { statusCode: 500 },
       });
     }
 
-    if (data.type === CategoryType.Basic && data.filters.length) {
+    if (!newCat) {
+      throw new GraphQLError("Category not found", {
+        extensions: { statusCode: 404 },
+      });
+    }
+
+    if (type === CategoryType.Basic && data.filters.length) {
       // add category filters
       const filterIds: string[] = [];
       if (data.filters?.length) {
@@ -131,18 +146,18 @@ export const UpdateCategory = mutationField("UpdateCategory", {
     // check if logged_in
     middleware.checkSuperAdmin(ctx);
 
-    // validate data
-    await validator.category(data as any, true);
-
     if (!data) {
       throw new GraphQLError("No data provided", {
         extensions: { statusCode: 400 },
       });
     }
 
+    // validate data
+    await validator.category(data as any, true);
+
     // check if cat exist
     const addedCat = await ctx.db.category.findUnique({
-      where: { name: data?.name },
+      where: { id: data?.id },
       select: {
         id: true,
         type: true,
@@ -154,48 +169,21 @@ export const UpdateCategory = mutationField("UpdateCategory", {
 
     if (!addedCat) {
       throw new GraphQLError("Category not found", {
-        extensions: { statusCode: 400 },
-      });
-    }
-
-    if (addedCat.type === CategoryType.SuperOrd && !!data?.parent) {
-      throw new GraphQLError("Category should not have parent", {
-        extensions: { statusCode: 400 },
-      });
-    }
-
-    // check parent
-    let parent: {
-      type: CategoryType;
-      id: string;
-    } | null = null;
-    if (data?.parent) {
-      parent = await ctx.db.category.findUnique({
-        where: { name: data.parent },
-        select: { id: true, type: true },
-      });
-      if (!parent) {
-        throw new GraphQLError("Parent category does not exist", {
-          extensions: { statusCode: 400 },
-        });
-      }
-    }
-
-    if (
-      (addedCat.type === CategoryType.Basic &&
-        parent?.type !== CategoryType.SuperOrd) ||
-      (addedCat.type === CategoryType.SubOrd &&
-        parent?.type !== CategoryType.Basic)
-    ) {
-      throw new GraphQLError("Sorry, you can't add to this category", {
-        extensions: { statusCode: 400 },
+        extensions: { statusCode: 404 },
       });
     }
 
     // validate image/
-    const imgLink = (
-      await validator.files([data?.image], 1, 1, "image", [addedCat.image])
-    )[0];
+    const imgLink =
+      (
+        await validator.files(
+          !!data?.image ? [data?.image] : [],
+          1,
+          0,
+          "image",
+          [addedCat.image]
+        )
+      )[0] || "";
     const bannerLinks = await validator.files(
       data?.banners,
       3,
@@ -237,7 +225,6 @@ export const UpdateCategory = mutationField("UpdateCategory", {
       data: {
         name: data.name,
         description: data.description,
-        parentId: parent?.id || null,
         image: imgLink,
         banners: bannerLinks,
         filterIds,
@@ -254,10 +241,74 @@ export const UpdateCategory = mutationField("UpdateCategory", {
     });
 
     if (cat === null) {
-      throw new GraphQLError(CONST.errors.server, {
-        extensions: { statusCode: 400 },
+      throw new GraphQLError("Category not found", {
+        extensions: { statusCode: 404 },
       });
     }
     return { ...cat, parent: cat.parent?.name || "" };
+  },
+});
+
+export const UpdateCategoryParent = mutationField("UpdateCategoryParent", {
+  type: CategoryMiniObj,
+  args: { name: nonNull(stringArg()), parent: nonNull(stringArg()) },
+  resolve: async (_, { name, parent }, ctx) => {
+    // check if logged_in
+    middleware.checkSuperAdmin(ctx);
+
+    // validate data
+    await validator.categoryParent(name, parent);
+
+    // check if cat exist
+    const addedCat = await ctx.db.category.findUnique({
+      where: { name },
+      select: {
+        name: true,
+        id: true,
+        type: true,
+      },
+    });
+
+    if (!addedCat) {
+      throw new GraphQLError("Category not found", {
+        extensions: { statusCode: 404 },
+      });
+    }
+
+    if (addedCat.type === CategoryType.SuperOrd) {
+      throw new GraphQLError("Category should not have parent", {
+        extensions: { statusCode: 400 },
+      });
+    }
+
+    // check parent
+    const catParent = await ctx.db.category.findUnique({
+      where: { name: parent },
+      select: { id: true, type: true, name: true },
+    });
+    if (!catParent) {
+      throw new GraphQLError("Parent category does not exist", {
+        extensions: { statusCode: 404 },
+      });
+    }
+
+    if (
+      (addedCat.type === CategoryType.Basic &&
+        catParent?.type !== CategoryType.SuperOrd) ||
+      (addedCat.type === CategoryType.SubOrd &&
+        catParent?.type !== CategoryType.Basic)
+    ) {
+      throw new GraphQLError("Sorry, you can't add to this category", {
+        extensions: { statusCode: 400 },
+      });
+    }
+
+    await ctx.db.category.update({
+      where: { id: addedCat.id },
+      data: {
+        parentId: catParent.id,
+      },
+    });
+    return { ...addedCat, parent: catParent.name };
   },
 });

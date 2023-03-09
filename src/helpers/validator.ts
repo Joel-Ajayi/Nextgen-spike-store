@@ -85,7 +85,7 @@ class Validator {
         extensions: { statusCode: 400 },
       });
     }
-    return { filename, stream, b64 };
+    return { filename, stream: createReadStream, b64 };
   }
 
   private async video(
@@ -134,7 +134,7 @@ class Validator {
         extensions: { statusCode: 400 },
       });
     }
-    return { filename, b64, stream };
+    return { filename, b64, stream: createReadStream };
   }
 
   public async files(
@@ -167,21 +167,32 @@ class Validator {
     const b64s: {
       filename?: string;
       b64?: string;
-      stream?: Stream;
+      stream?: () => Stream;
       filePath?: string;
     }[] = [];
 
     if (prevFiles.length) {
       await Promise.all(
         prevFiles.map(async (link) => {
-          const res = await axios.get(link, {
-            responseType: "arraybuffer",
-          });
-          if (res.data) {
-            const b64 = Buffer.from(res.data, "binary")
+          try {
+            const b64 = (
+              (await new Promise((resolve, reject) => {
+                fs.readFile(path.join(__dirname, `../${link}`), (err, data) => {
+                  if (err) {
+                    reject(null);
+                  } else {
+                    resolve(data);
+                  }
+                });
+              })) as Buffer
+            )
               .toString("base64")
               .replace(/^data:(.*,)?/, "");
             prevB64s.push({ b64, filePath: link });
+          } catch (error) {
+            throw new GraphQLError(CONST.errors.server, {
+              extensions: { statusCode: 400 },
+            });
           }
         })
       );
@@ -221,15 +232,18 @@ class Validator {
       b64s.map(async (item) => {
         if (item.filePath) return item.filePath;
         const basePath = type === "video" ? "uploads/vd/" : "uploads/img/";
-        const filePath = `${basePath}${nanoid()}-${item.filename?.toLowerCase()}`;
+        const { ext } = path.parse(item.filename as string);
+        const filePath = `${basePath}${nanoid()}${ext}`;
+        const fileStream = await fs.createWriteStream(
+          path.join(__dirname, `../${filePath}`)
+        );
 
         try {
           await new Promise((resolve, reject) => {
             if (item.stream) {
-              item.stream
-                .pipe(
-                  fs.createWriteStream(path.join(__dirname, `../${filePath}`))
-                )
+              item
+                .stream()
+                .pipe(fileStream)
                 .on("error", () => {
                   reject();
                 })
@@ -255,7 +269,7 @@ class Validator {
       await Promise.all(
         paths.map(async (filePath) => {
           await new Promise((resolve, reject) => {
-            fs.unlink(path.join(__dirname, filePath), (err) => {
+            fs.unlink(path.join(__dirname, `../${filePath}`), (err) => {
               if (err) reject("An error occured. Please try again");
               resolve(path);
             });
@@ -294,35 +308,44 @@ class Validator {
         .min(2, "Name should have more than 2 characters")
         .matches(/^[a-zA-Z0-9\s]*$/, "Special characters not allowed")
         .max(12, "Name should have not more than 12 characters"),
-      type: mixed()
-        .oneOf(
-          Object.values(CategoryType),
-          "Please provide valid category type"
-        )
-        .required("Please provide filter type"),
-      parent: string().nullable(),
       description: string()
         .required("Description Field is empty")
         .max(110, "Description should have not more than 110 characters"),
-      image: mixed().required("Category image field is empty"),
+      image: mixed().nullable(),
       banners: array().nullable().of(mixed()),
       filters: array(
         object(
           isUpdate
-            ? { id: string().required("Filter Id not provided"), ...filterObj }
+            ? {
+                id: string().required("Filter Id not provided"),
+                ...filterObj,
+              }
             : filterObj
         )
-      )
-        .nullable()
-        .max(5, "Filters should not be more than 5"),
+      ).max(5, "Filters should not be more than 5"),
     };
 
     try {
       await object(
         isUpdate
-          ? { id: string().required("Category Id not provided"), ...obj }
-          : obj
+          ? { id: string().required("Category ID not provided"), ...obj }
+          : { ...obj, parent: string().nullable() }
       ).validate(val);
+    } catch (error) {
+      throw new GraphQLError((error as any).message, {
+        extensions: {
+          statusCode: 400,
+        },
+      });
+    }
+  }
+
+  public async categoryParent(name: string, parent: string) {
+    try {
+      await object({
+        name: string().required("Category Name is required"),
+        parent: string().required("Category Parent Name is required"),
+      }).validate({ name, parent });
     } catch (error) {
       throw new GraphQLError((error as any).message, {
         extensions: {

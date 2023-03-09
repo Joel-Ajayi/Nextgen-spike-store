@@ -13,7 +13,11 @@ class UserReq {
       const res = await makeRequest(body);
       return res.UserQuery;
     } catch (err) {
-      return { msg: (err as any)?.message, type: MessageType.Error };
+      return {
+        msg: (err as any)?.message,
+        type: MessageType.Error,
+        statusCode: (err as any)?.statusCode,
+      };
     }
   }
 
@@ -33,9 +37,17 @@ class UserReq {
 
     try {
       const res = await makeRequest(body);
-      return { msg: res.data.SignUp?.message, type: MessageType.Success };
+      return {
+        msg: res.data.SignUp?.message,
+        type: MessageType.Success,
+        statusCode: 200,
+      };
     } catch (err) {
-      return { msg: (err as any)?.message, type: MessageType.Error };
+      return {
+        msg: (err as any)?.message,
+        type: MessageType.Error,
+        statusCode: (err as any)?.statusCode,
+      };
     }
   }
 }

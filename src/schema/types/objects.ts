@@ -1,4 +1,4 @@
-import { list, nonNull, nullable, objectType } from "nexus";
+import { list, nonNull, objectType } from "nexus";
 import { CatFilterTypeEnum, CatTypeEnum } from "./enums";
 
 export const MessageObj = objectType({
@@ -30,8 +30,8 @@ export const CategoryObj = objectType({
       });
     t.string("parent"),
       t.nonNull.string("description"),
-      t.nonNull.upload("image"),
-      t.nonNull.list.nonNull.upload("banners"),
+      t.nonNull.string("image"),
+      t.nonNull.list.nonNull.string("banners"),
       t.field("filters", {
         type: nonNull(list(nonNull(CategoryFilterObj))),
       });

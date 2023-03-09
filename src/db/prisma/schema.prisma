@@ -69,7 +69,7 @@ model Category {
   id          String       @id @default(auto()) @map("_id") @db.ObjectId
   name        String       @unique
   description String
-  parentId    String?      @unique @db.ObjectId
+  parentId    String?      @db.ObjectId
   parent      Category?    @relation("Category", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   children    Category[]   @relation("Category")
   type        CategoryType

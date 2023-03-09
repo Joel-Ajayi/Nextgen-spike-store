@@ -44,10 +44,9 @@ input CategoryInput {
   banners: [Upload!]!
   description: String!
   filters: [CategoryFilterInput!]!
-  image: Upload!
+  image: Upload
   name: String!
   parent: String
-  type: CatTypeEnum!
 }
 
 type CategoryMiniObj {
@@ -57,11 +56,11 @@ type CategoryMiniObj {
 }
 
 type CategoryObj {
-  banners: [Upload!]!
+  banners: [String!]!
   description: String!
   filters: [CategoryFilterObj!]!
   id: String!
-  image: Upload!
+  image: String!
   name: String!
   parent: String
   type: CatTypeEnum!
@@ -72,9 +71,8 @@ input CategoryUpdateInput {
   description: String!
   filters: [CategoryFilterUpdateInput!]!
   id: String!
-  image: Upload!
+  image: Upload
   name: String!
-  parent: String
 }
 
 type Message {
@@ -88,6 +86,7 @@ type Mutation {
   SignOut: Message
   SignUp(data: SignUpInput): Message
   UpdateCategory(data: CategoryUpdateInput): CategoryMiniObj
+  UpdateCategoryParent(name: String!, parent: String!): CategoryMiniObj
   VerifyAccount(data: SetTokenInput): Message
   VerifyPasswordToken(data: VerificationTokenInput): Message
   VerifyToken(data: VerificationTokenInput): Message

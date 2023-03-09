@@ -32,12 +32,12 @@ export const GetCategory = queryField("GetCategory", {
   args: {
     name: nonNull(stringArg()),
   },
-  resolve: async (_, data, ctx) => {
+  resolve: async (_, { name }, ctx) => {
     // check if logged_in
     middleware.checkSuperAdmin(ctx);
 
     const category = await ctx.db.category.findUnique({
-      where: { name: data.name },
+      where: { name },
       select: {
         id: true,
         name: true,
@@ -65,7 +65,7 @@ export const GetCategory = queryField("GetCategory", {
 
     if (!category) {
       throw new GraphQLError(CONST.errors.categories.catNotFound, {
-        extensions: { statusCode: 400 },
+        extensions: { statusCode: 404 },
       });
     }
 

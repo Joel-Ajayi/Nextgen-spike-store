@@ -1,5 +1,5 @@
-import { extendType, inputObjectType, list, nonNull, nullable } from "nexus";
-import { CatFilterTypeEnum, CatTypeEnum } from "./enums";
+import { inputObjectType, list, nonNull } from "nexus";
+import { CatFilterTypeEnum } from "./enums";
 
 export const SignInInput = inputObjectType({
   name: "SignInInput",
@@ -32,17 +32,14 @@ export const SetTokenInput = inputObjectType({
 export const CategoryInput = inputObjectType({
   name: "CategoryInput",
   definition(t) {
-    t.nonNull.string("name"),
-      t.nonNull.field("type", {
-        type: CatTypeEnum,
-      });
-    t.string("parent"),
-      t.nonNull.string("description"),
-      t.nonNull.upload("image"),
-      t.nonNull.list.nonNull.upload("banners"),
-      t.field("filters", {
-        type: nonNull(list(nonNull(CategoryFilterInput))),
-      });
+    t.nonNull.string("name");
+    t.string("parent");
+    t.nonNull.string("description");
+    t.nullable.upload("image");
+    t.nonNull.list.nonNull.upload("banners");
+    t.field("filters", {
+      type: nonNull(list(nonNull(CategoryFilterInput))),
+    });
   },
 });
 
@@ -64,9 +61,8 @@ export const CategoryUpdateInput = inputObjectType({
   definition(t) {
     t.nonNull.string("id");
     t.nonNull.string("name");
-    t.string("parent");
     t.nonNull.string("description");
-    t.nonNull.upload("image");
+    t.nullable.upload("image");
     t.nonNull.list.nonNull.upload("banners");
     t.field("filters", {
       type: nonNull(list(nonNull(CategoryFilterUpdateInput))),
@@ -77,13 +73,13 @@ export const CategoryUpdateInput = inputObjectType({
 export const CategoryFilterUpdateInput = inputObjectType({
   name: "CategoryFilterUpdateInput",
   definition(t) {
-    t.nonNull.string("id"),
-      t.nonNull.string("name"),
-      t.nonNull.field("type", {
-        type: CatFilterTypeEnum,
-      }),
-      t.nullable.string("unit"),
-      t.nonNull.list.nonNull.string("options"),
-      t.nonNull.boolean("isRequired");
+    t.nonNull.string("id");
+    t.nonNull.string("name");
+    t.nonNull.field("type", {
+      type: CatFilterTypeEnum,
+    });
+    t.nullable.string("unit");
+    t.nonNull.list.nonNull.string("options");
+    t.nonNull.boolean("isRequired");
   },
 });
