@@ -30,7 +30,7 @@ export const CreateCategory = mutationField("CreateCategory", {
       select: { id: true },
     });
     if (addedCat) {
-      throw new GraphQLError("Category already added", {
+      throw new GraphQLError("Category name already used", {
         extensions: { statusCode: 400 },
       });
     }
@@ -171,6 +171,20 @@ export const UpdateCategory = mutationField("UpdateCategory", {
       throw new GraphQLError("Category not found", {
         extensions: { statusCode: 404 },
       });
+    }
+
+    // check if cat exist
+    const searchedCat = await ctx.db.category.findUnique({
+      where: { name: data?.name },
+      select: { id: true },
+    });
+
+    if (!!searchedCat && addedCat.id !== searchedCat?.id) {
+      if (!addedCat) {
+        throw new GraphQLError("Category Name already used", {
+          extensions: { statusCode: 404 },
+        });
+      }
     }
 
     // validate image/

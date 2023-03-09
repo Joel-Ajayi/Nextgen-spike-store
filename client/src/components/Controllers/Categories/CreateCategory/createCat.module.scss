@@ -1,6 +1,12 @@
 @import "../../../../styles/mixins.scss";
 @import "../../../../styles/vars.scss";
 
+.loader {
+  width: min-content;
+  height: min-content;
+  margin: auto;
+}
+
 .content {
   flex: 1;
   overflow: auto;

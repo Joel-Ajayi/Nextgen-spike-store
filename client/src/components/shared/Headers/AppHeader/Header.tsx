@@ -6,6 +6,7 @@ import Dropdown, { DropdownProps } from "../../Dropdown/Dropdown";
 import { ReactComponent as ProfileIcon } from "../../../../images/icons/account.svg";
 import { ReactComponent as AdminIcon } from "../../../../images/icons/admin.svg";
 import { ReactComponent as CartIcon } from "../../../../images/icons/cart.svg";
+import { ReactComponent as CategoryIcon } from "../../../../images/icons/category.svg";
 import { ReactComponent as FavoriteIcon } from "../../../../images/icons/favorite.svg";
 import { ReactComponent as LogoutIcon } from "../../../../images/icons/logout.svg";
 import { ReactComponent as NotificationIcon } from "../../../../images/icons/notifications.svg";
@@ -24,6 +25,7 @@ import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import UserAvatar from "../UserAvatar/UserAvatar";
 import AppSideBar from "../../SideBars/AppSideBar/AppSideBar";
 import { Roles } from "../../../../types";
+import { Pages, PageSections } from "../../../../types/controller";
 
 export const loginDropdown = (
   isAuthenticated: boolean,
@@ -38,9 +40,9 @@ export const loginDropdown = (
     },
     isAuthenticated && role > Roles.User
       ? {
-          icon: <AdminIcon className="svg-brand" />,
-          title: "Controller",
-          link: "/controller",
+          icon: <CategoryIcon className="svg-brand-fill" />,
+          title: "Controller Categories",
+          link: `/controller?pg=${Pages.Categories}&sec=${PageSections.Listing}`,
         }
       : null,
     {

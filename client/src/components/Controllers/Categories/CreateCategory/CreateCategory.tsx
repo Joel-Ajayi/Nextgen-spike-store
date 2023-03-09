@@ -201,7 +201,11 @@ function CreateCategory({
       {statusCode === 404 && <Page404 />}
       {statusCode !== 404 && (
         <div className={ControllerStyles.wrapper}>
-          {isLoading && <SpinLoader brandColor />}
+          {isLoading && (
+            <div className={Styles.loader}>
+              <SpinLoader brandColor />
+            </div>
+          )}
           {!isLoading && (
             <>
               <div className={ControllerStyles.sec_header}>
