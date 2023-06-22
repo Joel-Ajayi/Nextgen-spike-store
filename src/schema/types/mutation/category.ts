@@ -303,6 +303,41 @@ export const UpdateCategoryParent = mutationField("UpdateCategoryParent", {
           extensions: { statusCode: 400 },
         });
       }
+
+      const categories = await ctx.db.category.findMany({
+        select: { id: true, parent: { select: { id: true } } },
+      });
+
+      const categoriesLinage = categories
+        .filter((cat) => !cat.parent?.id)
+        .map(({ id }) => [id]);
+
+      categoriesLinage.forEach((id, i) => {
+        (function pushToTree(parent: string, index: number) {
+          categories
+            .filter((cat) => cat.parent?.id === parent)
+            .forEach((child) => {
+              categoriesLinage[index].push(child.id);
+              pushToTree(child.id, index);
+            });
+        })(id[0], i);
+      });
+
+      const parentLineIndex = categoriesLinage.findIndex(
+        (line) => line.findIndex((id) => id === catParent?.id) !== -1
+      );
+      const categoryLineIndex = categoriesLinage.findIndex(
+        (line) => line.findIndex((id) => id === addedCat.id) !== -1
+      );
+
+      if (
+        parentLineIndex === categoryLineIndex &&
+        catParent.lvl > addedCat.lvl
+      ) {
+        throw new GraphQLError("Sorry, you can't add to this category", {
+          extensions: { statusCode: 400 },
+        });
+      }
     }
 
     await ctx.db.category.update({
