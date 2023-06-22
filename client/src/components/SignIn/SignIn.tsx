@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import Styles from "./signIn.module.scss";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Input from "../shared/Input/Input";
@@ -27,14 +27,15 @@ function SignIn() {
 
   const isModalVisible = useAppSelector((state) => state.app.showModal);
 
-  const [isSignIn, setIsSignIn] = useState(params.get("signup") !== "true");
+  const [isSignIn, setIsSignIn] = useState(true);
   const [formData, setFormData] = useState<SignInForm>({});
 
-  useEffect(() => {
-    if (!isSignPage && params.get("signup") === "true") {
-      navigate("/", { replace: true });
+  useLayoutEffect(() => {
+    if (params.get("signup") === "true") {
+      navigate(pathname, { replace: true });
+      setIsSignIn(false);
     }
-  }, []);
+  }, [params]);
 
   const changeAuth = () => {
     if (isModalVisible && isSignPage) dispatch(setShowModal(false));

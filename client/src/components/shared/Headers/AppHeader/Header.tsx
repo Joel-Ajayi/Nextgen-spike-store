@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import Styles from "./header.module.scss";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import ProductsSearch from "../../Search/ProductsSearch/ProductsSearch";
 import Dropdown, { DropdownProps } from "../../Dropdown/Dropdown";
 import { ReactComponent as ProfileIcon } from "../../../../images/icons/account.svg";
@@ -125,6 +125,7 @@ export const moreDropdown = [
 function Header() {
   const { pathname } = useLocation();
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const { isAuthenticated, role } = useAppSelector((state) => state.user);
 
@@ -142,15 +143,15 @@ function Header() {
   const handleSignOut = async () => {
     await userReq.signOut();
     dispatch(resetUserState());
+    navigate("/signin", { replace: false });
   };
 
   const loginItemsDropdown = useMemo(() => {
     if (isAuthenticated) return loginDropdown(true, role, handleSignOut);
-
     return [
       <div className={Styles.signup_item} key={uniqId()}>
         <div>New Customer ?</div>
-        <Link to="/?signup=true" onClick={handleSignInButton}>
+        <Link to={`${pathname}?signup=true`} onClick={handleSignInButton}>
           Sign Up
         </Link>
       </div>,

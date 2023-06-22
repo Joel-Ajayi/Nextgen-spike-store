@@ -23,6 +23,8 @@ const {
   SESSION_NAME,
   EMAIL_VERIFICATION_SECRET,
   PASSWORD_VERIFICATION_SECRET,
+  SESSION_NAME_DEV,
+  NODE_ENV,
 } = process.env;
 
 export const SignUp = mutationField("SignUp", {
@@ -210,7 +212,9 @@ export const SignOut = mutationField("SignOut", {
   type: MessageObj,
   resolve: async (_, args, ctx) => {
     if (ctx.user) {
-      ctx.res.clearCookie(SESSION_NAME as string);
+      ctx.res.clearCookie(
+        (NODE_ENV === "production" ? SESSION_NAME : SESSION_NAME_DEV) as string
+      );
       ctx.req.session.destroy((err: any) => {
         if (err) throw new Error(CONST.errors.server);
       });

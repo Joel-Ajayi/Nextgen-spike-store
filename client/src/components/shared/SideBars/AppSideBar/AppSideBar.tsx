@@ -10,19 +10,25 @@ import { ReactComponent as SideBarIcon } from "../../../../images/icons/sideBar.
 import { ReactComponent as CategoryIcon } from "../../../../images/icons/category.svg";
 import { CONSTS } from "../../../../const";
 import { loginDropdown, moreDropdown } from "../../Headers/AppHeader/Header";
-import DropdownItem, {
-  DropdownItemProps,
-} from "../../Dropdown/DropdownItem/DropdownItem";
+import DropdownItem from "../../Dropdown/DropdownItem/DropdownItem";
 import uniqId from "uniqid";
 import UserAvatar from "../../Headers/UserAvatar/UserAvatar";
-import { useAppSelector } from "../../../../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
+import userReq from "../../../../requests/user";
+import userSlice from "../../../../store/userState";
+import { useNavigate } from "react-router-dom";
 
 type BarProps = {
   className?: string;
 };
 
 function AppSideBar({ className = "" }: BarProps) {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
   const { isAuthenticated, role } = useAppSelector((state) => state.user);
+
+  const { resetUserState } = userSlice.actions;
 
   const [showBar, setShowBar] = useState(false);
   const [style, setStyle] = useState<CSSProperties>({});
@@ -45,6 +51,12 @@ function AppSideBar({ className = "" }: BarProps) {
         }, 200);
       }
     }
+  };
+
+  const handleSignOut = async () => {
+    await userReq.signOut();
+    dispatch(resetUserState());
+    navigate("/signin", { replace: false });
   };
 
   useEffect(() => {
@@ -83,7 +95,11 @@ function AppSideBar({ className = "" }: BarProps) {
           </section>
           <section>
             <ul>
-              {loginDropdown(isAuthenticated as boolean, role).map(
+              {loginDropdown(
+                isAuthenticated as boolean,
+                role,
+                handleSignOut
+              ).map(
                 (item) =>
                   !!item && (
                     <DropdownItem
@@ -91,6 +107,7 @@ function AppSideBar({ className = "" }: BarProps) {
                       title={item.title}
                       icon={item.icon}
                       link={item.link}
+                      onClick={item?.onClick}
                     />
                   )
               )}
@@ -115,6 +132,7 @@ function AppSideBar({ className = "" }: BarProps) {
                       title={item.title}
                       icon={item.icon}
                       link={item.link}
+                      onClick={item?.onClick}
                     />
                   )
               )}

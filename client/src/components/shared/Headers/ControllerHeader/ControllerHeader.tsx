@@ -4,17 +4,22 @@ import { Roles } from "../../../../types";
 import UserAvatar from "../UserAvatar/UserAvatar";
 import Styles from "./styles.module.scss";
 import Dropdown from "../../Dropdown/Dropdown";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import userSlice from "../../../../store/userState";
 import { Pages, PageSections } from "../../../../types/controller";
 import { CategoryType } from "../../../../types/category";
+import userReq from "../../../../requests/user";
 
 function ControllerHeader() {
   const { role } = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const { resetUserState } = userSlice.actions;
 
-  const signOut = () => {
+  const signOut = async () => {
+    await userReq.signOut();
+    dispatch(resetUserState());
+    navigate("/signin", { replace: false });
     dispatch(resetUserState());
   };
 
