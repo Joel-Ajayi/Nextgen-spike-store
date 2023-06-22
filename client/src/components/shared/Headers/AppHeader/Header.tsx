@@ -26,11 +26,13 @@ import UserAvatar from "../UserAvatar/UserAvatar";
 import AppSideBar from "../../SideBars/AppSideBar/AppSideBar";
 import { Roles } from "../../../../types";
 import { Pages, PageSections } from "../../../../types/controller";
+import userReq from "../../../../requests/user";
+import userSlice from "../../../../store/userState";
 
 export const loginDropdown = (
   isAuthenticated: boolean,
   role: Roles = Roles.User,
-  logoutFunc?: () => {}
+  logoutFunc?: () => void
 ) => {
   return [
     {
@@ -127,6 +129,7 @@ function Header() {
   const { isAuthenticated, role } = useAppSelector((state) => state.user);
 
   const actions = appSlice.actions;
+  const { resetUserState } = userSlice.actions;
 
   const handleSignInButton = () => {
     if (!isAuthenticated) {
@@ -136,19 +139,23 @@ function Header() {
     }
   };
 
+  const handleSignOut = async () => {
+    await userReq.signOut();
+    dispatch(resetUserState());
+  };
+
   const loginItemsDropdown = useMemo(() => {
-    if (!isAuthenticated) {
-      return [
-        <div className={Styles.signup_item} key={uniqId()}>
-          <div>New Customer ?</div>
-          <Link to="/?signup=true" onClick={handleSignInButton}>
-            Sign Up
-          </Link>
-        </div>,
-        ...loginDropdown(false, role),
-      ];
-    }
-    return loginDropdown(true, role);
+    if (isAuthenticated) return loginDropdown(true, role, handleSignOut);
+
+    return [
+      <div className={Styles.signup_item} key={uniqId()}>
+        <div>New Customer ?</div>
+        <Link to="/?signup=true" onClick={handleSignInButton}>
+          Sign Up
+        </Link>
+      </div>,
+      ...loginDropdown(false, role),
+    ];
   }, [isAuthenticated]);
 
   return (

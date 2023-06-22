@@ -12,8 +12,14 @@ import initSessionStore from "./db/session/session";
 import graphqlUpload from "graphql-upload/graphqlUploadExpress.js";
 import { CONST } from "./@types/conts";
 
-const { PORT, SESSION_NAME, SESSION_SECRET, SESSION_LIFETIME, NODE_ENV } =
-  process.env;
+const {
+  PORT,
+  SESSION_NAME,
+  SESSION_NAME_DEV,
+  SESSION_SECRET,
+  SESSION_LIFETIME,
+  NODE_ENV,
+} = process.env;
 
 declare module "express-session" {
   interface SessionData {
@@ -31,15 +37,13 @@ declare module "express-session" {
   app.use(express.json());
   app.use(cookieParser());
   app.use(graphqlUpload({ maxFileSize: CONST.files.vdSize, maxFiles: 4 }));
-  if (NODE_ENV !== "production") {
-    app.use(morgan("dev"));
-  }
+  if (NODE_ENV !== "production") app.use(morgan("dev"));
 
   // session setup
   app.use(
     session({
       store: sessionStore,
-      name: SESSION_NAME,
+      name: NODE_ENV === "production" ? SESSION_NAME : SESSION_NAME_DEV,
       secret: SESSION_SECRET as string,
       rolling: true,
       resave: false,

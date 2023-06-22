@@ -8,6 +8,7 @@ type InputProps = {
   type?: HTMLInputTypeAttribute;
   defaultValue?: string;
   defaultChecked?: boolean;
+  autoComplete?: "off" | "on";
 };
 
 function Input({
@@ -17,6 +18,7 @@ function Input({
   placeholder = "",
   type = "text",
   defaultChecked = false,
+  autoComplete = "on",
 }: InputProps) {
   const [isFocused, setIsFocused] = useState(false);
   const [error, setError] = useState("");
@@ -49,6 +51,7 @@ function Input({
             className={isFocused ? Styles.input_focus : Styles.input_blur}
             onBlur={handleBlur}
             onFocus={() => setIsFocused(true)}
+            autoComplete={autoComplete}
           />
           <div className={Styles.placeholder}>{placeholder}</div>
           {error && <div className={Styles.line_error} />}

@@ -112,6 +112,7 @@ function SignIn() {
                 name={SignInFieds.Pwd}
                 placeholder="Enter Password"
                 onChange={onInputChange}
+                autoComplete="off"
               />
               <div className={Styles.info}>
                 <p>

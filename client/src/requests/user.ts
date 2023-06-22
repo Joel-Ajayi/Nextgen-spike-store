@@ -38,7 +38,7 @@ class UserReq {
     try {
       const res = await makeRequest(body);
       return {
-        msg: res.data.SignUp?.message,
+        msg: res.SignUp?.message,
         type: MessageType.Success,
         statusCode: 200,
       };
@@ -49,6 +49,12 @@ class UserReq {
         statusCode: (err as any)?.statusCode,
       };
     }
+  }
+
+  public async signOut(): Promise<void> {
+    const query = `mutation { SignOut { message }}`;
+    const body = JSON.stringify({ query });
+    await makeRequest(body);
   }
 }
 

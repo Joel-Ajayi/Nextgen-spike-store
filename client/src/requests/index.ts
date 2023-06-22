@@ -35,7 +35,6 @@ export const makeRequest = async (
     }
     return res.data?.data;
   } catch (err) {
-    console.log(err);
     if (errFromServer) {
       throw new ApiError((err as any)?.message, {
         statusCode: (err as any)?.statusCode,

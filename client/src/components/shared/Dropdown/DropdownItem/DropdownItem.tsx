@@ -28,7 +28,7 @@ function DropdownItem({
         </Link>
       )}
       {!!onClick && (
-        <div className={Styles.link} style={{ height }}>
+        <div className={Styles.link} onClick={onClick} style={{ height }}>
           {icon}
           <div className={Styles.title}>{title}</div>
         </div>

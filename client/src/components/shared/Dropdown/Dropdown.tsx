@@ -57,6 +57,7 @@ export default function Dropdown({
             title={(item as DropdownItemProps).title}
             icon={(item as DropdownItemProps).icon}
             link={(item as DropdownItemProps).link}
+            onClick={(item as DropdownItemProps).onClick}
           />
         );
       }
