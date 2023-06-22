@@ -10,12 +10,6 @@ export enum CatFilterType {
   Range = "Range",
 }
 
-export enum CategoryType {
-  SuperOrd = "SuperOrd",
-  Basic = "Basic",
-  SubOrd = "SubOrd",
-}
-
 export type CatFilter = {
   id?: string;
   name: string;
@@ -27,14 +21,14 @@ export type CatFilter = {
 
 export type CategoryMini = {
   name: string;
-  type: CategoryType;
+  lvl: number;
   parent: string;
 };
 
 export type Category = {
   id?: string;
   name: string;
-  type?: CategoryType;
+  lvl?: number;
   parent: string;
   description: string;
   image: IFile[];

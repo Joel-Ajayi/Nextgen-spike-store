@@ -1,5 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Pages, PageSections } from "../../../../types/controller";
 import Button from "../../../shared/Button/Button";
 import Input from "../../../shared/Input/Controller/Input";
@@ -7,12 +7,7 @@ import ControllerStyles from "../../controller.module.scss";
 import uniqid from "uniqid";
 import Styles from "./createCat.module.scss";
 import validator from "../../../../helpers/validators";
-import {
-  Category,
-  CategoryMini,
-  CategoryType,
-  CatFilter,
-} from "../../../../types/category";
+import { Category, CategoryMini, CatFilter } from "../../../../types/category";
 import categoryReq from "../../../../requests/category";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { IFile, IMessage } from "../../../../types";
@@ -26,7 +21,6 @@ type CreateCategoryProps = {
   isUpdate?: boolean;
   cat_id?: string;
   parent?: string;
-  type: CategoryType;
 };
 
 const defaultData: Category = {
@@ -43,9 +37,7 @@ function CreateCategory({
   cat_id,
   parent = "",
   isUpdate = false,
-  type,
 }: CreateCategoryProps) {
-  let [params] = useSearchParams();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
@@ -65,7 +57,7 @@ function CreateCategory({
   defaultData.parent = parent;
   const index = categories.findIndex((cat) => cat.name === cat_id);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     (async () => {
       if (!!cat_id) {
         const cat = await categoryReq.getCategory(cat_id);
@@ -228,16 +220,8 @@ function CreateCategory({
               </div>
               <div className={Styles.content}>
                 <div>
-                  <form
-                    className={`${
-                      type === CategoryType.Basic ? Styles.grid_display : ""
-                    }`}
-                  >
-                    <section
-                      className={`${
-                        type !== CategoryType.Basic ? Styles.grid_display : ""
-                      }`}
-                    >
+                  <form className={Styles.grid_display}>
+                    <section>
                       <section className={Styles.section}>
                         <Input
                           name="name"
@@ -272,24 +256,22 @@ function CreateCategory({
                       </section>
                     </section>
 
-                    {type === CategoryType.Basic && (
-                      <section className={Styles.section}>
-                        <div className={Styles.filter_options_title}>
-                          Filter Options
-                        </div>
-                        <div className={Styles.filter_options}>
-                          <Filter index={-1} onChange={onFilterChange} />
-                          {form.filters.map((filter, index) => (
-                            <Filter
-                              key={uniqid()}
-                              data={filter}
-                              index={index}
-                              onChange={onFilterChange}
-                            />
-                          ))}
-                        </div>
-                      </section>
-                    )}
+                    <section className={Styles.section}>
+                      <div className={Styles.filter_options_title}>
+                        Filter Options
+                      </div>
+                      <div className={Styles.filter_options}>
+                        <Filter index={-1} onChange={onFilterChange} />
+                        {form.filters.map((filter, index) => (
+                          <Filter
+                            key={uniqid()}
+                            data={filter}
+                            index={index}
+                            onChange={onFilterChange}
+                          />
+                        ))}
+                      </div>
+                    </section>
                   </form>
                 </div>
               </div>

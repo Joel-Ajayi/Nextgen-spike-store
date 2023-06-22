@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import axios from "axios";
 import { nanoid } from "nanoid";
-import { CategoryType, CatFilterType } from "@prisma/client";
+import { CatFilterType } from "@prisma/client";
 import { GraphQLError } from "graphql";
 import { FileUpload } from "graphql-upload/Upload";
 import { Stream } from "stream";
@@ -318,7 +318,7 @@ class Validator {
         object(
           isUpdate
             ? {
-                id: string().required("Filter Id not provided"),
+                id: string().nullable(),
                 ...filterObj,
               }
             : filterObj
@@ -345,7 +345,7 @@ class Validator {
     try {
       await object({
         name: string().required("Category Name is required"),
-        parent: string().required("Category Parent Name is required"),
+        parent: string(),
       }).validate({ name, parent });
     } catch (error) {
       throw new GraphQLError((error as any).message, {

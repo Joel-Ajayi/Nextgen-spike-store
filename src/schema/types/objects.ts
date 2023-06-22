@@ -1,5 +1,5 @@
 import { list, nonNull, objectType } from "nexus";
-import { CatFilterTypeEnum, CatTypeEnum } from "./enums";
+import { CatFilterTypeEnum } from "./enums";
 
 export const MessageObj = objectType({
   name: "Message",
@@ -23,11 +23,7 @@ export const UserObj = objectType({
 export const CategoryObj = objectType({
   name: "CategoryObj",
   definition(t) {
-    t.nonNull.string("id"),
-      t.nonNull.string("name"),
-      t.nonNull.field("type", {
-        type: CatTypeEnum,
-      });
+    t.nonNull.string("id"), t.nonNull.string("name"), t.nonNull.int("lvl");
     t.string("parent"),
       t.nonNull.string("description"),
       t.nonNull.string("image"),
@@ -41,11 +37,7 @@ export const CategoryObj = objectType({
 export const CategoryMiniObj = objectType({
   name: "CategoryMiniObj",
   definition(t) {
-    t.nonNull.string("name"),
-      t.nonNull.field("type", {
-        type: CatTypeEnum,
-      }),
-      t.nonNull.string("parent");
+    t.nonNull.string("name"), t.nonNull.int("lvl"), t.nonNull.string("parent");
   },
 });
 

@@ -7,9 +7,9 @@ import { Category, CategoryMini } from "../types/category";
 
 class CategoryReq {
   public async createCat(data: Category) {
-    const { type, id, image, banners, ...rest } = data;
+    const { lvl, id, image, banners, ...rest } = data;
     const body = JSON.stringify({
-      query: `mutation CreateCategory($data: CategoryInput){CreateCategory(data:$data){name parent type}}`,
+      query: `mutation CreateCategory($data: CategoryInput){CreateCategory(data:$data){name parent lvl}}`,
       variables: {
         data: { ...rest, image: null, banners: banners.map(() => null) },
       },
@@ -45,10 +45,10 @@ class CategoryReq {
   }
 
   public async updateCat(data: Category) {
-    const { type, parent, image, banners, ...rest } = data;
+    const { lvl, parent, image, banners, ...rest } = data;
     const body = JSON.stringify({
-      query: `mutation UpdateCategoryParent($data: CategoryUpdateInput) {
-              UpdateCategory(data: $data) { name type parent } 
+      query: `mutation UpdateCategory($data: CategoryUpdateInput) {
+              UpdateCategory(data: $data) { name lvl parent } 
              }`,
       variables: {
         data: { ...rest, image: null, banners: banners.map(() => null) },
@@ -87,7 +87,7 @@ class CategoryReq {
   public async updateCatParent(name: string, parent: string) {
     const body = JSON.stringify({
       query: `mutation UpdateCategoryParent($name: String!, $parent: String!) {
-                UpdateCategoryParent(name: $name, parent: $parent) { name type parent }
+                UpdateCategoryParent(name: $name, parent: $parent) { name lvl parent }
               }`,
       variables: {
         name,
@@ -109,7 +109,7 @@ class CategoryReq {
 
   public async getCategories() {
     const body = JSON.stringify({
-      query: "query GetCategories { GetCategories { name parent type } }",
+      query: "query GetCategories { GetCategories { name parent lvl } }",
     });
 
     try {
@@ -127,7 +127,7 @@ class CategoryReq {
   public async getCategory(name: string) {
     const body = JSON.stringify({
       query: `query GetCategory($name: String!) { GetCategory(name: $name) {
-                 id name parent type description image banners filters { id name type unit options isRequired }
+                 id name parent lvl description image banners filters { id name type unit options isRequired }
                 }
               }`,
       variables: { name },

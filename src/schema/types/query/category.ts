@@ -10,7 +10,7 @@ export const GetCategories = queryField("GetCategories", {
     const categories = await ctx.db.category.findMany({
       select: {
         name: true,
-        type: true,
+        lvl: true,
         parent: {
           select: {
             name: true,
@@ -19,9 +19,9 @@ export const GetCategories = queryField("GetCategories", {
       },
     });
 
-    return categories.map(({ name, parent, type }) => ({
+    return categories.map(({ name, parent, lvl }) => ({
       name,
-      type,
+      lvl,
       parent: parent?.name || "",
     }));
   },
@@ -41,7 +41,7 @@ export const GetCategory = queryField("GetCategory", {
       select: {
         id: true,
         name: true,
-        type: true,
+        lvl: true,
         description: true,
         image: true,
         banners: true,

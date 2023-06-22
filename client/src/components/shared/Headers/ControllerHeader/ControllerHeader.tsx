@@ -7,7 +7,6 @@ import Dropdown from "../../Dropdown/Dropdown";
 import { Link, useNavigate } from "react-router-dom";
 import userSlice from "../../../../store/userState";
 import { Pages, PageSections } from "../../../../types/controller";
-import { CategoryType } from "../../../../types/category";
 import userReq from "../../../../requests/user";
 
 function ControllerHeader() {
@@ -30,7 +29,7 @@ function ControllerHeader() {
     },
     {
       title: "Add Category",
-      link: `/controller?pg=${Pages.Categories}&sec=${PageSections.CreateCat}&type=${CategoryType.SuperOrd}`,
+      link: `/controller?pg=${Pages.Categories}&sec=${PageSections.CreateCat}`,
     },
   ];
 

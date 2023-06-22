@@ -4,9 +4,9 @@ import { CategoryMiniObj } from "../objects";
 import { validator } from "../../../helpers/validator";
 import { GraphQLError } from "graphql";
 import { CategoryInput, CategoryUpdateInput } from "../inputs";
-import { CategoryType } from "@prisma/client";
 import { cloneDeep } from "lodash";
 import { CONST } from "../../../@types/conts";
+import { CatFilter } from "@prisma/client";
 
 export const CreateCategory = mutationField("CreateCategory", {
   type: CategoryMiniObj,
@@ -37,13 +37,13 @@ export const CreateCategory = mutationField("CreateCategory", {
 
     // check parent
     let parent: {
-      type: CategoryType;
+      lvl: number;
       id: string;
     } | null = null;
     if (data?.parent) {
       parent = await ctx.db.category.findUnique({
         where: { name: data.parent },
-        select: { id: true, type: true },
+        select: { id: true, lvl: true },
       });
       if (!parent) {
         throw new GraphQLError("Parent category does not exist", {
@@ -58,34 +58,19 @@ export const CreateCategory = mutationField("CreateCategory", {
       "";
     const bannerLinks = await validator.files(data?.banners as any, 3, 0);
 
-    // category type
-    let type: CategoryType = CategoryType.SuperOrd;
-    if (!!parent) {
-      if (parent.type === CategoryType.SubOrd) {
-        throw new GraphQLError("Sorry, you can't add to this category", {
-          extensions: { statusCode: 400 },
-        });
-      }
-      type =
-        parent.type === CategoryType.SuperOrd
-          ? CategoryType.Basic
-          : CategoryType.SubOrd;
-    }
-
     let newCat: {
-      type: CategoryType;
       name: string;
       id: string;
-      parent: {
-        name: string;
-      };
+      lvl: number;
+      parent: { name: string };
     } = null as any;
+
     try {
       // add category
       newCat = (await ctx.db.category.create({
         data: {
           name: data.name,
-          type,
+          lvl: !!parent ? parent.lvl + 1 : 1,
           description: data.description,
           image: imgLink,
           banners: bannerLinks,
@@ -94,7 +79,7 @@ export const CreateCategory = mutationField("CreateCategory", {
         select: {
           id: true,
           name: true,
-          type: true,
+          lvl: true,
           parent: {
             select: {
               name: true,
@@ -114,7 +99,7 @@ export const CreateCategory = mutationField("CreateCategory", {
       });
     }
 
-    if (type === CategoryType.Basic && data.filters.length) {
+    if (data.filters.length) {
       // add category filters
       const filterIds: string[] = [];
       if (data.filters?.length) {
@@ -160,7 +145,7 @@ export const UpdateCategory = mutationField("UpdateCategory", {
       where: { id: data?.id },
       select: {
         id: true,
-        type: true,
+        lvl: true,
         image: true,
         banners: true,
         filterIds: true,
@@ -207,30 +192,35 @@ export const UpdateCategory = mutationField("UpdateCategory", {
     );
 
     let filterIds: string[] = [];
-    if (addedCat.type === CategoryType.Basic) {
-      if (addedCat.filterIds.length && !data.filters?.length) {
-        await ctx.db.catFilter.deleteMany({
-          where: { id: { in: addedCat.filterIds } },
-        });
-      } else if (data.filters?.length) {
-        let prevFilterIds = cloneDeep(addedCat.filterIds);
-        await Promise.all(
-          data.filters.map(async ({ id, name, options, unit, type }) => {
-            const filter = await ctx.db.catFilter.upsert({
+    if (addedCat.filterIds.length && !data.filters?.length) {
+      await ctx.db.catFilter.deleteMany({
+        where: { id: { in: addedCat.filterIds } },
+      });
+    } else if (data.filters?.length) {
+      let prevFilterIds = cloneDeep(addedCat.filterIds);
+      await Promise.all(
+        data.filters.map(async ({ id = "", name, options, unit, type }) => {
+          let filter: CatFilter | null = null;
+          if (id) {
+            filter = await ctx.db.catFilter.update({
               where: { id },
-              update: { name, options, unit, type, categoryId: addedCat.id },
-              create: { name, options, unit, type, categoryId: addedCat.id },
+              data: { name, options, unit, type, categoryId: addedCat.id },
             });
-            filterIds.push(filter.id);
-            prevFilterIds = prevFilterIds.filter((fid) => fid !== filter.id);
-          })
-        );
+          } else {
+            filter = await ctx.db.catFilter.create({
+              data: { name, options, unit, type, categoryId: addedCat.id },
+            });
+          }
 
-        if (prevFilterIds.length) {
-          await ctx.db.catFilter.deleteMany({
-            where: { id: { in: prevFilterIds } },
-          });
-        }
+          filterIds.push(filter.id);
+          prevFilterIds = prevFilterIds.filter((fid) => fid !== filter?.id);
+        })
+      );
+
+      if (prevFilterIds.length) {
+        await ctx.db.catFilter.deleteMany({
+          where: { id: { in: prevFilterIds } },
+        });
       }
     }
 
@@ -245,7 +235,7 @@ export const UpdateCategory = mutationField("UpdateCategory", {
       },
       select: {
         name: true,
-        type: true,
+        lvl: true,
         parent: {
           select: {
             name: true,
@@ -279,7 +269,7 @@ export const UpdateCategoryParent = mutationField("UpdateCategoryParent", {
       select: {
         name: true,
         id: true,
-        type: true,
+        lvl: true,
       },
     });
 
@@ -289,40 +279,39 @@ export const UpdateCategoryParent = mutationField("UpdateCategoryParent", {
       });
     }
 
-    if (addedCat.type === CategoryType.SuperOrd) {
-      throw new GraphQLError("Category should not have parent", {
-        extensions: { statusCode: 400 },
-      });
-    }
+    let catParent: {
+      name: string;
+      id: string;
+      lvl: number;
+    } | null = null as any;
 
-    // check parent
-    const catParent = await ctx.db.category.findUnique({
-      where: { name: parent },
-      select: { id: true, type: true, name: true },
-    });
-    if (!catParent) {
-      throw new GraphQLError("Parent category does not exist", {
-        extensions: { statusCode: 404 },
+    if (parent) {
+      // check parent
+      catParent = await ctx.db.category.findUnique({
+        where: { name: parent },
+        select: { id: true, lvl: true, name: true },
       });
-    }
 
-    if (
-      (addedCat.type === CategoryType.Basic &&
-        catParent?.type !== CategoryType.SuperOrd) ||
-      (addedCat.type === CategoryType.SubOrd &&
-        catParent?.type !== CategoryType.Basic)
-    ) {
-      throw new GraphQLError("Sorry, you can't add to this category", {
-        extensions: { statusCode: 400 },
-      });
+      if (!catParent) {
+        throw new GraphQLError("Parent category does not exist", {
+          extensions: { statusCode: 404 },
+        });
+      }
+
+      if (catParent?.id === addedCat.id) {
+        throw new GraphQLError("Sorry, you can't add to this category", {
+          extensions: { statusCode: 400 },
+        });
+      }
     }
 
     await ctx.db.category.update({
       where: { id: addedCat.id },
       data: {
-        parentId: catParent.id,
+        parentId: catParent ? catParent.id : null,
+        lvl: catParent ? catParent.lvl + 1 : 1,
       },
     });
-    return { ...addedCat, parent: catParent.name };
+    return { ...addedCat, parent: catParent?.name || "" };
   },
 });

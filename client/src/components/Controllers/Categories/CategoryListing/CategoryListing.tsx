@@ -9,7 +9,7 @@ import Tree from "../../../shared/Tree/Tree";
 import ControllerStyles from "../../controller.module.scss";
 import Styles from "./catListing.module.scss";
 import categoryReq from "../../../../requests/category";
-import { CategoryMini, CategoryType } from "../../../../types/category";
+import { CategoryMini } from "../../../../types/category";
 import appSlice from "../../../../store/appState";
 import SpinLoader from "../../../shared/Loader/SpinLoader/SpinLoader";
 
@@ -54,27 +54,18 @@ function CategoryListing() {
   };
 
   const onAppend = (id: string) => {
-    let type = CategoryType.SuperOrd;
     const parent = categories.find(({ name }) => name === id);
 
-    if (!!parent) {
-      type =
-        parent.type === CategoryType.SuperOrd
-          ? CategoryType.Basic
-          : CategoryType.SubOrd;
-    }
-
-    let link = `/controller?pg=${Pages.Categories}&sec=${PageSections.CreateCat}&type=${type}`;
-    if (id) link += `&parent=${id.replace(/\s/g, "-")}`;
+    let link = `/controller?pg=${Pages.Categories}&sec=${PageSections.CreateCat}`;
+    if (id) link += id ? `&parent=${id.replace(/\s/g, "-")}` : "";
     navigate(link, { replace: false });
   };
 
   const onEdit = (id: string) => {
-    const cat = categories.find(({ name }) => name === id);
     navigate(
       `/controller?pg=${Pages.Categories}&sec=${
         PageSections.UpdateCat
-      }&cat_id=${id.replace(/\s/g, "-")}&type=${cat?.type}`,
+      }&cat_id=${id.replace(/\s/g, "-")}`,
       { replace: false }
     );
   };
@@ -96,14 +87,14 @@ function CategoryListing() {
       ): ITreeNode[] {
         return categories
           .filter((cat) => cat.parent === parent)
-          .map(({ name, type }) => {
+          .map(({ name }) => {
             height += 55;
             return {
               name,
               id: name,
               level,
-              moveable: type !== CategoryType.SuperOrd,
-              appendable: type !== CategoryType.SubOrd,
+              moveable: true,
+              appendable: true,
               children: pushToTree(name, level + 1),
             };
           });
@@ -133,7 +124,7 @@ function CategoryListing() {
             value="ADD NEW CATEGORY"
             type="button"
             className={Styles.all_cat_button}
-            link={`/controller?pg=${Pages.Categories}&sec=${PageSections.CreateCat}&type=${CategoryType.SuperOrd}`}
+            link={`/controller?pg=${Pages.Categories}&sec=${PageSections.CreateCat}`}
           />
         </div>
       </div>

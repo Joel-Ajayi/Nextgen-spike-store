@@ -104,6 +104,15 @@ function Tree({
                           className={styles.add_icon}
                         />
                       )}
+                      {!!moveNode &&
+                        moveNode?.id !== node.data.id &&
+                        node.data.appendable &&
+                        !!onMove && (
+                          <input
+                            type="checkbox"
+                            onChange={() => onMoveFunc(node.data.id)}
+                          />
+                        )}
                       {node.depth !== 0 && (
                         <>
                           {node.data.appendable && !moveNode && (
@@ -118,15 +127,7 @@ function Tree({
                               className={styles.edit_icon}
                             />
                           )}
-                          {!!moveNode &&
-                            moveNode?.level - 1 === node.data.level &&
-                            node.data.appendable &&
-                            !!onMove && (
-                              <input
-                                type="checkbox"
-                                onChange={() => onMoveFunc(node.data.id)}
-                              />
-                            )}
+
                           {node.data.moveable && !moveNode && (
                             <MoveIcon
                               onClick={() => initMove(node.data)}

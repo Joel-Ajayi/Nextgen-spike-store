@@ -40,12 +40,6 @@ enum CatFilterType {
   Range
 }
 
-enum CategoryType {
-  SuperOrd
-  Basic
-  SubOrd
-}
-
 model User {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
   email         String    @unique
@@ -66,19 +60,19 @@ model User {
 }
 
 model Category {
-  id          String       @id @default(auto()) @map("_id") @db.ObjectId
-  name        String       @unique
+  id          String      @id @default(auto()) @map("_id") @db.ObjectId
+  name        String      @unique
   description String?
-  parentId    String?      @db.ObjectId
-  parent      Category?    @relation("Category", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  children    Category[]   @relation("Category")
-  type        CategoryType
-  filterIds   String[]     @db.ObjectId
+  parentId    String?     @db.ObjectId
+  parent      Category?   @relation("Category", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children    Category[]  @relation("Category")
+  lvl        Int         @default(1)
+  filterIds   String[]    @db.ObjectId
   filters     CatFilter[]
   image       String?
   banners     String[]
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 }
 
 model CatFilter {
