@@ -72,12 +72,19 @@ function CreateCategory({
         if ((cat as IMessage)?.statusCode === 404) {
           setStatusCode((cat as IMessage)?.statusCode as number);
         } else {
-          const image = await categoryReq.getImageFiles(
-            (cat as Category).image as any
-          );
-          const banners = await categoryReq.getImageFiles(
-            (cat as Category).banners as any
-          );
+          let image: IFile[] = [];
+          if (!!(cat as Category).image.length) {
+            image = await categoryReq.getImageFiles(
+              (cat as Category).image as any
+            );
+          }
+
+          let banners: IFile[] = [];
+          if ((cat as Category).banners.length > 0) {
+            banners = await categoryReq.getImageFiles(
+              (cat as Category).banners as any
+            );
+          }
           setForm({ ...(cat as Category), image, banners });
         }
         setIsLoading(false);
@@ -223,16 +230,12 @@ function CreateCategory({
                 <div>
                   <form
                     className={`${
-                      form.type === CategoryType.Basic
-                        ? Styles.grid_display
-                        : ""
+                      type === CategoryType.Basic ? Styles.grid_display : ""
                     }`}
                   >
                     <section
                       className={`${
-                        form.type !== CategoryType.Basic
-                          ? Styles.grid_display
-                          : ""
+                        type !== CategoryType.Basic ? Styles.grid_display : ""
                       }`}
                     >
                       <section className={Styles.section}>

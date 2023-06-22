@@ -69,6 +69,11 @@ export const GetCategory = queryField("GetCategory", {
       });
     }
 
-    return { ...category, parent: category?.parent?.name };
+    return {
+      ...category,
+      parent: category?.parent?.name,
+      description: category.description || "",
+      image: category.image || "",
+    };
   },
 });

@@ -140,8 +140,8 @@ class Validator {
       await string()
         .required("Name Field is empty")
         .min(2, "Name should have more than 2 characters")
-        .matches(/^[a-zA-Z0-9\s]*$/, "Special characters not allowed")
-        .max(12, "Name should have not more than 12 characters")
+        .matches(/^[a-zA-Z0-9'\s]*$/, "Special characters not allowed")
+        .max(18, "Name should have not more than 18 characters")
         .validate(val);
       return "";
     } catch (error) {
@@ -152,7 +152,6 @@ class Validator {
   public async catDesc(val: string) {
     try {
       await string()
-        .required("Description Field is empty")
         .max(110, "Description should have not more than 110 characters")
         .validate(val);
       return "";

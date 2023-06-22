@@ -68,14 +68,14 @@ model User {
 model Category {
   id          String       @id @default(auto()) @map("_id") @db.ObjectId
   name        String       @unique
-  description String
+  description String?
   parentId    String?      @db.ObjectId
   parent      Category?    @relation("Category", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   children    Category[]   @relation("Category")
   type        CategoryType
   filterIds   String[]     @db.ObjectId
   filters     CatFilter[]
-  image       String
+  image       String?
   banners     String[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt

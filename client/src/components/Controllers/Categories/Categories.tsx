@@ -12,8 +12,8 @@ function Categories() {
   const navigate = useNavigate();
   const sec = params.get("sec");
   const type = params.get("type") as CategoryType;
-  const cat_id = params.get("cat_id");
-  const parent = params.get("parent") || "";
+  const cat_id = (params.get("cat_id") || "").replace(/-/g, " ");
+  const parent = (params.get("parent") || "").replace(/-/g, " ");
 
   const currentPage = useMemo(() => {
     switch (sec) {

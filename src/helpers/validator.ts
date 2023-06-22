@@ -306,11 +306,12 @@ class Validator {
       name: string()
         .required("Name Field is empty")
         .min(2, "Name should have more than 2 characters")
-        .matches(/^[a-zA-Z0-9\s]*$/, "Special characters not allowed")
-        .max(12, "Name should have not more than 12 characters"),
-      description: string()
-        .required("Description Field is empty")
-        .max(110, "Description should have not more than 110 characters"),
+        .matches(/^[a-zA-Z0-9'\s]*$/, "Special characters not allowed")
+        .max(18, "Name should have not more than 18 characters"),
+      description: string().max(
+        110,
+        "Description should have not more than 110 characters"
+      ),
       image: mixed().nullable(),
       banners: array().nullable().of(mixed()),
       filters: array(

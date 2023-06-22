@@ -195,7 +195,7 @@ export const UpdateCategory = mutationField("UpdateCategory", {
           1,
           0,
           "image",
-          [addedCat.image]
+          !!addedCat?.image ? [addedCat.image] : []
         )
       )[0] || "";
     const bannerLinks = await validator.files(

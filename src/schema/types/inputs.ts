@@ -34,7 +34,7 @@ export const CategoryInput = inputObjectType({
   definition(t) {
     t.nonNull.string("name");
     t.string("parent");
-    t.nonNull.string("description");
+    t.string("description");
     t.nullable.upload("image");
     t.nonNull.list.nonNull.upload("banners");
     t.field("filters", {
@@ -61,7 +61,7 @@ export const CategoryUpdateInput = inputObjectType({
   definition(t) {
     t.nonNull.string("id");
     t.nonNull.string("name");
-    t.nonNull.string("description");
+    t.string("description");
     t.nullable.upload("image");
     t.nonNull.list.nonNull.upload("banners");
     t.field("filters", {

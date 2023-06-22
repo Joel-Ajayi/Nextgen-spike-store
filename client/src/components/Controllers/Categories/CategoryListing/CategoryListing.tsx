@@ -65,21 +65,23 @@ function CategoryListing() {
     }
 
     let link = `/controller?pg=${Pages.Categories}&sec=${PageSections.CreateCat}&type=${type}`;
-    if (id) link += `&parent=${id}`;
+    if (id) link += `&parent=${id.replace(/\s/g, "-")}`;
     navigate(link, { replace: false });
   };
 
   const onEdit = (id: string) => {
     const cat = categories.find(({ name }) => name === id);
     navigate(
-      `/controller?pg=${Pages.Categories}&sec=${PageSections.UpdateCat}&cat_id=${id}&type=${cat?.type}`,
+      `/controller?pg=${Pages.Categories}&sec=${
+        PageSections.UpdateCat
+      }&cat_id=${id.replace(/\s/g, "-")}&type=${cat?.type}`,
       { replace: false }
     );
   };
 
   const tree = useMemo(() => {
     if (isLoading) return null;
-    const width = window?.innerWidth || 500;
+    const width = window?.innerWidth > 500 ? window?.innerWidth - 50 : 500;
     let height = 100;
 
     const rawTree: ITreeNode = {
@@ -113,7 +115,7 @@ function CategoryListing() {
         rawTree={rawTree}
         height={height}
         width={width}
-        nodeWidth={110}
+        nodeWidth={115}
         nodeHeight={30}
         onAppend={onAppend}
         onMove={onMove}

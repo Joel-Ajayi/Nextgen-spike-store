@@ -42,7 +42,7 @@ input CategoryFilterUpdateInput {
 
 input CategoryInput {
   banners: [Upload!]!
-  description: String!
+  description: String
   filters: [CategoryFilterInput!]!
   image: Upload
   name: String!
@@ -68,7 +68,7 @@ type CategoryObj {
 
 input CategoryUpdateInput {
   banners: [Upload!]!
-  description: String!
+  description: String
   filters: [CategoryFilterUpdateInput!]!
   id: String!
   image: Upload

@@ -135,7 +135,7 @@ class CategoryReq {
 
     try {
       const res = (await makeRequest(body)).GetCategory;
-      return { ...res, image: [res.image] } as any;
+      return { ...res, image: res.image ? [res.image] : [] } as any;
     } catch (err) {
       return {
         msg: (err as any)?.message,

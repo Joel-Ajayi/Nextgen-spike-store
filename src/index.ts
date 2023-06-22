@@ -30,12 +30,7 @@ declare module "express-session" {
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
   app.use(cookieParser());
-  app.use(
-    graphqlUpload({
-      maxFileSize: CONST.files.vdSize,
-      maxFiles: 4,
-    })
-  );
+  app.use(graphqlUpload({ maxFileSize: CONST.files.vdSize, maxFiles: 4 }));
   if (NODE_ENV !== "production") {
     app.use(morgan("dev"));
   }
