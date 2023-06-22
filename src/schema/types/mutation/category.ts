@@ -179,7 +179,6 @@ export const UpdateCategory = mutationField("UpdateCategory", {
           !!data?.image ? [data?.image] : [],
           1,
           0,
-          "image",
           !!addedCat?.image ? [addedCat.image] : []
         )
       )[0] || "";
@@ -187,7 +186,6 @@ export const UpdateCategory = mutationField("UpdateCategory", {
       data?.banners,
       3,
       0,
-      "image",
       addedCat.banners
     );
 

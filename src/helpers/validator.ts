@@ -88,60 +88,10 @@ class Validator {
     return { filename, stream: createReadStream, b64 };
   }
 
-  private async video(
-    vd: Promise<FileUpload>,
-    b64s: string[],
-    prevUploadedB64s: { filePath: string; b64: string }[] = []
-  ) {
-    const maxSize = CONST.files.vdSize;
-    const { mimetype, createReadStream, filename } = await vd;
-    const rvBs64Type = (str: string) => str.replace(/^data:(.*,)?/, "");
-
-    const types = CONST.files.mimeType.supportedVd;
-    if (!types.includes(mimetype)) {
-      throw new GraphQLError(CONST.errors.files.inCorrectVideoFormat, {
-        extensions: { statusCode: 400 },
-      });
-    }
-
-    const chunks: any = [];
-    const stream = createReadStream();
-    for await (const chunk of stream) {
-      chunks.push(chunk);
-    }
-
-    const buffer = Buffer.concat(chunks);
-    const b64 = rvBs64Type(buffer.toString("base64"));
-    if (buffer.byteLength > maxSize) {
-      throw new GraphQLError(
-        `${CONST.errors.files.exceededMaxSize} ${(
-          maxSize /
-          (1024 * 1024)
-        ).toFixed(0)}mb`,
-        {
-          extensions: { statusCode: 400 },
-        }
-      );
-    }
-
-    const duplicateFilePath = prevUploadedB64s.find(
-      (upload) => upload.b64 === b64
-    );
-    if (!!duplicateFilePath) return duplicateFilePath;
-
-    if (b64s.includes(b64)) {
-      throw new GraphQLError(CONST.errors.files.duplicate, {
-        extensions: { statusCode: 400 },
-      });
-    }
-    return { filename, b64, stream: createReadStream };
-  }
-
   public async files(
     files: Promise<FileUpload>[],
     maxNum: number,
     minNum: number,
-    type: "video" | "image" = "image",
     prevFiles: string[] = []
   ) {
     if (files.length < minNum) {
@@ -211,8 +161,7 @@ class Validator {
         });
 
         const comparableB64s = b64s.map(({ b64 }) => b64 || "");
-        const valifationFunc =
-          type !== "video" ? await this.image : await this.video;
+        const valifationFunc = await this.image;
         const b64 = await valifationFunc(file, comparableB64s, prevB64s);
         if ((b64 as any)?.filePath) {
           prevB64s = prevB64s.filter((prev) => prev.b64 !== b64.b64);
@@ -231,7 +180,7 @@ class Validator {
     const filePaths = await Promise.all(
       b64s.map(async (item) => {
         if (item.filePath) return item.filePath;
-        const basePath = type === "video" ? "uploads/vd/" : "uploads/img/";
+        const basePath = "uploads/img/";
         const { ext } = path.parse(item.filename as string);
         const filePath = `${basePath}${nanoid()}${ext}`;
         const fileStream = await fs.createWriteStream(

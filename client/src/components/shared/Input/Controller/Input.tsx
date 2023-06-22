@@ -1,10 +1,4 @@
-import React, {
-  CSSProperties,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { CSSProperties, useEffect, useRef, useState } from "react";
 import Styles from "./input.module.scss";
 import { ReactComponent as CaretIcon } from "./../../../../images/icons/caret.svg";
 import { ReactComponent as AddIcon } from "./../../../../images/icons/add.svg";
@@ -12,7 +6,6 @@ import { ReactComponent as DownloadIcon } from "./../../../../images/icons/downl
 
 import uniqid from "uniqid";
 import { CONSTS } from "../../../../const";
-import filesHelper from "../../../../helpers/files";
 import { IFile } from "../../../../types";
 
 type InputProps = {
@@ -63,7 +56,6 @@ function Input({
   multipleFiles = false,
   options,
   span = false,
-  changeOnMount = false,
 }: InputProps) {
   const [error, setError] = useState("");
   const [showOptions, setShowOptions] = useState(false);
@@ -75,7 +67,7 @@ function Input({
   const inputRef = useRef<any>(null);
 
   useEffect(() => {
-    if (isMultiInput || type === "image" || type === "video") {
+    if (isMultiInput || type === "image") {
       setInputs(defaultValues);
       if ((defaultValues[0] as IFile)?.file) {
         handleChange(defaultValues.map((file) => (file as any).file));
@@ -112,7 +104,7 @@ function Input({
   ) => {
     if (onChange) {
       let error: string | void = "";
-      if (type === "image" || type === "video") {
+      if (type === "image") {
         const files = (value as File[]).map(
           (file) =>
             ({ file, b64: window.URL.createObjectURL(file as File) } as any)
@@ -169,7 +161,7 @@ function Input({
 
   const removeFromInputs = async (index: number) => {
     const currentInputs = inputs.filter((_, i) => i !== index) as any[];
-    if (type === "image" || type === "video") {
+    if (type === "image") {
       const ref = inputRef.current as HTMLInputElement;
       ref.files = null;
       ref.value = "";
@@ -204,7 +196,7 @@ function Input({
         <div className={Styles.input}>
           <div style={type === "checkbox" ? { display: "flex" } : {}}>
             {/* // text/boolean input */}
-            {type !== "textarea" && type !== "image" && type !== "video" && (
+            {type !== "textarea" && type !== "image" && (
               <input
                 ref={inputRef}
                 name={name}
@@ -230,7 +222,7 @@ function Input({
               />
             )}
             {/* // files input */}
-            {(type === "image" || type === "video") && (
+            {type === "image" && (
               <div className={Styles.files_area}>
                 <DownloadIcon className={Styles.download_icon} />
                 <div>
@@ -275,7 +267,7 @@ function Input({
                     onClick={handleFocus}
                   />
                 )}
-                {!(type === "image" || type === "video") && isMultiInput && (
+                {!(type === "image") && isMultiInput && (
                   <AddIcon onClick={handleMultiItemsChange} />
                 )}
               </div>
@@ -305,44 +297,33 @@ function Input({
       {/* //error message */}
       {error && <div className={Styles.error}>{error}</div>}
       {/* // multiple added inputs */}
-      {(isMultiInput || type === "image" || type === "video") &&
-        !!inputs.length && (
-          <div
-            className={Styles.added_inputs}
-            style={asInfo ? {} : { marginTop: 5 }}
-          >
-            {inputs.map((input, index) => {
-              return (
-                <div className={Styles.added_input} key={uniqid()}>
-                  {!asInfo && (
-                    <span
-                      onClick={() => removeFromInputs(index)}
-                      className={Styles.close}
-                    >
-                      &#10006;
-                    </span>
-                  )}
-                  {type === "image" && (
-                    <img className={Styles.img} src={(input as IFile).b64} />
-                  )}
-                  {type === "video" && (
-                    <div className={Styles.video}>
-                      <video controls>
-                        <source
-                          src={(input as IFile).b64}
-                          type={(input as IFile).file.type}
-                        />
-                      </video>
-                    </div>
-                  )}
-                  {!(type === "image" || type === "video") && (
-                    <span className={Styles.item}>{input as string}</span>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
+      {(isMultiInput || type === "image") && !!inputs.length && (
+        <div
+          className={Styles.added_inputs}
+          style={asInfo ? {} : { marginTop: 5 }}
+        >
+          {inputs.map((input, index) => {
+            return (
+              <div className={Styles.added_input} key={uniqid()}>
+                {!asInfo && (
+                  <span
+                    onClick={() => removeFromInputs(index)}
+                    className={Styles.close}
+                  >
+                    &#10006;
+                  </span>
+                )}
+                {type === "image" && (
+                  <img className={Styles.img} src={(input as IFile).b64} />
+                )}
+                {!(type === "image") && (
+                  <span className={Styles.item}>{input as string}</span>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
