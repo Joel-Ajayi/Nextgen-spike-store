@@ -199,22 +199,38 @@ export const UpdateCategory = mutationField("UpdateCategory", {
     } else if (data.filters?.length) {
       let prevFilterIds = cloneDeep(addedCat.filterIds);
       await Promise.all(
-        data.filters.map(async ({ id = "", name, options, unit, type }) => {
-          let filter: CatFilter | null = null;
-          if (id) {
-            filter = await ctx.db.catFilter.update({
-              where: { id },
-              data: { name, options, unit, type, categoryId: addedCat.id },
-            });
-          } else {
-            filter = await ctx.db.catFilter.create({
-              data: { name, options, unit, type, categoryId: addedCat.id },
-            });
-          }
+        data.filters.map(
+          async ({ id = "", name, options, unit, type, isRequired }) => {
+            let filter: CatFilter | null = null;
+            if (id) {
+              filter = await ctx.db.catFilter.update({
+                where: { id },
+                data: {
+                  name,
+                  options,
+                  unit,
+                  type,
+                  categoryId: addedCat.id,
+                  isRequired,
+                },
+              });
+            } else {
+              filter = await ctx.db.catFilter.create({
+                data: {
+                  name,
+                  options,
+                  unit,
+                  type,
+                  categoryId: addedCat.id,
+                  isRequired,
+                },
+              });
+            }
 
-          filterIds.push(filter.id);
-          prevFilterIds = prevFilterIds.filter((fid) => fid !== filter?.id);
-        })
+            filterIds.push(filter.id);
+            prevFilterIds = prevFilterIds.filter((fid) => fid !== filter?.id);
+          }
+        )
       );
 
       if (prevFilterIds.length) {

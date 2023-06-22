@@ -66,6 +66,7 @@ const Filter = ({ onChange, index, data }: FilterProps) => {
     if (isValid) {
       onChange(form, index, del);
       setFormData(defaultData);
+      toggleIsEditing();
     }
   };
 

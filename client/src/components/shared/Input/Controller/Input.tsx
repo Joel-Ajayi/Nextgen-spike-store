@@ -140,6 +140,7 @@ function Input({
   };
 
   const handleOptionsChange = (opt: string, value: string) => {
+    console.log(opt);
     setShowOptions((preVal) => !preVal);
     if (inputRef.current) {
       inputRef.current.value = opt;
@@ -166,8 +167,8 @@ function Input({
     }
   };
 
-  const removeFromInputs = (index: number) => {
-    const currentInputs = inputs.filter((_, i) => i !== index);
+  const removeFromInputs = async (index: number) => {
+    const currentInputs = inputs.filter((_, i) => i !== index) as any[];
     if (type === "image" || type === "video") {
       const ref = inputRef.current as HTMLInputElement;
       ref.files = null;
@@ -175,7 +176,9 @@ function Input({
       handleChange(currentInputs as any);
       return;
     }
-    setInputs(() => currentInputs);
+    const error = onChange ? await onChange(currentInputs, name as string) : "";
+    setInputs(currentInputs);
+    setError(error || "");
   };
 
   const inputClassName = () => {

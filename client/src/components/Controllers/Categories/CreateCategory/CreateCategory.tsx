@@ -177,7 +177,7 @@ function CreateCategory({
         changeOnMount
       />
     ),
-    [form.image]
+    [form.image.length]
   );
 
   const bannerInput = useMemo(
@@ -192,7 +192,20 @@ function CreateCategory({
         changeOnMount
       />
     ),
-    [form.banners]
+    [form.banners.length]
+  );
+
+  const filters = useMemo(
+    () =>
+      form.filters.map((filter, index) => (
+        <Filter
+          key={uniqid()}
+          data={filter}
+          index={index}
+          onChange={onFilterChange}
+        />
+      )),
+    [form.filters.length]
   );
 
   return (
@@ -262,14 +275,7 @@ function CreateCategory({
                       </div>
                       <div className={Styles.filter_options}>
                         <Filter index={-1} onChange={onFilterChange} />
-                        {form.filters.map((filter, index) => (
-                          <Filter
-                            key={uniqid()}
-                            data={filter}
-                            index={index}
-                            onChange={onFilterChange}
-                          />
-                        ))}
+                        {filters}
                       </div>
                     </section>
                   </form>
