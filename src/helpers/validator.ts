@@ -1,14 +1,13 @@
 import fs from "fs";
 import path from "path";
-import axios from "axios";
 import { nanoid } from "nanoid";
-import { CatFilterType } from "@prisma/client";
+import { CatFilterType, PAYMENTMETHOD } from "@prisma/client";
 import { GraphQLError } from "graphql";
 import { FileUpload } from "graphql-upload/Upload";
 import { Stream } from "stream";
-import { string, object, array, boolean, mixed } from "yup";
+import { string, object, array, boolean, mixed, number, date } from "yup";
 import { CategoryForm } from "../@types/Category";
-import { CONST } from "../@types/conts";
+import conts from "../@types/conts";
 
 class Validator {
   private email() {
@@ -45,13 +44,13 @@ class Validator {
     b64s: string[],
     prevUploadedB64s: { filePath: string; b64: string }[] = []
   ) {
-    const maxSize = CONST.files.imgSize;
+    const maxSize = conts.files.imgSize;
     const { mimetype, createReadStream, filename } = await img;
     const rvBs64Type = (str: string) => str.replace(/^data:(.*,)?/, "");
 
-    const types = CONST.files.mimeType.supportedImg;
+    const types = conts.files.mimeType.supportedImg;
     if (!types.includes(mimetype)) {
-      throw new GraphQLError(CONST.errors.files.inCorrectImageFormat, {
+      throw new GraphQLError(conts.errors.files.inCorrectImageFormat, {
         extensions: { statusCode: 400 },
       });
     }
@@ -66,8 +65,8 @@ class Validator {
     const b64 = rvBs64Type(buffer.toString("base64"));
     if (buffer.byteLength > maxSize) {
       throw new GraphQLError(
-        `${CONST.errors.files.exceededMaxSize} ${(
-          CONST.files.imgSize / 1024
+        `${conts.errors.files.exceededMaxSize} ${(
+          conts.files.imgSize / 1024
         ).toFixed(0)}kb`,
         {
           extensions: { statusCode: 400 },
@@ -81,7 +80,7 @@ class Validator {
     if (!!duplicateFilePath) return duplicateFilePath;
 
     if (b64s.includes(b64)) {
-      throw new GraphQLError(CONST.errors.files.duplicate, {
+      throw new GraphQLError(conts.errors.files.duplicate, {
         extensions: { statusCode: 400 },
       });
     }
@@ -96,7 +95,7 @@ class Validator {
   ) {
     if (files.length < minNum) {
       throw new GraphQLError(
-        `${CONST.errors.files.leastFileUpload} ${minNum}`,
+        `${conts.errors.files.leastFileUpload} ${minNum}`,
         {
           extensions: { statusCode: 400 },
         }
@@ -105,7 +104,7 @@ class Validator {
 
     if (files.length > maxNum) {
       throw new GraphQLError(
-        `${CONST.errors.files.exceededMaxNumber} ${maxNum}`,
+        `${conts.errors.files.exceededMaxNumber} ${maxNum}`,
         {
           extensions: { statusCode: 400 },
         }
@@ -140,7 +139,7 @@ class Validator {
               .replace(/^data:(.*,)?/, "");
             prevB64s.push({ b64, filePath: link });
           } catch (error) {
-            throw new GraphQLError(CONST.errors.server, {
+            throw new GraphQLError(conts.errors.server, {
               extensions: { statusCode: 400 },
             });
           }
@@ -226,7 +225,7 @@ class Validator {
         })
       );
     } catch (error) {
-      throw new GraphQLError(CONST.errors.server, {
+      throw new GraphQLError(conts.errors.server, {
         extensions: { statusCode: 400 },
       });
     }
@@ -272,7 +271,7 @@ class Validator {
               }
             : filterObj
         )
-      ).max(5, "Filters should not be more than 5"),
+      ).max(4, "Filters should not be more than 5"),
     };
 
     try {
@@ -296,6 +295,72 @@ class Validator {
         name: string().required("Category Name is required"),
         parent: string(),
       }).validate({ name, parent });
+    } catch (error) {
+      throw new GraphQLError((error as any).message, {
+        extensions: {
+          statusCode: 400,
+        },
+      });
+    }
+  }
+
+  public async product(data: any) {
+    try {
+      const warranty = object({
+        duration: number().required("Warranty duration is required"),
+        covered: string().required("Damages warranty covers is required"),
+      });
+
+      const filter = object({
+        optionId: string().required("Filter option id is required"),
+        values: array(string())
+          .min(1, "Option values are required")
+          .required("Option values are required"),
+      });
+
+      await object({
+        name: string()
+          .required("Product name is required")
+          .min(10, "Product name should have more than 10 characters")
+          .max(20, "Product name should not exceed 30 characters"),
+        cId: number().required("Product category is required"),
+        description: string()
+          .required("Description is required")
+          .min(15, "Description should have more than 15 characters")
+          .max(40, "Description should not exceed 30 characters"),
+        price: number()
+          .min(0, "Price value is not allowed")
+          .required("Product price is required"),
+        images: array()
+          .required("No image was uploaded")
+          .min(2, "More than 1 image should be uploaded")
+          .max(4, "Not more than 4 images should be uploaded")
+          .of(mixed()),
+        count: number().required("Product count in stock is required"),
+        payment: array()
+          .of(
+            string().oneOf(Object.values(PAYMENTMETHOD), "Invalid payment type")
+          )
+          .min(1, "Payment method is required")
+          .max(2, "Only two payment methods are allowed")
+          .required("Payment method is required"),
+        discount: number().nullable(),
+        brand: string().required("Product brand is required"),
+        colors: array()
+          .of(string().required("Please provide color of product"))
+          .min(1, "Please provide color of product")
+          .max(4, "Not more than 4 colors should be added")
+          .required("Please provide color of product"),
+        mfgCountry: string().required("Production country is required"),
+        mfgDate: string()
+          .test("Date", "Date format should be in MM-YYYY", (val) => {
+            const rg = /^[1-12]{2}-^(1|2)[1-9]{3}$/;
+            return rg.test(val as string);
+          })
+          .required("Production date is required"),
+        warranty,
+        filters: array(filter).max(5, "Filters should not be more than 5"),
+      }).validate(data);
     } catch (error) {
       throw new GraphQLError((error as any).message, {
         extensions: {

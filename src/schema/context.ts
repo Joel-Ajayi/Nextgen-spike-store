@@ -1,8 +1,8 @@
 import { PrismaClient, User } from "@prisma/client";
 import { ExpressContext } from "apollo-server-express";
 import { Request, Response } from "express";
-import { CONST } from "../@types/conts";
 import { prisma as db } from "../db/prisma/connect";
+import consts from "../@types/conts";
 
 export type Context = {
   user: User;
@@ -34,7 +34,7 @@ export async function appContext({
       })) as User;
     }
   } catch (error) {
-    throw new Error(CONST.errors.server);
+    throw new Error(consts.errors.server);
   }
 
   return { req, res, db, user };
