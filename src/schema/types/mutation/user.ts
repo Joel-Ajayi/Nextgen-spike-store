@@ -4,7 +4,7 @@ import {
   forgotPasswordEmail,
   userVerificationEmail,
 } from "../../../emails/verification";
-import { CONST } from "../../../@types/conts";
+import consts from "../../../@types/conts";
 import { MessageObj } from "../objects";
 import {
   SetTokenInput,
@@ -49,9 +49,9 @@ export const SignUp = mutationField("SignUp", {
       });
       // set session cookie
       ctx.req.session.user = user.id;
-      return { message: CONST.messages.signedUp };
+      return { message: consts.messages.signedUp };
     } catch (error) {
-      return { message: CONST.errors.server };
+      return { message: consts.errors.server };
     }
   },
 });
@@ -84,7 +84,7 @@ export const VerifyAccount = mutationField("VerifyAccount", {
         `${ctx.req.headers.host}/verify_account?token=${token}`
       );
     }
-    return { message: CONST.messages.forgotPwdEmail };
+    return { message: consts.messages.forgotPwdEmail };
   },
 });
 
@@ -114,7 +114,7 @@ export const ForgotPassword = mutationField("ForgotPassword", {
         `${ctx.req.headers.host}/forgot_pwd?token=${token}`
       );
     }
-    return { message: CONST.messages.forgotPwdEmail };
+    return { message: consts.messages.forgotPwdEmail };
   },
 });
 
@@ -124,7 +124,7 @@ export const VerifyToken = mutationField("VerifyToken", {
   resolve: async (_, { data }, ctx) => {
     const vToken = await verifyJWT(data?.token, EMAIL_VERIFICATION_SECRET);
     if (!vToken) {
-      throw new GraphQLError(CONST.errors.invalidToken, {
+      throw new GraphQLError(consts.errors.invalidToken, {
         extensions: {
           statusCode: 400,
         },
@@ -135,7 +135,7 @@ export const VerifyToken = mutationField("VerifyToken", {
       where: { vToken: vToken as string },
     });
     if (!user) {
-      throw new GraphQLError(CONST.errors.invalidToken, {
+      throw new GraphQLError(consts.errors.invalidToken, {
         extensions: {
           statusCode: 400,
         },
@@ -143,7 +143,7 @@ export const VerifyToken = mutationField("VerifyToken", {
     }
 
     if (user.verified) {
-      throw new GraphQLError(CONST.errors.invalidToken, {
+      throw new GraphQLError(consts.errors.invalidToken, {
         extensions: {
           statusCode: 400,
         },
@@ -154,7 +154,7 @@ export const VerifyToken = mutationField("VerifyToken", {
       where: { id: user.id },
       data: { vToken: null, verified: true },
     });
-    return { message: CONST.messages.emailVerified };
+    return { message: consts.messages.emailVerified };
   },
 });
 
@@ -164,7 +164,7 @@ export const VerifyPasswordToken = mutationField("VerifyPasswordToken", {
   resolve: async (_, { data }, ctx) => {
     const pwdToken = await verifyJWT(data?.token, PASSWORD_VERIFICATION_SECRET);
     if (!pwdToken) {
-      throw new GraphQLError(CONST.errors.invalidToken, {
+      throw new GraphQLError(consts.errors.invalidToken, {
         extensions: {
           statusCode: 400,
         },
@@ -175,7 +175,7 @@ export const VerifyPasswordToken = mutationField("VerifyPasswordToken", {
       where: { pwdToken: pwdToken as string },
     });
     if (!user) {
-      throw new GraphQLError(CONST.errors.invalidToken, {
+      throw new GraphQLError(consts.errors.invalidToken, {
         extensions: {
           statusCode: 400,
         },
@@ -186,7 +186,7 @@ export const VerifyPasswordToken = mutationField("VerifyPasswordToken", {
       where: { id: user.id },
       data: { pwdToken: null },
     });
-    return { message: CONST.messages.emailVerified };
+    return { message: consts.messages.emailVerified };
   },
 });
 
@@ -204,7 +204,7 @@ export const SignIn = mutationField("SignIn", {
     );
     // set session cookie
     ctx.req.session.user = user.id;
-    return { message: CONST.messages.signedIn };
+    return { message: consts.messages.signedIn };
   },
 });
 
@@ -216,9 +216,9 @@ export const SignOut = mutationField("SignOut", {
         (NODE_ENV === "production" ? SESSION_NAME : SESSION_NAME_DEV) as string
       );
       ctx.req.session.destroy((err: any) => {
-        if (err) throw new Error(CONST.errors.server);
+        if (err) throw new Error(consts.errors.server);
       });
     }
-    return { message: CONST.messages.signedOut };
+    return { message: consts.messages.signedOut };
   },
 });
