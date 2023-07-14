@@ -1,4 +1,4 @@
-export const CONST = {
+const consts = {
   errors: {
     database: "An error occured in the data base",
     signIn: "Please login",
@@ -19,9 +19,15 @@ export const CONST = {
       alreadyExist: "File already exist",
       leastFileUpload: "Number of files should be at least",
     },
+    product: {
+      prdNotFound: "Product not found",
+    },
     categories: {
       catNotFound: "Category not found",
     },
+  },
+  sku: {
+    price: 50,
   },
   files: {
     mimeType: {
@@ -36,6 +42,10 @@ export const CONST = {
     },
     vdSize: 5 * 1024 * 1024,
     imgSize: 80 * 1024,
+    product: {
+      min: 2,
+      max: 4,
+    },
   },
   request: {
     methods: ["POST", "GET"],
@@ -52,3 +62,5 @@ export const CONST = {
     passwordChange: "Password has been Changed. Please SignIn",
   },
 };
+
+export default consts;

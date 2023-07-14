@@ -3,8 +3,8 @@ import { ApolloServer } from "apollo-server-express";
 import { userSchema } from "./schema/index";
 import "dotenv/config";
 import { appContext } from "./schema/context";
-import { CONST } from "./@types/conts";
 import { NexusGraphQLSchema } from "nexus/dist/core";
+import consts from "./@types/conts";
 
 export default async (app: Application) => {
   await setUpGraphql(app, userSchema, "/api");
@@ -17,9 +17,11 @@ const setUpGraphql = async (
 ) => {
   const cors = {
     origin:
-      process.env.NODE_ENV === "production" ? undefined : CONST.request.origins,
+      process.env.NODE_ENV === "production"
+        ? undefined
+        : consts.request.origins,
     credentials: process.env.NODE_ENV !== "production",
-    methods: CONST.request.methods,
+    methods: consts.request.methods,
   };
 
   // graphql files
