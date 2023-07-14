@@ -37,9 +37,8 @@ export const CategoryInput = inputObjectType({
     t.string("description");
     t.nullable.upload("image");
     t.nonNull.list.nonNull.upload("banners");
-    t.field("filters", {
-      type: nonNull(list(nonNull(CategoryFilterInput))),
-    });
+    t.nonNull.boolean("hasWarranty");
+    t.field("filters", { type: nonNull(list(nonNull(CategoryFilterInput))) });
   },
 });
 
@@ -47,9 +46,7 @@ export const CategoryFilterInput = inputObjectType({
   name: "CategoryFilterInput",
   definition(t) {
     t.nonNull.string("name"),
-      t.nonNull.field("type", {
-        type: CatFilterTypeEnum,
-      }),
+      t.nonNull.field("type", { type: CatFilterTypeEnum }),
       t.nullable.string("unit"),
       t.nonNull.list.nonNull.string("options"),
       t.nonNull.boolean("isRequired");
@@ -63,10 +60,9 @@ export const CategoryUpdateInput = inputObjectType({
     t.nonNull.string("name");
     t.string("description");
     t.nullable.upload("image");
+    t.nonNull.boolean("hasWarranty");
     t.nonNull.list.nonNull.upload("banners");
-    t.field("filters", {
-      type: nonNull(list(nonNull(CategoryFilterUpdateInput))),
-    });
+    t.field("filters", { type: nonNull(list(CategoryFilterInput)) });
   },
 });
 
@@ -75,9 +71,7 @@ export const CategoryFilterUpdateInput = inputObjectType({
   definition(t) {
     t.nonNull.string("id");
     t.nonNull.string("name");
-    t.nonNull.field("type", {
-      type: CatFilterTypeEnum,
-    });
+    t.nonNull.field("type", { type: CatFilterTypeEnum });
     t.nullable.string("unit");
     t.nonNull.list.nonNull.string("options");
     t.nonNull.boolean("isRequired");

@@ -20,8 +20,8 @@ export const UserObj = objectType({
   },
 });
 
-export const CategoryObj = objectType({
-  name: "CategoryObj",
+export const Category = objectType({
+  name: "Category",
   definition(t) {
     t.nonNull.string("id"), t.nonNull.string("name"), t.nonNull.int("lvl");
     t.string("parent"),
@@ -29,20 +29,20 @@ export const CategoryObj = objectType({
       t.nonNull.string("image"),
       t.nonNull.list.nonNull.string("banners"),
       t.field("filters", {
-        type: nonNull(list(nonNull(CategoryFilterObj))),
+        type: nonNull(list(nonNull(CategoryFilter))),
       });
   },
 });
 
-export const CategoryMiniObj = objectType({
-  name: "CategoryMiniObj",
+export const CategoryMini = objectType({
+  name: "CategoryMini",
   definition(t) {
     t.nonNull.string("name"), t.nonNull.int("lvl"), t.nonNull.string("parent");
   },
 });
 
-export const CategoryFilterObj = objectType({
-  name: "CategoryFilterObj",
+export const CategoryFilter = objectType({
+  name: "CategoryFilter",
   definition(t) {
     t.nonNull.string("id"),
       t.nonNull.string("name"),

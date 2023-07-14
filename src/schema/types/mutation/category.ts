@@ -1,15 +1,14 @@
 import { mutationField, nonNull, stringArg } from "nexus";
 import middleware from "../../../middlewares/middlewares";
-import { CategoryMiniObj } from "../objects";
+import { CategoryMini } from "../objects";
 import { validator } from "../../../helpers/validator";
 import { GraphQLError } from "graphql";
 import { CategoryInput, CategoryUpdateInput } from "../inputs";
-import { cloneDeep } from "lodash";
-import { CONST } from "../../../@types/conts";
-import { CatFilter } from "@prisma/client";
+import consts from "../../../@types/conts";
+import { Category, CategoryFilter } from "@prisma/client";
 
 export const CreateCategory = mutationField("CreateCategory", {
-  type: CategoryMiniObj,
+  type: CategoryMini,
   args: { data: CategoryInput },
   resolve: async (_, { data }, ctx) => {
     // check if logged_in
@@ -54,25 +53,24 @@ export const CreateCategory = mutationField("CreateCategory", {
 
     // validate image/
     const imgLink =
-      (await validator.files(!!data?.image ? [data?.image] : [], 1, 0))[0] ||
-      "";
-    const bannerLinks = await validator.files(data?.banners as any, 3, 0);
+      (await validator.files(!!data?.image ? [data.image] : [], 1, 0))[0] || "";
+    const bannerLinks = await validator.files(data.banners as any, 3, 0);
 
     let newCat: {
-      name: string;
-      id: string;
-      lvl: number;
       parent: { name: string };
-    } = null as any;
+    } & Category = null as any;
 
+    const catCount = await ctx.db.category.count();
     try {
       // add category
       newCat = (await ctx.db.category.create({
         data: {
           name: data.name,
           lvl: !!parent ? parent.lvl + 1 : 1,
+          cId: catCount + 1,
           description: data.description,
           image: imgLink,
+          hasWarranty: data.hasWarranty,
           banners: bannerLinks,
           parentId: !parent?.id ? undefined : parent.id,
         },
@@ -88,44 +86,31 @@ export const CreateCategory = mutationField("CreateCategory", {
         },
       })) as any;
     } catch (error) {
-      throw new GraphQLError(CONST.errors.server, {
+      throw new GraphQLError(consts.errors.server, {
         extensions: { statusCode: 500 },
-      });
-    }
-
-    if (!newCat) {
-      throw new GraphQLError("Category not found", {
-        extensions: { statusCode: 404 },
       });
     }
 
     if (data.filters.length) {
       // add category filters
-      const filterIds: string[] = [];
       if (data.filters?.length) {
         await Promise.all(
           data.filters.map(async ({ name, options, unit, type }) => {
-            const filter = await ctx.db.catFilter.create({
+            await ctx.db.categoryFilter.create({
               data: { name, options, unit, type, categoryId: newCat.id },
             });
-            filterIds.push(filter.id);
           })
         );
       }
-
-      await ctx.db.category.update({
-        where: { id: newCat.id },
-        data: { filterIds },
-      });
     }
 
-    const { id, ...rest } = newCat;
+    const { id, cId, ...rest } = newCat;
     return { ...rest, parent: newCat.parent?.name || "" };
   },
 });
 
 export const UpdateCategory = mutationField("UpdateCategory", {
-  type: CategoryMiniObj,
+  type: CategoryMini,
   args: { data: CategoryUpdateInput },
   resolve: async (_, { data }, ctx) => {
     // check if logged_in
@@ -148,10 +133,9 @@ export const UpdateCategory = mutationField("UpdateCategory", {
         lvl: true,
         image: true,
         banners: true,
-        filterIds: true,
+        filters: { select: { id: true } },
       },
     });
-
     if (!addedCat) {
       throw new GraphQLError("Category not found", {
         extensions: { statusCode: 404 },
@@ -189,19 +173,20 @@ export const UpdateCategory = mutationField("UpdateCategory", {
       addedCat.banners
     );
 
-    let filterIds: string[] = [];
-    if (addedCat.filterIds.length && !data.filters?.length) {
-      await ctx.db.catFilter.deleteMany({
-        where: { id: { in: addedCat.filterIds } },
+    // Get previous filter ids
+    let prevFilterIds = addedCat.filters.map(({ id }) => id);
+    // delete all filters
+    if (prevFilterIds.length && !data.filters?.length) {
+      await ctx.db.categoryFilter.deleteMany({
+        where: { id: { in: prevFilterIds } },
       });
     } else if (data.filters?.length) {
-      let prevFilterIds = cloneDeep(addedCat.filterIds);
       await Promise.all(
-        data.filters.map(
+        (data.filters as CategoryFilter[]).map(
           async ({ id = "", name, options, unit, type, isRequired }) => {
-            let filter: CatFilter | null = null;
+            let filter: CategoryFilter | null = null;
             if (id) {
-              filter = await ctx.db.catFilter.update({
+              filter = await ctx.db.categoryFilter.update({
                 where: { id },
                 data: {
                   name,
@@ -213,7 +198,7 @@ export const UpdateCategory = mutationField("UpdateCategory", {
                 },
               });
             } else {
-              filter = await ctx.db.catFilter.create({
+              filter = await ctx.db.categoryFilter.create({
                 data: {
                   name,
                   options,
@@ -225,27 +210,29 @@ export const UpdateCategory = mutationField("UpdateCategory", {
               });
             }
 
-            filterIds.push(filter.id);
             prevFilterIds = prevFilterIds.filter((fid) => fid !== filter?.id);
           }
         )
       );
 
+      // delete filter not modified
       if (prevFilterIds.length) {
-        await ctx.db.catFilter.deleteMany({
+        await ctx.db.categoryFilter.deleteMany({
           where: { id: { in: prevFilterIds } },
         });
       }
     }
 
+    const catCount = await ctx.db.category.count();
     const cat = await ctx.db.category.update({
       where: { id: addedCat.id },
       data: {
         name: data.name,
+        cId: catCount + 1,
         description: data.description,
         image: imgLink,
         banners: bannerLinks,
-        filterIds,
+        hasWarranty: data.hasWarranty,
       },
       select: {
         name: true,
@@ -268,7 +255,7 @@ export const UpdateCategory = mutationField("UpdateCategory", {
 });
 
 export const UpdateCategoryParent = mutationField("UpdateCategoryParent", {
-  type: CategoryMiniObj,
+  type: CategoryMini,
   args: { name: nonNull(stringArg()), parent: nonNull(stringArg()) },
   resolve: async (_, { name, parent }, ctx) => {
     // check if logged_in

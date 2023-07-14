@@ -1,11 +1,11 @@
 import { GraphQLError } from "graphql";
 import { list, nonNull, queryField, stringArg } from "nexus";
-import { CONST } from "../../../@types/conts";
 import middleware from "../../../middlewares/middlewares";
-import { CategoryMiniObj, CategoryObj } from "../objects";
+import { CategoryMini, Category } from "../objects";
+import consts from "../../../@types/conts";
 
 export const GetCategories = queryField("GetCategories", {
-  type: nonNull(list(nonNull(CategoryMiniObj))),
+  type: nonNull(list(nonNull(CategoryMini))),
   resolve: async (_, data, ctx) => {
     const categories = await ctx.db.category.findMany({
       select: {
@@ -28,7 +28,7 @@ export const GetCategories = queryField("GetCategories", {
 });
 
 export const GetCategory = queryField("GetCategory", {
-  type: CategoryObj,
+  type: Category,
   args: {
     name: nonNull(stringArg()),
   },
@@ -64,7 +64,7 @@ export const GetCategory = queryField("GetCategory", {
     });
 
     if (!category) {
-      throw new GraphQLError(CONST.errors.categories.catNotFound, {
+      throw new GraphQLError(consts.errors.categories.catNotFound, {
         extensions: { statusCode: 404 },
       });
     }
