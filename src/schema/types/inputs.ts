@@ -77,3 +77,39 @@ export const CategoryFilterUpdateInput = inputObjectType({
     t.nonNull.boolean("isRequired");
   },
 });
+
+export const CategoryFilterValueInput = inputObjectType({
+  name: "CategoryFilterValueInput",
+  definition(t) {
+    t.nonNull.string("optionId");
+    t.nonNull.list.nonNull.string("values");
+  },
+});
+
+export const ProductWarrantyInput = inputObjectType({
+  name: "ProductWarrantyInput",
+  definition(t) {
+    t.nonNull.int("duration");
+    t.nonNull.string("covered");
+  },
+});
+
+export const ProductInput = inputObjectType({
+  name: "ProductInput",
+  definition(t) {
+    t.nonNull.string("name");
+    t.nonNull.int("cId");
+    t.nonNull.string("description");
+    t.nonNull.int("price");
+    t.nonNull.int("count");
+    t.nonNull.string("brand");
+    t.int("discount");
+    t.nonNull.string("mfgCountry");
+    t.nonNull.string("mfgDate");
+    t.nonNull.list.nonNull.string("colors");
+    t.nonNull.list.nonNull.string("payment");
+    t.nonNull.list.nonNull.upload("images");
+    t.field("warranty", { type: ProductWarrantyInput });
+    t.field("filters", { type: list(nonNull(CategoryFilterValueInput)) });
+  },
+});

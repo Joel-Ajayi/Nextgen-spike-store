@@ -4,11 +4,22 @@
 
 enum CatFilterType {
   Num
-  Range
   Txt
 }
 
-input CategoryFilterInput {
+type Category {
+  banners: [String!]!
+  description: String!
+  filters: [CategoryFilter!]!
+  id: String!
+  image: String!
+  lvl: Int!
+  name: String!
+  parent: String
+}
+
+type CategoryFilter {
+  id: String!
   isRequired: Boolean!
   name: String!
   options: [String!]!
@@ -16,8 +27,7 @@ input CategoryFilterInput {
   unit: String
 }
 
-type CategoryFilterObj {
-  id: String!
+input CategoryFilterInput {
   isRequired: Boolean!
   name: String!
   options: [String!]!
@@ -34,36 +44,41 @@ input CategoryFilterUpdateInput {
   unit: String
 }
 
+type CategoryFilterValue {
+  id: String!
+  name: String!
+  optionId: String!
+  type: String
+  unit: String
+  values: [String!]!
+}
+
+input CategoryFilterValueInput {
+  optionId: String!
+  values: [String!]!
+}
+
 input CategoryInput {
   banners: [Upload!]!
   description: String
   filters: [CategoryFilterInput!]!
+  hasWarranty: Boolean!
   image: Upload
   name: String!
   parent: String
 }
 
-type CategoryMiniObj {
+type CategoryMini {
   lvl: Int!
   name: String!
   parent: String!
 }
 
-type CategoryObj {
-  banners: [String!]!
-  description: String!
-  filters: [CategoryFilterObj!]!
-  id: String!
-  image: String!
-  lvl: Int!
-  name: String!
-  parent: String
-}
-
 input CategoryUpdateInput {
   banners: [Upload!]!
   description: String
-  filters: [CategoryFilterUpdateInput!]!
+  filters: [CategoryFilterInput]!
+  hasWarranty: Boolean!
   id: String!
   image: Upload
   name: String!
@@ -74,21 +89,97 @@ type Message {
 }
 
 type Mutation {
-  CreateCategory(data: CategoryInput): CategoryMiniObj
+  CreateCategory(data: CategoryInput): CategoryMini
+  CreateProduct(data: ProductInput): ProductMini
   ForgotPassword(data: SetTokenInput): Message
   SignIn(data: SignInInput): Message
   SignOut: Message
   SignUp(data: SignUpInput): Message
-  UpdateCategory(data: CategoryUpdateInput): CategoryMiniObj
-  UpdateCategoryParent(name: String!, parent: String!): CategoryMiniObj
+  UpdateCategory(data: CategoryUpdateInput): CategoryMini
+  UpdateCategoryParent(name: String!, parent: String!): CategoryMini
   VerifyAccount(data: SetTokenInput): Message
   VerifyPasswordToken(data: VerificationTokenInput): Message
   VerifyToken(data: VerificationTokenInput): Message
 }
 
+type Product {
+  brand: String!
+  category: String
+  colors: [String!]!
+  description: String!
+  discount: Int!
+  filters: [CategoryFilterValue!]!
+  id: String!
+  images: [String!]!
+  mfgCountry: String!
+  mfgDate: String!
+  name: String!
+  payment: [String!]!
+  price: Int!
+  warranty: ProductWarranty
+}
+
+type ProductFilterPage {
+  brand: String!
+  category: String
+  colors: [String!]!
+  description: String!
+  discount: Int!
+  filters: [CategoryFilterValue!]!
+  id: String!
+  images: [String!]!
+  name: String!
+  numRating: Int!
+  numReviews: Int!
+  price: Int!
+  rating: Int!
+}
+
+input ProductInput {
+  brand: String!
+  cId: Int!
+  colors: [String!]!
+  count: Int!
+  description: String!
+  discount: Int
+  filters: [CategoryFilterValueInput!]
+  images: [Upload!]!
+  mfgCountry: String!
+  mfgDate: String!
+  name: String!
+  payment: [String!]!
+  price: Int!
+  warranty: ProductWarrantyInput
+}
+
+type ProductMini {
+  brand: String
+  category: String
+  discount: Int!
+  id: String!
+  images: [String!]!
+  name: String!
+  price: Int!
+  rating: Int!
+}
+
+type ProductWarranty {
+  covered: String!
+  duration: Int!
+  id: String!
+}
+
+input ProductWarrantyInput {
+  covered: String!
+  duration: Int!
+}
+
 type Query {
-  GetCategories: [CategoryMiniObj!]!
-  GetCategory(name: String!): CategoryObj
+  GetCategories: [CategoryMini!]!
+  GetCategory(name: String!): Category
+  GetFilterPageProduct(category: String!, id: String!, reqImages: Boolean!): ProductMini
+  GetProduct(category: String!, id: String!): Product
+  GetProductMini(category: String!, id: String!): ProductFilterPage
   UserQuery: User
 }
 
