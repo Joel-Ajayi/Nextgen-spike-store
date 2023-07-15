@@ -1,6 +1,5 @@
-import { string, object, array } from "yup";
+import { string } from "yup";
 import { CONSTS } from "../const";
-import { CatFilter } from "../types/category";
 
 class Validator {
   public email() {
@@ -81,9 +80,9 @@ class Validator {
 
   public async files(
     files: File[],
-    maxNum: number,
-    minNum: number,
-    type: "video" | "image"
+    type: "video" | "image",
+    minNum = 0,
+    maxNum = 1
   ) {
     try {
       if (files.length < minNum) {
@@ -119,89 +118,6 @@ class Validator {
       return "";
     } catch (error) {
       return (error as any).message;
-    }
-  }
-
-  public signInPwd() {
-    return string()
-      .required("Password is required")
-      .min(8, "Password should be 8 chars minimum")
-      .matches(
-        /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/,
-        {
-          message:
-            "password must contain at least one uppercase letter, one lowercase letter, one number and one special character",
-        }
-      );
-  }
-
-  public async catName(val: string) {
-    try {
-      await string()
-        .required("Name Field is empty")
-        .min(2, "Name should have more than 2 characters")
-        .matches(/^[a-zA-Z0-9'\s]*$/, "Special characters not allowed")
-        .max(18, "Name should have not more than 18 characters")
-        .validate(val);
-      return "";
-    } catch (error) {
-      return (error as any).message;
-    }
-  }
-
-  public async catDesc(val: string) {
-    try {
-      await string()
-        .max(110, "Description should have not more than 110 characters")
-        .validate(val);
-      return "";
-    } catch (error) {
-      return (error as any).message;
-    }
-  }
-
-  public async catFilter(val: CatFilter[]) {
-    try {
-      await array().max(5, "Filters should not be more than 5").validate(val);
-      return "";
-    } catch (error) {
-      return (error as any).message as string;
-    }
-  }
-
-  public async catFilterName(val: string) {
-    try {
-      await string()
-        .required("Name Field is empty")
-        .min(2, "Name should have more than 2 characters")
-        .max(10, "Name should have not more than 10 characters")
-        .validate(val);
-      return "";
-    } catch (error) {
-      return (error as any).message as string;
-    }
-  }
-
-  public async catFilterUnit(val: string) {
-    try {
-      await string()
-        .max(5, "Unit should have not more than 5 characters")
-        .validate(val);
-      return "";
-    } catch (error) {
-      return (error as any).message as string;
-    }
-  }
-
-  public async catFilterOptions(val: string[]) {
-    try {
-      await array()
-        .of(string().max(10, "Option should have not more than 10 characters"))
-        .max(10, "Options should not be more than 10")
-        .validate(val);
-      return "";
-    } catch (error) {
-      return (error as any).message as string;
     }
   }
 }

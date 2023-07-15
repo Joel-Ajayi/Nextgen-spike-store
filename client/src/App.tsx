@@ -51,8 +51,8 @@ function GetUser() {
 
   useEffect(() => {
     (async () => {
-      const user = await userReq.getUser();
-      if ((user as IMessage)?.type === MessageType.Error) {
+      const { user, msg } = await userReq.getUser();
+      if (msg?.type === MessageType.Error) {
         dispatch(resetUserState());
         dispatch(setNetworkError(true));
       } else {

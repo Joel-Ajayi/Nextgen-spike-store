@@ -4,11 +4,12 @@ import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import Input from "../shared/Input/Input";
 import appSlice from "../../store/appState";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import validator from "../../helpers/validators";
 import userReq from "../../requests/user";
 import { SignInForm } from "../../types/user";
 import { MessageType } from "../../types";
 import userSlice from "../../store/userState";
+import validator from "../../validators";
+import userValidator from "../../validators/user";
 
 enum SignInFieds {
   Email = "email",
@@ -48,7 +49,9 @@ function SignIn() {
   ): Promise<string | void> => {
     try {
       const valFunc =
-        name === SignInFieds.Pwd ? validator.signInPwd() : validator.email();
+        name === SignInFieds.Pwd
+          ? userValidator.signInPwd()
+          : validator.email();
       await valFunc.validate(value);
       setFormData({ ...formData, [name]: { value, err: "" } });
     } catch (error) {

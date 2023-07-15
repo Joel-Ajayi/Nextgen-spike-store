@@ -1,24 +1,15 @@
 import axios from "axios";
-import { makeRequest } from ".";
+import request from ".";
 import { IMessage, MessageType } from "../types";
 import { IUserInitailState, SignInFieds, SignInForm } from "../types/user";
 
 class UserReq {
-  public async getUser(): Promise<IUserInitailState | null | IMessage> {
+  public async getUser() {
     const body = JSON.stringify({
       query: `query { UserQuery { contactNumber avatar email role fullName id }}`,
     });
-
-    try {
-      const res = await makeRequest(body);
-      return res.UserQuery;
-    } catch (err) {
-      return {
-        msg: (err as any)?.message,
-        type: MessageType.Error,
-        statusCode: (err as any)?.statusCode,
-      };
-    }
+    const { res, msg } = await request.makeRequest(body);
+    return { user: res as IUserInitailState, msg };
   }
 
   public async signIn(data: SignInForm, isSignIn: boolean): Promise<IMessage> {
@@ -35,26 +26,20 @@ class UserReq {
       },
     });
 
-    try {
-      const res = await makeRequest(body);
-      return {
-        msg: res.SignUp?.message,
-        type: MessageType.Success,
-        statusCode: 200,
-      };
-    } catch (err) {
-      return {
-        msg: (err as any)?.message,
-        type: MessageType.Error,
-        statusCode: (err as any)?.statusCode,
-      };
-    }
+    const { res, msg } = await request.makeRequest(body);
+    return !msg
+      ? {
+          msg: res.message,
+          type: MessageType.Success,
+          statusCode: 200,
+        }
+      : msg;
   }
 
   public async signOut(): Promise<void> {
     const query = `mutation { SignOut { message }}`;
     const body = JSON.stringify({ query });
-    await makeRequest(body);
+    await request.makeRequest(body);
   }
 }
 

@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Pages, PageSections } from "../../../../types/controller";
 import Button from "../../../shared/Button/Button";
@@ -6,7 +6,6 @@ import Input from "../../../shared/Input/Controller/Input";
 import ControllerStyles from "../../controller.module.scss";
 import uniqid from "uniqid";
 import Styles from "./createCat.module.scss";
-import validator from "../../../../helpers/validators";
 import { Category, CategoryMini, CatFilter } from "../../../../types/category";
 import categoryReq from "../../../../requests/category";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
@@ -16,6 +15,9 @@ import Filter from "./Filter/Filter";
 import appSlice from "../../../../store/appState";
 import Page404 from "../../../shared/Page404/Page404";
 import SpinLoader from "../../../shared/Loader/SpinLoader/SpinLoader";
+import request from "../../../../requests";
+import validator from "../../../../validators";
+import categoryValidator from "../../../../validators/category";
 
 type CreateCategoryProps = {
   isUpdate?: boolean;
@@ -42,11 +44,6 @@ function CreateCategory({
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const [isLoading, setIsLoading] = useState(!!cat_id);
-  const [isSaving, setIsSaving] = useState(false);
-  const [form, setForm] = useState(defaultData);
-  const [errors, setErrors] = useState<{ [key in string]: string }>({});
-
   const statusCode = useAppSelector((state) => state.app.statusCode);
   const categories = useAppSelector(
     (state) => state.controller.category.categories
@@ -58,27 +55,28 @@ function CreateCategory({
   defaultData.parent = parent;
   const index = categories.findIndex((cat) => cat.name === cat_id);
 
-  useLayoutEffect(() => {
+  const [isLoading, setIsLoading] = useState(!!cat_id);
+  const [isSaving, setIsSaving] = useState(false);
+  const [form, setForm] = useState(defaultData);
+  const [errors, setErrors] = useState<{ [key in string]: string }>({});
+
+  useEffect(() => {
     (async () => {
       if (!!cat_id) {
-        const cat = await categoryReq.getCategory(cat_id);
-        if ((cat as IMessage)?.statusCode === 404) {
-          setStatusCode((cat as IMessage)?.statusCode as number);
+        const { cat, msg } = await categoryReq.getCategory(cat_id);
+        if (msg?.statusCode === 404) {
+          setStatusCode(msg.statusCode as number);
         } else {
           let image: IFile[] = [];
-          if (!!(cat as Category).image.length) {
-            image = await categoryReq.getImageFiles(
-              (cat as Category).image as any
-            );
+          if (cat.image.length) {
+            image = await request.getImageFiles(cat.image as any);
           }
 
           let banners: IFile[] = [];
-          if ((cat as Category).banners.length > 0) {
-            banners = await categoryReq.getImageFiles(
-              (cat as Category).banners as any
-            );
+          if (cat.banners.length > 0) {
+            banners = await request.getImageFiles(cat.banners as any);
           }
-          setForm({ ...(cat as Category), image, banners });
+          setForm({ ...cat, image, banners });
         }
         setIsLoading(false);
       }
@@ -99,25 +97,19 @@ function CreateCategory({
     const getError = async (name: string) => {
       switch (name) {
         case "name":
-          return await validator.catName(value as string);
+          return await categoryValidator.catName(value as string);
         case "description":
-          return await validator.catDesc((value as string) || "");
+          return await categoryValidator.catDesc((value as string) || "");
         case "filters":
-          return await validator.catFilter(value as CatFilter[]);
-        case "image":
-          return await validator.files(
-            (value as IFile[]).map((f) => f.file),
-            1,
-            0,
-            "image"
-          );
-        case "banners":
-          return await validator.files(
-            (value as IFile[]).map((f) => f.file),
-            3,
-            0,
-            "image"
-          );
+          return await categoryValidator.catFilter(value as CatFilter[]);
+        case "image": {
+          const files = (value as IFile[]).map((f) => f.file);
+          return await validator.files(files, "image");
+        }
+        case "banners": {
+          const files = (value as IFile[]).map((f) => f.file);
+          return await validator.files(files, "image", 0, 3);
+        }
         default:
           return "";
       }
@@ -145,23 +137,19 @@ function CreateCategory({
   const onSave = async () => {
     if (isValid) {
       setIsSaving(true);
-      const cat = isUpdate
+      const { cat, msg } = isUpdate
         ? await categoryReq.updateCat(form)
         : await categoryReq.createCat(form);
-      if ((cat as IMessage)?.msg) {
-        dispatch(
-          setBackgroundMsg({ msg: (cat as any).msg, type: (cat as any).type })
-        );
+      if (msg) {
+        dispatch(setBackgroundMsg(msg));
       } else {
         if (isUpdate && categories.length) {
           dispatch(updateCategory({ index, cat: cat as CategoryMini }));
         } else {
           dispatch(addCategory(cat as CategoryMini));
         }
-        navigate(
-          `/controller?pg=${Pages.Categories}&sec=${PageSections.Listing}`,
-          { replace: false }
-        );
+        const navLink = `/controller?pg=${Pages.Categories}&sec=${PageSections.Listing}`;
+        navigate(navLink, { replace: false });
       }
       setIsSaving(false);
     }

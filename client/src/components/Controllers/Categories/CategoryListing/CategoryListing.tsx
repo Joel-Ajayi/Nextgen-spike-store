@@ -30,8 +30,8 @@ function CategoryListing() {
   useEffect(() => {
     (async () => {
       if (!categories.length) {
-        const cats = await categoryReq.getCategories();
-        if ((cats as IMessage)?.msg) {
+        const { cats, msg } = await categoryReq.getCategories();
+        if (msg) {
           dispatch(setCategories([]));
         } else {
           dispatch(setCategories(cats as CategoryMini[]));
@@ -42,11 +42,9 @@ function CategoryListing() {
   }, []);
 
   const onMove = async (id: string, destId: string) => {
-    const cat = await categoryReq.updateCatParent(id, destId);
-    if ((cat as IMessage)?.msg) {
-      dispatch(
-        setBackgroundMsg({ msg: (cat as any).msg, type: (cat as any).type })
-      );
+    const { cat, msg } = await categoryReq.updateCatParent(id, destId);
+    if (msg) {
+      dispatch(setBackgroundMsg(msg));
     } else {
       const index = categories.findIndex((cat) => cat.name === id);
       dispatch(updateCategory({ index, cat: cat as CategoryMini }));
