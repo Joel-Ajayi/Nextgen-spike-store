@@ -34,4 +34,5 @@ export type Category = {
   image: IFile[];
   banners: IFile[];
   filters: CatFilter[];
+  hasWarranty: boolean;
 };

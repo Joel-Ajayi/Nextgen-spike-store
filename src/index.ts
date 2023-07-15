@@ -10,7 +10,7 @@ import path, { join } from "path";
 import cookieParser from "cookie-parser";
 import initSessionStore from "./db/session/session";
 import graphqlUpload from "graphql-upload/graphqlUploadExpress.js";
-import { CONST } from "./@types/conts";
+import consts from "./@types/conts";
 
 const {
   PORT,
@@ -36,7 +36,7 @@ declare module "express-session" {
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
   app.use(cookieParser());
-  app.use(graphqlUpload({ maxFileSize: CONST.files.vdSize, maxFiles: 4 }));
+  app.use(graphqlUpload({ maxFileSize: consts.files.vdSize, maxFiles: 4 }));
   if (NODE_ENV !== "production") app.use(morgan("dev"));
 
   // session setup

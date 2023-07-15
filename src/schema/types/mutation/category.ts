@@ -38,17 +38,24 @@ export const CreateCategory = mutationField("CreateCategory", {
     let parent: {
       lvl: number;
       id: string;
+      hasWarranty: boolean;
     } | null = null;
     if (data?.parent) {
       parent = await ctx.db.category.findUnique({
         where: { name: data.parent },
-        select: { id: true, lvl: true },
+        select: { id: true, lvl: true, hasWarranty: true },
       });
       if (!parent) {
         throw new GraphQLError("Parent category does not exist", {
           extensions: { statusCode: 404 },
         });
       }
+    }
+
+    if (!data.hasWarranty && parent?.hasWarranty) {
+      throw new GraphQLError("Category requires warranty", {
+        extensions: { statusCode: 404 },
+      });
     }
 
     // validate image/
@@ -133,11 +140,18 @@ export const UpdateCategory = mutationField("UpdateCategory", {
         lvl: true,
         image: true,
         banners: true,
+        parent: { select: { hasWarranty: true } },
         filters: { select: { id: true } },
       },
     });
     if (!addedCat) {
       throw new GraphQLError("Category not found", {
+        extensions: { statusCode: 404 },
+      });
+    }
+
+    if (!data.hasWarranty && addedCat.parent?.hasWarranty) {
+      throw new GraphQLError("Category requires warranty", {
         extensions: { statusCode: 404 },
       });
     }
@@ -271,6 +285,7 @@ export const UpdateCategoryParent = mutationField("UpdateCategoryParent", {
         name: true,
         id: true,
         lvl: true,
+        hasWarranty: true,
       },
     });
 
@@ -284,13 +299,14 @@ export const UpdateCategoryParent = mutationField("UpdateCategoryParent", {
       name: string;
       id: string;
       lvl: number;
+      hasWarranty: boolean;
     } | null = null as any;
 
     if (parent) {
       // check parent
       catParent = await ctx.db.category.findUnique({
         where: { name: parent },
-        select: { id: true, lvl: true, name: true },
+        select: { id: true, lvl: true, name: true, hasWarranty: true },
       });
 
       if (!catParent) {
@@ -302,6 +318,12 @@ export const UpdateCategoryParent = mutationField("UpdateCategoryParent", {
       if (catParent?.id === addedCat.id) {
         throw new GraphQLError("Sorry, you can't add to this category", {
           extensions: { statusCode: 400 },
+        });
+      }
+
+      if (!addedCat.hasWarranty && catParent && catParent.hasWarranty) {
+        throw new GraphQLError("Category requires warranty", {
+          extensions: { statusCode: 404 },
         });
       }
 

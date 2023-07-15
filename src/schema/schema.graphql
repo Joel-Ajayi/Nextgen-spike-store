@@ -11,6 +11,7 @@ type Category {
   banners: [String!]!
   description: String!
   filters: [CategoryFilter!]!
+  hasWarranty: Boolean!
   id: String!
   image: String!
   lvl: Int!

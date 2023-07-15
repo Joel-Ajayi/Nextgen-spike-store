@@ -31,6 +31,7 @@ const defaultData: Category = {
   image: [],
   banners: [],
   filters: [],
+  hasWarranty: false,
 };
 
 function CreateCategory({
@@ -252,7 +253,16 @@ function CreateCategory({
                           onChange={onInputChange}
                           changeOnMount
                         />
+                        <Input
+                          name="hasWarranty"
+                          label="Has warranty"
+                          type="checkbox"
+                          defaultChecked={form.hasWarranty}
+                          span
+                          onChange={onInputChange}
+                        />
                       </section>
+
                       <section
                         className={Styles.section}
                         style={{ marginTop: 15 }}

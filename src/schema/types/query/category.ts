@@ -11,6 +11,7 @@ export const GetCategories = queryField("GetCategories", {
       select: {
         name: true,
         lvl: true,
+        hasWarranty: true,
         parent: {
           select: {
             name: true,
@@ -19,10 +20,9 @@ export const GetCategories = queryField("GetCategories", {
       },
     });
 
-    return categories.map(({ name, parent, lvl }) => ({
-      name,
-      lvl,
-      parent: parent?.name || "",
+    return categories.map((cat) => ({
+      ...cat,
+      parent: cat.parent?.name || "",
     }));
   },
 });
@@ -45,6 +45,7 @@ export const GetCategory = queryField("GetCategory", {
         description: true,
         image: true,
         banners: true,
+        hasWarranty: true,
         parent: {
           select: {
             name: true,

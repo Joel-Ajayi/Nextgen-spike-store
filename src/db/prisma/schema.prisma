@@ -70,7 +70,7 @@ model Category {
   filters     CategoryFilter[]
   image       String?
   banners     String[]
-  hasWarranty Boolean          @default(false)
+  hasWarranty Boolean
   products    Product[]
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
