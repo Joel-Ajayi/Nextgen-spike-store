@@ -8,8 +8,8 @@ class UserReq {
     const body = JSON.stringify({
       query: `query { UserQuery { contactNumber avatar email role fullName id }}`,
     });
-    const { res, msg } = await request.makeRequest(body);
-    return { user: res as IUserInitailState, msg };
+    const { res, msg } = await request.makeRequest<IUserInitailState>(body);
+    return { user: res, msg };
   }
 
   public async signIn(data: SignInForm, isSignIn: boolean): Promise<IMessage> {
@@ -26,13 +26,9 @@ class UserReq {
       },
     });
 
-    const { res, msg } = await request.makeRequest(body);
+    const { res, msg } = await request.makeRequest<string>(body);
     return !msg
-      ? {
-          msg: res.message,
-          type: MessageType.Success,
-          statusCode: 200,
-        }
+      ? { msg: res, type: MessageType.Success, statusCode: 200 }
       : msg;
   }
 

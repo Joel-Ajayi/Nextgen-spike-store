@@ -32,7 +32,7 @@ class Requests {
     return files;
   }
 
-  public async makeRequest(data: string | FormData, isUpload = false) {
+  public async makeRequest<T>(data: string | FormData, isUpload = false) {
     const headers: { [key in string]: string } = {};
     if (isUpload) {
       headers["Apollo-Require-Preflight"] = "true";
@@ -50,8 +50,9 @@ class Requests {
         });
       }
       const resData = res.data?.data as Object;
-      return { res: Object.values(resData)[0], msg: null };
+      return { res: Object.values(resData)[0] as T, msg: null };
     } catch (err) {
+      console.log(err);
       let msg: IMessage | null = null;
       if (errFromServer) {
         msg = {
