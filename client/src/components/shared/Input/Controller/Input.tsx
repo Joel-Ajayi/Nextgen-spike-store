@@ -47,7 +47,6 @@ function Input({
   label,
   type = "text",
   defaultValue = type === "number" ? "0" : "",
-  opt = "",
   isMultiInput = false,
   defaultChecked = false,
   unit = "",
@@ -236,9 +235,12 @@ function Input({
                   multiple={multipleFiles}
                   required
                   accept={CONSTS.files.mimeType.supportedImg}
-                  onChange={(e) =>
-                    handleChange([...inputs, ...(e.target.files as any)])
-                  }
+                  onChange={(e) => {
+                    const newInputs = multipleFiles
+                      ? [...inputs, ...(e.target.files as any)]
+                      : [];
+                    handleChange([...newInputs, ...(e.target.files as any)]);
+                  }}
                 />
               </div>
             )}
