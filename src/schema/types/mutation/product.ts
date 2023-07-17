@@ -34,11 +34,21 @@ export const CreateProduct = mutationField("CreateProduct", {
       });
     }
 
+    // check if product brand exist
+    const productBrd = await ctx.db.brand.findUnique({
+      where: { name: data.brand },
+    });
+    if (!productBrd) {
+      throw new GraphQLError("Product Brand not found", {
+        extensions: { statusCode: 404 },
+      });
+    }
+
     // validate image/
     const images = await validator.files(
       data.images,
-      consts.files.product.max,
-      consts.files.product.min
+      consts.files.product.min,
+      consts.files.product.max
     );
 
     // create sku
@@ -59,7 +69,7 @@ export const CreateProduct = mutationField("CreateProduct", {
           cId: data.cId,
           description: data.description,
           price: data.price,
-          brand: data.brand,
+          brdId: data.brand,
           count: data.count || 0,
           images,
           discount: data.discount || 0,
@@ -73,7 +83,7 @@ export const CreateProduct = mutationField("CreateProduct", {
           name: true,
           price: true,
           category: { select: { name: true } },
-          brand: true,
+          brand: { select: { name: true } },
           rating: true,
         },
       });
@@ -103,6 +113,7 @@ export const CreateProduct = mutationField("CreateProduct", {
 
       return {
         ...newPrd,
+        brand: newPrd.brand.name,
         category: newPrd.category.name,
         images: [],
         discount: 0,

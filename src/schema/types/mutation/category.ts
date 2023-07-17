@@ -60,8 +60,8 @@ export const CreateCategory = mutationField("CreateCategory", {
 
     // validate image/
     const imgLink =
-      (await validator.files(!!data?.image ? [data.image] : [], 1, 0))[0] || "";
-    const bannerLinks = await validator.files(data.banners as any, 3, 0);
+      (await validator.files(!!data?.image ? [data.image] : [], 0))[0] || "";
+    const bannerLinks = await validator.files(data.banners as any, 0, 3);
 
     let newCat: {
       parent: { name: string };
@@ -171,20 +171,18 @@ export const UpdateCategory = mutationField("UpdateCategory", {
     }
 
     // validate image/
+    const imageFile = !!data?.image ? [data?.image] : [];
+    const prevImage = !!addedCat?.image ? [addedCat.image] : [];
     const imgLink =
-      (
-        await validator.files(
-          !!data?.image ? [data?.image] : [],
-          1,
-          0,
-          !!addedCat?.image ? [addedCat.image] : []
-        )
-      )[0] || "";
+      (await validator.files(imageFile, 0, 1, prevImage))[0] || "";
+
+    const bannerFiles = data?.banners;
+    const prevBannerFiles = addedCat.banners;
     const bannerLinks = await validator.files(
-      data?.banners,
-      3,
+      bannerFiles,
       0,
-      addedCat.banners
+      3,
+      prevBannerFiles
     );
 
     // Get previous filter ids

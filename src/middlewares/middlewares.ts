@@ -1,7 +1,7 @@
 import { PrismaClient, User } from "@prisma/client";
 import { GraphQLError } from "graphql";
-import { CONST } from "../@types/conts";
 import { prisma as db } from "../db/prisma/connect";
+import consts from "../@types/conts";
 import { Context } from "../schema/context";
 import bcrypt from "bcryptjs";
 import { Roles } from "../@types/User";
@@ -9,7 +9,7 @@ import { Roles } from "../@types/User";
 class MiddleWare {
   public checkUser(ctx: Context) {
     if (!ctx.user?.id) {
-      throw new GraphQLError(CONST.errors.signIn, {
+      throw new GraphQLError(consts.errors.signIn, {
         extensions: {
           statusCode: 401,
         },
@@ -20,7 +20,7 @@ class MiddleWare {
   public checkAdmin(ctx: Context) {
     this.checkUser(ctx);
     if (ctx.user?.role < Roles.Admin) {
-      throw new GraphQLError(CONST.errors.signIn, {
+      throw new GraphQLError(consts.errors.signIn, {
         extensions: {
           statusCode: 401,
         },
@@ -31,7 +31,7 @@ class MiddleWare {
   public checkSuperAdmin(ctx: Context) {
     this.checkUser(ctx);
     if (ctx.user?.role !== Roles.SuperAdmin) {
-      throw new GraphQLError(CONST.errors.unAuthorized, {
+      throw new GraphQLError(consts.errors.unAuthorized, {
         extensions: {
           statusCode: 403,
         },
@@ -46,7 +46,7 @@ class MiddleWare {
     const user = await db.user.findUnique({ where: { email } });
 
     if (!user) {
-      throw new GraphQLError(CONST.errors.invalidSignIn, {
+      throw new GraphQLError(consts.errors.invalidSignIn, {
         extensions: {
           statusCode: 400,
         },
@@ -55,7 +55,7 @@ class MiddleWare {
 
     const isMatched = await bcrypt.compare(password, user.pwd);
     if (!isMatched) {
-      throw new GraphQLError(CONST.errors.invalidSignIn, {
+      throw new GraphQLError(consts.errors.invalidSignIn, {
         extensions: {
           statusCode: 400,
         },
@@ -67,7 +67,7 @@ class MiddleWare {
   public async alreadySignedUp(email: string, db: PrismaClient): Promise<void> {
     const user = await db.user.findUnique({ where: { email } });
     if (user) {
-      throw new GraphQLError(CONST.errors.userAlreadyExist, {
+      throw new GraphQLError(consts.errors.userAlreadyExist, {
         extensions: {
           statusCode: 400,
         },
@@ -77,7 +77,7 @@ class MiddleWare {
 
   public async alreadySignedIn(ctx: Context): Promise<void> {
     if (ctx.user?.id) {
-      throw new GraphQLError(CONST.errors.alreadySignedIn, {
+      throw new GraphQLError(consts.errors.alreadySignedIn, {
         extensions: {
           statusCode: 400,
         },

@@ -55,6 +55,7 @@ export const GetProduct = queryField("GetProduct", {
     const { filters, warranty, ...rest } = product;
     return {
       ...rest,
+      brand: rest.brand.name,
       category: rest.category.name,
       warranty: requiredWarranty,
       filters: requiredFilters,
@@ -120,6 +121,7 @@ export const GetProductMini = queryField("GetProductMini", {
       const { reviews, ...rest } = product;
       return {
         ...rest,
+        brand: rest.brand.name,
         filters: requiredFilters,
         numRating,
         numReviews,
@@ -163,7 +165,11 @@ export const GetFilterPageProduct = queryField("GetFilterPageProduct", {
         });
       }
 
-      return { ...product, category: product.category.name };
+      return {
+        ...product,
+        brand: product.brand.name,
+        category: product.category.name,
+      };
     } catch (error) {
       throw new GraphQLError(consts.errors.server, {
         extensions: { statusCode: 500 },
