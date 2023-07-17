@@ -110,7 +110,8 @@ model Product {
   rating       Int                   @default(0)
   count        Int                   @default(0)
   payment      PAYMENTMETHOD[]
-  brand        String
+  brdId        String
+  brand        Brand                 @relation(fields: [brdId], references: [name])
   colors       String[]
   mfgCountry   String
   mfgDate      String
@@ -131,6 +132,13 @@ model ProductWarranty {
   covered   String
   productId String  @unique @db.ObjectId
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Brand {
+  id       String    @id @default(auto()) @map("_id") @db.ObjectId
+  name     String    @unique
+  image    String
+  products Product[]
 }
 
 model Reviews {

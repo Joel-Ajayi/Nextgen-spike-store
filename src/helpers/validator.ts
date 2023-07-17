@@ -89,8 +89,8 @@ class Validator {
 
   public async files(
     files: Promise<FileUpload>[],
-    maxNum: number,
-    minNum: number,
+    minNum = 1,
+    maxNum = 1,
     prevFiles: string[] = []
   ) {
     if (files.length < minNum) {
@@ -295,6 +295,25 @@ class Validator {
         name: string().required("Category Name is required"),
         parent: string(),
       }).validate({ name, parent });
+    } catch (error) {
+      throw new GraphQLError((error as any).message, {
+        extensions: {
+          statusCode: 400,
+        },
+      });
+    }
+  }
+
+  public async brand(data: any) {
+    try {
+      await object({
+        name: string()
+          .required("Name Field is empty")
+          .min(2, "Name should have more than 2 characters")
+          .matches(/^[a-zA-Z0-9'\s]*$/, "Special characters not allowed")
+          .max(15, "Name should have not more than 15 characters"),
+        image: mixed().required("No image was uploaded"),
+      }).validate(data);
     } catch (error) {
       throw new GraphQLError((error as any).message, {
         extensions: {

@@ -113,3 +113,11 @@ export const ProductInput = inputObjectType({
     t.field("filters", { type: list(nonNull(CategoryFilterValueInput)) });
   },
 });
+
+export const BrandInput = inputObjectType({
+  name: "BrandInput",
+  definition(t) {
+    t.nonNull.string("name");
+    t.nonNull.upload("image");
+  },
+});

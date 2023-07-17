@@ -27,8 +27,8 @@ export const Category = objectType({
     t.nonNull.int("lvl");
     t.string("parent");
     t.nonNull.string("description");
-    t.nonNull.string("image");
     t.nonNull.boolean("hasWarranty");
+    t.nonNull.list.nonNull.string("image");
     t.nonNull.list.nonNull.string("banners");
     t.field("filters", {
       type: nonNull(list(nonNull(CategoryFilter))),
@@ -130,5 +130,13 @@ export const FilterPageProduct = objectType({
       type: nonNull(list(nonNull(CategoryFilterValue))),
     });
     t.nonNull.list.nonNull.string("images");
+  },
+});
+
+export const Brand = objectType({
+  name: "Brand",
+  definition(t) {
+    t.nonNull.string("name");
+    t.nonNull.list.nonNull.string("image");
   },
 });

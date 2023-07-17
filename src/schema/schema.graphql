@@ -2,6 +2,16 @@
 ### Do not make changes to this file directly
 
 
+type Brand {
+  image: [String!]!
+  name: String!
+}
+
+input BrandInput {
+  image: Upload!
+  name: String!
+}
+
 enum CatFilterType {
   Num
   Txt
@@ -13,7 +23,7 @@ type Category {
   filters: [CategoryFilter!]!
   hasWarranty: Boolean!
   id: String!
-  image: String!
+  image: [String!]!
   lvl: Int!
   name: String!
   parent: String
@@ -90,6 +100,7 @@ type Message {
 }
 
 type Mutation {
+  CreateBrand(data: BrandInput): Brand
   CreateCategory(data: CategoryInput): CategoryMini
   CreateProduct(data: ProductInput): ProductMini
   ForgotPassword(data: SetTokenInput): Message
@@ -176,6 +187,8 @@ input ProductWarrantyInput {
 }
 
 type Query {
+  GetBrand(name: String!): Brand
+  GetBrands: [Brand!]!
   GetCategories: [CategoryMini!]!
   GetCategory(name: String!): Category
   GetFilterPageProduct(category: String!, id: String!, reqImages: Boolean!): ProductMini
