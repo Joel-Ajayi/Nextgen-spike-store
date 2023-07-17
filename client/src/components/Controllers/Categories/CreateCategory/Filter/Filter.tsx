@@ -4,9 +4,9 @@ import { ReactComponent as EditIcon } from "../../../../../images/icons/edit.svg
 import { ReactComponent as SaveIcon } from "../../../../../images/icons/save.svg";
 import { CatFilter, CatFilterType } from "../../../../../types/category";
 import Input from "../../../../shared/Input/Controller/Input";
-import validator from "../../../../../helpers/validators";
 import Styles from "./filter.module.scss";
 import { IFile } from "../../../../../types";
+import categoryValidator from "../../../../../validators/category";
 
 type FilterProps = {
   index: number;
@@ -43,11 +43,11 @@ const Filter = ({ onChange, index, data }: FilterProps) => {
     const getError = async (name: string) => {
       switch (name) {
         case "name":
-          return await validator.catFilterName(value as string);
+          return await categoryValidator.catFilterName(value as string);
         case "unit":
-          return await validator.catFilterUnit((value as string) || "");
+          return await categoryValidator.catFilterUnit((value as string) || "");
         case "options":
-          return await validator.catFilterOptions(value as string[]);
+          return await categoryValidator.catFilterOptions(value as string[]);
         default:
           return "";
       }
