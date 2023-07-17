@@ -51,7 +51,7 @@ function ControllerHeader() {
     },
     {
       title: "Add Brand",
-      link: `/controller?pg=${Pages.Brand}&sec=${PageSections.CreatePrd}`,
+      link: `/controller?pg=${Pages.Brand}&sec=${PageSections.CreateBrd}`,
     },
   ];
 
