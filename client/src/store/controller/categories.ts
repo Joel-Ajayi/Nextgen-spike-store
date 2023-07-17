@@ -1,10 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { cloneDeep } from "lodash";
-import {
-  Category,
-  CategoryMini,
-  InitialCategoryController,
-} from "../../types/category";
+import { CategoryMini, InitialCategoryController } from "../../types/category";
 
 export const initialState: InitialCategoryController = {
   categories: [],

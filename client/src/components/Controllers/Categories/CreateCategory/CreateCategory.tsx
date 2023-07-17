@@ -26,7 +26,7 @@ type CreateCategoryProps = {
 };
 
 const defaultData: Category = {
-  id: "",
+  id: undefined,
   name: "",
   description: "",
   parent: "",
@@ -48,12 +48,14 @@ function CreateCategory({
   const categories = useAppSelector(
     (state) => state.controller.category.categories
   );
+  const index = useAppSelector((state) =>
+    state.controller.category.categories.findIndex((cat) => cat.name === cat_id)
+  );
 
   const { updateCategory, addCategory } = controllerCatSlice.actions;
   const { setStatusCode } = appSlice.actions;
   const { setBackgroundMsg } = appSlice.actions;
   defaultData.parent = parent;
-  const index = categories.findIndex((cat) => cat.name === cat_id);
 
   const [isLoading, setIsLoading] = useState(!!cat_id);
   const [isSaving, setIsSaving] = useState(false);
@@ -66,15 +68,15 @@ function CreateCategory({
         const { cat, msg } = await categoryReq.getCategory(cat_id);
         if (msg?.statusCode === 404) {
           setStatusCode(msg.statusCode as number);
-        } else {
+        } else if (cat) {
           let image: IFile[] = [];
           if (cat.image.length) {
-            image = await request.getImageFiles(cat.image as any);
+            image = await request.getImageFiles(cat.image as string[]);
           }
 
           let banners: IFile[] = [];
           if (cat.banners.length > 0) {
-            banners = await request.getImageFiles(cat.banners as any);
+            banners = await request.getImageFiles(cat.image as string[]);
           }
           setForm({ ...cat, image, banners });
         }
@@ -137,14 +139,12 @@ function CreateCategory({
   const onSave = async () => {
     if (isValid) {
       setIsSaving(true);
-      const { cat, msg } = isUpdate
-        ? await categoryReq.updateCat(form)
-        : await categoryReq.createCat(form);
+      const { cat, msg } = await categoryReq.updateCat(form, isUpdate);
       if (msg) {
         dispatch(setBackgroundMsg(msg));
-      } else {
+      } else if (cat) {
         if (isUpdate && categories.length) {
-          dispatch(updateCategory({ index, cat: cat as CategoryMini }));
+          dispatch(updateCategory({ index, cat }));
         } else {
           dispatch(addCategory(cat as CategoryMini));
         }

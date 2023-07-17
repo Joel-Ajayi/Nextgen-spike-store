@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import controllerCatSlice from "../../../../store/controller/categories";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
-import { IMessage, ITreeNode } from "../../../../types";
+import { ITreeNode } from "../../../../types";
 import { Pages, PageSections } from "../../../../types/controller";
 import Button from "../../../shared/Button/Button";
 import Tree from "../../../shared/Tree/Tree";
@@ -19,6 +19,7 @@ function CategoryListing() {
 
   const { updateCategory, setCategories } = controllerCatSlice.actions;
   const { setBackgroundMsg } = appSlice.actions;
+
   const categories = useAppSelector(
     (state) => state.controller.category.categories
   );
@@ -33,8 +34,9 @@ function CategoryListing() {
         const { cats, msg } = await categoryReq.getCategories();
         if (msg) {
           dispatch(setCategories([]));
-        } else {
-          dispatch(setCategories(cats as CategoryMini[]));
+          dispatch(setBackgroundMsg(msg));
+        } else if (cats) {
+          dispatch(setCategories(cats));
         }
       }
       setLoading(false);

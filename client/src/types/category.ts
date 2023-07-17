@@ -31,8 +31,8 @@ export type Category = {
   lvl?: number;
   parent: string;
   description: string;
-  image: IFile[];
-  banners: IFile[];
+  image: (IFile | string)[];
+  banners: (IFile | string)[];
   filters: CatFilter[];
   hasWarranty: boolean;
 };
