@@ -11,5 +11,6 @@ export enum PageSections {
   UpdateCat = "update-cat",
   CreatePrd = "create-prd",
   CreateBrd = "createbrd",
+  UpdateBrd = "updatebrd",
   OrderTrack = "track",
 }

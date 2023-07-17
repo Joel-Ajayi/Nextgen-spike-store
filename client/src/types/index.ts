@@ -45,3 +45,8 @@ export interface IFile {
   file: File;
   b64: string;
 }
+
+export type Brand = {
+  name: string;
+  image: IFile[];
+};

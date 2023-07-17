@@ -1,0 +1,47 @@
+@import "../../../../styles/mixins.scss";
+
+.content {
+  flex: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  margin-top: 10px;
+  @include scrollbar();
+
+  & > div {
+    @include desktop-wrapper;
+    padding: 10px 15px;
+
+    @media screen and (min-width: 850px) {
+      padding: 20px 25px;
+    }
+    .grid_display {
+      display: grid !important;
+      grid-template-columns: 1fr;
+      gap: 10px 25px !important;
+      grid-template-rows: repeat(2, min-content);
+
+      .save_button {
+        margin-top: 10px;
+      }
+
+      @media screen and (min-width: 650px) {
+        grid-template-columns: 1fr 1fr;
+        .save_button {
+          grid-column: span 2;
+        }
+      }
+    }
+  }
+}
+
+.loader {
+  width: 100%;
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  background: transparent;
+  margin-top: 10px;
+}
