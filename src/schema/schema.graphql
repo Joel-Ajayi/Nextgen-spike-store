@@ -8,6 +8,7 @@ type Brand {
 }
 
 input BrandInput {
+  id: String!
   image: Upload!
   name: String!
 }
@@ -19,6 +20,7 @@ enum CatFilterType {
 
 type Category {
   banners: [String!]!
+  brand: String!
   description: String!
   filters: [CategoryFilter!]!
   hasWarranty: Boolean!
@@ -71,6 +73,7 @@ input CategoryFilterValueInput {
 
 input CategoryInput {
   banners: [Upload!]!
+  brand: String
   description: String
   filters: [CategoryFilterInput!]!
   hasWarranty: Boolean!
@@ -87,6 +90,7 @@ type CategoryMini {
 
 input CategoryUpdateInput {
   banners: [Upload!]!
+  brand: String
   description: String
   filters: [CategoryFilterInput]!
   hasWarranty: Boolean!

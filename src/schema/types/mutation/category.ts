@@ -52,6 +52,20 @@ export const CreateCategory = mutationField("CreateCategory", {
       }
     }
 
+    // check if brand exist
+    let brandId: string = "";
+    if (data?.brand) {
+      const productBrd = await ctx.db.brand.findUnique({
+        where: { name: data.brand },
+      });
+      if (!productBrd) {
+        throw new GraphQLError("Brand not found", {
+          extensions: { statusCode: 404 },
+        });
+      }
+      brandId = productBrd.id;
+    }
+
     if (!data.hasWarranty && parent?.hasWarranty) {
       throw new GraphQLError("Category requires warranty", {
         extensions: { statusCode: 404 },
@@ -77,6 +91,7 @@ export const CreateCategory = mutationField("CreateCategory", {
           cId: catCount + 1,
           description: data.description,
           image: imgLink,
+          brdId: brandId,
           hasWarranty: data.hasWarranty,
           banners: bannerLinks,
           parentId: !parent?.id ? undefined : parent.id,
@@ -139,6 +154,7 @@ export const UpdateCategory = mutationField("UpdateCategory", {
         id: true,
         lvl: true,
         image: true,
+        brdId: true,
         banners: true,
         parent: { select: { hasWarranty: true } },
         filters: { select: { id: true } },
@@ -168,6 +184,24 @@ export const UpdateCategory = mutationField("UpdateCategory", {
           extensions: { statusCode: 404 },
         });
       }
+    }
+
+    // check if brand exist
+    let brandId: string = "";
+    if (!data.brand && addedCat.brdId) {
+      await ctx.db.brand.delete({
+        where: { id: addedCat.brdId },
+      });
+    } else if (data.brand) {
+      const productBrd = await ctx.db.brand.findUnique({
+        where: { name: data.brand },
+      });
+      if (!productBrd) {
+        throw new GraphQLError("Brand not found", {
+          extensions: { statusCode: 404 },
+        });
+      }
+      brandId = productBrd.id;
     }
 
     // validate image/
@@ -243,6 +277,7 @@ export const UpdateCategory = mutationField("UpdateCategory", {
         cId: catCount + 1,
         description: data.description,
         image: imgLink,
+        brdId: brandId,
         banners: bannerLinks,
         hasWarranty: data.hasWarranty,
       },

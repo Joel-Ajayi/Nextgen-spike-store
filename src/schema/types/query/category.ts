@@ -52,11 +52,8 @@ export const GetCategory = queryField("GetCategory", {
           image: true,
           banners: true,
           hasWarranty: true,
-          parent: {
-            select: {
-              name: true,
-            },
-          },
+          brand: { select: { name: true } },
+          parent: { select: { name: true } },
           filters: {
             select: {
               id: true,
@@ -78,6 +75,7 @@ export const GetCategory = queryField("GetCategory", {
 
       return {
         ...category,
+        brand: category.brand?.name || "",
         parent: category?.parent?.name,
         description: category.description || "",
         image: category.image ? [category.image] : [],

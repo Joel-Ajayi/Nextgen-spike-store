@@ -27,7 +27,7 @@ export const CreateBrand = mutationField("CreateBrand", {
       const image = (await validator.files([data.image], 1, 1, prevImage))[0];
 
       const newBrd = await ctx.db.brand.upsert({
-        where: { name: prevBrand?.name || "" },
+        where: { name: data.id },
         update: { name: data.name, image },
         create: { name: data.name, image },
         select: { name: true, image: true },

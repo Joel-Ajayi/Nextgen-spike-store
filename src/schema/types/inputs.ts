@@ -36,6 +36,7 @@ export const CategoryInput = inputObjectType({
     t.string("parent");
     t.string("description");
     t.nullable.upload("image");
+    t.nullable.string("brand");
     t.nonNull.list.nonNull.upload("banners");
     t.nonNull.boolean("hasWarranty");
     t.field("filters", { type: nonNull(list(nonNull(CategoryFilterInput))) });
@@ -45,11 +46,11 @@ export const CategoryInput = inputObjectType({
 export const CategoryFilterInput = inputObjectType({
   name: "CategoryFilterInput",
   definition(t) {
-    t.nonNull.string("name"),
-      t.nonNull.field("type", { type: CatFilterTypeEnum }),
-      t.nullable.string("unit"),
-      t.nonNull.list.nonNull.string("options"),
-      t.nonNull.boolean("isRequired");
+    t.nonNull.string("name");
+    t.nonNull.field("type", { type: CatFilterTypeEnum });
+    t.nullable.string("unit");
+    t.nonNull.list.nonNull.string("options");
+    t.nonNull.boolean("isRequired");
   },
 });
 
@@ -59,6 +60,7 @@ export const CategoryUpdateInput = inputObjectType({
     t.nonNull.string("id");
     t.nonNull.string("name");
     t.string("description");
+    t.nullable.string("brand");
     t.nullable.upload("image");
     t.nonNull.boolean("hasWarranty");
     t.nonNull.list.nonNull.upload("banners");
@@ -117,6 +119,7 @@ export const ProductInput = inputObjectType({
 export const BrandInput = inputObjectType({
   name: "BrandInput",
   definition(t) {
+    t.nonNull.string("id");
     t.nonNull.string("name");
     t.nonNull.upload("image");
   },

@@ -27,6 +27,7 @@ export const CreateProduct = mutationField("CreateProduct", {
     // check if product category exist
     const productCat = await ctx.db.category.findUnique({
       where: { cId: data.cId },
+      select: { hasWarranty: true, brand: { select: { name: true } } },
     });
     if (!productCat) {
       throw new GraphQLError("Product Category not found", {
@@ -40,6 +41,12 @@ export const CreateProduct = mutationField("CreateProduct", {
     });
     if (!productBrd) {
       throw new GraphQLError("Product Brand not found", {
+        extensions: { statusCode: 404 },
+      });
+    }
+
+    if (productCat.brand?.name && productCat.brand.name !== productBrd.name) {
+      throw new GraphQLError("Brand cannot be assigned to product", {
         extensions: { statusCode: 404 },
       });
     }
@@ -69,7 +76,7 @@ export const CreateProduct = mutationField("CreateProduct", {
           cId: data.cId,
           description: data.description,
           price: data.price,
-          brdId: data.brand,
+          brdId: productBrd.id,
           count: data.count || 0,
           images,
           discount: data.discount || 0,

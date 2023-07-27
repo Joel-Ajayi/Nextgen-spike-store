@@ -23,11 +23,13 @@ export const UserObj = objectType({
 export const Category = objectType({
   name: "Category",
   definition(t) {
-    t.nonNull.string("id"), t.nonNull.string("name");
+    t.nonNull.string("id");
+    t.nonNull.string("name");
     t.nonNull.int("lvl");
     t.string("parent");
     t.nonNull.string("description");
     t.nonNull.boolean("hasWarranty");
+    t.nonNull.string("brand");
     t.nonNull.list.nonNull.string("image");
     t.nonNull.list.nonNull.string("banners");
     t.field("filters", {

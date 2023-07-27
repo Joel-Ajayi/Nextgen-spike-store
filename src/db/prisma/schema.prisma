@@ -69,6 +69,8 @@ model Category {
   lvl         Int              @default(1)
   filters     CategoryFilter[]
   image       String?
+  brdId       String?          @unique @db.ObjectId
+  brand       Brand?           @relation(fields: [brdId], references: [id])
   banners     String[]
   hasWarranty Boolean
   products    Product[]
@@ -110,8 +112,8 @@ model Product {
   rating       Int                   @default(0)
   count        Int                   @default(0)
   payment      PAYMENTMETHOD[]
-  brdId        String
-  brand        Brand                 @relation(fields: [brdId], references: [name])
+  brdId        String                @unique @db.ObjectId
+  brand        Brand                 @relation(fields: [brdId], references: [id])
   colors       String[]
   mfgCountry   String
   mfgDate      String
@@ -139,6 +141,7 @@ model Brand {
   name     String    @unique
   image    String
   products Product[]
+  Category Category?
 }
 
 model Reviews {
