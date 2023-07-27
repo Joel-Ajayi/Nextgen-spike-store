@@ -9,7 +9,7 @@ import Styles from "./createCat.module.scss";
 import { Category, CategoryMini, CatFilter } from "../../../../types/category";
 import categoryReq from "../../../../requests/category";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
-import { IFile, IMessage } from "../../../../types";
+import { Brand, IFile } from "../../../../types";
 import controllerCatSlice from "../../../../store/controller/categories";
 import Filter from "./Filter/Filter";
 import appSlice from "../../../../store/appState";
@@ -18,6 +18,7 @@ import SpinLoader from "../../../shared/Loader/SpinLoader/SpinLoader";
 import request from "../../../../requests";
 import validator from "../../../../validators";
 import categoryValidator from "../../../../validators/category";
+import brandReq from "../../../../requests/brand";
 
 type CreateCategoryProps = {
   isUpdate?: boolean;
@@ -28,6 +29,7 @@ type CreateCategoryProps = {
 const defaultData: Category = {
   id: undefined,
   name: "",
+  brand: "",
   description: "",
   parent: "",
   image: [],
@@ -60,15 +62,18 @@ function CreateCategory({
   const [isLoading, setIsLoading] = useState(!!cat_id);
   const [isSaving, setIsSaving] = useState(false);
   const [form, setForm] = useState(defaultData);
+  const [brands, setBrands] = useState<Brand[]>([]);
   const [errors, setErrors] = useState<{ [key in string]: string }>({});
 
   useEffect(() => {
     (async () => {
       if (!!cat_id) {
-        const { cat, msg } = await categoryReq.getCategory(cat_id);
-        if (msg?.statusCode === 404) {
-          setStatusCode(msg.statusCode as number);
-        } else if (cat) {
+        const { cat, msg: catMsg } = await categoryReq.getCategory(cat_id);
+        const { brds, msg: brdMsg } = await brandReq.getBrands();
+
+        if (catMsg?.statusCode === 404 || brdMsg?.statusCode === 404) {
+          setStatusCode(404);
+        } else if (cat && brds) {
           let image: IFile[] = [];
           if (cat.image.length) {
             image = await request.getImageFiles(cat.image as string[]);
@@ -78,7 +83,36 @@ function CreateCategory({
           if (cat.banners.length > 0) {
             banners = await request.getImageFiles(cat.image as string[]);
           }
-          setForm({ ...cat, image, banners });
+
+          const initialForm: { [key: string]: any } = {
+            ...cat,
+            image,
+            banners,
+          };
+
+          Object.keys(initialForm).forEach((catProp) => {
+            if (catProp === "filters") {
+              const filters = initialForm[catProp] as CatFilter[];
+              filters.forEach((filter, i) => {
+                onFilterChange(filter, i);
+              });
+            } else {
+              const value = initialForm[catProp];
+              onInputChange(value, catProp);
+            }
+          });
+
+          let brdsWithFiles = await Promise.all(
+            brds.map(async (brd) => {
+              const imgFile = await request.getImageFiles(
+                brd.image as string[]
+              );
+              return { ...brd, image: [imgFile[0].b64] };
+            })
+          );
+          brdsWithFiles.unshift({ name: "", image: [""] });
+          setForm(initialForm as Category);
+          setBrands(brdsWithFiles);
         }
         setIsLoading(false);
       }
@@ -163,7 +197,6 @@ function CreateCategory({
         type="image"
         onChange={onInputChange}
         defaultValues={form.image as any}
-        changeOnMount
       />
     ),
     [form.image.length]
@@ -178,7 +211,6 @@ function CreateCategory({
         multipleFiles
         onChange={onInputChange}
         defaultValues={form.banners as any}
-        changeOnMount
       />
     ),
     [form.banners.length]
@@ -201,13 +233,13 @@ function CreateCategory({
     <>
       {statusCode === 404 && <Page404 />}
       {statusCode !== 404 && (
-        <div className={ControllerStyles.wrapper}>
+        <>
           {isLoading && (
             <div className={Styles.loader}>
               <SpinLoader brandColor />
             </div>
           )}
-          {!isLoading && (
+          <div className={ControllerStyles.wrapper}>
             <>
               <div className={ControllerStyles.sec_header}>
                 <div className={ControllerStyles.title}>Create Category</div>
@@ -230,7 +262,6 @@ function CreateCategory({
                           label="Name"
                           defaultValue={form.name}
                           onChange={onInputChange}
-                          changeOnMount
                         />
                         <Input
                           name="description"
@@ -239,7 +270,20 @@ function CreateCategory({
                           rows={6}
                           type="textarea"
                           onChange={onInputChange}
-                          changeOnMount
+                        />
+                        <Input
+                          name="brand"
+                          label="Brand"
+                          type="select"
+                          defaultValue={form.brand}
+                          selectionLabel={form.brand || "None"}
+                          onChange={onInputChange}
+                          selections={brands.map((brand) => ({
+                            label: brand.name || "None",
+                            selectionImg: brand.image[0] as string,
+                            defaultValue: brand.name,
+                          }))}
+                          isSelection
                         />
                         <Input
                           name="hasWarranty"
@@ -272,7 +316,11 @@ function CreateCategory({
                         Filter Options
                       </div>
                       <div className={Styles.filter_options}>
-                        <Filter index={-1} onChange={onFilterChange} />
+                        <Filter
+                          index={-1}
+                          onChange={onFilterChange}
+                          changeOnMount={false}
+                        />
                         {filters}
                       </div>
                     </section>
@@ -280,8 +328,8 @@ function CreateCategory({
                 </div>
               </div>
             </>
-          )}
-        </div>
+          </div>
+        </>
       )}
     </>
   );

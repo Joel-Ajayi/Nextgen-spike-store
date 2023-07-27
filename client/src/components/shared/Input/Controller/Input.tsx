@@ -1,4 +1,10 @@
-import React, { CSSProperties, useEffect, useRef, useState } from "react";
+import React, {
+  CSSProperties,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import Styles from "./input.module.scss";
 import { ReactComponent as CaretIcon } from "./../../../../images/icons/caret.svg";
 import { ReactComponent as AddIcon } from "./../../../../images/icons/add.svg";
@@ -11,6 +17,7 @@ import { IFile } from "../../../../types";
 type InputProps = {
   name?: string;
   isMultiInput?: boolean;
+  isSelection?: boolean;
   asInfo?: boolean;
   changeOnMount?: boolean;
   onChange?: (
@@ -29,7 +36,6 @@ type InputProps = {
     | "image"
     | "video"
     | "checkbox";
-  opt?: string;
   rows?: number;
   cols?: number;
   multipleFiles?: boolean;
@@ -37,27 +43,32 @@ type InputProps = {
   defaultValues?: (string | IFile | number)[];
   defaultChecked?: boolean;
   unit?: string;
-  options?: InputProps[];
+  selections?: InputProps[];
+  selectionImg?: string;
+  selectionLabel?: string;
 };
 
 function Input({
   name,
   onChange,
-  asInfo = false,
   label,
   type = "text",
   defaultValue = type === "number" ? "0" : "",
-  isMultiInput = false,
-  defaultChecked = false,
+  selectionLabel = "",
   unit = "",
   rows = 3,
   defaultValues = [],
-  multipleFiles = false,
-  options,
+  selections = [],
   span = false,
+  isMultiInput = false,
+  isSelection = false,
+  defaultChecked = false,
+  changeOnMount = true,
+  asInfo = false,
+  multipleFiles = false,
 }: InputProps) {
   const [error, setError] = useState("");
-  const [showOptions, setShowOptions] = useState(false);
+  const [showSelections, setShowSelections] = useState(false);
   const [inputs, setInputs] = useState<(string | IFile | number)[]>([]);
   const [caretStyle, setCaretStyle] = useState<CSSProperties>({
     display: "none",
@@ -65,26 +76,30 @@ function Input({
 
   const inputRef = useRef<any>(null);
 
-  useEffect(() => {
-    if (isMultiInput || type === "image") {
-      setInputs(defaultValues);
-      if ((defaultValues[0] as IFile)?.file) {
-        handleChange(defaultValues.map((file) => (file as any).file));
+  useLayoutEffect(() => {
+    if (changeOnMount) {
+      if (isMultiInput || type === "image") {
+        setInputs(defaultValues);
+        if ((defaultValues[0] as IFile)?.file) {
+          handleChange(defaultValues.map((file) => (file as any).file));
+        } else {
+          handleChange(defaultValues as any);
+        }
+      } else if (type === "checkbox") {
+        handleChange(defaultChecked);
+      } else if (isSelection) {
+        handleSelectionChange(selectionLabel, defaultValue);
       } else {
-        handleChange(defaultValues as any);
+        handleChange(defaultValue);
       }
-    } else if (type === "checkbox") {
-      handleChange(defaultChecked);
-    } else {
-      handleChange(defaultValue);
     }
-  }, []);
+  }, [defaultValue, defaultValues.length]);
 
   const changeCaretPos = () => {
     setTimeout(() => {
       if (inputRef.current) {
         setCaretStyle({
-          transform: `rotate(${!showOptions ? 180 : 0}deg)`,
+          transform: `rotate(${!showSelections ? 180 : 0}deg)`,
         });
       }
     }, 100);
@@ -130,26 +145,26 @@ function Input({
     }
   };
 
-  const handleOptionsChange = (opt: string, value: string) => {
-    console.log(opt);
-    setShowOptions((preVal) => !preVal);
+  const handleSelectionChange = (label: string, value: string) => {
+    setShowSelections((preVal) => !preVal);
     if (inputRef.current) {
-      inputRef.current.value = opt;
+      inputRef.current.value = label;
       setCaretStyle({
         left: inputRef.current.getBoundingClientRect().width - 22,
         transform: "rotate(180deg)",
       });
     }
+    setShowSelections(false);
     handleChange(value);
   };
 
   const handleFocus = () => {
     if (type === "select" && inputRef.current) {
       inputRef.current.blur();
-      setShowOptions((preVal) => !preVal);
+      setShowSelections((preVal) => !preVal);
       setCaretStyle({
         left: inputRef.current.getBoundingClientRect().width - 22,
-        transform: `rotate(${showOptions ? 180 : 0}deg)`,
+        transform: `rotate(${showSelections ? 180 : 0}deg)`,
       });
     }
 
@@ -276,22 +291,25 @@ function Input({
             )}
           </div>
           {/* //dropdown selection options */}
-          {type === "select" && showOptions && (
-            <div className={Styles.options}>
-              {options?.map(
-                ({ opt, defaultValue }) =>
-                  defaultValue && (
-                    <div
-                      key={uniqid()}
-                      className={Styles.option}
-                      onClick={() =>
-                        handleOptionsChange(opt as any, defaultValue)
-                      }
-                    >
-                      {opt}
-                    </div>
-                  )
-              )}
+          {type === "select" && showSelections && (
+            <div className={Styles.selections}>
+              {selections?.map(({ label, selectionImg, defaultValue }) => (
+                <div
+                  key={uniqid()}
+                  className={Styles.selection}
+                  onClick={() =>
+                    handleSelectionChange(
+                      label as string,
+                      defaultValue as string
+                    )
+                  }
+                >
+                  {selectionImg && (
+                    <img className={Styles.selection_img} src={selectionImg} />
+                  )}
+                  <span>{label}</span>
+                </div>
+              ))}
             </div>
           )}
         </div>

@@ -1,5 +1,5 @@
 import request from ".";
-import { Brand } from "../types";
+import { Brand, IFile } from "../types";
 
 class BrandReq {
   public async getBrand(name: string) {
@@ -22,7 +22,7 @@ class BrandReq {
     formData.append("operations", body);
     let map = { "0": ["variables.data.image"] };
     formData.append("map", JSON.stringify(map));
-    formData.append("0", data.image[0].file);
+    formData.append("0", (data.image[0] as IFile).file);
 
     const { res, msg } = await request.makeRequest<Brand>(
       formData as any,

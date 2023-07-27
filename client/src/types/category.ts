@@ -29,6 +29,7 @@ export type Category = {
   id?: string;
   name: string;
   lvl?: number;
+  brand?: string;
   parent: string;
   description: string;
   image: (IFile | string)[];

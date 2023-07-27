@@ -124,7 +124,7 @@
         display: flex;
         column-gap: 5px;
         position: absolute;
-        z-index: $z-index3;
+        z-index: $z-index;
         height: 30px;
         top: 50%;
         right: 2px;
@@ -149,7 +149,7 @@
       }
     }
 
-    .options {
+    .selections {
       position: absolute;
       top: 35px;
       left: 0;
@@ -161,11 +161,14 @@
       border: 1px solid $color-gray3;
       border-radius: 4px;
 
-      .option {
+      .selection {
+        display: flex;
+        align-items: center;
         padding: 5px 7px;
         font-size: 13px;
         cursor: pointer;
         color: $color-gray5;
+        width: 100%;
 
         &:first-child {
           border-radius: 3px 3px 0px 0px;
@@ -178,6 +181,12 @@
         &:hover {
           background-color: $brand-color;
           color: white;
+        }
+
+        .selection_img {
+          max-width: 50px;
+          max-height: 20px;
+          margin-right: 10px;
         }
       }
     }
@@ -218,8 +227,8 @@
     }
 
     .img {
-      height: 120px;
-      width: 150px;
+      max-height: 90px;
+      max-width: 180px;
       background-size: cover;
     }
 

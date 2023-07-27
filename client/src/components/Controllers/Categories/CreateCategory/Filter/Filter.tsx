@@ -12,6 +12,7 @@ type FilterProps = {
   index: number;
   onChange: (data: CatFilter, index: number, del?: boolean) => void;
   data?: CatFilter;
+  changeOnMount?: boolean;
 };
 
 const defaultData: CatFilter = {
@@ -23,7 +24,12 @@ const defaultData: CatFilter = {
   isRequired: false,
 };
 
-const Filter = ({ onChange, index, data }: FilterProps) => {
+const Filter = ({
+  onChange,
+  index,
+  data,
+  changeOnMount = true,
+}: FilterProps) => {
   const [isEditing, setIsEdititng] = useState(index === -1);
   const [form, setFormData] = useState<CatFilter>(data || defaultData);
   const [errors, setErrors] = useState<{ [key in string]: string }>({});
@@ -96,21 +102,22 @@ const Filter = ({ onChange, index, data }: FilterProps) => {
         defaultValue={form.name}
         asInfo={!isEditing}
         onChange={onInputChange}
-        changeOnMount
+        changeOnMount={changeOnMount}
       />
       <Input
         name="type"
         label="Type"
         type="select"
-        opt={form.type as any}
-        defaultValue={form.type as any}
-        asInfo={!isEditing}
-        changeOnMount
-        options={Object.keys(CatFilterType).map((type, i) => ({
-          opt: Object.values(CatFilterType)[i],
+        selectionLabel={form.type}
+        defaultValue={form.type}
+        selections={Object.keys(CatFilterType).map((type, i) => ({
+          label: Object.values(CatFilterType)[i],
           defaultValue: type,
         }))}
         onChange={onInputChange}
+        asInfo={!isEditing}
+        isSelection
+        changeOnMount={changeOnMount}
       />
       <Input
         name="unit"
@@ -118,7 +125,7 @@ const Filter = ({ onChange, index, data }: FilterProps) => {
         asInfo={!isEditing}
         defaultValue={form.unit}
         onChange={onInputChange}
-        changeOnMount
+        changeOnMount={changeOnMount}
       />
       <Input
         name="options"
@@ -129,7 +136,7 @@ const Filter = ({ onChange, index, data }: FilterProps) => {
         defaultValues={form.options}
         onChange={onInputChange}
         asInfo={!isEditing}
-        changeOnMount
+        changeOnMount={changeOnMount}
       />
       <Input
         name="isRequired"

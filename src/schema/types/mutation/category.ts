@@ -53,17 +53,17 @@ export const CreateCategory = mutationField("CreateCategory", {
     }
 
     // check if brand exist
-    let brandId: string = "";
+    let brandId: string | null = null;
     if (data?.brand) {
-      const productBrd = await ctx.db.brand.findUnique({
+      const brand = await ctx.db.brand.findUnique({
         where: { name: data.brand },
       });
-      if (!productBrd) {
+      if (!brand) {
         throw new GraphQLError("Brand not found", {
           extensions: { statusCode: 404 },
         });
       }
-      brandId = productBrd.id;
+      brandId = brand.id;
     }
 
     if (!data.hasWarranty && parent?.hasWarranty) {
@@ -155,6 +155,7 @@ export const UpdateCategory = mutationField("UpdateCategory", {
         lvl: true,
         image: true,
         brdId: true,
+        brand: { select: { name: true } },
         banners: true,
         parent: { select: { hasWarranty: true } },
         filters: { select: { id: true } },
@@ -187,21 +188,19 @@ export const UpdateCategory = mutationField("UpdateCategory", {
     }
 
     // check if brand exist
-    let brandId: string = "";
-    if (!data.brand && addedCat.brdId) {
-      await ctx.db.brand.delete({
-        where: { id: addedCat.brdId },
-      });
-    } else if (data.brand) {
-      const productBrd = await ctx.db.brand.findUnique({
+    let brandId: string | null = addedCat.brdId;
+    if (data.brand && data.brand !== addedCat.brand?.name) {
+      const brand = await ctx.db.brand.findUnique({
         where: { name: data.brand },
       });
-      if (!productBrd) {
+      if (!brand) {
         throw new GraphQLError("Brand not found", {
           extensions: { statusCode: 404 },
         });
       }
-      brandId = productBrd.id;
+      brandId = brand.id;
+    } else if (!data.brand) {
+      brandId = null;
     }
 
     // validate image/

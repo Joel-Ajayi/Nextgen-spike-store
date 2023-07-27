@@ -66,7 +66,7 @@ class CategoryReq {
   public async getCategory(name: string) {
     const body = JSON.stringify({
       query: `query GetCategory($name: String!) { GetCategory(name: $name) {
-                 id name parent lvl description image banners hasWarranty filters { id name type unit options isRequired }
+                 id name parent lvl description image banners hasWarranty brand filters { id name type unit options isRequired }
                 }
               }`,
       variables: { name },

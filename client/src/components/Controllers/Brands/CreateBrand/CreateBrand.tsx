@@ -21,7 +21,7 @@ type CreateBrandProps = {
   brd_id?: string;
 };
 
-const defaultData: Brand = { name: "", image: [] };
+const defaultData: Brand = { id: "", name: "", image: [] };
 
 function CreateBrand({ isUpdate, brd_id }: CreateBrandProps) {
   const dispatch = useAppDispatch();
@@ -95,7 +95,6 @@ function CreateBrand({ isUpdate, brd_id }: CreateBrandProps) {
         type="image"
         onChange={onInputChange}
         defaultValues={form.image as any}
-        changeOnMount
       />
     ),
     [form.image.length]
@@ -150,7 +149,6 @@ function CreateBrand({ isUpdate, brd_id }: CreateBrandProps) {
                       label="Name"
                       defaultValue={form.name}
                       onChange={onInputChange}
-                      changeOnMount
                     />
                     {imageInput}
                     <Button

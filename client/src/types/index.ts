@@ -47,6 +47,7 @@ export interface IFile {
 }
 
 export type Brand = {
+  id?: string;
   name: string;
-  image: IFile[];
+  image: (IFile | string)[];
 };
