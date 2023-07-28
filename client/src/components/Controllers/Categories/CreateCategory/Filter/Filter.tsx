@@ -108,15 +108,13 @@ const Filter = ({
         name="type"
         label="Type"
         type="select"
-        selectionLabel={form.type}
         defaultValue={form.type}
-        selections={Object.keys(CatFilterType).map((type, i) => ({
-          label: Object.values(CatFilterType)[i],
+        options={Object.keys(CatFilterType).map((type, i) => ({
+          optionLabel: Object.values(CatFilterType)[i],
           defaultValue: type,
         }))}
         onChange={onInputChange}
         asInfo={!isEditing}
-        isSelection
         changeOnMount={changeOnMount}
       />
       <Input

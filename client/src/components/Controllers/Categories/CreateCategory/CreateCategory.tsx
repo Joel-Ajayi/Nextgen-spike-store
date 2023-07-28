@@ -67,55 +67,39 @@ function CreateCategory({
 
   useEffect(() => {
     (async () => {
+      const { brds, msg: brdMsg } = await brandReq.getBrands();
       if (!!cat_id) {
         const { cat, msg: catMsg } = await categoryReq.getCategory(cat_id);
-        const { brds, msg: brdMsg } = await brandReq.getBrands();
-
-        if (catMsg?.statusCode === 404 || brdMsg?.statusCode === 404) {
+        if (catMsg?.statusCode === 404) {
           setStatusCode(404);
-        } else if (cat && brds) {
+        } else if (cat) {
           let image: IFile[] = [];
           if (cat.image.length) {
             image = await request.getImageFiles(cat.image as string[]);
           }
-
           let banners: IFile[] = [];
           if (cat.banners.length > 0) {
             banners = await request.getImageFiles(cat.image as string[]);
           }
 
-          const initialForm: { [key: string]: any } = {
-            ...cat,
-            image,
-            banners,
-          };
-
-          Object.keys(initialForm).forEach((catProp) => {
-            if (catProp === "filters") {
-              const filters = initialForm[catProp] as CatFilter[];
-              filters.forEach((filter, i) => {
-                onFilterChange(filter, i);
-              });
-            } else {
-              const value = initialForm[catProp];
-              onInputChange(value, catProp);
-            }
-          });
-
-          let brdsWithFiles = await Promise.all(
-            brds.map(async (brd) => {
-              const imgFile = await request.getImageFiles(
-                brd.image as string[]
-              );
-              return { ...brd, image: [imgFile[0].b64] };
-            })
-          );
-          brdsWithFiles.unshift({ name: "", image: [""] });
-          setForm(initialForm as Category);
-          setBrands(brdsWithFiles);
+          setForm({ ...cat, image, banners });
         }
-        setIsLoading(false);
       }
+
+      if (brdMsg?.statusCode === 404) {
+        setStatusCode(404);
+      } else if (brds) {
+        let brdsWithFiles = await Promise.all(
+          brds.map(async (brd) => {
+            const imgFile = await request.getImageFiles(brd.image as string[]);
+            return { ...brd, image: [imgFile[0].b64] };
+          })
+        );
+        brdsWithFiles.unshift({ name: "", image: [""] });
+        setBrands(brdsWithFiles);
+      }
+
+      setIsLoading(false);
     })();
   }, []);
 
@@ -196,10 +180,11 @@ function CreateCategory({
         label="Category Image"
         type="image"
         onChange={onInputChange}
-        defaultValues={form.image as any}
+        defaultValues={form.image}
+        changeOnMount={!isLoading}
       />
     ),
-    [form.image.length]
+    [form.image.length, isLoading]
   );
 
   const bannerInput = useMemo(
@@ -208,12 +193,13 @@ function CreateCategory({
         name="banners"
         label="Category Banners*"
         type="image"
-        multipleFiles
+        isMultipleFiles
         onChange={onInputChange}
-        defaultValues={form.banners as any}
+        defaultValues={form.banners}
+        changeOnMount={!isLoading}
       />
     ),
-    [form.banners.length]
+    [form.banners.length, isLoading]
   );
 
   const filters = useMemo(
@@ -224,9 +210,10 @@ function CreateCategory({
           data={filter}
           index={index}
           onChange={onFilterChange}
+          changeOnMount={!isLoading}
         />
       )),
-    [form.filters.length]
+    [form.filters.length, isLoading]
   );
 
   return (
@@ -262,6 +249,7 @@ function CreateCategory({
                           label="Name"
                           defaultValue={form.name}
                           onChange={onInputChange}
+                          changeOnMount={!isLoading}
                         />
                         <Input
                           name="description"
@@ -270,28 +258,28 @@ function CreateCategory({
                           rows={6}
                           type="textarea"
                           onChange={onInputChange}
+                          changeOnMount={!isLoading}
                         />
                         <Input
                           name="brand"
                           label="Brand"
                           type="select"
                           defaultValue={form.brand}
-                          selectionLabel={form.brand || "None"}
                           onChange={onInputChange}
-                          selections={brands.map((brand) => ({
-                            label: brand.name || "None",
-                            selectionImg: brand.image[0] as string,
+                          options={brands.map((brand) => ({
+                            optionImg: brand.image[0] as string,
                             defaultValue: brand.name,
                           }))}
-                          isSelection
+                          changeOnMount={!isLoading}
                         />
                         <Input
                           name="hasWarranty"
                           label="Has warranty"
                           type="checkbox"
                           defaultChecked={form.hasWarranty}
-                          span
                           onChange={onInputChange}
+                          changeOnMount={!isLoading}
+                          span
                         />
                       </section>
 
@@ -319,7 +307,7 @@ function CreateCategory({
                         <Filter
                           index={-1}
                           onChange={onFilterChange}
-                          changeOnMount={false}
+                          changeOnMount={!isLoading}
                         />
                         {filters}
                       </div>

@@ -1,5 +1,6 @@
 import React, {
   CSSProperties,
+  ChangeEvent,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -17,7 +18,6 @@ import { IFile } from "../../../../types";
 type InputProps = {
   name?: string;
   isMultiInput?: boolean;
-  isSelection?: boolean;
   asInfo?: boolean;
   changeOnMount?: boolean;
   onChange?: (
@@ -38,14 +38,13 @@ type InputProps = {
     | "checkbox";
   rows?: number;
   cols?: number;
-  multipleFiles?: boolean;
+  isMultipleFiles?: boolean;
   defaultValue?: string;
-  defaultValues?: (string | IFile | number)[];
+  defaultValues?: (string | IFile)[];
   defaultChecked?: boolean;
   unit?: string;
-  selections?: InputProps[];
-  selectionImg?: string;
-  selectionLabel?: string;
+  options?: InputProps[];
+  optionImg?: string;
 };
 
 function Input({
@@ -54,22 +53,25 @@ function Input({
   label,
   type = "text",
   defaultValue = type === "number" ? "0" : "",
-  selectionLabel = "",
   unit = "",
   rows = 3,
   defaultValues = [],
-  selections = [],
+  options = [],
   span = false,
   isMultiInput = false,
-  isSelection = false,
+  isMultipleFiles = false,
   defaultChecked = false,
   changeOnMount = true,
   asInfo = false,
-  multipleFiles = false,
 }: InputProps) {
+  const isSelect = type === "select";
+  const isImage = type === "image";
+  const isCheckbox = type === "checkbox";
+  const isTextArea = type === "textarea";
+
   const [error, setError] = useState("");
   const [showSelections, setShowSelections] = useState(false);
-  const [inputs, setInputs] = useState<(string | IFile | number)[]>([]);
+  const [inputs, setInputs] = useState<(string | IFile)[]>([]);
   const [caretStyle, setCaretStyle] = useState<CSSProperties>({
     display: "none",
   });
@@ -78,22 +80,18 @@ function Input({
 
   useLayoutEffect(() => {
     if (changeOnMount) {
-      if (isMultiInput || type === "image") {
+      if (isMultiInput || isImage) {
         setInputs(defaultValues);
-        if ((defaultValues[0] as IFile)?.file) {
-          handleChange(defaultValues.map((file) => (file as any).file));
-        } else {
-          handleChange(defaultValues as any);
-        }
-      } else if (type === "checkbox") {
+        handleChange(defaultValues);
+      } else if (isCheckbox) {
         handleChange(defaultChecked);
-      } else if (isSelection) {
-        handleSelectionChange(selectionLabel, defaultValue);
+      } else if (isSelect) {
+        handleSelectionChange(defaultValue);
       } else {
         handleChange(defaultValue);
       }
     }
-  }, [defaultValue, defaultValues.length]);
+  }, [changeOnMount]);
 
   const changeCaretPos = () => {
     setTimeout(() => {
@@ -114,29 +112,31 @@ function Input({
   }, []);
 
   const handleChange = async (
-    value: string | (string | File)[] | boolean | null
+    value: string | (string | IFile)[] | boolean | null
   ) => {
     if (onChange) {
       let error: string | void = "";
-      if (type === "image") {
-        const files = (value as File[]).map(
-          (file) =>
-            ({ file, b64: window.URL.createObjectURL(file as File) } as any)
-        );
-        setInputs(files);
-        error = await onChange(files, name as string);
-      } else if (!isMultiInput) {
-        error = await onChange(value as any, name as string);
-      }
+      if (!isMultiInput) error = await onChange(value, name as string);
       setError(error || "");
     }
   };
 
-  const handleMultiItemsChange = async () => {
+  const handleFileChange = (value: FileList) => {
+    const targetFiles = isMultipleFiles ? [...inputs] : [];
+    for (let index = 0; index < value.length; index++) {
+      const file = value.item(index) as File;
+      const b64 = window.URL.createObjectURL(file as File);
+      targetFiles.push({ file, b64 });
+    }
+    setInputs(targetFiles);
+    handleChange(targetFiles);
+  };
+
+  const handleMultiInputChange = async () => {
     if (inputRef.current && onChange) {
       const value = inputRef.current.value;
-      const alreadyAdded = inputs.findIndex((val) => val === value) !== -1;
-      if (value && !alreadyAdded) {
+      const isAdded = inputs.findIndex((val) => val === value) !== -1;
+      if (value && !isAdded) {
         const newInputs = [...inputs, value];
         const error = await onChange(newInputs, name as string);
         setInputs(newInputs);
@@ -145,10 +145,10 @@ function Input({
     }
   };
 
-  const handleSelectionChange = (label: string, value: string) => {
+  const handleSelectionChange = (value: string) => {
     setShowSelections((preVal) => !preVal);
     if (inputRef.current) {
-      inputRef.current.value = label;
+      inputRef.current.value = value || "None";
       setCaretStyle({
         left: inputRef.current.getBoundingClientRect().width - 22,
         transform: "rotate(180deg)",
@@ -174,16 +174,16 @@ function Input({
   };
 
   const removeFromInputs = async (index: number) => {
-    const currentInputs = inputs.filter((_, i) => i !== index) as any[];
-    if (type === "image") {
+    const currentInputs = inputs.filter((_, i) => i !== index);
+    setInputs(currentInputs);
+    if (isImage) {
       const ref = inputRef.current as HTMLInputElement;
       ref.files = null;
       ref.value = "";
-      handleChange(currentInputs as any);
+      handleChange(currentInputs);
       return;
     }
     const error = onChange ? await onChange(currentInputs, name as string) : "";
-    setInputs(currentInputs);
     setError(error || "");
   };
 
@@ -216,8 +216,12 @@ function Input({
                 name={name}
                 type={type}
                 className={inputClassName()}
-                defaultValue={defaultValue}
-                defaultChecked={defaultChecked}
+                defaultValue={
+                  defaultValue === "" && type === "select"
+                    ? "None"
+                    : defaultValue
+                }
+                checked={defaultChecked}
                 onChange={(e) =>
                   handleChange(
                     type === "checkbox" ? e.target.checked : e.target.value
@@ -225,42 +229,16 @@ function Input({
                 }
                 onFocus={handleFocus}
                 style={{
-                  cursor:
-                    type === "select" || type === "checkbox"
-                      ? "pointer"
-                      : "auto",
+                  cursor: isSelect || type === "checkbox" ? "pointer" : "auto",
                   minHeight: asInfo ? "min-content" : 33,
                   margin: asInfo && type !== "checkbox" ? "3px 0" : 0,
                 }}
                 disabled={asInfo}
               />
             )}
-            {/* // files input */}
-            {type === "image" && (
-              <div className={Styles.files_area}>
-                <DownloadIcon className={Styles.download_icon} />
-                <div>
-                  <b>Choose a file </b>or drag it here
-                </div>
-                <input
-                  ref={inputRef}
-                  type="file"
-                  title=" "
-                  className={Styles.input_box}
-                  multiple={multipleFiles}
-                  required
-                  accept={CONSTS.files.mimeType.supportedImg}
-                  onChange={(e) => {
-                    const newInputs = multipleFiles
-                      ? [...inputs, ...(e.target.files as any)]
-                      : [];
-                    handleChange([...newInputs, ...(e.target.files as any)]);
-                  }}
-                />
-              </div>
-            )}
+
             {/* // textarea input */}
-            {type === "textarea" && (
+            {isTextArea && (
               <textarea
                 ref={inputRef}
                 name={name}
@@ -274,50 +252,67 @@ function Input({
                 disabled={asInfo}
               />
             )}
-            {/* //select input caret | */}
-            {!asInfo && (
+
+            {/* //selections display caret and Addition button for multiInputs */}
+            {!asInfo && !isImage && (
               <div className={Styles.actions}>
-                {type === "select" && (
+                {isSelect && (
                   <CaretIcon
                     className={Styles.caret}
                     style={caretStyle}
                     onClick={handleFocus}
                   />
                 )}
-                {!(type === "image") && isMultiInput && (
-                  <AddIcon onClick={handleMultiItemsChange} />
-                )}
+                {isMultiInput && <AddIcon onClick={handleMultiInputChange} />}
+              </div>
+            )}
+
+            {/* // files input */}
+            {isImage && (
+              <div className={Styles.files_area}>
+                <DownloadIcon className={Styles.download_icon} />
+                <div>
+                  <b>Choose a file </b>or drag it here
+                </div>
+                <input
+                  ref={inputRef}
+                  type="file"
+                  title=" "
+                  className={Styles.input_box}
+                  multiple={isMultipleFiles}
+                  required
+                  accept={CONSTS.files.mimeType.supportedImg}
+                  onChange={(e) => handleFileChange(e.target.files as FileList)}
+                />
               </div>
             )}
           </div>
+
           {/* //dropdown selection options */}
-          {type === "select" && showSelections && (
+          {isSelect && showSelections && (
             <div className={Styles.selections}>
-              {selections?.map(({ label, selectionImg, defaultValue }) => (
+              {options?.map(({ optionImg, defaultValue }) => (
                 <div
                   key={uniqid()}
                   className={Styles.selection}
-                  onClick={() =>
-                    handleSelectionChange(
-                      label as string,
-                      defaultValue as string
-                    )
-                  }
+                  onClick={() => handleSelectionChange(defaultValue as string)}
                 >
-                  {selectionImg && (
-                    <img className={Styles.selection_img} src={selectionImg} />
+                  {optionImg && (
+                    <img className={Styles.selection_img} src={optionImg} />
                   )}
-                  <span>{label}</span>
+                  <span>{defaultValue || "None"}</span>
                 </div>
               ))}
             </div>
           )}
         </div>
       )}
+
       {/* //error message */}
       {error && <div className={Styles.error}>{error}</div>}
+
       {/* // multiple added inputs */}
-      {(isMultiInput || type === "image") && !!inputs.length && (
+      {!!inputs.length && (
         <div
           className={Styles.added_inputs}
           style={asInfo ? {} : { marginTop: 5 }}
@@ -333,10 +328,10 @@ function Input({
                     &#10006;
                   </span>
                 )}
-                {type === "image" && (
+                {isImage && (
                   <img className={Styles.img} src={(input as IFile).b64} />
                 )}
-                {!(type === "image") && (
+                {!isImage && (
                   <span className={Styles.item}>{input as string}</span>
                 )}
               </div>

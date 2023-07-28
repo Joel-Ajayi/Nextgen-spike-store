@@ -97,7 +97,7 @@ function CreateBrand({ isUpdate, brd_id }: CreateBrandProps) {
         defaultValues={form.image as any}
       />
     ),
-    [form.image.length]
+    [form.image.length, isLoading]
   );
 
   const onSave = async () => {
