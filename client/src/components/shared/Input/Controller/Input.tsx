@@ -321,12 +321,12 @@ function Input({
             return (
               <div className={Styles.added_input} key={uniqid()}>
                 {!asInfo && (
-                  <span
+                  <div
                     onClick={() => removeFromInputs(index)}
                     className={Styles.close}
                   >
-                    &#10006;
-                  </span>
+                    <div>x</div>
+                  </div>
                 )}
                 {isImage && (
                   <img className={Styles.img} src={(input as IFile).b64} />

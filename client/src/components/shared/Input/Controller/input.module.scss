@@ -238,19 +238,22 @@
 
     .close {
       position: absolute;
-      display: flex;
-      justify-content: center;
-      align-items: center;
       right: -6px;
       top: -6px;
-      width: 15px;
       height: 15px;
+      width: 15px;
       background-color: $color-gray5;
-      font-size: 8px;
       padding-bottom: 1px;
-      border-radius: 50%;
-      color: white;
       cursor: pointer;
+      text-align: center;
+      border-radius: 50%;
+
+      div {
+        font-size: 12px;
+        margin-top: -3px;
+        margin-left: 1px;
+        color: white !important;
+      }
     }
   }
 }
