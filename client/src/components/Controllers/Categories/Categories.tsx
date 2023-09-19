@@ -19,7 +19,7 @@ function Categories() {
       case PageSections.UpdateCat:
         if (!cat_id) return <Page404 />;
         return <CreateCategory isUpdate cat_id={cat_id} />;
-      case PageSections.Listing:
+      case PageSections.CatListing:
         return <CategoryListing />;
       default:
         return <Page404 />;

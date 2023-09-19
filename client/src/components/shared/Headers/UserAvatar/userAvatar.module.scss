@@ -1,7 +1,7 @@
 @import "../../../../styles/vars.scss";
 
 a {
-  text-decoration: none;
+  text-decoration: none !important;
 }
 
 .avatar_wrapper {
@@ -11,7 +11,6 @@ a {
   align-items: center;
   overflow: hidden;
   text-overflow: ellipsis;
-  background-color: $brand-color;
 
   .avatar {
     width: 20px;
@@ -24,21 +23,17 @@ a {
   }
 
   .name_initials {
-    height: 38px;
-    width: 38px;
-    border: 2px solid rgb(74, 74, 100);
-    background-color: rgb(96, 100, 112);
-    font-size: 20px;
+    background-color: rgb(22, 22, 22);
     border-radius: 50%;
+    border: 2px solid rgb(46, 46, 46);
+    text-transform: capitalize;
     display: flex;
     align-items: center;
     justify-content: center;
-
-    span {
-      margin-top: -2px;
-      color: white;
-      font-weight: 500;
-    }
+    text-decoration: none;
+    color: white;
+    font-weight: 500;
+    font-size: 20px;
   }
 
   .default {

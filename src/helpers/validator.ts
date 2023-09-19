@@ -29,7 +29,16 @@ class Validator {
 
   public async signIn(data: any) {
     try {
-      await object({ email: this.email(), pwd: this.pwd() }).validate(data);
+      await object({
+        email: this.email(),
+        pwd: this.pwd(),
+        fName: string()
+          .min(2, "First Name should exceed 1 word")
+          .max(20, "First Name should not exceed 20 words"),
+        lName: string()
+          .min(2, "Last Name should exceed 1 word")
+          .max(20, "Last Name should not exceed 20 words"),
+      }).validate(data);
     } catch (error) {
       throw new GraphQLError((error as any).message, {
         extensions: {

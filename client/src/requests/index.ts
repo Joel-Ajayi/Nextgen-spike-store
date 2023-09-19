@@ -50,7 +50,10 @@ class Requests {
         });
       }
       const resData = res.data?.data as Object;
-      return { res: Object.values(resData)[0] as T, msg: null };
+      return {
+        res: Object.values(resData)[0] as T,
+        msg: { msg: "", type: MessageType.Success, statusCode: 200 },
+      };
     } catch (err) {
       console.log(err);
       let msg: IMessage | null = null;

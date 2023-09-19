@@ -5,7 +5,8 @@ export const initialState: IUserInitailState = {
   isAuthenticated: false,
   email: "",
   role: 0,
-  fullName: "",
+  fName: "",
+  lName: "",
   avatar: null,
   contactNumber: null,
 };

@@ -1,11 +1,12 @@
 import React, { useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { Navigate, useLocation, useSearchParams } from "react-router-dom";
 import Brands from "../components/Controllers/Brands/Brands";
 import Categories from "../components/Controllers/Categories/Categories";
 import Orders from "../components/Controllers/Orders/Orders";
 import Products from "../components/Controllers/Products/Products";
 import BackgroundMsg from "../components/shared/BackgroundMsg/BackgroundMsg";
 import { Pages } from "../types/controller";
+import Dashboard from "../components/Controllers/Dashboard/Dashboard";
 
 function ControllerPage() {
   let [params] = useSearchParams();
@@ -21,8 +22,10 @@ function ControllerPage() {
         return <Brands />;
       case Pages.Orders:
         return <Orders />;
+      case Pages.DashBoard:
+        return <Dashboard />;
       default:
-        return <div>Hello</div>;
+        return <Navigate to={`/controller?pg=${Pages.DashBoard}`} replace />
     }
   }, [page]);
 

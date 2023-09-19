@@ -32,12 +32,8 @@ function CategoryListing() {
     (async () => {
       if (!categories.length) {
         const { cats, msg } = await categoryReq.getCategories();
-        if (msg) {
-          dispatch(setCategories([]));
-          dispatch(setBackgroundMsg(msg));
-        } else if (cats) {
-          dispatch(setCategories(cats));
-        }
+        if (msg.msg) dispatch(setBackgroundMsg(msg));
+        if (cats) dispatch(setCategories(cats));
       }
       setLoading(false);
     })();
@@ -63,8 +59,7 @@ function CategoryListing() {
 
   const onEdit = (id: string) => {
     navigate(
-      `/controller?pg=${Pages.Categories}&sec=${
-        PageSections.UpdateCat
+      `/controller?pg=${Pages.Categories}&sec=${PageSections.UpdateCat
       }&cat_id=${id.replace(/\s/g, "-")}`,
       { replace: false }
     );

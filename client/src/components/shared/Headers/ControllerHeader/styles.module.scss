@@ -13,11 +13,24 @@
     display: flex;
     align-items: center;
     height: inherit;
-    column-gap: 3%;
+    column-gap: 5%;
     width: 100%;
-    justify-content: center;
+    justify-content: space-between;
+
+    @media screen and (max-width: 799px) {
+      justify-content: space-between;
+    }
+
+    @media screen and (max-width: 1200px) {
+      padding: 20px 25px;
+    }
 
     .logo {
+      @media screen and (max-width: 799px) {
+        order: 2;
+        margin-left: auto;
+      }
+
       a {
         display: flex;
         align-items: center;
@@ -44,14 +57,25 @@
       color: white;
       cursor: pointer;
 
+      @media screen and (max-width: 799px) {
+        display: none;
+      }
+
       a {
         color: white;
         text-decoration: none;
       }
     }
 
+    .side_bar {
+      @media screen and (min-width: 800px) {
+        display: none;
+      }
+    }
+
     .nav_avatar {
-      @media screen and (max-width: 850px) {
+      margin-left: auto;
+      @media screen and (max-width: 799px) {
         display: none !important;
       }
     }

@@ -166,7 +166,7 @@ function CreateCategory({
         } else {
           dispatch(addCategory(cat as CategoryMini));
         }
-        const navLink = `/controller?pg=${Pages.Categories}&sec=${PageSections.Listing}`;
+        const navLink = `/controller?pg=${Pages.Categories}&sec=${PageSections.CatListing}`;
         navigate(navLink, { replace: false });
       }
       setIsSaving(false);
@@ -235,7 +235,7 @@ function CreateCategory({
                     value="ALL CATEGORIES"
                     type="button"
                     className={Styles.all_cat_button}
-                    link={`/controller?pg=${Pages.Categories}&sec=${PageSections.Listing}`}
+                    link={`/controller?pg=${Pages.Categories}&sec=${PageSections.CatListing}`}
                   />
                 </div>
               </div>

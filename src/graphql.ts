@@ -6,10 +6,6 @@ import { appContext } from "./schema/context";
 import { NexusGraphQLSchema } from "nexus/dist/core";
 import consts from "./@types/conts";
 
-export default async (app: Application) => {
-  await setUpGraphql(app, userSchema, "/api");
-};
-
 const setUpGraphql = async (
   app: Application,
   schema: NexusGraphQLSchema,
@@ -32,4 +28,8 @@ const setUpGraphql = async (
   });
   await server.start();
   await server.applyMiddleware({ app, path, cors });
+};
+
+export default async (app: Application) => {
+  await setUpGraphql(app, userSchema, "/api");
 };

@@ -42,8 +42,8 @@ enum CatFilterType {
 model User {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
   email         String    @unique
-  fullName      String?
-  displayName   String?
+  fName         String
+  lName         String
   avatar        String?
   contactNumber String?
   reviews       Reviews[]

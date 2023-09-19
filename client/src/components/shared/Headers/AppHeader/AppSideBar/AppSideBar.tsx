@@ -6,16 +6,16 @@ import React, {
   CSSProperties,
 } from "react";
 import Styles from "./sidebar.module.scss";
-import { ReactComponent as SideBarIcon } from "../../../../images/icons/sideBar.svg";
-import { ReactComponent as CategoryIcon } from "../../../../images/icons/category.svg";
-import { CONSTS } from "../../../../const";
-import { loginDropdown, moreDropdown } from "../../Headers/AppHeader/Header";
-import DropdownItem from "../../Dropdown/DropdownItem/DropdownItem";
+import { ReactComponent as CategoryIcon } from "../../../../../images/icons/category.svg";
+import { HiBars3BottomLeft as SideBarIcon } from 'react-icons/hi2'
+import { CONSTS } from "../../../../../const";
+import { loginDropdown, moreDropdown } from "../Header";
+import DropdownItem from "../../../Dropdown/DropdownItem/DropdownItem";
 import uniqId from "uniqid";
-import UserAvatar from "../../Headers/UserAvatar/UserAvatar";
-import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
-import userReq from "../../../../requests/user";
-import userSlice from "../../../../store/userState";
+import UserAvatar from "../../UserAvatar/UserAvatar";
+import { useAppDispatch, useAppSelector } from "../../../../../store/hooks";
+import userReq from "../../../../../requests/user";
+import userSlice from "../../../../../store/userState";
 import { useNavigate } from "react-router-dom";
 
 type BarProps = {
@@ -38,10 +38,11 @@ function AppSideBar({ className = "" }: BarProps) {
 
   const handleToggle = (e: MouseEvent) => {
     if (showBar) {
-      const show =
-        ((e as any).composedPath() as EventTarget[]).findIndex(
-          (el) => (el as any).id === CONSTS.ids.appSideBar
-        ) !== -1;
+
+      const paths = e.composedPath()
+      const show = paths.findIndex(
+        (el) => (el as any).id === CONSTS.ids.appSideBar
+      ) !== -1;
       if (!show) {
         setShowBar(() => show);
         setWrapperStyle({ backgroundColor: "transparent", left: 0 });
@@ -58,6 +59,12 @@ function AppSideBar({ className = "" }: BarProps) {
     dispatch(resetUserState());
     navigate("/signin", { replace: false });
   };
+
+  const handleBarAction = () => {
+    setWrapperStyle({ left: 0 });
+    setStyle({ left: 0 });
+    setShowBar(true);
+  }
 
   useEffect(() => {
     return () => {
@@ -76,22 +83,19 @@ function AppSideBar({ className = "" }: BarProps) {
         wrapperRef.current.removeEventListener("click", handleToggle);
       }
     };
-  }, [wrapperRef.current, style, setStyle]);
+  }, [wrapperRef.current, style]);
+
+
 
   return (
     <div className={`${Styles.bar_wrapper} ${className}`}>
-      <SideBarIcon
-        className={Styles.icon}
-        onClick={() => {
-          setWrapperStyle({ left: 0 });
-          setStyle({ left: 0 });
-          setShowBar(true);
-        }}
-      />
+      {!showBar && (
+        <SideBarIcon className={Styles.icon} onClick={handleBarAction} />
+      )}
       <div className={Styles.content} style={wrapperStyle} ref={wrapperRef}>
         <div className={Styles.bar} style={style} id={CONSTS.ids.appSideBar}>
           <section className={Styles.avatar}>
-            <UserAvatar showInfo />
+            <UserAvatar size={37} showInfo />
           </section>
           <section>
             <ul>
@@ -108,6 +112,7 @@ function AppSideBar({ className = "" }: BarProps) {
                       icon={item.icon}
                       link={item.link}
                       onClick={item?.onClick}
+                      highlight
                     />
                   )
               )}
@@ -119,6 +124,7 @@ function AppSideBar({ className = "" }: BarProps) {
                 title="All Categories"
                 icon={<CategoryIcon className="svg-brand-fill" />}
                 link="/categories"
+                highlight
               />
             </ul>
           </section>
@@ -133,6 +139,7 @@ function AppSideBar({ className = "" }: BarProps) {
                       icon={item.icon}
                       link={item.link}
                       onClick={item?.onClick}
+                      highlight
                     />
                   )
               )}

@@ -15,7 +15,8 @@ export const UserObj = objectType({
     t.nonNull.field("email", { type: "String" });
     t.nonNull.field("role", { type: "Int" });
     t.nonNull.field("avatar", { type: "String" });
-    t.nullable.field("fullName", { type: "String" });
+    t.nullable.field("fName", { type: "String" });
+    t.nullable.field("lName", { type: "String" });
     t.nullable.field("contactNumber", { type: "String" });
   },
 });

@@ -2,16 +2,40 @@
 
 .dropdown_item {
   padding: 0;
+  display: flex;
   .link {
     display: flex;
     align-items: center;
     text-decoration: none;
-    column-gap: 6px;
-    padding: 0 10px;
+    cursor: pointer;
+    height: inherit;
+    flex-wrap: nowrap;
+    width: 100%;
 
     .title {
       color: $color-gray-text;
-      font-size: 0.9em;
+      font-size: 0.8rem;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      margin: 0 5px;
+      height: 100%;
+      flex: 1;
+    }
+
+    .title_txt {
+      &:hover {
+        opacity: 0.7;
+      }
+    }
+
+    .title_bg {
+      border-radius: 3px;
+      &:hover {
+        background-color: $brand-color;
+        color: white;
+      }
     }
 
     svg {
@@ -19,8 +43,4 @@
       height: 23px;
     }
   }
-}
-
-.border {
-  border-top: 1px solid $color-gray1;
 }

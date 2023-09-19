@@ -18,7 +18,7 @@ function Brands() {
       case PageSections.UpdateBrd:
         if (!brd_id) return <Page404 />;
         return <CreateBrand isUpdate brd_id={brd_id} />;
-      case PageSections.Listing:
+      case PageSections.BrdListing:
         return <BrandListing />;
       default:
         return <Page404 />;

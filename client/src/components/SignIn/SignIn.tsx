@@ -5,16 +5,11 @@ import Input from "../shared/Input/Input";
 import appSlice from "../../store/appState";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import userReq from "../../requests/user";
-import { SignInForm } from "../../types/user";
+import { SignInFieds, SignInForm } from "../../types/user";
 import { MessageType } from "../../types";
 import userSlice from "../../store/userState";
 import validator from "../../validators";
 import userValidator from "../../validators/user";
-
-enum SignInFieds {
-  Email = "email",
-  Pwd = "pwd",
-}
 
 function SignIn() {
   let [params] = useSearchParams();
@@ -41,44 +36,27 @@ function SignIn() {
   const changeAuth = () => {
     if (isModalVisible && isSignPage) dispatch(setShowModal(false));
     setIsSignIn(!isSignIn);
+    setFormData({ ...formData, fName: undefined, lName: undefined, })
   };
 
   const onInputChange = async (
     value: string,
     name: string
   ): Promise<string | void> => {
-    try {
-      const valFunc =
-        name === SignInFieds.Pwd
-          ? userValidator.signInPwd()
-          : validator.email();
-      await valFunc.validate(value);
-      setFormData({ ...formData, [name]: { value, err: "" } });
-    } catch (error) {
-      setFormData({
-        ...formData,
-        [name]: { value, err: (error as any).message },
-      });
-      return (error as any).message;
-    }
+    const { error } = await userValidator.signIn(name as SignInFieds, value)
+    setFormData({ ...formData, [name]: { value, err: error } });
+    return error;
   };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const msg = await userReq.signIn(formData, isSignIn);
+    const { msg, user } = await userReq.signIn(formData, isSignIn);
     if (msg.type === MessageType.Error) {
       dispatch(setBackgroundMsg(msg));
-    } else {
-      dispatch(
-        setUserState({
-          email: formData[SignInFieds.Email]?.value as string,
-          isAuthenticated: true,
-          role: 0,
-          avatar: "",
-        })
-      );
+    } else if (user) {
+      dispatch(setUserState({ ...user, isAuthenticated: true }));
       dispatch(setShowModal(false));
     }
   };
@@ -107,6 +85,20 @@ function SignIn() {
           </div>
           <div className={Styles.form_wrapper}>
             <form onSubmit={onSubmit}>
+              {
+                !isSignIn && <>
+                  <Input
+                    name={SignInFieds.Fname}
+                    placeholder="Enter First Name"
+                    onChange={onInputChange}
+                  />
+                  <Input
+                    name={SignInFieds.Lname}
+                    placeholder="Enter Last Name"
+                    onChange={onInputChange}
+                  />
+                </>
+              }
               <Input
                 name={SignInFieds.Email}
                 placeholder="Enter Email"
@@ -117,6 +109,7 @@ function SignIn() {
                 placeholder="Enter Password"
                 onChange={onInputChange}
                 autoComplete="off"
+                type="password"
               />
               <div className={Styles.info}>
                 <p>

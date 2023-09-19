@@ -1,66 +1,79 @@
-import React from "react";
+import React, { useEffect, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { Roles } from "../../../../types";
 import UserAvatar from "../UserAvatar/UserAvatar";
 import Styles from "./styles.module.scss";
 import Dropdown from "../../Dropdown/Dropdown";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import userSlice from "../../../../store/userState";
-import { Pages, PageSections } from "../../../../types/controller";
+import { Pages } from "../../../../types/controller";
 import userReq from "../../../../requests/user";
+import ControllerSideBar from "./ControllerSideBar/ControllerSideBar";
+import { loginDropdown } from "../AppHeader/Header";
+import uniqId from 'uniqid'
+import appSlice from "../../../../store/appState";
+import controllerStateSlice from "../../../../store/controller/states";
+import navData, { DataType } from './data'
+import data from "./data";
 
 function ControllerHeader() {
-  const { role } = useAppSelector((state) => state.user);
+  let [params] = useSearchParams();
+  const { pathname } = useLocation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { resetUserState } = userSlice.actions;
+  const { setShowModal } = appSlice.actions;
+  const { setActiveTabs } = controllerStateSlice.actions;
 
-  const signOut = async () => {
+  const tab = params.get("sub");
+
+  const { role, isAuthenticated } = useAppSelector((state) => state.user);
+  const activeTabs = useAppSelector((state) => state.controller.state.activeTabs);
+
+  useEffect(() => {
+    if (tab && !activeTabs.includes(tab)) {
+      const tabPath: string[] = [];
+
+      (function findPath(data: { [x: string]: DataType; }, path: string[]) {
+        Object.keys(data).forEach((dataKey) => {
+          if (dataKey !== tab) {
+            findPath(data[dataKey].items, [...path, dataKey])
+            return;
+          }
+          tabPath.push(...path, dataKey)
+        })
+      })(data, [])
+      dispatch(setActiveTabs(tabPath))
+    }
+  }, [tab])
+
+  const handleSignOut = async () => {
     await userReq.signOut();
     dispatch(resetUserState());
     navigate("/signin", { replace: false });
     dispatch(resetUserState());
   };
 
-  const catNavItems = [
-    {
-      title: "All Categories",
-      link: `/controller?pg=${Pages.Categories}&sec=${PageSections.Listing}`,
-    },
-    {
-      title: "Add Category",
-      link: `/controller?pg=${Pages.Categories}&sec=${PageSections.CreateCat}`,
-    },
-  ];
+  const handleSignInButton = () => {
+    if (!isAuthenticated) {
+      if (!pathname.includes("/signin")) {
+        dispatch(setShowModal(true));
+      }
+    }
+  };
 
-  const prdNavItems = [
-    {
-      title: "All Products",
-      link: `/controller?pg=${Pages.Products}&sec=${PageSections.Listing}`,
-    },
-    {
-      title: "Add Product",
-      link: `/controller?pg=${Pages.Products}&sec=${PageSections.CreatePrd}`,
-    },
-  ];
-
-  const brandNavItems = [
-    {
-      title: "All Brands",
-      link: `/controller?pg=${Pages.Brand}&sec=${PageSections.Listing}`,
-    },
-    {
-      title: "Add Brand",
-      link: `/controller?pg=${Pages.Brand}&sec=${PageSections.CreateBrd}`,
-    },
-  ];
-
-  const ordersNavItems = [
-    {
-      title: "Order Items",
-      link: `/controller?pg=${Pages.Orders}&sec=${PageSections.Listing}`,
-    },
-  ];
+  const loginItemsDropdown = useMemo(() => {
+    if (isAuthenticated) return loginDropdown(true, role, handleSignOut);
+    return [
+      <div className={Styles.signup_item} key={uniqId()}>
+        <div>New Customer ?</div>
+        <Link to={`${pathname}?signup=true`} onClick={handleSignInButton}>
+          Sign Up
+        </Link>
+      </div>,
+      ...loginDropdown(false, role),
+    ];
+  }, [isAuthenticated]);
 
   return (
     <div className={Styles.headerWrapper}>
@@ -73,51 +86,35 @@ function ControllerHeader() {
             </div>
           </Link>
         </div>
-        {role === Roles.SuperAdmin && (
-          <Dropdown
+
+        {role === Roles.SuperAdmin && Object.values(Pages).map((page) => {
+          const hasItems = !!Object.keys(navData[page]).length;
+          return <Dropdown
             wrapperClassName={Styles.nav_item}
+            key={uniqId()}
             listClassName={Styles.nav_item_dropdown}
-            title="Categories"
+            title={navData[page].title}
             showCaret
+            onClick={hasItems ? () => { } : null as any}
+            link={!hasItems ? navData[page].link : ''}
             showToolTip={false}
-            items={catNavItems}
+            items={Object.values(navData[page].items)}
             level={1}
           />
-        )}
-        {role === Roles.SuperAdmin && (
-          <Dropdown
-            wrapperClassName={Styles.nav_item}
-            listClassName={Styles.nav_item_dropdown}
-            title="Brand"
-            showCaret
-            showToolTip={false}
-            items={brandNavItems}
-            level={1}
-          />
-        )}
+        })}
+
         <Dropdown
           wrapperClassName={Styles.nav_item}
-          listClassName={Styles.nav_item_dropdown}
-          title="Products"
-          showCaret
-          showToolTip={false}
-          items={prdNavItems}
+          onClick={handleSignInButton}
+          title={isAuthenticated ? <UserAvatar infoClassName={Styles.nav_avatar} /> : <span>Login</span>}
+          listClassName={Styles.user_dropdown_list}
+          titleClassName={!isAuthenticated ? Styles.login_button : ""}
+          showCaret={false}
+          items={loginItemsDropdown}
           level={1}
         />
-        <Dropdown
-          wrapperClassName={Styles.nav_item}
-          listClassName={Styles.nav_item_dropdown}
-          title="Orders"
-          showCaret
-          showToolTip={false}
-          items={ordersNavItems}
-          level={1}
-        />
-        <div>
-          <UserAvatar infoClassName={Styles.nav_avatar} />
-        </div>
-        <div className={Styles.nav_item} onClick={signOut}>
-          <span>Logout</span>
+        <div className={Styles.side_bar}>
+          <ControllerSideBar isFixed />
         </div>
       </div>
     </div>

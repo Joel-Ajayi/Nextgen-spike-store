@@ -11,7 +11,10 @@ export const SignInInput = inputObjectType({
 export const SignUpInput = inputObjectType({
   name: "SignUpInput",
   definition(t) {
-    t.nullable.string("email"), t.nonNull.string("pwd");
+    t.nonNull.string("email");
+    t.nonNull.string("fName");
+    t.nonNull.string("lName");
+    t.nonNull.string("pwd");
   },
 });
 

@@ -17,13 +17,14 @@ import { ReactComponent as RewardIcon } from "../../../../images/icons/badge.svg
 import { ReactComponent as OrderIcon } from "../../../../images/icons/order.svg";
 import { ReactComponent as GiftIcon } from "../../../../images/icons/gift-card.svg";
 import { DropdownItemProps } from "../../Dropdown/DropdownItem/DropdownItem";
+import { FiSearch as SearchIcon } from 'react-icons/fi'
 import uniqId from "uniqid";
 import ModalWrapper from "../../Modal/Wrapper/Wrapper";
 import UserLogin from "../../../SignIn/SignIn";
 import appSlice from "../../../../store/appState";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import UserAvatar from "../UserAvatar/UserAvatar";
-import AppSideBar from "../../SideBars/AppSideBar/AppSideBar";
+import AppSideBar from "./AppSideBar/AppSideBar";
 import { Roles } from "../../../../types";
 import { Pages, PageSections } from "../../../../types/controller";
 import userReq from "../../../../requests/user";
@@ -42,16 +43,16 @@ export const loginDropdown = (
     },
     isAuthenticated && role > Roles.User
       ? {
-          icon: <CategoryIcon className="svg-brand-fill" />,
-          title: "Controller Categories",
-          link: `/controller?pg=${Pages.Categories}&sec=${PageSections.Listing}`,
-        }
+        icon: <CategoryIcon className="svg-brand-fill" />,
+        title: "Controller Categories",
+        link: `/controller`,
+      }
       : null,
     {
       icon: (
         <OrderIcon
           className="svg-brand-fill"
-          style={{ transform: "scale(0.8)" }}
+          style={{ transform: "scale(0.75)" }}
         />
       ),
       title: "Orders",
@@ -74,15 +75,15 @@ export const loginDropdown = (
     },
     isAuthenticated
       ? {
-          icon: (
-            <LogoutIcon
-              className="svg-brand"
-              style={{ transform: "scale(0.9)" }}
-            />
-          ),
-          title: "Logout",
-          onClick: logoutFunc,
-        }
+        icon: (
+          <LogoutIcon
+            className="svg-brand"
+            style={{ transform: "scale(0.9)" }}
+          />
+        ),
+        title: "Logout",
+        onClick: logoutFunc,
+      }
       : null,
   ] as DropdownItemProps[];
 };
@@ -188,17 +189,8 @@ function Header() {
               </span>
             </div>
           </Link>
+          <SearchIcon className={Styles.search_icon} />
           <ProductsSearch className={Styles.search_bar} />
-          <Dropdown
-            wrapperClassName={Styles.user_dropdown}
-            onClick={handleSignInButton}
-            title={isAuthenticated ? <UserAvatar /> : <span>Login</span>}
-            listClassName={Styles.user_dropdown_list}
-            titleClassName={!isAuthenticated ? Styles.login_button : ""}
-            showCaret={false}
-            items={loginItemsDropdown}
-            level={1}
-          />
           <Dropdown
             wrapperClassName={Styles.more_dropdown}
             title={<span>More</span>}
@@ -209,6 +201,17 @@ function Header() {
             <CartIcon className={Styles.cart_icon} />
             <span>Cart</span>
           </Link>
+          <Dropdown
+            wrapperClassName={Styles.user_dropdown}
+            onClick={handleSignInButton}
+            title={isAuthenticated ? <UserAvatar /> : <span>Login</span>}
+            listClassName={Styles.user_dropdown_list}
+            titleClassName={!isAuthenticated ? Styles.login_button : ""}
+            showCaret={false}
+            items={loginItemsDropdown}
+            level={1}
+            position="r"
+          />
         </div>
       </div>
     </>

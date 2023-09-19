@@ -1,20 +1,23 @@
-@import "../../../../styles/vars.scss";
+@import "../../../../../styles/vars.scss";
 
 .bar_wrapper {
   display: flex;
   align-items: center;
+  position: relative;
+  border-right: 2px;
 
   .icon {
     fill: white;
     cursor: pointer;
     width: 20px;
     margin: auto 0;
+    transform: scale(1.8);
   }
 
   .content {
     position: fixed;
     z-index: $z-index5;
-    background-color: rgba(0, 0, 0, 0.6);
+    background-color: rgba(0, 0, 0, 0.39);
     top: 0;
     width: 100%;
     left: -100%;
@@ -22,19 +25,28 @@
 
     .bar {
       position: relative;
-      width: 80%;
+      max-width: 70%;
       left: -100%;
       height: inherit;
       background-color: white;
-      transition: 0.15s;
+      transition: 0.3s linear;
       overflow: hidden;
+      box-shadow: 0px 2px 10px $color-gray4;
 
       .avatar {
+        position: relative;
         & > a > div {
           justify-content: left;
           svg {
             width: 22px !important;
           }
+        }
+
+        .close {
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          right: 20px;
         }
       }
 
@@ -44,19 +56,19 @@
             padding: 15px 10px;
           }
         }
-
-        &:not(:last-child) {
-          border-bottom: 1px solid $color-gray1;
-        }
+        padding: 0 10px;
 
         ul {
           list-style-type: none;
           padding: 0;
-          margin: -2px 0px 10px;
+          margin: 0px 0px 10px;
+          border-bottom: 1px solid $color-gray1;
+          padding-bottom: 5px 10px;
 
           li {
             border: none !important;
-            height: 40px;
+            height: 30px;
+            margin: 10px;
 
             a {
               font-size: 14px !important;

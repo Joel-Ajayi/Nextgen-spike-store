@@ -26,7 +26,8 @@ export async function appContext({
         select: {
           id: true,
           email: true,
-          fullName: true,
+          fName: true,
+          lName: true,
           avatar: true,
           role: true,
           contactNumber: true,

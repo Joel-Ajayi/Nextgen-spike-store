@@ -4,6 +4,40 @@ export type InitialCategoryController = {
   categories: CategoryMini[];
 };
 
+export type ProductWarranty = {
+  duration: number;
+  covered: string;
+};
+
+export type CategoryFilterValues = {
+  values: string[];
+  optionId: string;
+};
+
+export type NewProduct = {
+  category: {
+    name: string;
+    path?: string;
+  };
+  brand: string;
+  info: {
+    name: string;
+    description: string;
+    images: (IFile | string)[];
+    colors: string[];
+    price: number;
+    discount: number;
+    paymentMethods: number[];
+    warranty: ProductWarranty;
+    mfgCountry: string;
+    mfgDate: string;
+  };
+};
+
+export type InitialProductController = {
+  newProduct: NewProduct;
+};
+
 export enum CatFilterType {
   Txt = "Text",
   Num = "Number",

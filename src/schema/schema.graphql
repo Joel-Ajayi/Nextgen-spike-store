@@ -211,7 +211,9 @@ input SignInInput {
 }
 
 input SignUpInput {
-  email: String
+  email: String!
+  fName: String!
+  lName: String!
   pwd: String!
 }
 
@@ -222,8 +224,9 @@ type User {
   avatar: String!
   contactNumber: String
   email: String!
-  fullName: String
+  fName: String
   id: ID!
+  lName: String
   role: Int!
 }
 

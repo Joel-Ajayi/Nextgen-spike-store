@@ -112,7 +112,7 @@ function CreateBrand({ isUpdate, brd_id }: CreateBrandProps) {
         } else {
           dispatch(addBrand(brd));
         }
-        const navLink = `/controller?pg=${Pages.Brand}&sec=${PageSections.Listing}`;
+        const navLink = `/controller?pg=${Pages.Brand}&sec=${PageSections.BrdListing}`;
         navigate(navLink, { replace: false });
       }
       setIsSaving(false);
@@ -137,7 +137,7 @@ function CreateBrand({ isUpdate, brd_id }: CreateBrandProps) {
                     value="ALL Brands"
                     type="button"
                     className={Styles.all_cat_button}
-                    link={`/controller?pg=${Pages.Brand}&sec=${PageSections.Listing}`}
+                    link={`/controller?pg=${Pages.Brand}&sec=${PageSections.BrdListing}`}
                   />
                 </div>
               </div>

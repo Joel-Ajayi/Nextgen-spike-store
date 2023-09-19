@@ -30,21 +30,35 @@ const {
 export const SignUp = mutationField("SignUp", {
   type: MessageObj,
   args: { data: SignUpInput },
-  resolve: async (_, { data }, ctx) => {
+  resolve: async (_, args, ctx) => {
+    const data = args.data as {
+      email: string;
+      fName: string;
+      lName: string;
+      pwd: string;
+    };
+
     await middleware.alreadySignedIn(ctx);
     // validates arguments
     await validator.signIn(data);
     // check if user already exist
-    await middleware.alreadySignedUp(data?.email as string, ctx.db);
+    await middleware.alreadySignedUp(data.email, ctx.db);
 
-    const pwd = await bcrypt.hash(data?.pwd as string, 12);
+    // hash password
+    const pwd = await bcrypt.hash(data.pwd, 12);
+
+    // user role
+    const userCount = await ctx.db.user.count();
+    const role = userCount > 1 ? Roles.User : Roles.SuperAdmin;
+
     try {
-      const userCount = await ctx.db.user.count();
       const user = await ctx.db.user.create({
         data: {
           pwd,
-          email: data?.email as string,
-          role: userCount > 1 ? Roles.User : Roles.SuperAdmin,
+          email: data?.email,
+          fName: data?.fName,
+          lName: data?.lName,
+          role,
         },
       });
       // set session cookie
