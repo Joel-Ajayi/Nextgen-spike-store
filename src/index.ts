@@ -58,8 +58,8 @@ declare module "express-session" {
   );
 
   const options = {
-    key: fs.readFileSync(join(__dirname, "../../../../key.pem")),
-    cert: fs.readFileSync(join(__dirname, "../../../../cert.pem")),
+    key: fs.readFileSync(join(__dirname, "../../../key.pem")),
+    cert: fs.readFileSync(join(__dirname, "../../../cert.pem")),
   };
   const httpServer = https.createServer(options, app);
 
