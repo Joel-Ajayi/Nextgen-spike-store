@@ -1,5 +1,3 @@
-import { CatFilterType } from "@prisma/client";
-
 export type CatFilter = {
   name: string;
   type: CatFilterType;
@@ -16,3 +14,8 @@ export type CategoryForm = {
   banners: File[] | String[];
   filters: CatFilter[];
 };
+
+export enum CatFilterType {
+  Text = "Text", //0
+  Number = "Number", //1
+}

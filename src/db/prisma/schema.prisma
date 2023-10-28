@@ -18,8 +18,8 @@ enum PAYMENTSTATUS {
 }
 
 enum PAYMENTMETHOD {
-  COD
-  CARD
+  COD //0
+  CARD //1
 }
 
 enum ORDERSTATUS {
@@ -32,11 +32,6 @@ enum ORDERSTATUS {
 enum ADDRESSTYPE {
   HOME
   WORK
-}
-
-enum CatFilterType {
-  Txt
-  Num
 }
 
 model User {
@@ -69,10 +64,10 @@ model Category {
   lvl         Int              @default(1)
   filters     CategoryFilter[]
   image       String?
-  brdId       String?          @unique @db.ObjectId
+  brdId       String?          @db.ObjectId
   brand       Brand?           @relation(fields: [brdId], references: [id])
-  banners     String[]
   hasWarranty Boolean
+  hasMfg      Boolean          @default(false)
   products    Product[]
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
@@ -81,7 +76,7 @@ model Category {
 model CategoryFilter {
   id             String                @id @default(auto()) @map("_id") @db.ObjectId
   name           String
-  type           CatFilterType
+  type           String?
   unit           String?
   options        String[]
   category       Category              @relation(fields: [categoryId], references: [id], onDelete: Cascade)
@@ -111,15 +106,16 @@ model Product {
   images       String[]
   rating       Int                   @default(0)
   count        Int                   @default(0)
-  payment      PAYMENTMETHOD[]
+  payment      Int[] //PAYMENTMETHOD
   brdId        String                @unique @db.ObjectId
   brand        Brand                 @relation(fields: [brdId], references: [id])
   colors       String[]
-  mfgCountry   String
-  mfgDate      String
   discount     Int                   @default(0)
   aprroved     Boolean               @default(false)
-  warranty     ProductWarranty?
+  mfgCountry   String?
+  mfgDate      String?
+  warrDuration Int?
+  warrCovered  String?
   filters      CategoryFilterValue[]
   reviews      Reviews[]
   OrderItemIds String[]              @db.ObjectId
@@ -128,20 +124,12 @@ model Product {
   updatedAt    DateTime              @updatedAt
 }
 
-model ProductWarranty {
-  id        String  @id @default(auto()) @map("_id") @db.ObjectId
-  duration  Int
-  covered   String
-  productId String  @unique @db.ObjectId
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-}
-
 model Brand {
-  id       String    @id @default(auto()) @map("_id") @db.ObjectId
-  name     String    @unique
+  id       String     @id @default(auto()) @map("_id") @db.ObjectId
+  name     String     @unique
   image    String
   products Product[]
-  Category Category?
+  Category Category[]
 }
 
 model Reviews {

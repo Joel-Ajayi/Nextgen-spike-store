@@ -1,4 +1,4 @@
-import { list, nonNull, objectType } from "nexus";
+import { interfaceType, list, nonNull, objectType } from "nexus";
 import { CatFilterTypeEnum } from "./enums";
 
 export const MessageObj = objectType({
@@ -30,6 +30,7 @@ export const Category = objectType({
     t.string("parent");
     t.nonNull.string("description");
     t.nonNull.boolean("hasWarranty");
+    t.nonNull.boolean("hasMfg");
     t.nonNull.string("brand");
     t.nonNull.list.nonNull.string("image");
     t.nonNull.list.nonNull.string("banners");
@@ -42,30 +43,22 @@ export const Category = objectType({
 export const CategoryMini = objectType({
   name: "CategoryMini",
   definition(t) {
-    t.nonNull.string("name"), t.nonNull.int("lvl"), t.nonNull.string("parent");
+    t.nonNull.string("name");
+    t.nonNull.int("lvl");
+    t.nonNull.string("parent");
+    t.nullable.string("image");
   },
 });
 
 export const CategoryFilter = objectType({
   name: "CategoryFilter",
   definition(t) {
-    t.nonNull.string("id"),
-      t.nonNull.string("name"),
-      t.nonNull.field("type", {
-        type: CatFilterTypeEnum,
-      }),
-      t.nullable.string("unit"),
-      t.nonNull.list.nonNull.string("options"),
-      t.nonNull.boolean("isRequired");
-  },
-});
-
-export const ProductWarranty = objectType({
-  name: "ProductWarranty",
-  definition(t) {
     t.nonNull.string("id");
-    t.nonNull.int("duration");
-    t.nonNull.string("covered");
+    t.nonNull.string("name");
+    t.string("type");
+    t.nullable.string("unit");
+    t.nonNull.list.nonNull.string("options");
+    t.nonNull.boolean("isRequired");
   },
 });
 
@@ -105,13 +98,24 @@ export const Product = objectType({
     t.nonNull.int("price");
     t.nonNull.int("discount");
     t.nonNull.string("brand");
-    t.nonNull.string("mfgCountry");
-    t.nonNull.string("mfgDate");
     t.nonNull.list.nonNull.string("colors");
-    t.nonNull.list.nonNull.string("payment");
+    t.nonNull.list.nonNull.int("payment");
     t.nonNull.list.nonNull.string("images");
-    t.field("warranty", { type: ProductWarranty });
+    t.string("warrCovered");
+    t.int("warrDuration");
+    t.string("mfgCountry");
+    t.string("mfgDate");
     t.field("filters", { type: nonNull(list(nonNull(CategoryFilterValue))) });
+  },
+});
+
+export const CreateProductData = objectType({
+  name: "CreateProductData",
+  definition(t) {
+    t.nonNull.list.field("brands", { type: Brand });
+    t.nonNull.list.field("categories", { type: CategoryMini });
+    t.list.nonNull.list.nonNull.string("colours");
+    t.nonNull.list.string("paymentMethods");
   },
 });
 

@@ -40,8 +40,8 @@ export const CategoryInput = inputObjectType({
     t.string("description");
     t.nullable.upload("image");
     t.nullable.string("brand");
-    t.nonNull.list.nonNull.upload("banners");
     t.nonNull.boolean("hasWarranty");
+    t.nonNull.boolean("hasMfg");
     t.field("filters", { type: nonNull(list(nonNull(CategoryFilterInput))) });
   },
 });
@@ -50,6 +50,7 @@ export const CategoryFilterInput = inputObjectType({
   name: "CategoryFilterInput",
   definition(t) {
     t.nonNull.string("name");
+    t.string("id");
     t.nonNull.field("type", { type: CatFilterTypeEnum });
     t.nullable.string("unit");
     t.nonNull.list.nonNull.string("options");
@@ -63,11 +64,11 @@ export const CategoryUpdateInput = inputObjectType({
     t.nonNull.string("id");
     t.nonNull.string("name");
     t.string("description");
-    t.nullable.string("brand");
-    t.nullable.upload("image");
+    t.nonNull.string("brand");
+    t.nonNull.upload("image");
     t.nonNull.boolean("hasWarranty");
-    t.nonNull.list.nonNull.upload("banners");
-    t.field("filters", { type: nonNull(list(CategoryFilterInput)) });
+    t.nonNull.boolean("hasMfg");
+    t.field("filters", { type: nonNull(list(nonNull(CategoryFilterInput))) });
   },
 });
 
@@ -86,6 +87,16 @@ export const CategoryFilterUpdateInput = inputObjectType({
 export const CategoryFilterValueInput = inputObjectType({
   name: "CategoryFilterValueInput",
   definition(t) {
+    t.string("id");
+    t.nonNull.string("optionId");
+    t.nonNull.list.nonNull.string("values");
+  },
+});
+
+export const CategoryFilterValueUpdateInput = inputObjectType({
+  name: "CategoryFilterValueUpdateInput",
+  definition(t) {
+    t.nonNull.string("id");
     t.nonNull.string("optionId");
     t.nonNull.list.nonNull.string("values");
   },
@@ -115,7 +126,39 @@ export const ProductInput = inputObjectType({
     t.nonNull.list.nonNull.string("payment");
     t.nonNull.list.nonNull.upload("images");
     t.field("warranty", { type: ProductWarrantyInput });
-    t.field("filters", { type: list(nonNull(CategoryFilterValueInput)) });
+    t.field("filters", {
+      type: nonNull(list(nonNull(CategoryFilterValueInput))),
+    });
+  },
+});
+
+export const UpdateProductCategoryInput = inputObjectType({
+  name: "UpdateProductCategoryInput",
+  definition(t) {
+    t.nonNull.string("pId");
+    t.nonNull.string("cId");
+    t.field("filters", {
+      type: nonNull(list(nonNull(CategoryFilterValueInput))),
+    });
+  },
+});
+
+export const UpdateProductInfoInput = inputObjectType({
+  name: "UpdateProductInfoInput",
+  definition(t) {
+    t.nonNull.string("id");
+    t.nonNull.string("name");
+    t.nonNull.string("description");
+    t.nonNull.int("price");
+    t.nonNull.int("count");
+    t.nonNull.string("brand");
+    t.int("discount");
+    t.nonNull.string("mfgCountry");
+    t.nonNull.string("mfgDate");
+    t.nonNull.list.nonNull.string("colors");
+    t.nonNull.list.nonNull.string("payment");
+    t.nonNull.list.nonNull.upload("images");
+    t.field("warranty", { type: ProductWarrantyInput });
   },
 });
 

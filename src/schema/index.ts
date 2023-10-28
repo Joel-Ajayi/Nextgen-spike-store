@@ -15,4 +15,9 @@ export const userSchema = makeSchema({
     alias: "ContextModule",
     module: join(__dirname, "context.ts"),
   },
+  features: {
+    abstractTypeStrategies: {
+      resolveType: false,
+    },
+  },
 });

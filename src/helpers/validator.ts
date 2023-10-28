@@ -1,37 +1,87 @@
 import fs from "fs";
 import path from "path";
 import { nanoid } from "nanoid";
-import { CatFilterType, PAYMENTMETHOD } from "@prisma/client";
+import { PAYMENTMETHOD } from "@prisma/client";
 import { GraphQLError } from "graphql";
 import { FileUpload } from "graphql-upload/Upload";
 import { Stream } from "stream";
 import { string, object, array, boolean, mixed, number, date } from "yup";
-import { CategoryForm } from "../@types/Category";
+import { CatFilterType, CategoryForm } from "../@types/Category";
 import conts from "../@types/conts";
 
 class Validator {
-  private email() {
-    return string().required("Invalid email").email("Invalid email");
-  }
+  private productFilters = array(
+    object({
+      id: string(),
+      optionId: string().required("Filter option id is required"),
+      values: array(string())
+        .min(1, "Option values are required")
+        .required("Option values are required"),
+    })
+  ).max(5, "Filters should not be more than 5");
 
-  private pwd() {
-    return string()
-      .required("Password is required")
-      .min(8, "Password should be 8 chars minimum")
-      .matches(
-        /^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/,
-        {
-          message:
-            "password must contain at least one uppercase letter, one lowercase letter, one number and one special character",
-        }
-      );
-  }
+  private email = string().required("Invalid email").email("Invalid email");
+
+  private pwd = string()
+    .required("Password is required")
+    .min(8, "Password should be 8 chars minimum")
+    .matches(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/, {
+      message:
+        "password must contain at least one uppercase letter, one lowercase letter, one number and one special character",
+    });
+
+  private productWarranty = object({
+    duration: number()
+      .min(1 / 12, "Warranty can't be less than a month")
+      .required("Warranty duration is required"),
+    covered: string().required("Damages warranty covers is required"),
+  });
+
+  private productInfo = {
+    name: string()
+      .required("Product name is required")
+      .min(10, "Product name should have more than 10 characters")
+      .max(20, "Product name should not exceed 30 characters"),
+    description: string()
+      .required("Description is required")
+      .min(15, "Description should have more than 15 characters")
+      .max(40, "Description should not exceed 30 characters"),
+    price: number()
+      .min(0, "Price value is not allowed")
+      .required("Product price is required"),
+    images: array()
+      .required("No image was uploaded")
+      .min(2, "More than 1 image should be uploaded")
+      .max(4, "Not more than 4 images should be uploaded")
+      .of(mixed()),
+    count: number().required("Product count in stock is required"),
+    payment: array()
+      .of(string().oneOf(Object.values(PAYMENTMETHOD), "Invalid payment type"))
+      .min(1, "Payment method is required")
+      .max(2, "Only two payment methods are allowed")
+      .required("Payment method is required"),
+    discount: number().nullable(),
+    brand: string().required("Product brand is required"),
+    colors: array()
+      .of(string().required("Please provide color of product"))
+      .min(1, "Please provide color of product")
+      .max(4, "Not more than 4 colors should be added")
+      .required("Please provide color of product"),
+    mfgCountry: string().required("Production country is required"),
+    mfgDate: string()
+      .test("Date", "Date format should be in MM-YYYY", (val) => {
+        const rg = /^\d{2}-\d{3}$/;
+        return rg.test(val as string);
+      })
+      .required("Production date is required"),
+    warranty: this.productWarranty,
+  };
 
   public async signIn(data: any) {
     try {
       await object({
-        email: this.email(),
-        pwd: this.pwd(),
+        email: this.email,
+        pwd: this.pwd,
         fName: string()
           .min(2, "First Name should exceed 1 word")
           .max(20, "First Name should not exceed 20 words"),
@@ -263,8 +313,8 @@ class Validator {
       name: string()
         .required("Name Field is empty")
         .min(2, "Name should have more than 2 characters")
-        .matches(/^[a-zA-Z0-9'\s]*$/, "Special characters not allowed")
-        .max(18, "Name should have not more than 18 characters"),
+        .matches(/^[a-zA-Z0-9&'\s]*$/, "Special characters not allowed")
+        .max(25, "Name should have not more than 25 characters"),
       description: string().max(
         110,
         "Description should have not more than 110 characters"
@@ -291,9 +341,7 @@ class Validator {
       ).validate(val);
     } catch (error) {
       throw new GraphQLError((error as any).message, {
-        extensions: {
-          statusCode: 400,
-        },
+        extensions: { statusCode: 400 },
       });
     }
   }
@@ -306,9 +354,7 @@ class Validator {
       }).validate({ name, parent });
     } catch (error) {
       throw new GraphQLError((error as any).message, {
-        extensions: {
-          statusCode: 400,
-        },
+        extensions: { statusCode: 400 },
       });
     }
   }
@@ -325,75 +371,45 @@ class Validator {
       }).validate(data);
     } catch (error) {
       throw new GraphQLError((error as any).message, {
-        extensions: {
-          statusCode: 400,
-        },
+        extensions: { statusCode: 400 },
       });
     }
   }
 
-  public async product(data: any) {
+  public async valProductFilters(data: any) {
     try {
-      const warranty = object({
-        duration: number().required("Warranty duration is required"),
-        covered: string().required("Damages warranty covers is required"),
+      this.productFilters.validate(data);
+    } catch (error) {
+      throw new GraphQLError((error as any).message, {
+        extensions: { statusCode: 400 },
       });
+    }
+  }
 
-      const filter = object({
-        optionId: string().required("Filter option id is required"),
-        values: array(string())
-          .min(1, "Option values are required")
-          .required("Option values are required"),
-      });
-
+  public async valProduct(data: any) {
+    try {
       await object({
-        name: string()
-          .required("Product name is required")
-          .min(10, "Product name should have more than 10 characters")
-          .max(20, "Product name should not exceed 30 characters"),
+        ...this.productInfo,
         cId: number().required("Product category is required"),
-        description: string()
-          .required("Description is required")
-          .min(15, "Description should have more than 15 characters")
-          .max(40, "Description should not exceed 30 characters"),
-        price: number()
-          .min(0, "Price value is not allowed")
-          .required("Product price is required"),
-        images: array()
-          .required("No image was uploaded")
-          .min(2, "More than 1 image should be uploaded")
-          .max(4, "Not more than 4 images should be uploaded")
-          .of(mixed()),
-        count: number().required("Product count in stock is required"),
-        payment: array()
-          .of(
-            string().oneOf(Object.values(PAYMENTMETHOD), "Invalid payment type")
-          )
-          .min(1, "Payment method is required")
-          .max(2, "Only two payment methods are allowed")
-          .required("Payment method is required"),
-        discount: number().nullable(),
-        brand: string().required("Product brand is required"),
-        colors: array()
-          .of(string().required("Please provide color of product"))
-          .min(1, "Please provide color of product")
-          .max(4, "Not more than 4 colors should be added")
-          .required("Please provide color of product"),
-        mfgCountry: string().required("Production country is required"),
-        mfgDate: string()
-          .test("Date", "Date format should be in MM-YYYY", (val) => {
-            const rg = /^[1-12]{2}-^(1|2)[1-9]{3}$/;
-            return rg.test(val as string);
-          })
-          .required("Production date is required"),
-        warranty,
-        filters: array(filter).max(5, "Filters should not be more than 5"),
+        warranty: this.productWarranty,
+        filters: this.productFilters,
       }).validate(data);
     } catch (error) {
       throw new GraphQLError((error as any).message, {
-        extensions: {
-          statusCode: 400,
-        },
+        extensions: { statusCode: 400 },
+      });
+    }
+  }
+
+  public async valProductInfo(data: any) {
+    try {
+      await object({
+        ...this.productInfo,
+        warranty: this.productWarranty,
+      }).validate(data);
+    } catch (error) {
+      throw new GraphQLError((error as any).message, {
+        extensions: { statusCode: 400 },
       });
     }
   }

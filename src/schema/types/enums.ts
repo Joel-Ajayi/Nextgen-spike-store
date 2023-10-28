@@ -1,5 +1,5 @@
-import { CatFilterType } from "@prisma/client";
 import { enumType } from "nexus";
+import { CatFilterType } from "../../@types/Category";
 
 export const CatFilterTypeEnum = enumType({
   name: "CatFilterType",

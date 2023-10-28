@@ -14,8 +14,8 @@ input BrandInput {
 }
 
 enum CatFilterType {
-  Num
-  Txt
+  Number
+  Text
 }
 
 type Category {
@@ -23,6 +23,7 @@ type Category {
   brand: String!
   description: String!
   filters: [CategoryFilter!]!
+  hasMfg: Boolean!
   hasWarranty: Boolean!
   id: String!
   image: [String!]!
@@ -36,11 +37,12 @@ type CategoryFilter {
   isRequired: Boolean!
   name: String!
   options: [String!]!
-  type: CatFilterType!
+  type: String
   unit: String
 }
 
 input CategoryFilterInput {
+  id: String
   isRequired: Boolean!
   name: String!
   options: [String!]!
@@ -67,15 +69,22 @@ type CategoryFilterValue {
 }
 
 input CategoryFilterValueInput {
+  id: String
+  optionId: String!
+  values: [String!]!
+}
+
+input CategoryFilterValueUpdateInput {
+  id: String!
   optionId: String!
   values: [String!]!
 }
 
 input CategoryInput {
-  banners: [Upload!]!
   brand: String
   description: String
   filters: [CategoryFilterInput!]!
+  hasMfg: Boolean!
   hasWarranty: Boolean!
   image: Upload
   name: String!
@@ -83,20 +92,28 @@ input CategoryInput {
 }
 
 type CategoryMini {
+  image: String
   lvl: Int!
   name: String!
   parent: String!
 }
 
 input CategoryUpdateInput {
-  banners: [Upload!]!
-  brand: String
+  brand: String!
   description: String
-  filters: [CategoryFilterInput]!
+  filters: [CategoryFilterInput!]!
+  hasMfg: Boolean!
   hasWarranty: Boolean!
   id: String!
-  image: Upload
+  image: Upload!
   name: String!
+}
+
+type CreateProductData {
+  brands: [Brand]!
+  categories: [CategoryMini]!
+  colours: [[String!]!]
+  paymentMethods: [String]!
 }
 
 type Message {
@@ -113,6 +130,8 @@ type Mutation {
   SignUp(data: SignUpInput): Message
   UpdateCategory(data: CategoryUpdateInput): CategoryMini
   UpdateCategoryParent(name: String!, parent: String!): CategoryMini
+  UpdateProductCategory(data: UpdateProductCategoryInput): Message
+  UpdateProductInfo(data: UpdateProductInfoInput): Message
   VerifyAccount(data: SetTokenInput): Message
   VerifyPasswordToken(data: VerificationTokenInput): Message
   VerifyToken(data: VerificationTokenInput): Message
@@ -127,12 +146,13 @@ type Product {
   filters: [CategoryFilterValue!]!
   id: String!
   images: [String!]!
-  mfgCountry: String!
-  mfgDate: String!
+  mfgCountry: String
+  mfgDate: String
   name: String!
-  payment: [String!]!
+  payment: [Int!]!
   price: Int!
-  warranty: ProductWarranty
+  warrCovered: String
+  warrDuration: Int
 }
 
 type ProductFilterPage {
@@ -158,7 +178,7 @@ input ProductInput {
   count: Int!
   description: String!
   discount: Int
-  filters: [CategoryFilterValueInput!]
+  filters: [CategoryFilterValueInput!]!
   images: [Upload!]!
   mfgCountry: String!
   mfgDate: String!
@@ -179,12 +199,6 @@ type ProductMini {
   rating: Int!
 }
 
-type ProductWarranty {
-  covered: String!
-  duration: Int!
-  id: String!
-}
-
 input ProductWarrantyInput {
   covered: String!
   duration: Int!
@@ -195,6 +209,7 @@ type Query {
   GetBrands: [Brand!]!
   GetCategories: [CategoryMini!]!
   GetCategory(name: String!): Category
+  GetCreateProductData: CreateProductData
   GetFilterPageProduct(category: String!, id: String!, reqImages: Boolean!): ProductMini
   GetProduct(category: String!, id: String!): Product
   GetProductMini(category: String!, id: String!): ProductFilterPage
@@ -215,6 +230,28 @@ input SignUpInput {
   fName: String!
   lName: String!
   pwd: String!
+}
+
+input UpdateProductCategoryInput {
+  cId: String!
+  filters: [CategoryFilterValueInput!]!
+  pId: String!
+}
+
+input UpdateProductInfoInput {
+  brand: String!
+  colors: [String!]!
+  count: Int!
+  description: String!
+  discount: Int
+  id: String!
+  images: [Upload!]!
+  mfgCountry: String!
+  mfgDate: String!
+  name: String!
+  payment: [String!]!
+  price: Int!
+  warranty: ProductWarrantyInput
 }
 
 """The `Upload` scalar type represents a file upload."""

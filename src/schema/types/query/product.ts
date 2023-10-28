@@ -1,8 +1,16 @@
 import { booleanArg, nonNull, queryField, stringArg } from "nexus";
-import { FilterPageProduct, Product, ProductMini } from "../objects";
+import {
+  CreateProductData,
+  FilterPageProduct,
+  Product,
+  ProductMini,
+} from "../objects";
 import { GraphQLError } from "graphql";
 import consts from "../../../@types/conts";
 import { Roles } from "../../../@types/User";
+import middleware from "../../../middlewares/middlewares";
+import { colours } from "../../../db/app.data";
+import { PAYMENTMETHOD } from "@prisma/client";
 
 export const GetProduct = queryField("GetProduct", {
   type: Product,
@@ -21,8 +29,6 @@ export const GetProduct = queryField("GetProduct", {
         category: { select: { name: true } },
         images: true,
         brand: true,
-        mfgCountry: true,
-        mfgDate: true,
         colors: true,
         payment: true,
         price: true,
@@ -36,7 +42,10 @@ export const GetProduct = queryField("GetProduct", {
             option: { select: { name: true, unit: true, type: true } },
           },
         },
-        warranty: { select: { id: isAdmin, duration: true, covered: true } },
+        mfgCountry: true,
+        mfgDate: true,
+        warrDuration: true,
+        warrCovered: true,
       },
     });
 
@@ -46,18 +55,16 @@ export const GetProduct = queryField("GetProduct", {
       });
     }
 
-    const requiredWarranty = product?.warranty ? { ...product.warranty } : null;
     const requiredFilters = product?.filters.map(({ option, ...rest }) => ({
       ...rest,
       ...option,
     }));
 
-    const { filters, warranty, ...rest } = product;
+    const { filters, ...rest } = product;
     return {
       ...rest,
       brand: rest.brand.name,
       category: rest.category.name,
-      warranty: requiredWarranty,
       filters: requiredFilters,
     };
   },
@@ -169,6 +176,47 @@ export const GetFilterPageProduct = queryField("GetFilterPageProduct", {
         ...product,
         brand: product.brand.name,
         category: product.category.name,
+      };
+    } catch (error) {
+      throw new GraphQLError(consts.errors.server, {
+        extensions: { statusCode: 500 },
+      });
+    }
+  },
+});
+
+export const GetCreateProductData = queryField("GetCreateProductData", {
+  type: CreateProductData,
+  resolve: async (_, args, ctx) => {
+    // check if logged_in
+    middleware.checkSuperAdmin(ctx);
+
+    try {
+      const categories = await ctx.db.category.findMany({
+        select: {
+          name: true,
+          lvl: true,
+          image: true,
+          parent: {
+            select: {
+              name: true,
+            },
+          },
+        },
+      });
+
+      const brands = await ctx.db.brand.findMany({
+        select: { name: true, image: true },
+      });
+
+      return {
+        colours,
+        brands: brands.map((brd) => ({ ...brd, image: [brd.image] })),
+        categories: categories.map((cat) => ({
+          ...cat,
+          parent: cat.parent?.name || "",
+        })),
+        paymentMethods: Object.values(PAYMENTMETHOD) as string[],
       };
     } catch (error) {
       throw new GraphQLError(consts.errors.server, {

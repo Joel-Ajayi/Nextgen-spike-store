@@ -5,7 +5,7 @@ import { validator } from "../../../helpers/validator";
 import { GraphQLError } from "graphql";
 import { CategoryInput, CategoryUpdateInput } from "../inputs";
 import consts from "../../../@types/conts";
-import { Category, CategoryFilter } from "@prisma/client";
+import { Category } from "@prisma/client";
 
 export const CreateCategory = mutationField("CreateCategory", {
   type: CategoryMini,
@@ -39,11 +39,12 @@ export const CreateCategory = mutationField("CreateCategory", {
       lvl: number;
       id: string;
       hasWarranty: boolean;
+      hasMfg: boolean;
     } | null = null;
     if (data?.parent) {
       parent = await ctx.db.category.findUnique({
         where: { name: data.parent },
-        select: { id: true, lvl: true, hasWarranty: true },
+        select: { id: true, lvl: true, hasWarranty: true, hasMfg: true },
       });
       if (!parent) {
         throw new GraphQLError("Parent category does not exist", {
@@ -72,28 +73,36 @@ export const CreateCategory = mutationField("CreateCategory", {
       });
     }
 
+    if (!data.hasMfg && parent?.hasMfg) {
+      throw new GraphQLError("Category requires production details", {
+        extensions: { statusCode: 404 },
+      });
+    }
+
     // validate image/
-    const imgLink =
-      (await validator.files(!!data?.image ? [data.image] : [], 0))[0] || "";
-    const bannerLinks = await validator.files(data.banners as any, 0, 3);
+    let image: string | undefined = undefined;
+    if (data?.image) {
+      image =
+        (await validator.files(!!data?.image ? [data.image] : [], 0))[0] || "";
+    }
 
     let newCat: {
       parent: { name: string };
     } & Category = null as any;
 
-    const catCount = await ctx.db.category.count();
     try {
+      const catCount = (await ctx.db.category.count()) + 1;
       // add category
       newCat = (await ctx.db.category.create({
         data: {
           name: data.name,
           lvl: !!parent ? parent.lvl + 1 : 1,
-          cId: catCount + 1,
+          cId: catCount,
           description: data.description,
-          image: imgLink,
+          image,
           brdId: brandId,
           hasWarranty: data.hasWarranty,
-          banners: bannerLinks,
+          hasMfg: true,
           parentId: !parent?.id ? undefined : parent.id,
         },
         select: {
@@ -107,27 +116,24 @@ export const CreateCategory = mutationField("CreateCategory", {
           },
         },
       })) as any;
+
+      if (data.filters?.length) {
+        // add category filters
+        await ctx.db.categoryFilter.createMany({
+          data: data.filters.map(({ id, ...rest }) => ({
+            ...rest,
+            categoryId: newCat.id,
+          })),
+        });
+      }
+
+      const { id, cId, ...rest } = newCat;
+      return { ...rest, parent: newCat.parent?.name || "" };
     } catch (error) {
       throw new GraphQLError(consts.errors.server, {
         extensions: { statusCode: 500 },
       });
     }
-
-    if (data.filters.length) {
-      // add category filters
-      if (data.filters?.length) {
-        await Promise.all(
-          data.filters.map(async ({ name, options, unit, type }) => {
-            await ctx.db.categoryFilter.create({
-              data: { name, options, unit, type, categoryId: newCat.id },
-            });
-          })
-        );
-      }
-    }
-
-    const { id, cId, ...rest } = newCat;
-    return { ...rest, parent: newCat.parent?.name || "" };
   },
 });
 
@@ -203,61 +209,23 @@ export const UpdateCategory = mutationField("UpdateCategory", {
       brandId = null;
     }
 
-    // validate image/
-    const imageFile = !!data?.image ? [data?.image] : [];
-    const prevImage = !!addedCat?.image ? [addedCat.image] : [];
-    const imgLink =
-      (await validator.files(imageFile, 0, 1, prevImage))[0] || "";
-
-    const bannerFiles = data?.banners;
-    const prevBannerFiles = addedCat.banners;
-    const bannerLinks = await validator.files(
-      bannerFiles,
-      0,
-      3,
-      prevBannerFiles
-    );
-
-    // Get previous filter ids
-    let prevFilterIds = addedCat.filters.map(({ id }) => id);
     // delete all filters
+    let prevFilterIds = addedCat.filters.map(({ id }) => id);
     if (prevFilterIds.length && !data.filters?.length) {
       await ctx.db.categoryFilter.deleteMany({
         where: { id: { in: prevFilterIds } },
       });
     } else if (data.filters?.length) {
       await Promise.all(
-        (data.filters as CategoryFilter[]).map(
-          async ({ id = "", name, options, unit, type, isRequired }) => {
-            let filter: CategoryFilter | null = null;
-            if (id) {
-              filter = await ctx.db.categoryFilter.update({
-                where: { id },
-                data: {
-                  name,
-                  options,
-                  unit,
-                  type,
-                  categoryId: addedCat.id,
-                  isRequired,
-                },
-              });
-            } else {
-              filter = await ctx.db.categoryFilter.create({
-                data: {
-                  name,
-                  options,
-                  unit,
-                  type,
-                  categoryId: addedCat.id,
-                  isRequired,
-                },
-              });
-            }
-
-            prevFilterIds = prevFilterIds.filter((fid) => fid !== filter?.id);
-          }
-        )
+        data.filters.map(async ({ id, ...rest }) => {
+          const data = { ...rest, categoryId: addedCat.id };
+          const filter = await ctx.db.categoryFilter.upsert({
+            where: { id: id || undefined },
+            create: data,
+            update: data,
+          });
+          prevFilterIds = prevFilterIds.filter((fid) => fid !== filter?.id);
+        })
       );
 
       // delete filter not modified
@@ -268,17 +236,20 @@ export const UpdateCategory = mutationField("UpdateCategory", {
       }
     }
 
-    const catCount = await ctx.db.category.count();
+    // validate image
+    const dataImage = data?.image ? [data?.image] : [];
+    const prevImage = !!addedCat?.image ? [addedCat.image] : [];
+    const image = (await validator.files(dataImage, 0, 1, prevImage))[0];
+
     const cat = await ctx.db.category.update({
       where: { id: addedCat.id },
       data: {
         name: data.name,
-        cId: catCount + 1,
         description: data.description,
-        image: imgLink,
+        image,
         brdId: brandId,
-        banners: bannerLinks,
         hasWarranty: data.hasWarranty,
+        hasMfg: data.hasMfg,
       },
       select: {
         name: true,

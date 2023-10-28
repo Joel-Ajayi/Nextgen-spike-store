@@ -13,6 +13,7 @@ export const GetCategories = queryField("GetCategories", {
           name: true,
           lvl: true,
           hasWarranty: true,
+          hasMfg: true,
           parent: {
             select: {
               name: true,
@@ -26,6 +27,7 @@ export const GetCategories = queryField("GetCategories", {
         parent: cat.parent?.name || "",
       }));
     } catch (error) {
+      console.log(error);
       throw new GraphQLError(consts.errors.server, {
         extensions: { statusCode: 500 },
       });
@@ -52,6 +54,7 @@ export const GetCategory = queryField("GetCategory", {
           image: true,
           banners: true,
           hasWarranty: true,
+          hasMfg: true,
           brand: { select: { name: true } },
           parent: { select: { name: true } },
           filters: {
