@@ -1,21 +1,24 @@
-import { mutationField } from "nexus";
-import middleware from "../../../middlewares/middlewares";
 import { GraphQLError } from "graphql";
-import { validator } from "../../../helpers/validator";
-import {
-  ProductInput,
-  UpdateProductCategoryInput,
-  UpdateProductInfoInput,
-} from "../inputs";
-import { MessageObj, ProductMini } from "../objects";
+import { Context } from "../../context";
 import consts from "../../../@types/conts";
-import { getSKU } from "../../../helpers";
+import middleware from "../../../middlewares/middlewares";
+import {
+  ProductInfo_I_U,
+  ProductCategory_I_U,
+  ProductMini,
+  Product_I,
+} from "../../../@types/products";
+import { validator } from "../../../helpers/validator";
 import { isEqual } from "lodash";
+import { getSKU } from "../../../helpers";
+import { Message } from "../../../@types";
 
-export const CreateProduct = mutationField("CreateProduct", {
-  type: ProductMini,
-  args: { data: ProductInput },
-  resolve: async (_, { data }, ctx) => {
+const resolvers = {
+  CreateProduct: async (
+    _: any,
+    { data }: { data: Product_I },
+    ctx: Context
+  ): Promise<ProductMini> => {
     // check if logged_in
     middleware.checkAdmin(ctx);
 
@@ -172,12 +175,11 @@ export const CreateProduct = mutationField("CreateProduct", {
       });
     }
   },
-});
-
-export const UpdateProductCategory = mutationField("UpdateProductCategory", {
-  type: MessageObj,
-  args: { data: UpdateProductCategoryInput },
-  resolve: async (_, { data }, ctx) => {
+  UpdateProductCategory: async (
+    _: any,
+    { data }: { data: ProductCategory_I_U },
+    ctx: Context
+  ): Promise<Message> => {
     if (!data) {
       throw new GraphQLError("No data provided", {
         extensions: { statusCode: 400 },
@@ -318,12 +320,11 @@ export const UpdateProductCategory = mutationField("UpdateProductCategory", {
 
     return { message: "Product Updated" };
   },
-});
-
-export const UpdateProductInfo = mutationField("UpdateProductInfo", {
-  type: MessageObj,
-  args: { data: UpdateProductInfoInput },
-  resolve: async (_, { data }, ctx) => {
+  UpdateProductInfo: async (
+    _: any,
+    { data }: { data: ProductInfo_I_U },
+    ctx: Context
+  ): Promise<Message> => {
     if (!data) {
       throw new GraphQLError("No data provided", {
         extensions: { statusCode: 400 },
@@ -434,4 +435,5 @@ export const UpdateProductInfo = mutationField("UpdateProductInfo", {
 
     return { message: "Product Updated" };
   },
-});
+};
+export default resolvers;

@@ -4,7 +4,7 @@ import { prisma as db } from "../db/prisma/connect";
 import consts from "../@types/conts";
 import { Context } from "../schema/context";
 import bcrypt from "bcryptjs";
-import { Roles } from "../@types/User";
+import { Roles } from "../@types/users";
 
 class MiddleWare {
   public checkUser(ctx: Context) {

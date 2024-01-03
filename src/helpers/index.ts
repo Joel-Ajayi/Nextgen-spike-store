@@ -1,6 +1,4 @@
-import { Product } from "@prisma/client";
 import jwt from "jsonwebtoken";
-import { ProductInput } from "../schema/types";
 import consts from "../@types/conts";
 
 export const verifyJWT = async (token: any, secret: any) => {

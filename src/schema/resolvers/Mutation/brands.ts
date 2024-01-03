@@ -1,20 +1,20 @@
-import { mutationField } from "nexus";
-import middleware from "../../../middlewares/middlewares";
-import { BrandInput } from "../inputs";
-import { Brand } from "../objects";
-import { validator } from "../../../helpers/validator";
 import { GraphQLError } from "graphql";
+import { Brand, Brand_I } from "../../../@types/brand";
 import consts from "../../../@types/conts";
+import { validator } from "../../../helpers/validator";
+import middleware from "../../../middlewares/middlewares";
+import { Context } from "../../context";
 
-export const CreateBrand = mutationField("CreateBrand", {
-  type: Brand,
-  args: { data: BrandInput },
-  resolve: async (_, { data }, ctx) => {
+const resolvers = {
+  CreateBrand: async (
+    _: any,
+    { data }: { data: Brand_I },
+    ctx: Context
+  ): Promise<Brand> => {
     // check if logged_in
     middleware.checkSuperAdmin(ctx);
     // validate data
-    await validator.brand(data as any);
-    if (!data) return null;
+    await validator.brand(data);
 
     try {
       // check if product brand exist
@@ -40,4 +40,5 @@ export const CreateBrand = mutationField("CreateBrand", {
       });
     }
   },
-});
+};
+export default resolvers;

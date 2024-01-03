@@ -1,35 +1,26 @@
 import { Application } from "express";
 import { ApolloServer } from "apollo-server-express";
-import { userSchema } from "./schema/index";
 import "dotenv/config";
-import { appContext } from "./schema/context";
-import { NexusGraphQLSchema } from "nexus/dist/core";
+import { appContext as context } from "./schema/context";
 import consts from "./@types/conts";
+import typeDefs from "./schema/schema.graphql";
+import resolvers from "./schema/resolvers";
 
-const setUpGraphql = async (
-  app: Application,
-  schema: NexusGraphQLSchema,
-  path: string
-) => {
+export default async (app: Application) => {
+  const isProduction = process.env.NODE_ENV === "production";
   const cors = {
-    origin:
-      process.env.NODE_ENV === "production"
-        ? undefined
-        : consts.request.origins,
-    credentials: process.env.NODE_ENV !== "production",
+    origin: isProduction ? undefined : consts.request.origins,
+    credentials: !isProduction,
     methods: consts.request.methods,
   };
 
   // graphql files
   const server = new ApolloServer({
-    schema,
-    context: appContext,
+    typeDefs,
+    resolvers,
+    context,
     csrfPrevention: true,
   });
   await server.start();
-  await server.applyMiddleware({ app, path, cors });
-};
-
-export default async (app: Application) => {
-  await setUpGraphql(app, userSchema, "/api");
+  await server.applyMiddleware({ app, path: "api", cors });
 };

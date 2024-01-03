@@ -1,12 +1,15 @@
 import { GraphQLError } from "graphql";
-import { list, nonNull, queryField, stringArg } from "nexus";
-import middleware from "../../../middlewares/middlewares";
-import { CategoryMini, Category } from "../objects";
 import consts from "../../../@types/conts";
+import { Category, CategoryMini } from "../../../@types/categories";
+import { Context } from "../../context";
+import middleware from "../../../middlewares/middlewares";
 
-export const GetCategories = queryField("GetCategories", {
-  type: nonNull(list(nonNull(CategoryMini))),
-  resolve: async (_, data, ctx) => {
+const resolvers = {
+  GetCategories: async (
+    _: any,
+    data: any,
+    ctx: Context
+  ): Promise<CategoryMini[]> => {
     try {
       const categories = await ctx.db.category.findMany({
         select: {
@@ -33,14 +36,11 @@ export const GetCategories = queryField("GetCategories", {
       });
     }
   },
-});
-
-export const GetCategory = queryField("GetCategory", {
-  type: Category,
-  args: {
-    name: nonNull(stringArg()),
-  },
-  resolve: async (_, { name }, ctx) => {
+  GetCategory: async (
+    _: any,
+    { name }: { name: string },
+    ctx: Context
+  ): Promise<Category> => {
     // check if logged_in
     middleware.checkSuperAdmin(ctx);
     try {
@@ -89,4 +89,6 @@ export const GetCategory = queryField("GetCategory", {
       });
     }
   },
-});
+};
+
+export default resolvers;

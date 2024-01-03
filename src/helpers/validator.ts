@@ -1,13 +1,13 @@
 import fs from "fs";
 import path from "path";
 import { nanoid } from "nanoid";
-import { PAYMENTMETHOD } from "@prisma/client";
 import { GraphQLError } from "graphql";
 import { FileUpload } from "graphql-upload/Upload";
 import { Stream } from "stream";
-import { string, object, array, boolean, mixed, number, date } from "yup";
-import { CatFilterType, CategoryForm } from "../@types/Category";
+import { string, object, array, boolean, mixed, number } from "yup";
+import { CategoryFilterType, CategoryForm } from "../@types/categories";
 import conts from "../@types/conts";
+import { PaymentType } from "../@types/products";
 
 class Validator {
   private productFilters = array(
@@ -56,7 +56,12 @@ class Validator {
       .of(mixed()),
     count: number().required("Product count in stock is required"),
     payment: array()
-      .of(string().oneOf(Object.values(PAYMENTMETHOD), "Invalid payment type"))
+      .of(
+        number().oneOf(
+          Object.values(PaymentType) as number[],
+          "Invalid payment type"
+        )
+      )
       .min(1, "Payment method is required")
       .max(2, "Only two payment methods are allowed")
       .required("Payment method is required"),
@@ -301,7 +306,10 @@ class Validator {
         .nullable(),
       isRequired: boolean().required("Required field is not provided"),
       type: mixed()
-        .oneOf(Object.values(CatFilterType), "Please provide valid filter type")
+        .oneOf(
+          Object.values(CategoryFilterType),
+          "Please provide valid filter type"
+        )
         .required("Please provide filter type"),
       options: array()
         .of(string().max(10, "Option should have not more than 10 characters"))

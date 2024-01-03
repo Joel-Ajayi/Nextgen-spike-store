@@ -1,24 +1,17 @@
-import { booleanArg, nonNull, queryField, stringArg } from "nexus";
-import {
-  CreateProductData,
-  FilterPageProduct,
-  Product,
-  ProductMini,
-} from "../objects";
 import { GraphQLError } from "graphql";
+import { Roles, User } from "../../../@types/users";
+import { Context } from "../../context";
 import consts from "../../../@types/conts";
-import { Roles } from "../../../@types/User";
 import middleware from "../../../middlewares/middlewares";
 import { colours } from "../../../db/app.data";
-import { PAYMENTMETHOD } from "@prisma/client";
+import { PaymentType, ProductBoilerPlate } from "../../../@types/products";
 
-export const GetProduct = queryField("GetProduct", {
-  type: Product,
-  args: {
-    id: nonNull(stringArg()),
-    category: nonNull(stringArg()),
-  },
-  resolve: async (_, { id, category }, ctx) => {
+const resolvers = {
+  GetProduct: async (
+    _: any,
+    { id, category }: { id: string; category: string },
+    ctx: Context
+  ) => {
     const isAdmin = ctx.user.role > Roles.User;
 
     const product = await ctx.db.product.findFirst({
@@ -68,15 +61,11 @@ export const GetProduct = queryField("GetProduct", {
       filters: requiredFilters,
     };
   },
-});
-
-export const GetProductMini = queryField("GetProductMini", {
-  type: FilterPageProduct,
-  args: {
-    id: nonNull(stringArg()),
-    category: nonNull(stringArg()),
-  },
-  resolve: async (_, { id, category }, ctx) => {
+  GetProductMini: async (
+    _: any,
+    { id, category }: { id: string; category: string },
+    ctx: Context
+  ) => {
     try {
       const product = await ctx.db.product.findFirst({
         where: { id, category: { name: category } },
@@ -140,54 +129,11 @@ export const GetProductMini = queryField("GetProductMini", {
       });
     }
   },
-});
-
-export const GetFilterPageProduct = queryField("GetFilterPageProduct", {
-  type: ProductMini,
-  args: {
-    id: nonNull(stringArg()),
-    category: nonNull(stringArg()),
-    reqImages: nonNull(booleanArg()),
-  },
-  resolve: async (_, { id, category, reqImages }, ctx) => {
-    try {
-      const product = await ctx.db.product.findFirst({
-        where: { id, category: { name: category } },
-        select: {
-          id: true,
-          name: true,
-          price: true,
-          category: { select: { name: true } },
-          cId: true,
-          brand: true,
-          rating: true,
-          discount: true,
-          images: reqImages,
-        },
-      });
-
-      if (!product) {
-        throw new GraphQLError(consts.errors.product.prdNotFound, {
-          extensions: { statusCode: 404 },
-        });
-      }
-
-      return {
-        ...product,
-        brand: product.brand.name,
-        category: product.category.name,
-      };
-    } catch (error) {
-      throw new GraphQLError(consts.errors.server, {
-        extensions: { statusCode: 500 },
-      });
-    }
-  },
-});
-
-export const GetCreateProductData = queryField("GetCreateProductData", {
-  type: CreateProductData,
-  resolve: async (_, args, ctx) => {
+  GetCreateProductData: async (
+    _: any,
+    args: any,
+    ctx: Context
+  ): Promise<ProductBoilerPlate> => {
     // check if logged_in
     middleware.checkSuperAdmin(ctx);
 
@@ -216,7 +162,7 @@ export const GetCreateProductData = queryField("GetCreateProductData", {
           ...cat,
           parent: cat.parent?.name || "",
         })),
-        paymentMethods: Object.values(PAYMENTMETHOD) as string[],
+        paymentTypes: Object.values(PaymentType) as PaymentType[],
       };
     } catch (error) {
       throw new GraphQLError(consts.errors.server, {
@@ -224,4 +170,5 @@ export const GetCreateProductData = queryField("GetCreateProductData", {
       });
     }
   },
-});
+};
+export default resolvers;

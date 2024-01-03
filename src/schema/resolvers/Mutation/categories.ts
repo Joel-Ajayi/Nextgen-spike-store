@@ -1,16 +1,20 @@
-import { mutationField, nonNull, stringArg } from "nexus";
-import middleware from "../../../middlewares/middlewares";
-import { CategoryMini } from "../objects";
-import { validator } from "../../../helpers/validator";
 import { GraphQLError } from "graphql";
-import { CategoryInput, CategoryUpdateInput } from "../inputs";
 import consts from "../../../@types/conts";
-import { Category } from "@prisma/client";
+import {
+  CategoryMini,
+  Category_I,
+  Category_I_U,
+} from "../../../@types/categories";
+import { Context } from "../../context";
+import middleware from "../../../middlewares/middlewares";
+import { validator } from "../../../helpers/validator";
 
-export const CreateCategory = mutationField("CreateCategory", {
-  type: CategoryMini,
-  args: { data: CategoryInput },
-  resolve: async (_, { data }, ctx) => {
+const resolvers = {
+  CreateCategory: async (
+    _: any,
+    { data }: { data: Category_I },
+    ctx: Context
+  ): Promise<CategoryMini> => {
     // check if logged_in
     middleware.checkSuperAdmin(ctx);
 
@@ -79,27 +83,21 @@ export const CreateCategory = mutationField("CreateCategory", {
       });
     }
 
-    // validate image/
-    let image: string | undefined = undefined;
-    if (data?.image) {
-      image =
-        (await validator.files(!!data?.image ? [data.image] : [], 0))[0] || "";
-    }
-
-    let newCat: {
-      parent: { name: string };
-    } & Category = null as any;
-
     try {
+      // validate image/
+      let image: string | null | undefined = "";
+      if (data?.image) image = (await validator.files([data.image], 0))[0];
+
       const catCount = (await ctx.db.category.count()) + 1;
       // add category
-      newCat = (await ctx.db.category.create({
+      const newCat = await ctx.db.category.create({
         data: {
           name: data.name,
           lvl: !!parent ? parent.lvl + 1 : 1,
           cId: catCount,
           description: data.description,
           image,
+          banners: [],
           brdId: brandId,
           hasWarranty: data.hasWarranty,
           hasMfg: true,
@@ -109,13 +107,14 @@ export const CreateCategory = mutationField("CreateCategory", {
           id: true,
           name: true,
           lvl: true,
+          image: true,
           parent: {
             select: {
               name: true,
             },
           },
         },
-      })) as any;
+      });
 
       if (data.filters?.length) {
         // add category filters
@@ -127,7 +126,7 @@ export const CreateCategory = mutationField("CreateCategory", {
         });
       }
 
-      const { id, cId, ...rest } = newCat;
+      const { id, ...rest } = newCat;
       return { ...rest, parent: newCat.parent?.name || "" };
     } catch (error) {
       throw new GraphQLError(consts.errors.server, {
@@ -135,12 +134,11 @@ export const CreateCategory = mutationField("CreateCategory", {
       });
     }
   },
-});
-
-export const UpdateCategory = mutationField("UpdateCategory", {
-  type: CategoryMini,
-  args: { data: CategoryUpdateInput },
-  resolve: async (_, { data }, ctx) => {
+  UpdateCategory: async (
+    _: any,
+    { data }: { data: Category_I_U },
+    ctx: Context
+  ): Promise<CategoryMini> => {
     // check if logged_in
     middleware.checkSuperAdmin(ctx);
 
@@ -269,12 +267,11 @@ export const UpdateCategory = mutationField("UpdateCategory", {
     }
     return { ...cat, parent: cat.parent?.name || "" };
   },
-});
-
-export const UpdateCategoryParent = mutationField("UpdateCategoryParent", {
-  type: CategoryMini,
-  args: { name: nonNull(stringArg()), parent: nonNull(stringArg()) },
-  resolve: async (_, { name, parent }, ctx) => {
+  UpdateCategoryParent: async (
+    _: any,
+    { name, parent }: { name: string; parent: string },
+    ctx: Context
+  ): Promise<CategoryMini> => {
     // check if logged_in
     middleware.checkSuperAdmin(ctx);
 
@@ -375,4 +372,6 @@ export const UpdateCategoryParent = mutationField("UpdateCategoryParent", {
     });
     return { ...addedCat, parent: catParent?.name || "" };
   },
-});
+};
+
+export default resolvers;

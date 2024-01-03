@@ -17,11 +17,6 @@ enum PAYMENTSTATUS {
   COMPLETED
 }
 
-enum PAYMENTMETHOD {
-  COD //0
-  CARD //1
-}
-
 enum ORDERSTATUS {
   ORDERED
   PACKED
@@ -40,7 +35,7 @@ model User {
   fName         String
   lName         String
   avatar        String?
-  contactNumber String?
+  contactNumber Int?
   reviews       Reviews[]
   address       Address?
   orders        Order[]
@@ -64,6 +59,7 @@ model Category {
   lvl         Int              @default(1)
   filters     CategoryFilter[]
   image       String?
+  banners     String[]
   brdId       String?          @db.ObjectId
   brand       Brand?           @relation(fields: [brdId], references: [id])
   hasWarranty Boolean
@@ -76,7 +72,7 @@ model Category {
 model CategoryFilter {
   id             String                @id @default(auto()) @map("_id") @db.ObjectId
   name           String
-  type           String?
+  type           String
   unit           String?
   options        String[]
   category       Category              @relation(fields: [categoryId], references: [id], onDelete: Cascade)
@@ -164,7 +160,7 @@ model Order {
   user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   addressId     String        @db.ObjectId
   paymentStatus PAYMENTSTATUS
-  paymentMethod PAYMENTMETHOD
+  paymentMethod Int //0- card, 1-cod
   orderStatus   OrderStatus[]
   totalAmount   Float
   items         OrderItem[]

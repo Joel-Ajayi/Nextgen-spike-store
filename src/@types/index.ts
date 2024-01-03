@@ -6,3 +6,7 @@ export interface Upload {
   encoding: string;
   createReadStream: () => Stream;
 }
+
+export type Message = {
+  message: string;
+};
