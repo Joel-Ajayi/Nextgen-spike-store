@@ -22,5 +22,5 @@ export default async (app: Application) => {
     csrfPrevention: true,
   });
   await server.start();
-  await server.applyMiddleware({ app, path: "api", cors });
+  await server.applyMiddleware({ app, path: "/api", cors });
 };

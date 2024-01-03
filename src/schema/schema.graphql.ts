@@ -4,7 +4,6 @@ type Query {
   GetBrands: [Brand!]!
   GetCategories: [CategoryMini!]!
   GetCategory(name: String!): Category
-  GetColors: [[String]]!
   GetCreateProductData: CreateProductData
   GetFilterPageProduct(category: String!, id: String!, reqImages: Boolean!): ProductMini
   GetProduct(category: String!, id: String!): Product
