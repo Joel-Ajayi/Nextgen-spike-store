@@ -49,75 +49,74 @@ model User {
 }
 
 model Category {
-  id          String           @id @default(auto()) @map("_id") @db.ObjectId
-  name        String           @unique
-  cId         Int              @unique
-  description String?
-  parentId    String?          @db.ObjectId
-  parent      Category?        @relation("Category", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  children    Category[]       @relation("Category")
-  lvl         Int              @default(1)
-  filters     CategoryFilter[]
-  image       String?
-  banners     String[]
-  brdId       String?          @db.ObjectId
-  brand       Brand?           @relation(fields: [brdId], references: [id])
-  hasWarranty Boolean
-  hasMfg      Boolean          @default(false)
-  products    Product[]
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id                       String            @id @default(auto()) @map("_id") @db.ObjectId
+  name                     String            @unique
+  cId                      Int               @unique
+  description              String?
+  parentId                 String?           @db.ObjectId
+  parent                   Category?         @relation("Category", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  children                 Category[]        @relation("Category")
+  lvl                      Int               @default(1)
+  features                 CategoryFeature[]
+  image                    String?
+  banners                  String[]
+  brdId                    String?           @db.ObjectId
+  brand                    Brand?            @relation(fields: [brdId], references: [id])
+  hasWarrantyAndProduction Boolean           @default(false)
+  products                 Product[]
+  createdAt                DateTime          @default(now())
+  updatedAt                DateTime          @updatedAt
 }
 
-model CategoryFilter {
-  id             String                @id @default(auto()) @map("_id") @db.ObjectId
-  name           String
-  type           String
-  unit           String?
-  options        String[]
-  category       Category              @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  categoryId     String                @unique @db.ObjectId
-  isRequired     Boolean               @default(true)
-  productFilters CategoryFilterValue[]
-}
-
-model CategoryFilterValue {
-  id        String         @id @default(auto()) @map("_id") @db.ObjectId
-  values    String[]
-  optionId  String         @db.ObjectId
-  option    CategoryFilter @relation(fields: [optionId], references: [id], onDelete: Cascade)
-  productId String         @db.ObjectId
-  product   Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+model CategoryFeature {
+  id              String           @id @default(auto()) @map("_id") @db.ObjectId
+  name            String
+  type            Int
+  options         String[]
+  parentId        String?          @db.ObjectId
+  category        Category?        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId      String?          @db.ObjectId
+  useAsFilter     Boolean          @default(false)
+  productFeatures ProductFeature[]
 }
 
 // name-cat-brand-price-color
 model Product {
-  id           String                @id @default(auto()) @map("_id") @db.ObjectId
-  sku          String                @unique
+  id           String           @id @default(auto()) @map("_id") @db.ObjectId
+  sku          String           @unique
   name         String
   cId          Int
-  category     Category              @relation(fields: [cId], references: [cId], onDelete: Cascade)
+  category     Category         @relation(fields: [cId], references: [cId], onDelete: Cascade)
   description  String
   price        Float //Naira
   images       String[]
-  rating       Int                   @default(0)
-  count        Int                   @default(0)
-  payment      Int[] //PAYMENTMETHOD
-  brdId        String                @unique @db.ObjectId
-  brand        Brand                 @relation(fields: [brdId], references: [id])
-  colors       String[]
-  discount     Int                   @default(0)
-  aprroved     Boolean               @default(false)
+  rating       Int              @default(0)
+  count        Int              @default(0)
+  paymentType  Int //PAYMENTMETHOD
+  brdId        String           @unique @db.ObjectId
+  brand        Brand            @relation(fields: [brdId], references: [id])
+  colours      String[]
+  discount     Int              @default(0)
+  aprroved     Boolean          @default(false)
   mfgCountry   String?
   mfgDate      String?
   warrDuration Int?
   warrCovered  String?
-  filters      CategoryFilterValue[]
+  features     ProductFeature[]
   reviews      Reviews[]
-  OrderItemIds String[]              @db.ObjectId
-  OrderItems   OrderItem[]           @relation(fields: [OrderItemIds], references: [id])
-  createdAt    DateTime              @default(now())
-  updatedAt    DateTime              @updatedAt
+  OrderItemIds String[]         @db.ObjectId
+  OrderItems   OrderItem[]      @relation(fields: [OrderItemIds], references: [id])
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+}
+
+model ProductFeature {
+  id           String          @id @default(auto()) @map("_id") @db.ObjectId
+  catFeatureId String          @db.ObjectId
+  catFeature   CategoryFeature @relation(fields: [catFeatureId], references: [id], onDelete: Cascade)
+  productId    String          @db.ObjectId
+  product      Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  value        String
 }
 
 model Brand {

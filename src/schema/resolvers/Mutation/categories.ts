@@ -1,6 +1,9 @@
 import { GraphQLError } from "graphql";
+import { Types } from "mongoose";
+
 import consts from "../../../@types/conts";
 import {
+  CategoryFeature,
   CategoryMini,
   Category_I,
   Category_I_U,
@@ -42,13 +45,17 @@ const resolvers = {
     let parent: {
       lvl: number;
       id: string;
-      hasWarranty: boolean;
-      hasMfg: boolean;
+      hasWarrantyAndProduction: boolean;
     } | null = null;
     if (data?.parent) {
       parent = await ctx.db.category.findUnique({
         where: { name: data.parent },
-        select: { id: true, lvl: true, hasWarranty: true, hasMfg: true },
+        select: {
+          id: true,
+          lvl: true,
+          hasWarrantyAndProduction: true,
+          features: true,
+        },
       });
       if (!parent) {
         throw new GraphQLError("Parent category does not exist", {
@@ -71,21 +78,11 @@ const resolvers = {
       brandId = brand.id;
     }
 
-    if (!data.hasWarranty && parent?.hasWarranty) {
-      throw new GraphQLError("Category requires warranty", {
-        extensions: { statusCode: 404 },
-      });
-    }
-
-    if (!data.hasMfg && parent?.hasMfg) {
-      throw new GraphQLError("Category requires production details", {
-        extensions: { statusCode: 404 },
-      });
-    }
-
     try {
       // validate image/
       let image: string | null | undefined = "";
+      const hasWarrantyAndProduction =
+        parent?.hasWarrantyAndProduction || data.hasWarrantyAndProduction;
       if (data?.image) image = (await validator.files([data.image], 0))[0];
 
       const catCount = (await ctx.db.category.count()) + 1;
@@ -99,36 +96,49 @@ const resolvers = {
           image,
           banners: [],
           brdId: brandId,
-          hasWarranty: data.hasWarranty,
-          hasMfg: true,
+          hasWarrantyAndProduction,
           parentId: !parent?.id ? undefined : parent.id,
         },
         select: {
           id: true,
           name: true,
           lvl: true,
+          cId: true,
           image: true,
-          parent: {
-            select: {
-              name: true,
-            },
-          },
+          hasWarrantyAndProduction: true,
+          parent: { select: { name: true } },
+          features: true,
         },
       });
 
-      if (data.filters?.length) {
-        // add category filters
-        await ctx.db.categoryFilter.createMany({
-          data: data.filters.map(({ id, ...rest }) => ({
-            ...rest,
-            categoryId: newCat.id,
-          })),
-        });
+      // Features
+      if (data.features?.length) {
+        const parentFeatures = data.features
+          .filter((f) => !f?.parentId)
+          .map((f) => ({ ...f, categoryId: newCat.id }));
+
+        await (async function saveFeature(pFeatures: CategoryFeature[]) {
+          await Promise.all(
+            pFeatures.map(async ({ categoryId, ...rest }) => {
+              // save feature
+              let feature = { categoryId, ...rest };
+              feature = await ctx.db.categoryFeature.create({ data: feature });
+
+              // get feature children
+              const children = data.features
+                .filter((child) => child.parentId === feature.name)
+                .map((f) => ({ ...f, categoryId, parentId: feature.id }));
+
+              // save feature children
+              if (children.length) await saveFeature(children);
+            })
+          );
+        })(parentFeatures);
       }
 
-      const { id, ...rest } = newCat;
-      return { ...rest, parent: newCat.parent?.name || "" };
+      return { ...newCat, parent: newCat.parent?.name || "" };
     } catch (error) {
+      console.log(error);
       throw new GraphQLError(consts.errors.server, {
         extensions: { statusCode: 500 },
       });
@@ -152,7 +162,7 @@ const resolvers = {
     await validator.category(data as any, true);
 
     // check if cat exist
-    const addedCat = await ctx.db.category.findUnique({
+    const category = await ctx.db.category.findUnique({
       where: { id: data?.id },
       select: {
         id: true,
@@ -161,18 +171,12 @@ const resolvers = {
         brdId: true,
         brand: { select: { name: true } },
         banners: true,
-        parent: { select: { hasWarranty: true } },
-        filters: { select: { id: true } },
+        parent: { select: { hasWarrantyAndProduction: true } },
+        features: { select: { id: true, parentId: true } },
       },
     });
-    if (!addedCat) {
+    if (!category) {
       throw new GraphQLError("Category not found", {
-        extensions: { statusCode: 404 },
-      });
-    }
-
-    if (!data.hasWarranty && addedCat.parent?.hasWarranty) {
-      throw new GraphQLError("Category requires warranty", {
         extensions: { statusCode: 404 },
       });
     }
@@ -183,8 +187,8 @@ const resolvers = {
       select: { id: true },
     });
 
-    if (!!searchedCat && addedCat.id !== searchedCat?.id) {
-      if (!addedCat) {
+    if (!!searchedCat && category.id !== searchedCat?.id) {
+      if (!category) {
         throw new GraphQLError("Category Name already used", {
           extensions: { statusCode: 404 },
         });
@@ -192,8 +196,8 @@ const resolvers = {
     }
 
     // check if brand exist
-    let brandId: string | null = addedCat.brdId;
-    if (data.brand && data.brand !== addedCat.brand?.name) {
+    let brandId: string | null = category.brdId;
+    if (data.brand && data.brand !== category.brand?.name) {
       const brand = await ctx.db.brand.findUnique({
         where: { name: data.brand },
       });
@@ -208,64 +212,84 @@ const resolvers = {
     }
 
     // delete all filters
-    let prevFilterIds = addedCat.filters.map(({ id }) => id);
-    if (prevFilterIds.length && !data.filters?.length) {
-      await ctx.db.categoryFilter.deleteMany({
-        where: { id: { in: prevFilterIds } },
-      });
-    } else if (data.filters?.length) {
-      await Promise.all(
-        data.filters.map(async ({ id, ...rest }) => {
-          const data = { ...rest, categoryId: addedCat.id };
-          const filter = await ctx.db.categoryFilter.upsert({
-            where: { id: id || undefined },
-            create: data,
-            update: data,
-          });
-          prevFilterIds = prevFilterIds.filter((fid) => fid !== filter?.id);
-        })
-      );
+    let prevFeaturesId = [...category.features].map((f) => f.id);
+    if (data.features?.length) {
+      // Features
+      const parentFeatures = data.features.filter((f) => !f.parentId);
+      const ObjectId = Types.ObjectId;
 
-      // delete filter not modified
-      if (prevFilterIds.length) {
-        await ctx.db.categoryFilter.deleteMany({
-          where: { id: { in: prevFilterIds } },
-        });
-      }
+      await (async function saveFeature(pFeatures: CategoryFeature[]) {
+        const randObjId = new ObjectId().toString();
+        await Promise.all(
+          pFeatures.map(async ({ id, parentId, ...rest }) => {
+            const isIdValid =
+              ObjectId.isValid(id) && String(new ObjectId(id)) === id;
+
+            // save feature
+            const featureData = {
+              categoryId: category.id,
+              ...rest,
+              parentId: parentId || null,
+            };
+            const feature = await ctx.db.categoryFeature.upsert({
+              where: { id: isIdValid ? id : randObjId },
+              create: featureData,
+              update: featureData,
+            });
+            prevFeaturesId = prevFeaturesId.filter((fId) => fId !== id);
+
+            // get feature children
+            const children = data.features
+              .filter((child) => child.parentId === id)
+              .map((f) => ({ ...f, parentId: feature.id }));
+
+            // save feature children
+            if (children.length) await saveFeature(children);
+          })
+        );
+      })(parentFeatures);
+    }
+    // delete filter not modified
+    if (prevFeaturesId.length) {
+      await ctx.db.categoryFeature.deleteMany({
+        where: { id: { in: prevFeaturesId } },
+      });
     }
 
     // validate image
     const dataImage = data?.image ? [data?.image] : [];
-    const prevImage = !!addedCat?.image ? [addedCat.image] : [];
+    const prevImage = !!category?.image ? [category.image] : [];
     const image = (await validator.files(dataImage, 0, 1, prevImage))[0];
+    const hasWarrantyAndProduction =
+      category?.parent?.hasWarrantyAndProduction ||
+      data.hasWarrantyAndProduction;
 
-    const cat = await ctx.db.category.update({
-      where: { id: addedCat.id },
+    const updatedCategory = await ctx.db.category.update({
+      where: { id: category.id },
       data: {
         name: data.name,
         description: data.description,
         image,
         brdId: brandId,
-        hasWarranty: data.hasWarranty,
-        hasMfg: data.hasMfg,
+        hasWarrantyAndProduction,
       },
       select: {
+        id: true,
         name: true,
         lvl: true,
-        parent: {
-          select: {
-            name: true,
-          },
-        },
+        cId: true,
+        parent: { select: { name: true } },
+        hasWarrantyAndProduction: true,
+        features: true,
       },
     });
 
-    if (cat === null) {
+    if (updatedCategory === null) {
       throw new GraphQLError("Category not found", {
         extensions: { statusCode: 404 },
       });
     }
-    return { ...cat, parent: cat.parent?.name || "" };
+    return { ...updatedCategory, parent: updatedCategory.parent?.name || "" };
   },
   UpdateCategoryParent: async (
     _: any,
@@ -285,7 +309,9 @@ const resolvers = {
         name: true,
         id: true,
         lvl: true,
-        hasWarranty: true,
+        cId: true,
+        hasWarrantyAndProduction: true,
+        features: true,
       },
     });
 
@@ -299,14 +325,21 @@ const resolvers = {
       name: string;
       id: string;
       lvl: number;
-      hasWarranty: boolean;
+      cId: number;
+      hasWarrantyAndProduction: boolean;
     } | null = null as any;
 
     if (parent) {
       // check parent
       catParent = await ctx.db.category.findUnique({
         where: { name: parent },
-        select: { id: true, lvl: true, name: true, hasWarranty: true },
+        select: {
+          id: true,
+          lvl: true,
+          cId: true,
+          name: true,
+          hasWarrantyAndProduction: true,
+        },
       });
 
       if (!catParent) {
@@ -318,12 +351,6 @@ const resolvers = {
       if (catParent?.id === addedCat.id) {
         throw new GraphQLError("Sorry, you can't add to this category", {
           extensions: { statusCode: 400 },
-        });
-      }
-
-      if (!addedCat.hasWarranty && catParent && catParent.hasWarranty) {
-        throw new GraphQLError("Category requires warranty", {
-          extensions: { statusCode: 404 },
         });
       }
 
@@ -368,6 +395,9 @@ const resolvers = {
       data: {
         parentId: catParent ? catParent.id : null,
         lvl: catParent ? catParent.lvl + 1 : 1,
+        hasWarrantyAndProduction:
+          catParent?.hasWarrantyAndProduction ||
+          addedCat.hasWarrantyAndProduction,
       },
     });
     return { ...addedCat, parent: catParent?.name || "" };

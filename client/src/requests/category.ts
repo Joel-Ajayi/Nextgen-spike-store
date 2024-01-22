@@ -17,23 +17,20 @@ class CategoryReq {
     const formData = new FormData();
     formData.append("operations", body);
     let map: { [key in string]: string[] } = {};
-    if (image.length) {
-      map["0"] = ["variables.data.image"];
-    }
+    if (image.length) map["0"] = ["variables.data.image"];
     data.banners.forEach((_, i) => {
       map[i + (!image.length ? 0 : 1)] = [`variables.data.banners.${i}`];
     });
     formData.append("map", JSON.stringify(map));
 
-    if (image.length) {
-      formData.append("0", (data.image[0] as IFile).file);
-    }
+    if (image.length) formData.append("0", (data.image[0] as IFile).file);
+
     (data.banners as IFile[]).forEach(({ file }, i) => {
       formData.append(`${i + (!image.length ? 0 : 1)}`, file);
     });
 
     const { res, msg } = await request.makeRequest<CategoryMini>(
-      formData as any,
+      formData,
       true
     );
     return { cat: res, msg };
@@ -54,9 +51,11 @@ class CategoryReq {
     return { cat: res as CategoryMini, msg };
   }
 
-  public async getCategories() {
+  public async getCategories(parent = "") {
     const body = JSON.stringify({
-      query: "query GetCategories { GetCategories { name parent lvl } }",
+      query:
+        "query GetCategories($parent:String) { GetCategories(parent: $parent) { name parent lvl image cId hasWarrantyAndProduction features { id name type options useAsFilter parentId} } }",
+      variables: { parent },
     });
 
     const { res, msg } = await request.makeRequest<CategoryMini[]>(body);
@@ -66,7 +65,7 @@ class CategoryReq {
   public async getCategory(name: string) {
     const body = JSON.stringify({
       query: `query GetCategory($name: String!) { GetCategory(name: $name) {
-                 id name parent lvl description image banners hasWarranty brand filters { id name type unit options isRequired }
+                 id name parent lvl description image banners hasWarrantyAndProduction brand features { id name type options useAsFilter parentId }
                 }
               }`,
       variables: { name },

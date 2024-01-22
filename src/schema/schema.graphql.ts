@@ -2,27 +2,26 @@ const typeDefs = `#graphql
 type Query {
   GetBrand(name: String!): Brand
   GetBrands: [Brand!]!
-  GetCategories: [CategoryMini!]!
+  GetCategories(parent: String): [CategoryMini!]!
   GetCategory(name: String!): Category
   GetCreateProductData: CreateProductData
-  GetFilterPageProduct(category: String!, id: String!, reqImages: Boolean!): ProductMini
-  GetProduct(category: String!, id: String!): Product
-  GetProductMini(category: String!, id: String!): ProductFilterPage
+  #GetFilterPageProduct(category: String!, id: String!, reqImages: Boolean!): ProductMini
+  GetProduct(id: String!): Product
+  GetProductMini(category: String!, id: String!): ProductMini
   UserQuery: User
 }
 
 type Mutation {
   CreateBrand(data: BrandInput): Brand
   CreateCategory(data: CategoryInput): CategoryMini
-  CreateProduct(data: ProductInput): ProductMini
+  CreateProduct(data: ProductInput): Message
   ForgotPassword(email: String!): Message
   SignIn(data: SignInInput): Message
   SignOut: Message
   SignUp(data: SignUpInput): Message
   UpdateCategory(data: CategoryUpdateInput): CategoryMini
   UpdateCategoryParent(name: String!, parent: String!): CategoryMini
-  UpdateProductCategory(data: UpdateProductCategoryInput): Message
-  UpdateProductInfo(data: UpdateProductInfoInput): Message
+  UpdateProduct(data: UpdateProductInput): Message
   VerifyAccount(email: String!): Message
   VerifyPasswordToken(token: String!): Message
   VerifyToken(token: String!): Message
@@ -35,6 +34,8 @@ type Message {
 
 # scallar type
 scalar Upload
+scalar Date
+scalar StringAndInt
 
 
 #Brand
@@ -56,9 +57,8 @@ type Category {
   banners: [String!]!
   brand: String!
   description: String!
-  filters: [CategoryFilter!]!
-  hasMfg: Boolean!
-  hasWarranty: Boolean!
+  features: [CategoryFeature!]!
+  hasWarrantyAndProduction:Boolean!
   id: String!
   image: [String!]!
   lvl: Int!
@@ -66,40 +66,30 @@ type Category {
   parent: String
 }
 
-type CategoryFilter {
+type CategoryFeature {
   id: String!
-  isRequired: Boolean!
+  useAsFilter: Boolean!
+  parentId: String
   name: String!
   options: [String!]!
-  type: String
-  unit: String
+  type: Int!
 }
 
-input CategoryFilterInput {
-  id: String
-  isRequired: Boolean!
-  name: String!
-  options: [String!]!
-  type: CatFilterType!
-  unit: String
-}
-
-input CategoryFilterUpdateInput {
+input CategoryFeatureInput {
   id: String!
-  isRequired: Boolean!
+  useAsFilter: Boolean!
+  parentId: String
   name: String!
   options: [String!]!
-  type: CatFilterType!
-  unit: String
+  type: Int!
 }
 
 
 input CategoryInput {
   brand: String
   description: String
-  filters: [CategoryFilterInput!]!
-  hasMfg: Boolean!
-  hasWarranty: Boolean!
+  features: [CategoryFeatureInput!]!
+  hasWarrantyAndProduction: Boolean!
   image: Upload
   name: String!
   parent: String
@@ -108,85 +98,43 @@ input CategoryInput {
 type CategoryMini {
   image: String
   lvl: Int!
+  cId: Int!
   name: String!
   parent: String!
-}
-
-enum CatFilterType {
-  Number
-  Text
+  hasWarrantyAndProduction:Boolean!
+  features: [CategoryFeature!]!
 }
 
 input CategoryUpdateInput {
   brand: String!
   description: String
-  filters: [CategoryFilterInput!]!
-  hasMfg: Boolean!
-  hasWarranty: Boolean!
+  features: [CategoryFeatureInput!]!
+  hasWarrantyAndProduction:Boolean!
   id: String!
-  image: Upload!
+  image: Upload
+  banners:[Upload]!
   name: String!
-}
-
-type CreateProductData {
-  brands: [Brand]!
-  categories: [CategoryMini]!
-  colours: [[String!]!]
-  paymentMethods: [String]!
 }
 
 
 
 #Product
 type Product {
-  brand: String!
-  category: String
-  colors: [String!]!
-  description: String!
-  discount: Int!
-  filters: [CategoryFilterValue!]!
   id: String!
-  images: [String!]!
-  mfgCountry: String
-  mfgDate: String
   name: String!
-  payment: [Int!]!
   price: Int!
-  warrCovered: String
-  warrDuration: Int
-}
-
-type ProductFilterPage {
-  brand: String!
-  category: String
-  colors: [String!]!
-  description: String!
-  discount: Int!
-  filters: [CategoryFilterValue!]!
-  id: String!
-  images: [String!]!
-  name: String!
-  numRating: Int!
-  numReviews: Int!
-  price: Int!
-  rating: Int!
-}
-
-input ProductInput {
   brand: String!
   cId: Int!
-  colors: [String!]!
-  count: Int!
   description: String!
-  discount: Int
-  filters: [CategoryFilterValueInput!]!
-  images: [Upload!]!
-  mfgCountry: String!
-  mfgDate: String!
-  name: String!
-  payment: [String!]!
-  price: Int!
-  warranty: ProductWarrantyInput
+  discount: Int!
+  colours: [String!]!
+  paymentType: Int!
+  images: [String!]!
+  sku:String!
+  mfgDate: String
+  warrCovered: String
+  warrDuration: Int
+  features: [ProductFeature!]!
 }
 
 type ProductMini {
@@ -200,30 +148,79 @@ type ProductMini {
   rating: Int!
 }
 
-input ProductWarrantyInput {
-  covered: String!
-  duration: Int!
-}
+#type ProductFilterPage {
+#  brand: String!
+#  category: String
+#  colours: [String!]!
+#  description: String!
+#  discount: Int!
+#  filters: [CategoryFilterValue!]!
+#  id: String!
+#  images: [String!]!
+ # name: String!
+#  numRating: Int!
+#  numReviews: Int!
+#  price: Int!
+#  rating: Int!
+#}
 
-type CategoryFilterValue {
-  id: String!
+input ProductInput {
+  brand: String!
+  cId: Int!
+  colours: [String!]!
+  count: Int!
+  description: String!
+  discount: Int
+  images: [Upload!]!
   name: String!
-  optionId: String!
-  type: String
-  unit: String
-  values: [String!]!
+  paymentType: Int!
+  price: Int!
+  mfgDate: Date!
+  warrCovered: String
+  warrDuration: Int!
+  features: [ProductFeatureInput!]!
 }
 
-input CategoryFilterValueInput {
+input UpdateProductInput {
+  id: String!
+  name: String
+  cId: String
+  brand:String
+  description: String
+  price: Int
+  discount: Int
+  colors: [String!]
+  count: Int
+  paymentType: Int
+  images: [Upload!]
+  mfgDate: Date
+  warrCovered: String
+  warrDuration: Int
+  features: [ProductFeatureInput!]
+}
+
+interface ProductFeature {
+  id: String!
+  optionId: String!
+  value: String!
+}
+
+input ProductFeatureInput {
   id: String
   optionId: String!
-  values: [String!]!
+  value: String!
 }
 
-input CategoryFilterValueUpdateInput {
-  id: String!
-  optionId: String!
-  values: [String!]!
+type CreateProductData {
+  brands: [Brand]!
+  categories: [CategoryMini]!
+  colours: [[String!]!]
+  paymentTypes: [PaymentType!]!
+}
+
+type PaymentType {
+  val:Int!
+  type:String!
 }
 
 
@@ -248,28 +245,6 @@ input SignUpInput {
   fName: String!
   lName: String!
   pwd: String!
-}
-
-input UpdateProductCategoryInput {
-  cId: String!
-  filters: [CategoryFilterValueInput!]!
-  pId: String!
-}
-
-input UpdateProductInfoInput {
-  brand: String!
-  colors: [String!]!
-  count: Int!
-  description: String!
-  discount: Int
-  id: String!
-  images: [Upload!]!
-  mfgCountry: String!
-  mfgDate: String!
-  name: String!
-  payment: [String!]!
-  price: Int!
-  warranty: ProductWarrantyInput
 }
 `;
 

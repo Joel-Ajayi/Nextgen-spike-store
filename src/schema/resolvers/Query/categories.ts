@@ -7,21 +7,23 @@ import middleware from "../../../middlewares/middlewares";
 const resolvers = {
   GetCategories: async (
     _: any,
-    data: any,
+    { parent }: { parent: string },
     ctx: Context
   ): Promise<CategoryMini[]> => {
     try {
+      let query = {};
+      if (parent) query = { parent: { name: parent } };
+
       const categories = await ctx.db.category.findMany({
+        where: query,
         select: {
+          id: true,
           name: true,
           lvl: true,
-          hasWarranty: true,
-          hasMfg: true,
-          parent: {
-            select: {
-              name: true,
-            },
-          },
+          hasWarrantyAndProduction: true,
+          cId: true,
+          parent: { select: { name: true } },
+          features: true,
         },
       });
 
@@ -53,20 +55,10 @@ const resolvers = {
           description: true,
           image: true,
           banners: true,
-          hasWarranty: true,
-          hasMfg: true,
+          hasWarrantyAndProduction: true,
           brand: { select: { name: true } },
           parent: { select: { name: true } },
-          filters: {
-            select: {
-              id: true,
-              name: true,
-              unit: true,
-              options: true,
-              isRequired: true,
-              type: true,
-            },
-          },
+          features: true,
         },
       });
 

@@ -18,10 +18,10 @@
 .content {
   position: relative;
   flex: 1;
-  overflow: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  overflow: auto;
   margin-top: 10px;
   @include scrollbar();
 
@@ -40,11 +40,27 @@
         flex-direction: column;
         row-gap: 15px;
 
-        .filter_options_title {
+        .feature_options {
+          width: 100%;
+          display: flex;
+          flex-direction: column;
+          row-gap: 20px;
+          @include scrollbar();
+          overflow-y: hidden;
+          overflow-x: auto;
+        }
+
+        .feature_options_title {
+          display: flex;
+          justify-content: space-between;
           font-size: 18px;
           font-weight: 500;
           color: $color-gray5;
           margin-bottom: 10px;
+
+          .add_icon {
+            cursor: pointer;
+          }
         }
       }
     }

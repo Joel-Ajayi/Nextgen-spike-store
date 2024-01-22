@@ -1,16 +1,16 @@
 @import "../../../../../styles/vars.scss";
 
-.filter_option {
+.feature_option {
   position: relative;
   display: flex;
   flex-direction: column;
-  margin-bottom: 20px;
+  min-width: 200px;
 
   .options_actions {
     display: flex;
     position: absolute;
     right: 0px;
-    top: -10px;
+    top: 0px;
     column-gap: 5px;
     z-index: 1;
 
@@ -29,5 +29,12 @@
     .disabled {
       cursor: not-allowed !important;
     }
+  }
+
+  .child_features {
+    margin-left: 20px;
+    display: flex;
+    flex-direction: column;
+    row-gap: 20px;
   }
 }

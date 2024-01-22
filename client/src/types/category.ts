@@ -2,61 +2,31 @@ import { IFile } from ".";
 
 export type InitialCategoryController = {
   categories: CategoryMini[];
+  category: Category;
 };
 
-export type ProductWarranty = {
-  duration: number;
-  covered: string;
-};
-
-export type CategoryFilterValues = {
-  values: string[];
-  optionId: string;
-};
-
-export type NewProduct = {
-  category: {
-    name: string;
-    path?: string;
-  };
-  brand: string;
-  info: {
-    name: string;
-    description: string;
-    images: (IFile | string)[];
-    colors: string[];
-    price: number;
-    discount: number;
-    paymentMethods: number[];
-    warranty: ProductWarranty;
-    mfgCountry: string;
-    mfgDate: string;
-  };
-};
-
-export type InitialProductController = {
-  newProduct: NewProduct;
-};
-
-export enum CatFilterType {
-  Txt = "Text",
-  Num = "Number",
-  Range = "Range",
+export enum CategoryFeatureType {
+  Text,
+  Number,
 }
 
-export type CatFilter = {
-  id?: string;
+export type CategoryFeature = {
+  id: string;
   name: string;
-  type: CatFilterType;
-  unit: string;
+  type: CategoryFeatureType;
   options: string[];
-  isRequired: boolean;
+  parentId: string | null;
+  useAsFilter: boolean;
 };
 
 export type CategoryMini = {
   name: string;
+  cId: number;
   lvl: number;
   parent: string;
+  hasWarrantyAndProduction: boolean;
+  image?: string;
+  features: CategoryFeature[];
 };
 
 export type Category = {
@@ -68,6 +38,6 @@ export type Category = {
   description: string;
   image: (IFile | string)[];
   banners: (IFile | string)[];
-  filters: CatFilter[];
-  hasWarranty: boolean;
+  features: CategoryFeature[];
+  hasWarrantyAndProduction: boolean;
 };

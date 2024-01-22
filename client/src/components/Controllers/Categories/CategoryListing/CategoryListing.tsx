@@ -17,11 +17,12 @@ function CategoryListing() {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const { updateCategory, setCategories } = controllerCatSlice.actions;
+  const { updateCategories: updateCategory, setCategories } =
+    controllerCatSlice.actions;
   const { setBackgroundMsg } = appSlice.actions;
 
   const categories = useAppSelector(
-    (state) => state.controller.category.categories
+    (state) => state.controller.categories.categories
   );
 
   const [isLoading, setLoading] = useState(true);
@@ -43,24 +44,25 @@ function CategoryListing() {
     const { cat, msg } = await categoryReq.updateCatParent(id, destId);
     if (msg) {
       dispatch(setBackgroundMsg(msg));
-    } else {
+    }
+    if (cat) {
       const index = categories.findIndex((cat) => cat.name === id);
       dispatch(updateCategory({ index, cat: cat as CategoryMini }));
     }
   };
 
   const onAppend = (id: string) => {
-    const parent = categories.find(({ name }) => name === id);
-
     let link = `/controller?pg=${Pages.Categories}&sec=${PageSections.CreateCat}`;
-    if (id) link += id ? `&parent=${id.replace(/\s/g, "-")}` : "";
+    if (id)
+      link += id ? `&parent=${id.replace(/\s/g, "-").replace("&", "%26")}` : "";
     navigate(link, { replace: false });
   };
 
   const onEdit = (id: string) => {
     navigate(
-      `/controller?pg=${Pages.Categories}&sec=${PageSections.UpdateCat
-      }&cat_id=${id.replace(/\s/g, "-")}`,
+      `/controller?pg=${Pages.Categories}&sec=${
+        PageSections.UpdateCat
+      }&cat_id=${id.replace(/\s/g, "-").replace("&", "%26")}`,
       { replace: false }
     );
   };
@@ -101,8 +103,8 @@ function CategoryListing() {
         rawTree={rawTree}
         height={height}
         width={width}
-        nodeWidth={115}
-        nodeHeight={30}
+        nodeWidth={130}
+        nodeHeight={0}
         onAppend={onAppend}
         onMove={onMove}
         onEdit={onEdit}
@@ -113,14 +115,16 @@ function CategoryListing() {
   return (
     <div className={ControllerStyles.wrapper}>
       <div className={ControllerStyles.sec_header}>
-        <div className={ControllerStyles.title}>Category Listings</div>
-        <div>
-          <Button
-            value="ADD NEW CATEGORY"
-            type="button"
-            className={Styles.all_cat_button}
-            link={`/controller?pg=${Pages.Categories}&sec=${PageSections.CreateCat}`}
-          />
+        <div className={ControllerStyles.header_content}>
+          <div className={ControllerStyles.title}>Category Listings</div>
+          <div>
+            <Button
+              value="ADD NEW CATEGORY"
+              type="button"
+              className={Styles.all_cat_button}
+              link={`/controller?pg=${Pages.Categories}&sec=${PageSections.CreateCat}`}
+            />
+          </div>
         </div>
       </div>
       <div className={Styles.content} ref={treeContainer}>

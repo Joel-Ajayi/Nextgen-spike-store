@@ -14,7 +14,7 @@ import Button from "../../../shared/Button/Button";
 import { PageSections, Pages } from "../../../../types/controller";
 import brandValidator from "../../../../validators/brand";
 import validator from "../../../../validators";
-import brandSlice from "../../../../store/controller/brand";
+import brandSlice from "../../../../store/controller/brands";
 
 type CreateBrandProps = {
   isUpdate?: boolean;
@@ -66,7 +66,7 @@ function CreateBrand({ isUpdate, brd_id }: CreateBrandProps) {
   }, []);
 
   const onInputChange = async (
-    value: string | (IFile | string)[] | boolean | [] | null,
+    value: string | (IFile | number | string)[] | number | boolean | [] | null,
     name: string
   ): Promise<string | void> => {
     setForm((preVal) => ({ ...preVal, [name]: value }));
@@ -131,14 +131,16 @@ function CreateBrand({ isUpdate, brd_id }: CreateBrandProps) {
           {!isLoading && (
             <>
               <div className={ControllerStyles.sec_header}>
-                <div className={ControllerStyles.title}>Create Category</div>
-                <div>
-                  <Button
-                    value="ALL Brands"
-                    type="button"
-                    className={Styles.all_cat_button}
-                    link={`/controller?pg=${Pages.Brand}&sec=${PageSections.BrdListing}`}
-                  />
+                <div className={ControllerStyles.header_content}>
+                  <div className={ControllerStyles.title}>Create Category</div>
+                  <div>
+                    <Button
+                      value="ALL Brands"
+                      type="button"
+                      className={Styles.all_cat_button}
+                      link={`/controller?pg=${Pages.Brand}&sec=${PageSections.BrdListing}`}
+                    />
+                  </div>
                 </div>
               </div>
               <div className={Styles.content}>

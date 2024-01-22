@@ -6,12 +6,19 @@ import Input from "../../../shared/Input/Controller/Input";
 import ControllerStyles from "../../controller.module.scss";
 import uniqid from "uniqid";
 import Styles from "./createCat.module.scss";
-import { Category, CategoryMini, CatFilter } from "../../../../types/category";
+import { GrAdd as AddIcon } from "react-icons/gr";
+import {
+  Category,
+  CategoryMini,
+  CategoryFeature,
+} from "../../../../types/category";
 import categoryReq from "../../../../requests/category";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { Brand, IFile } from "../../../../types";
-import controllerCatSlice from "../../../../store/controller/categories";
-import Filter from "./Filter/Filter";
+import controllerCatSlice, {
+  defaultFeature,
+} from "../../../../store/controller/categories";
+import Feature from "./Feature/Feature";
 import appSlice from "../../../../store/appState";
 import Page404 from "../../../shared/Page404/Page404";
 import SpinLoader from "../../../shared/Loader/SpinLoader/SpinLoader";
@@ -26,18 +33,6 @@ type CreateCategoryProps = {
   parent?: string;
 };
 
-const defaultData: Category = {
-  id: undefined,
-  name: "",
-  brand: "",
-  description: "",
-  parent: "",
-  image: [],
-  banners: [],
-  filters: [],
-  hasWarranty: false,
-};
-
 function CreateCategory({
   cat_id,
   parent = "",
@@ -48,20 +43,26 @@ function CreateCategory({
 
   const statusCode = useAppSelector((state) => state.app.statusCode);
   const categories = useAppSelector(
-    (state) => state.controller.category.categories
+    (state) => state.controller.categories.categories
   );
+  const input = useAppSelector((state) => state.controller.categories.category);
   const index = useAppSelector((state) =>
-    state.controller.category.categories.findIndex((cat) => cat.name === cat_id)
+    state.controller.categories.categories.findIndex(
+      (cat) => cat.name === cat_id
+    )
   );
 
-  const { updateCategory, addCategory } = controllerCatSlice.actions;
+  const { updateCategories: updateCategory, addCategory } =
+    controllerCatSlice.actions;
+  const setInitCategoryInput = controllerCatSlice.actions.setInitCategoryInput;
+  const setCatgeoryInput = controllerCatSlice.actions.setCatgeoryInput;
   const { setStatusCode } = appSlice.actions;
   const { setBackgroundMsg } = appSlice.actions;
-  defaultData.parent = parent;
 
   const [isLoading, setIsLoading] = useState(!!cat_id);
   const [isSaving, setIsSaving] = useState(false);
-  const [form, setForm] = useState(defaultData);
+  const [parentHasWarrantyAndProduction, setParentHasWarrantyAndProduction] =
+    useState(false);
   const [brands, setBrands] = useState<Brand[]>([]);
   const [errors, setErrors] = useState<{ [key in string]: string }>({});
 
@@ -70,8 +71,9 @@ function CreateCategory({
       const { brds, msg: brdMsg } = await brandReq.getBrands();
       if (!!cat_id) {
         const { cat, msg: catMsg } = await categoryReq.getCategory(cat_id);
+        const { cat: parentCat } = await categoryReq.getCategory(parent);
         if (catMsg?.statusCode === 404) {
-          setStatusCode(404);
+          dispatch(setStatusCode(404));
         } else if (cat) {
           let image: IFile[] = [];
           if (cat.image.length) {
@@ -81,8 +83,21 @@ function CreateCategory({
           if (cat.banners.length > 0) {
             banners = await request.getImageFiles(cat.image as string[]);
           }
-
-          setForm({ ...cat, image, banners });
+          if (parentCat) {
+            setParentHasWarrantyAndProduction(
+              parentCat.hasWarrantyAndProduction
+            );
+          }
+          dispatch(
+            setInitCategoryInput({
+              ...cat,
+              image,
+              banners,
+              hasWarrantyAndProduction:
+                parentCat?.hasWarrantyAndProduction ||
+                cat.hasWarrantyAndProduction,
+            })
+          );
         }
       }
 
@@ -110,18 +125,21 @@ function CreateCategory({
   }, [errors, isLoading]);
 
   const onInputChange = async (
-    value: string | (IFile | string | CatFilter)[] | boolean | [] | null,
+    value:
+      | string
+      | (IFile | number | string | CategoryFeature)[]
+      | number
+      | boolean
+      | null,
     name: string
   ): Promise<string | void> => {
-    setForm((preVal) => ({ ...preVal, [name]: value }));
+    dispatch(setCatgeoryInput({ value, name }));
     const getError = async (name: string) => {
       switch (name) {
         case "name":
           return await categoryValidator.catName(value as string);
         case "description":
           return await categoryValidator.catDesc((value as string) || "");
-        case "filters":
-          return await categoryValidator.catFilter(value as CatFilter[]);
         case "image": {
           const files = (value as IFile[]).map((f) => f.file);
           return await validator.files(files, "image");
@@ -139,38 +157,29 @@ function CreateCategory({
     return error;
   };
 
-  const onFilterChange = async (
-    data: CatFilter,
-    index: number,
-    del = false
-  ) => {
-    let filters = [...form.filters, data];
-
-    if (del) {
-      filters = form.filters.filter((_, i) => i !== index);
-    } else if (index !== -1) {
-      filters = form.filters.map((filter, i) => (i === index ? data : filter));
+  const onSave = async () => {
+    setIsSaving(true);
+    const { cat, msg } = await categoryReq.updateCat(input, isUpdate);
+    if (msg) {
+      dispatch(setBackgroundMsg(msg));
+    } else if (cat) {
+      if (isUpdate && categories.length) {
+        dispatch(updateCategory({ index, cat }));
+      } else {
+        dispatch(addCategory(cat as CategoryMini));
+      }
+      const navLink = `/controller?pg=${Pages.Categories}&sec=${PageSections.CatListing}`;
+      navigate(navLink, { replace: false });
     }
-    await onInputChange(filters, "filters");
+    setIsSaving(false);
   };
 
-  const onSave = async () => {
-    if (isValid) {
-      setIsSaving(true);
-      const { cat, msg } = await categoryReq.updateCat(form, isUpdate);
-      if (msg) {
-        dispatch(setBackgroundMsg(msg));
-      } else if (cat) {
-        if (isUpdate && categories.length) {
-          dispatch(updateCategory({ index, cat }));
-        } else {
-          dispatch(addCategory(cat as CategoryMini));
-        }
-        const navLink = `/controller?pg=${Pages.Categories}&sec=${PageSections.CatListing}`;
-        navigate(navLink, { replace: false });
-      }
-      setIsSaving(false);
-    }
+  const addChildFeature = () => {
+    const newFeatures = [
+      ...input.features,
+      { ...defaultFeature, id: uniqid() },
+    ];
+    dispatch(setCatgeoryInput({ value: newFeatures, name: "features" }));
   };
 
   const imageInput = useMemo(
@@ -180,11 +189,11 @@ function CreateCategory({
         label="Category Image"
         type="image"
         onChange={onInputChange}
-        defaultValues={form.image}
+        defaultValues={input.image}
         changeOnMount={!isLoading}
       />
     ),
-    [form.image.length, isLoading]
+    [input.image.length, isLoading]
   );
 
   const bannerInput = useMemo(
@@ -195,25 +204,27 @@ function CreateCategory({
         type="image"
         isMultipleFiles
         onChange={onInputChange}
-        defaultValues={form.banners}
+        defaultValues={input.banners}
         changeOnMount={!isLoading}
       />
     ),
-    [form.banners.length, isLoading]
+    [input.banners.length, isLoading]
   );
-
-  const filters = useMemo(
+  const features = useMemo(
     () =>
-      form.filters.map((filter, index) => (
-        <Filter
-          key={uniqid()}
-          data={filter}
-          index={index}
-          onChange={onFilterChange}
-          changeOnMount={!isLoading}
-        />
-      )),
-    [form.filters.length, isLoading]
+      input.features.map(
+        (feature) =>
+          !feature.parentId && (
+            <Feature
+              key={uniqid()}
+              data={feature}
+              featureId={feature.id as string}
+              changeOnMount={!feature.name}
+            />
+          )
+      ),
+
+    [input.features.length, isLoading]
   );
 
   return (
@@ -229,14 +240,16 @@ function CreateCategory({
           <div className={ControllerStyles.wrapper}>
             <>
               <div className={ControllerStyles.sec_header}>
-                <div className={ControllerStyles.title}>Create Category</div>
-                <div>
-                  <Button
-                    value="ALL CATEGORIES"
-                    type="button"
-                    className={Styles.all_cat_button}
-                    link={`/controller?pg=${Pages.Categories}&sec=${PageSections.CatListing}`}
-                  />
+                <div className={ControllerStyles.header_content}>
+                  <div className={ControllerStyles.title}>Create Category</div>
+                  <div>
+                    <Button
+                      value="ALL CATEGORIES"
+                      type="button"
+                      className={Styles.all_cat_button}
+                      link={`/controller?pg=${Pages.Categories}&sec=${PageSections.CatListing}`}
+                    />
+                  </div>
                 </div>
               </div>
               <div className={Styles.content}>
@@ -247,14 +260,14 @@ function CreateCategory({
                         <Input
                           name="name"
                           label="Name"
-                          defaultValue={form.name}
+                          defaultValue={input.name}
                           onChange={onInputChange}
                           changeOnMount={!isLoading}
                         />
                         <Input
                           name="description"
                           label="Description"
-                          defaultValue={form.description}
+                          defaultValue={input.description}
                           rows={6}
                           type="textarea"
                           onChange={onInputChange}
@@ -264,7 +277,7 @@ function CreateCategory({
                           name="brand"
                           label="Brand"
                           type="select"
-                          defaultValue={form.brand}
+                          defaultValue={input.brand}
                           onChange={onInputChange}
                           options={brands.map((brand) => ({
                             optionImg: brand.image[0] as string,
@@ -273,13 +286,14 @@ function CreateCategory({
                           changeOnMount={!isLoading}
                         />
                         <Input
-                          name="hasWarranty"
-                          label="Has warranty"
+                          name="hasWarrantyAndProduction"
+                          label="Has Warranty And Production Details"
                           type="checkbox"
-                          defaultChecked={form.hasWarranty}
+                          defaultChecked={input.hasWarrantyAndProduction}
                           onChange={onInputChange}
                           changeOnMount={!isLoading}
                           span
+                          asInfo={parentHasWarrantyAndProduction}
                         />
                       </section>
 
@@ -300,17 +314,14 @@ function CreateCategory({
                     </section>
 
                     <section className={Styles.section}>
-                      <div className={Styles.filter_options_title}>
-                        Filter Options
-                      </div>
-                      <div className={Styles.filter_options}>
-                        <Filter
-                          index={-1}
-                          onChange={onFilterChange}
-                          changeOnMount={!isLoading}
+                      <div className={Styles.feature_options_title}>
+                        <span>Feature Options</span>
+                        <AddIcon
+                          className={Styles.add_icon}
+                          onClick={addChildFeature}
                         />
-                        {filters}
                       </div>
+                      <div className={Styles.feature_options}>{features}</div>
                     </section>
                   </form>
                 </div>

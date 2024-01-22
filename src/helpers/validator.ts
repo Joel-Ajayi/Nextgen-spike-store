@@ -5,12 +5,12 @@ import { GraphQLError } from "graphql";
 import { FileUpload } from "graphql-upload/Upload";
 import { Stream } from "stream";
 import { string, object, array, boolean, mixed, number } from "yup";
-import { CategoryFilterType, CategoryForm } from "../@types/categories";
+import { CategoryFeatureType, CategoryForm } from "../@types/categories";
 import conts from "../@types/conts";
-import { PaymentType } from "../@types/products";
+import { PaymentType, Product_I, Product_I_U } from "../@types/products";
 
 class Validator {
-  private productFilters = array(
+  private productFeatures = array(
     object({
       id: string(),
       optionId: string().required("Filter option id is required"),
@@ -30,56 +30,51 @@ class Validator {
         "password must contain at least one uppercase letter, one lowercase letter, one number and one special character",
     });
 
-  private productWarranty = object({
-    duration: number()
-      .min(1 / 12, "Warranty can't be less than a month")
-      .required("Warranty duration is required"),
-    covered: string().required("Damages warranty covers is required"),
-  });
-
   private productInfo = {
     name: string()
       .required("Product name is required")
-      .min(10, "Product name should have more than 10 characters")
-      .max(20, "Product name should not exceed 30 characters"),
+      .min(5, "Product name should have more than 5 characters")
+      .max(50, "Product name should not exceed 50 characters"),
     description: string()
       .required("Description is required")
-      .min(15, "Description should have more than 15 characters")
-      .max(40, "Description should not exceed 30 characters"),
+      .min(50, "Description should have at least 50 characters")
+      .max(200, "Description should have at most 200 characters"),
     price: number()
-      .min(0, "Price value is not allowed")
+      .min(0.1, "Price value cannot be less than 100")
+      .max(500000, "Price cannot be more than 500,000")
       .required("Product price is required"),
     images: array()
       .required("No image was uploaded")
       .min(2, "More than 1 image should be uploaded")
       .max(4, "Not more than 4 images should be uploaded")
       .of(mixed()),
-    count: number().required("Product count in stock is required"),
-    payment: array()
-      .of(
-        number().oneOf(
-          Object.values(PaymentType) as number[],
-          "Invalid payment type"
-        )
+    count: number()
+      .min(2, "You must have at least 2 of the product in stock")
+      .required("Product count in stock is required"),
+    paymentType: number()
+      .oneOf(
+        Object.values(PaymentType).map((_, i) => i) as number[],
+        "Invalid payment type"
       )
-      .min(1, "Payment method is required")
-      .max(2, "Only two payment methods are allowed")
       .required("Payment method is required"),
-    discount: number().nullable(),
-    brand: string().required("Product brand is required"),
-    colors: array()
+    discount: number(),
+    colours: array()
       .of(string().required("Please provide color of product"))
       .min(1, "Please provide color of product")
       .max(4, "Not more than 4 colors should be added")
       .required("Please provide color of product"),
-    mfgCountry: string().required("Production country is required"),
     mfgDate: string()
       .test("Date", "Date format should be in MM-YYYY", (val) => {
         const rg = /^\d{2}-\d{3}$/;
         return rg.test(val as string);
       })
-      .required("Production date is required"),
-    warranty: this.productWarranty,
+      .test("Time check", "Date cannot be more than current month", (date) => {
+        var currentDate = new Date();
+        const currentMonth = `${currentDate.getMonth()}-${currentDate.getFullYear()}}`;
+        return date === currentMonth;
+      }),
+    warrDuration: number().min(1, "Warranty can't be less than a month"),
+    warrCovered: string(),
   };
 
   public async signIn(data: any) {
@@ -296,18 +291,15 @@ class Validator {
   }
 
   public async category(val: CategoryForm, isUpdate = false) {
-    const filterObj = {
+    const featureObj = {
       name: string()
         .required("Name Field is empty")
         .min(2, "Name should have more than 2 characters")
-        .max(10, "Name should have not more than 10 characters"),
-      unit: string()
-        .max(5, "Unit should have not more than 5 characters")
-        .nullable(),
-      isRequired: boolean().required("Required field is not provided"),
+        .max(20, "Name should have not more than 20 characters"),
+      useAsFilter: boolean().required("Required field is not provided"),
       type: mixed()
         .oneOf(
-          Object.values(CategoryFilterType),
+          Object.values(CategoryFeatureType),
           "Please provide valid filter type"
         )
         .required("Please provide filter type"),
@@ -329,16 +321,16 @@ class Validator {
       ),
       image: mixed().nullable(),
       banners: array().nullable().of(mixed()),
-      filters: array(
+      features: array(
         object(
           isUpdate
             ? {
                 id: string().nullable(),
-                ...filterObj,
+                ...featureObj,
               }
-            : filterObj
+            : featureObj
         )
-      ).max(4, "Filters should not be more than 5"),
+      ),
     };
 
     try {
@@ -384,9 +376,9 @@ class Validator {
     }
   }
 
-  public async valProductFilters(data: any) {
+  public async valProductFeatures(data: any) {
     try {
-      this.productFilters.validate(data);
+      this.productFeatures.validate(data);
     } catch (error) {
       throw new GraphQLError((error as any).message, {
         extensions: { statusCode: 400 },
@@ -394,13 +386,13 @@ class Validator {
     }
   }
 
-  public async valProduct(data: any) {
+  public async valProduct(data: Product_I) {
     try {
       await object({
         ...this.productInfo,
+        brand: string().required("Product brand is required"),
         cId: number().required("Product category is required"),
-        warranty: this.productWarranty,
-        filters: this.productFilters,
+        filters: this.productFeatures,
       }).validate(data);
     } catch (error) {
       throw new GraphQLError((error as any).message, {
@@ -409,11 +401,10 @@ class Validator {
     }
   }
 
-  public async valProductInfo(data: any) {
+  public async valProduct_U(data: Product_I_U) {
     try {
       await object({
         ...this.productInfo,
-        warranty: this.productWarranty,
       }).validate(data);
     } catch (error) {
       throw new GraphQLError((error as any).message, {

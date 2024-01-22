@@ -1,4 +1,4 @@
-import Upload, { FileUpload } from "graphql-upload/Upload";
+import { FileUpload } from "graphql-upload/Upload";
 
 // I-input
 //u-update
@@ -9,11 +9,10 @@ export type Category = {
   lvl: Number;
   parent?: string | null;
   description: string;
-  hasWarranty: boolean;
-  hasMfg: boolean;
+  hasWarrantyAndProduction: boolean;
   brand: string;
   image: string[];
-  filters: CategoryFilter[];
+  features: CategoryFeature[];
   banners: string[];
 };
 
@@ -23,9 +22,8 @@ export type Category_I = {
   description: string;
   image?: Promise<FileUpload> | null;
   brand: string | null;
-  hasWarranty: boolean;
-  hasMfg: boolean;
-  filters: CategoryFilter[];
+  hasWarrantyAndProduction: boolean;
+  features: CategoryFeature[];
 };
 
 export type Category_I_U = {
@@ -34,25 +32,27 @@ export type Category_I_U = {
   description?: string | null;
   image: Promise<FileUpload>;
   brand: string;
-  hasWarranty: boolean;
-  hasMfg: boolean;
-  filters: CategoryFilter[];
+  hasWarrantyAndProduction: boolean;
+  features: CategoryFeature[];
 };
 
 export type CategoryMini = {
   name: string;
   lvl: Number;
+  cId: number;
   parent: string;
   image?: string | null;
+  features: CategoryFeature[];
 };
 
-export interface CategoryFilter {
+export interface CategoryFeature {
   id: string;
   name: string;
-  type: CategoryFilterType | string;
-  unit: string | null;
+  type: number;
   options: string[];
-  isRequired: boolean;
+  parentId: string | null;
+  categoryId?: string | null;
+  useAsFilter: boolean;
 }
 
 export type CategoryForm = {
@@ -61,10 +61,10 @@ export type CategoryForm = {
   description: string;
   image: File[] | String[];
   banners: File[] | String[];
-  filters: CategoryFilter[];
+  features: CategoryFeature[];
 };
 
-export enum CategoryFilterType {
-  Text = "T", //Text
-  Number = "N", //Number
+export enum CategoryFeatureType {
+  Text,
+  Number,
 }

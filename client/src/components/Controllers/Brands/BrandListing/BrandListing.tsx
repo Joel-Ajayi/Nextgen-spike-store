@@ -6,7 +6,7 @@ import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { PageSections, Pages } from "../../../../types/controller";
 import { Link, useNavigate } from "react-router-dom";
 import brandReq from "../../../../requests/brand";
-import brandSlice from "../../../../store/controller/brand";
+import brandSlice from "../../../../store/controller/brands";
 import appSlice from "../../../../store/appState";
 import Table from "react-bootstrap/Table";
 import Styles from "./brdListing.module.scss";
@@ -46,14 +46,16 @@ function BrandListing() {
   return (
     <div className={ControllerStyles.wrapper}>
       <div className={ControllerStyles.sec_header}>
-        <div className={ControllerStyles.title}>Brands Listings</div>
-        <div>
-          <Button
-            value="ADD NEW BRAND"
-            type="button"
-            className={Styles.all_brd_button}
-            link={`/controller?pg=${Pages.Brand}&sec=${PageSections.CreateBrd}`}
-          />
+        <div className={ControllerStyles.header_content}>
+          <div className={ControllerStyles.title}>Brands Listings</div>
+          <div>
+            <Button
+              value="ADD NEW BRAND"
+              type="button"
+              className={Styles.all_brd_button}
+              link={`/controller?pg=${Pages.Brand}&sec=${PageSections.CreateBrd}`}
+            />
+          </div>
         </div>
       </div>
       <div className={Styles.content}>

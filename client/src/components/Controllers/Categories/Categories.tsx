@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { PageSections } from "../../../types/controller";
 import ControllerHeader from "../../shared/Headers/ControllerHeader/ControllerHeader";
@@ -15,10 +15,10 @@ function Categories() {
   const currentPage = useMemo(() => {
     switch (sec) {
       case PageSections.CreateCat:
-        return <CreateCategory parent={parent} />;
+        return <CreateCategory parent={parent.replace("%26", "&")} />;
       case PageSections.UpdateCat:
         if (!cat_id) return <Page404 />;
-        return <CreateCategory isUpdate cat_id={cat_id} />;
+        return <CreateCategory isUpdate cat_id={cat_id.replace("%26", "&")} />;
       case PageSections.CatListing:
         return <CategoryListing />;
       default:
