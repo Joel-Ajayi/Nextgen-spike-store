@@ -28,7 +28,7 @@ function BrandListing() {
     (async () => {
       if (!brands.length) {
         const { brds, msg } = await brandReq.getBrands();
-        if (msg) {
+        if (msg.msg) {
           dispatch(setBrands([]));
           dispatch(setBackgroundMsg(msg));
         } else if (brds) {
@@ -37,10 +37,6 @@ function BrandListing() {
       }
       setLoading(false);
     })();
-  }, []);
-
-  const table = useMemo(() => {
-    return <h1>Hey</h1>;
   }, []);
 
   return (
