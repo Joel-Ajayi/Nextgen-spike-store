@@ -4,7 +4,7 @@ type Query {
   GetBrands: [Brand!]!
   GetCategories(parent: String): [CategoryMini!]!
   GetCategory(name: String!): Category
-  GetCreateProductData: CreateProductData
+  GetCreateProductData(id:String): CreateProductData
   #GetFilterPageProduct(category: String!, id: String!, reqImages: Boolean!): ProductMini
   GetProduct(id: String!): Product
   GetProductMini(category: String!, id: String!): ProductMini
@@ -14,14 +14,14 @@ type Query {
 type Mutation {
   CreateBrand(data: BrandInput): Brand
   CreateCategory(data: CategoryInput): CategoryMini
-  CreateProduct(data: ProductInput): Message
+  CreateProduct(data: ProductInput): ProductUpdateReturn
   ForgotPassword(email: String!): Message
   SignIn(data: SignInInput): Message
   SignOut: Message
   SignUp(data: SignUpInput): Message
   UpdateCategory(data: CategoryUpdateInput): CategoryMini
   UpdateCategoryParent(name: String!, parent: String!): CategoryMini
-  UpdateProduct(data: UpdateProductInput): Message
+  UpdateProduct(data: UpdateProductInput): ProductUpdateReturn
   VerifyAccount(email: String!): Message
   VerifyPasswordToken(token: String!): Message
   VerifyToken(token: String!): Message
@@ -125,6 +125,7 @@ type Product {
   price: Int!
   brand: String!
   cId: Int!
+  count:Int!
   description: String!
   discount: Int!
   colours: [String!]!
@@ -146,6 +147,12 @@ type ProductMini {
   name: String!
   price: Int!
   rating: Int!
+}
+
+type ProductUpdateReturn {
+  id:String!
+  sku:String!
+  features:[ProductFeature!]!
 }
 
 #type ProductFilterPage {
@@ -175,39 +182,39 @@ input ProductInput {
   name: String!
   paymentType: Int!
   price: Int!
-  mfgDate: Date!
+  mfgDate: String
   warrCovered: String
-  warrDuration: Int!
+  warrDuration: Int
   features: [ProductFeatureInput!]!
 }
 
 input UpdateProductInput {
   id: String!
   name: String
-  cId: String
+  cId: Int
   brand:String
   description: String
   price: Int
   discount: Int
-  colors: [String!]
+  colours: [String!]
   count: Int
   paymentType: Int
   images: [Upload!]
-  mfgDate: Date
+  mfgDate: String
   warrCovered: String
   warrDuration: Int
   features: [ProductFeatureInput!]
 }
 
-interface ProductFeature {
+type ProductFeature {
   id: String!
-  optionId: String!
+  featureId: String!
   value: String!
 }
 
 input ProductFeatureInput {
   id: String
-  optionId: String!
+  featureId: String!
   value: String!
 }
 
@@ -216,6 +223,8 @@ type CreateProductData {
   categories: [CategoryMini]!
   colours: [[String!]!]
   paymentTypes: [PaymentType!]!
+  categoriesPath:[String]!
+  features:[CategoryFeature!]!
 }
 
 type PaymentType {

@@ -13,12 +13,10 @@ class Validator {
   private productFeatures = array(
     object({
       id: string(),
-      optionId: string().required("Filter option id is required"),
-      values: array(string())
-        .min(1, "Option values are required")
-        .required("Option values are required"),
+      featureId: string().required("Feature id is required"),
+      value: string().required("Feature value is required"),
     })
-  ).max(5, "Filters should not be more than 5");
+  );
 
   private email = string().required("Invalid email").email("Invalid email");
 
@@ -31,6 +29,9 @@ class Validator {
     });
 
   private productInfo = {
+    brand: string().required("Product brand is required"),
+    cId: number().required("Product category is required"),
+    features: this.productFeatures,
     name: string()
       .required("Product name is required")
       .min(5, "Product name should have more than 5 characters")
@@ -64,14 +65,21 @@ class Validator {
       .max(4, "Not more than 4 colors should be added")
       .required("Please provide color of product"),
     mfgDate: string()
-      .test("Date", "Date format should be in MM-YYYY", (val) => {
-        const rg = /^\d{2}-\d{3}$/;
-        return rg.test(val as string);
+      .test({
+        message: "Date format should be in MM-YYYY",
+        test: (val) => /^(\d{2})-(\d{4})$/.test(val as string),
       })
-      .test("Time check", "Date cannot be more than current month", (date) => {
-        var currentDate = new Date();
-        const currentMonth = `${currentDate.getMonth()}-${currentDate.getFullYear()}}`;
-        return date === currentMonth;
+      .test({
+        message: "Date cannot be more than current month",
+        test: (date) => {
+          var currentDate = new Date();
+          const matches = (date || "").split("-");
+          return !(
+            Number(matches[1]) > currentDate.getFullYear() ||
+            (Number(matches[1]) === currentDate.getFullYear() &&
+              Number(matches[0]) > currentDate.getMonth())
+          );
+        },
       }),
     warrDuration: number().min(1, "Warranty can't be less than a month"),
     warrCovered: string(),
@@ -388,24 +396,7 @@ class Validator {
 
   public async valProduct(data: Product_I) {
     try {
-      await object({
-        ...this.productInfo,
-        brand: string().required("Product brand is required"),
-        cId: number().required("Product category is required"),
-        filters: this.productFeatures,
-      }).validate(data);
-    } catch (error) {
-      throw new GraphQLError((error as any).message, {
-        extensions: { statusCode: 400 },
-      });
-    }
-  }
-
-  public async valProduct_U(data: Product_I_U) {
-    try {
-      await object({
-        ...this.productInfo,
-      }).validate(data);
+      await object({ ...this.productInfo }).validate(data);
     } catch (error) {
       throw new GraphQLError((error as any).message, {
         extensions: { statusCode: 400 },

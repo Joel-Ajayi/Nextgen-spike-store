@@ -83,7 +83,7 @@ model CategoryFeature {
 // name-cat-brand-price-color
 model Product {
   id           String           @id @default(auto()) @map("_id") @db.ObjectId
-  sku          String           @unique
+  sku          String
   name         String
   cId          Int
   category     Category         @relation(fields: [cId], references: [cId], onDelete: Cascade)
@@ -93,7 +93,7 @@ model Product {
   rating       Int              @default(0)
   count        Int              @default(0)
   paymentType  Int //PAYMENTMETHOD
-  brdId        String           @unique @db.ObjectId
+  brdId        String           @db.ObjectId
   brand        Brand            @relation(fields: [brdId], references: [id])
   colours      String[]
   discount     Int              @default(0)
@@ -111,12 +111,12 @@ model Product {
 }
 
 model ProductFeature {
-  id           String          @id @default(auto()) @map("_id") @db.ObjectId
-  catFeatureId String          @db.ObjectId
-  catFeature   CategoryFeature @relation(fields: [catFeatureId], references: [id], onDelete: Cascade)
-  productId    String          @db.ObjectId
-  product      Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
-  value        String
+  id        String          @id @default(auto()) @map("_id") @db.ObjectId
+  featureId String          @db.ObjectId
+  feature   CategoryFeature @relation(fields: [featureId], references: [id], onDelete: Cascade)
+  productId String          @db.ObjectId
+  product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  value     String
 }
 
 model Brand {
