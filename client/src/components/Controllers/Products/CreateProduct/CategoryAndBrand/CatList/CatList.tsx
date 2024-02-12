@@ -22,6 +22,9 @@ function CatList({ pathIndex = 0 }: Props) {
   const categories = useAppSelector(
     (state) => state.controller.products.formData.categories
   );
+  const initialProductFeatures = useAppSelector(
+    (state) => state.controller.products.product.initFeatures
+  );
 
   const setCategoryListPath = controllerPrdSlice.actions.setCategoryListPath;
   const setCategoryList = controllerPrdSlice.actions.setCategoryList;
@@ -59,9 +62,14 @@ function CatList({ pathIndex = 0 }: Props) {
     categories.forEach((c) => {
       if (newPath.includes(c.name)) features.push(...c.features);
     });
+    const featureIds = features.map((f) => f.id);
+
+    const productFeatures = initialProductFeatures.filter((f) =>
+      featureIds.includes(f.featureId)
+    );
 
     dispatch(setProductInput({ value: cId, name: "cId" }));
-    dispatch(setProductInput({ value: [], name: "features" }));
+    dispatch(setProductInput({ value: productFeatures, name: "features" }));
     dispatch(setCategoryListPath(newPath));
     dispatch(setProductFormFeatures(features));
     setIsLoading(false);

@@ -32,42 +32,16 @@
 
       @media only screen and (max-width: 1000px) and (min-width: 800px) {
         grid-template-columns: 1fr;
-
-        .main_section {
-          &:nth-child(3) {
-            grid-column: span 1 !important;
-          }
-        }
       }
 
       @media only screen and (max-width: 700px) {
         grid-template-columns: 1fr;
-
-        .main_section {
-          &:nth-child(3) {
-            grid-column: span 1 !important;
-          }
-        }
-      }
-
-      &:nth-child(2) {
-        .main_section {
-          &:first-child {
-            & > div {
-              height: 100%;
-            }
-          }
-        }
       }
 
       .main_section {
         display: flex;
         flex-direction: column;
         row-gap: 20px;
-
-        &:nth-child(3) {
-          grid-column: span 2;
-        }
 
         .sub_section {
           display: flex;
@@ -80,26 +54,12 @@
             color: $color-gray5;
           }
 
-          .feature_options {
+          section {
             display: grid;
-            grid-template-columns: repeat(2, minmax(200px, 1fr));
+            grid-template-columns: repeat(1, minmax(200px, 1fr));
             gap: 10px;
             overflow-x: auto;
             @include scrollbar;
-
-            @media screen and (max-width: 1000px) and (min-width: 800px) {
-              grid-template-columns: repeat(1, minmax(200px, 1fr));
-            }
-
-            @media screen and (max-width: 600px) {
-              grid-template-columns: repeat(1, minmax(200px, 1fr));
-            }
-          }
-
-          section {
-            display: flex;
-            flex-direction: column;
-            row-gap: 5px;
           }
         }
       }

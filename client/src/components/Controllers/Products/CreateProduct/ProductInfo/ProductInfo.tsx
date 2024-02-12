@@ -144,7 +144,6 @@ function ProductInfo() {
               key={uniqid()}
               id={f.id || uniqid()}
               onChange={onInputChange}
-              changeOnMount={!product?.id}
             />
           )
       ),
@@ -155,7 +154,7 @@ function ProductInfo() {
     () => (
       <Input
         name="images"
-        label="Product Images"
+        label=""
         type="image"
         isMultipleFiles
         onChange={onInputChange}
@@ -234,46 +233,53 @@ function ProductInfo() {
               onChange={onInputChange}
             />
           </div>
-          <div className={Styles.main_section}>
-            {images}
-            <div className={Styles.sub_section}>
-              <div className={Styles.sub_section_header}>
-                Production & Warranty
+          {category.hasWarrantyAndProduction && (
+            <div className={Styles.main_section}>
+              <div className={Styles.sub_section}>
+                <div className={Styles.sub_section_header}>
+                  Production & Warranty
+                </div>
+                <section>
+                  <Input
+                    name="warrCovered"
+                    label="Warranty Covered"
+                    type="textarea"
+                    defaultValue={product.warrCovered}
+                    onChange={onInputChange}
+                  />
+                  <Input
+                    name="warrDuration"
+                    label="Warranty Duration"
+                    defaultValue={product.warrDuration}
+                    type="number"
+                    onChange={onInputChange}
+                    unit="years"
+                  />
+                  <Input
+                    name="mfgDate"
+                    label="Production Date"
+                    defaultValue={product.mfgDate}
+                    onChange={onInputChange}
+                    unit="year"
+                  />
+                </section>
               </div>
-              <section>
-                <Input
-                  name="warrCovered"
-                  label="Warranty Covered"
-                  type="textarea"
-                  defaultValue={product.warrCovered}
-                  onChange={onInputChange}
-                />
-                <Input
-                  name="warrDuration"
-                  label="Warranty Duration"
-                  defaultValue={product.warrDuration}
-                  type="number"
-                  onChange={onInputChange}
-                  unit="years"
-                />
-                <Input
-                  name="mfgDate"
-                  label="Production Date"
-                  defaultValue={product.mfgDate}
-                  onChange={onInputChange}
-                  unit="year"
-                />
-              </section>
             </div>
-          </div>
+          )}
           {!!features.length && (
             <div className={Styles.main_section}>
               <div className={Styles.sub_section}>
                 <h5 className={Styles.sub_section_header}>Features Options</h5>
-                <div className={Styles.feature_options}>{features}</div>
+                <section className={Styles.feature_options}>{features}</section>
               </div>
             </div>
           )}
+          <div className={Styles.main_section}>
+            <div className={Styles.sub_section}>
+              <div className={Styles.sub_section_header}>Production Images</div>
+              {images}
+            </div>
+          </div>
         </section>
       </div>
       <section className={Styles.save_button}>

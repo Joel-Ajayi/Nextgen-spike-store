@@ -13,10 +13,9 @@ import Styles from "./feature.module.scss";
 type FeatureProps = {
   id: string;
   onChange: (value: ProductFeature[], name: string) => void;
-  changeOnMount: boolean;
 };
 
-function Feature({ onChange, id, changeOnMount }: FeatureProps) {
+function Feature({ onChange, id }: FeatureProps) {
   const features = useAppSelector(
     (state) => state.controller.products.formData.features
   );
@@ -32,6 +31,13 @@ function Feature({ onChange, id, changeOnMount }: FeatureProps) {
         (f) => f.featureId === id
       ) as ProductFeature
   );
+  const initialFeature = useAppSelector(
+    (state) =>
+      state.controller.products.product.initFeatures.find(
+        (f) => f.featureId === id
+      ) as ProductFeature
+  );
+
   const index = useAppSelector((state) =>
     state.controller.products.product.features.findIndex(
       (f) => f.featureId === id
@@ -42,9 +48,10 @@ function Feature({ onChange, id, changeOnMount }: FeatureProps) {
     feature.type === CategoryFeatureType.Number ? "number" : "textarea";
   const getType = (val: any) => (type === "number" ? Number(val) || 0 : val);
 
-  const defaultValue = getType(productFeature?.value);
+  const defaultValue =
+    getType(productFeature?.value) || getType(initialFeature?.value);
   const onInputChange = async (value: string): Promise<string> => {
-    const id = productFeature.id;
+    const id = productFeature?.id || initialFeature?.id;
     const newFeature = { id, value, featureId: feature.id as string };
     const isIndex = index !== -1;
     let newProductFeatures = isIndex
@@ -63,12 +70,7 @@ function Feature({ onChange, id, changeOnMount }: FeatureProps) {
   const childFeatures = useMemo(
     () =>
       children.map((f) => (
-        <Feature
-          id={f.id}
-          key={uniqId()}
-          changeOnMount={changeOnMount}
-          onChange={onChange}
-        />
+        <Feature id={f.id} key={uniqId()} onChange={onChange} />
       )),
     []
   );
@@ -90,7 +92,7 @@ function Feature({ onChange, id, changeOnMount }: FeatureProps) {
           options={options}
           asInfo={!!children.length}
           onChange={(val) => onInputChange(val as string)}
-          changeOnMount={changeOnMount && !children.length}
+          changeOnMount={false}
         />
       )}
       {!!children.length && (
