@@ -46,6 +46,8 @@ const Feature = ({ featureId, changeOnMount }: FeatureProps) => {
     (t) => !isNaN(Number(t))
   );
 
+  const children = features.filter((f) => f.parentId === featureId);
+
   const onInputChange = async (
     value: string | (IFile | number | string)[] | number | boolean | null,
     name: string
@@ -57,9 +59,7 @@ const Feature = ({ featureId, changeOnMount }: FeatureProps) => {
     const getError = async (name: string) => {
       switch (name) {
         case "name":
-          const names = features
-            .filter((_, i) => i !== index)
-            .map((f) => f.name);
+          const names = [""];
           return await categoryValidator.catFeatureName(value as string, names);
         case "options":
           return await categoryValidator.catFeatureOptions(value as string[]);
@@ -75,6 +75,7 @@ const Feature = ({ featureId, changeOnMount }: FeatureProps) => {
 
   const addChildFeature = () => {
     const newFeatures = [...features];
+    newFeatures[index] = { ...input, options: [] };
     const newFeature = { ...defaultFeature, id: uniqId(), parentId: featureId };
     newFeatures.push(newFeature);
     dispatch(setCatgeoryInput({ value: newFeatures, name: "features" }));
@@ -140,7 +141,7 @@ const Feature = ({ featureId, changeOnMount }: FeatureProps) => {
         defaultValue=""
         defaultValues={input.options}
         onChange={onInputChange}
-        asInfo={!isEditing}
+        asInfo={!isEditing || !!children.length}
         changeOnMount={changeOnMount}
       />
       <Input
@@ -154,11 +155,9 @@ const Feature = ({ featureId, changeOnMount }: FeatureProps) => {
       />
 
       <section className={Styles.child_features}>
-        {features
-          .filter((f) => f.parentId === featureId)
-          .map((f) => (
-            <Feature key={f.id} featureId={f.id} changeOnMount />
-          ))}
+        {children.map((f) => (
+          <Feature key={f.id} featureId={f.id} changeOnMount />
+        ))}
       </section>
     </div>
   );

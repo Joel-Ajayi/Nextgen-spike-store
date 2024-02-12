@@ -253,7 +253,7 @@ function CreateCategory({
                 </div>
               </div>
               <div className={Styles.content}>
-                <div>
+                <div className={Styles.inner_content}>
                   <form className={Styles.grid_display}>
                     <section>
                       <section className={Styles.section}>
@@ -303,13 +303,6 @@ function CreateCategory({
                       >
                         {imageInput}
                         {bannerInput}
-                        <Button
-                          value="Save"
-                          type="button"
-                          isLoading={isSaving}
-                          disabled={!isValid}
-                          onClick={onSave}
-                        />
                       </section>
                     </section>
 
@@ -325,6 +318,15 @@ function CreateCategory({
                     </section>
                   </form>
                 </div>
+              </div>
+              <div className={Styles.button_wrapper}>
+                <Button
+                  value="Save"
+                  type="button"
+                  isLoading={isSaving}
+                  disabled={!isValid}
+                  onClick={onSave}
+                />
               </div>
             </>
           </div>

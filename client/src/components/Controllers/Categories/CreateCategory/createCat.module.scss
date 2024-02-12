@@ -18,16 +18,17 @@
 .content {
   position: relative;
   flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
   display: flex;
   flex-direction: column;
-  margin-top: 10px;
-  @include scrollbar();
+  overflow: hidden;
 
-  & > div {
+  .inner_content {
+    padding-top: 10px;
     @include desktop-wrapper;
+    @include scrollbar();
     padding: 10px 15px;
+    overflow-y: auto;
+    overflow-x: hidden;
 
     @media screen and (min-width: 850px) {
       padding: 20px 25px;
@@ -75,5 +76,13 @@
         grid-template-columns: 1fr 1fr;
       }
     }
+  }
+}
+
+.button_wrapper {
+  padding: 0px 20px 20px 20px;
+  button {
+    margin-left: auto;
+    max-width: 500px;
   }
 }
