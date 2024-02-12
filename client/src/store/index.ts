@@ -1,8 +1,11 @@
-import { configureStore } from "@reduxjs/toolkit";
+import {
+  configureStore,
+  createSerializableStateInvariantMiddleware,
+} from "@reduxjs/toolkit";
 import appSlice from "./appState";
 import { controller } from "./controller";
 import userSlice from "./userState";
-import brandSlice from "./controller/brand";
+import brandSlice from "./controller/brands";
 
 const store = configureStore({
   reducer: {
@@ -11,6 +14,8 @@ const store = configureStore({
     brands: brandSlice.reducer,
     controller: controller,
   },
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({ serializableCheck: false }),
   devTools: true,
 });
 

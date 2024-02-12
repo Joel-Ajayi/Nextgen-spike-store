@@ -1,15 +1,16 @@
 import { max } from "lodash";
 import { array, number, string } from "yup";
-import { CatFilter, CatFilterValue } from "../types/category";
+import { CategoryFeature } from "../types/category";
+import { ProductFeature } from "../types/product";
 
 class ProductValidator {
   public async prdName(val: string) {
     try {
       await string()
         .required("Name Field is empty")
-        .min(2, "Name should have more than 2 characters")
+        .min(5, "Name should have more than 5 characters")
         .matches(/^[a-zA-Z0-9'\s]*$/, "Special characters not allowed")
-        .max(18, "Name should have not more than 18 characters")
+        .max(50, "Name should have not more than 50 characters")
         .validate(val);
       return "";
     } catch (error) {
@@ -21,7 +22,7 @@ class ProductValidator {
     try {
       await string()
         .min(50, "Description should have at least 50 characters")
-        .max(200, "Description should have at most 200 characters")
+        .max(700, "Description should have at most 700 characters")
         .validate(val);
       return "";
     } catch (error) {
@@ -31,10 +32,7 @@ class ProductValidator {
 
   public async prdDiscount(val = 0) {
     try {
-      await number()
-        .min(0, "Discount must be at least 0%")
-        .max(100, "Discount cannot be more than 100%")
-        .validate(val);
+      await number().min(0, "Discount must be at least 0%").validate(val);
       return "";
     } catch (error) {
       return (error as any).message;
@@ -44,7 +42,8 @@ class ProductValidator {
   public async prdPrice(val = 0) {
     try {
       await number()
-        .min(1000, "Price cannot be less than ₦1000")
+        .min(0.1, "Price value cannot be less than 100")
+        .max(500000, "Price cannot be more than 500,000")
         .required("Price is Required")
         .validate(val);
       return "";
@@ -56,8 +55,7 @@ class ProductValidator {
   public async prdCount(val = 0) {
     try {
       await number()
-        .min(5, "You must have at least 5 of the product in stock")
-        .max(500, "You must have at most 500 of the product in stock")
+        .min(2, "You must have at least 2 of the product in stock")
         .validate(val);
       return "";
     } catch (error) {
@@ -78,50 +76,64 @@ class ProductValidator {
     }
   }
 
-  public async prdPaymentMethods(val: string[] = []) {
+  public async prdPaymentType(val: number) {
     try {
-      await array()
-        .of(string())
-        .min(1, "You must have at least 1 payment method")
-        .validate(val);
+      await number().validate(val);
       return "";
     } catch (error) {
       return (error as any).message;
     }
   }
 
-  public async prdMfgDate(val: number) {
-    const year = new Date().getFullYear();
-    try {
-      await number()
-        .min(year - 15, `Year must be at least ${year - 15}`)
-        .max(year, "Invalid year")
-        .required("Invalid year")
-        .validate(val);
-      return "";
-    } catch (error) {
-      return (error as any).message;
-    }
-  }
-
-  public async prdWarrantyDuration(val: number) {
-    try {
-      await number()
-        .transform((value) => (Number.isNaN(value) ? null : value))
-        .min(0.6, "Warranty must be at least 6months")
-        .required("Warranty must be at least 6months")
-        .validate(val);
-      return "";
-    } catch (error) {
-      return (error as any).message;
-    }
-  }
-
-  public async prdWarrantyCovered(val: string) {
+  public async prdMfgDate(val: string, isRequired: boolean) {
+    const rg = /^(\d{2})-(\d{4})$/;
     try {
       await string()
+        .test({
+          message: "Date format should be in MM-YYYY",
+          test: (val) => rg.test(val as string),
+        })
+        .test({
+          message: "Date cannot be more than current month",
+          test: (date) => {
+            var currentDate = new Date();
+            const matches = (date || "").split("-");
+            return !(
+              Number(matches[1]) > currentDate.getFullYear() ||
+              (Number(matches[1]) === currentDate.getFullYear() &&
+                Number(matches[0]) > currentDate.getMonth())
+            );
+          },
+        })
+        .required("Date is required")
+        .validate(val);
+      return "";
+    } catch (error) {
+      if (!isRequired) return "";
+      return (error as any).message;
+    }
+  }
+
+  public async warrDuration(val: number, isRequired: boolean) {
+    try {
+      await number()
+        .min(1, "Warranty must be at least a month")
+        .required("Warranty must be at least a month")
+        .validate(val);
+      return "";
+    } catch (error) {
+      if (!isRequired) return "";
+      return (error as any).message;
+    }
+  }
+
+  public async warrCovered(val: string, isRequired: boolean) {
+    try {
+      if (isRequired && !val) return "Warranty Covered is required";
+
+      await string()
         .min(5, "Warranty covered must be at least 5 characters")
-        .max(25, "Warranty covered must be at most 25 characters")
+        .max(150, "Warranty covered must be at most 150 characters")
         .validate(val);
       return "";
     } catch (error) {
@@ -129,30 +141,20 @@ class ProductValidator {
     }
   }
 
-  public async filterValue(val: number | string | null) {
-    try {
-      if (typeof val !== "number" || typeof val !== "string") {
-        throw new Error("Filter value is required");
-      }
-      return "";
-    } catch (error) {
-      return (error as any).message as string;
-    }
+  public productFeature(val: string) {
+    if (!val && typeof val !== "number") return "Feature value is required";
+    return "";
   }
 
-  public async filterValues(
-    val: CatFilterValue[],
-    requiredFilters: CatFilter[]
-  ) {
+  public async productFeatures(productFeatures: ProductFeature[]) {
     try {
-      for (let index = 0; index < requiredFilters.length; index++) {
-        const requiredFilter = requiredFilters[index];
-        const isFound =
-          val.findIndex((f) => f.optionId === requiredFilter.id) !== -1;
+      const isFieldEmpty =
+        productFeatures.findIndex(
+          (f) => !f.value && typeof f.value !== "number"
+        ) !== -1;
 
-        if (!isFound) {
-          throw new Error("A required filter has not been filled");
-        }
+      if (isFieldEmpty) {
+        throw new Error("A required filter has not been filled");
       }
       return "";
     } catch (error) {

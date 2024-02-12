@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import { Navigate, useLocation, useSearchParams } from "react-router-dom";
 import Brands from "../components/Controllers/Brands/Brands";
 import Categories from "../components/Controllers/Categories/Categories";
@@ -25,7 +25,7 @@ function ControllerPage() {
       case Pages.DashBoard:
         return <Dashboard />;
       default:
-        return <Navigate to={`/controller?pg=${Pages.DashBoard}`} replace />
+        return <Navigate to={`/controller?pg=${Pages.DashBoard}`} replace />;
     }
   }, [page]);
 

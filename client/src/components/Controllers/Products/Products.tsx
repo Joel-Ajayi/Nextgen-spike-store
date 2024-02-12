@@ -10,7 +10,7 @@ function Products() {
   let [params] = useSearchParams();
   const sec = params.get("sec");
   const prd_id = (params.get("prd_id") || "").replace(/-/g, " ");
-  const parent = (params.get("parent") || "").replace(/-/g, " ");
+  // const parent = (params.get("parent") || "").replace(/-/g, " ");
 
   const currentPage = useMemo(() => {
     switch (sec) {

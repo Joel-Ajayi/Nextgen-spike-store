@@ -21,7 +21,6 @@ export enum PageSections {
 }
 
 export enum CreatePrdSections {
-  SelectCategory = "select_category",
-  SelectBrand = "select_brand",
+  CategoryAndBrand = "category_and_brand",
   ProductInfo = "prd_info",
 }

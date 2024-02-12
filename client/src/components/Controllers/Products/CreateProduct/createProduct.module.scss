@@ -6,20 +6,28 @@
   max-width: $max-width;
   width: 100%;
   margin: 0 auto;
+  overflow: hidden;
 
   .sidebar {
     flex-grow: 0.15;
     display: none;
 
-    @media screen and (min-width: 750px) {
+    @media screen and (min-width: 800px) {
       display: block;
     }
 
     @media screen and (min-width: 1200px) {
-        ul {
-          padding-left: 0px;
-          padding-right: 0px;
-        }
+      ul {
+        padding-left: 0px;
+        padding-right: 0px;
       }
+    }
+  }
+  .spinner_wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 }

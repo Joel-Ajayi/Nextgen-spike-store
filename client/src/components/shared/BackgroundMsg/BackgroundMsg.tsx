@@ -41,7 +41,7 @@ function BackgroundMsg() {
     if (type === MessageType.Success) return "#198754";
   }, [type]);
 
-  return msg ? (
+  return msg && type !== MessageType.NotFound ? (
     <div
       className={posClassName}
       style={{

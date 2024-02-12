@@ -1,13 +1,7 @@
-import React, {
-  useState,
-  useRef,
-  useEffect,
-  useMemo,
-  CSSProperties,
-} from "react";
+import React, { useState, useRef, useEffect, CSSProperties } from "react";
 import Styles from "./sidebar.module.scss";
 import { ReactComponent as CategoryIcon } from "../../../../../images/icons/category.svg";
-import { HiBars3BottomLeft as SideBarIcon } from 'react-icons/hi2'
+import { HiBars3BottomLeft as SideBarIcon } from "react-icons/hi2";
 import { CONSTS } from "../../../../../const";
 import { loginDropdown, moreDropdown } from "../Header";
 import DropdownItem from "../../../Dropdown/DropdownItem/DropdownItem";
@@ -38,11 +32,10 @@ function AppSideBar({ className = "" }: BarProps) {
 
   const handleToggle = (e: MouseEvent) => {
     if (showBar) {
-
-      const paths = e.composedPath()
-      const show = paths.findIndex(
-        (el) => (el as any).id === CONSTS.ids.appSideBar
-      ) !== -1;
+      const paths = e.composedPath();
+      const show =
+        paths.findIndex((el) => (el as any).id === CONSTS.ids.appSideBar) !==
+        -1;
       if (!show) {
         setShowBar(() => show);
         setWrapperStyle({ backgroundColor: "transparent", left: 0 });
@@ -64,7 +57,7 @@ function AppSideBar({ className = "" }: BarProps) {
     setWrapperStyle({ left: 0 });
     setStyle({ left: 0 });
     setShowBar(true);
-  }
+  };
 
   useEffect(() => {
     return () => {
@@ -84,8 +77,6 @@ function AppSideBar({ className = "" }: BarProps) {
       }
     };
   }, [wrapperRef.current, style]);
-
-
 
   return (
     <div className={`${Styles.bar_wrapper} ${className}`}>
@@ -123,7 +114,7 @@ function AppSideBar({ className = "" }: BarProps) {
               <DropdownItem
                 title="All Categories"
                 icon={<CategoryIcon className="svg-brand-fill" />}
-                link="/categories"
+                link={() => "/categories"}
                 highlight
               />
             </ul>

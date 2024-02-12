@@ -2,22 +2,19 @@ import React, { useMemo } from "react";
 import Styles from "./header.module.scss";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import ProductsSearch from "../../Search/ProductsSearch/ProductsSearch";
-import Dropdown, { DropdownProps } from "../../Dropdown/Dropdown";
+import Dropdown from "../../Dropdown/Dropdown";
 import { ReactComponent as ProfileIcon } from "../../../../images/icons/account.svg";
-import { ReactComponent as AdminIcon } from "../../../../images/icons/admin.svg";
 import { ReactComponent as CartIcon } from "../../../../images/icons/cart.svg";
 import { ReactComponent as CategoryIcon } from "../../../../images/icons/category.svg";
-import { ReactComponent as FavoriteIcon } from "../../../../images/icons/favorite.svg";
 import { ReactComponent as LogoutIcon } from "../../../../images/icons/logout.svg";
 import { ReactComponent as NotificationIcon } from "../../../../images/icons/notifications.svg";
 import { ReactComponent as QuestionIcon } from "../../../../images/icons/question-mark.svg";
-import { ReactComponent as DownloadIcon } from "../../../../images/icons/download.svg";
 import { ReactComponent as GrowthIcon } from "../../../../images/icons/growth.svg";
 import { ReactComponent as RewardIcon } from "../../../../images/icons/badge.svg";
 import { ReactComponent as OrderIcon } from "../../../../images/icons/order.svg";
 import { ReactComponent as GiftIcon } from "../../../../images/icons/gift-card.svg";
 import { DropdownItemProps } from "../../Dropdown/DropdownItem/DropdownItem";
-import { FiSearch as SearchIcon } from 'react-icons/fi'
+import { FiSearch as SearchIcon } from "react-icons/fi";
 import uniqId from "uniqid";
 import ModalWrapper from "../../Modal/Wrapper/Wrapper";
 import UserLogin from "../../../SignIn/SignIn";
@@ -26,7 +23,6 @@ import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import UserAvatar from "../UserAvatar/UserAvatar";
 import AppSideBar from "./AppSideBar/AppSideBar";
 import { Roles } from "../../../../types";
-import { Pages, PageSections } from "../../../../types/controller";
 import userReq from "../../../../requests/user";
 import userSlice from "../../../../store/userState";
 
@@ -39,14 +35,14 @@ export const loginDropdown = (
     {
       icon: <ProfileIcon className="svg-brand-fill" />,
       title: "My Profile",
-      link: "/profile",
+      link: () => "/profile",
     },
     isAuthenticated && role > Roles.User
       ? {
-        icon: <CategoryIcon className="svg-brand-fill" />,
-        title: "Controller Categories",
-        link: `/controller`,
-      }
+          icon: <CategoryIcon className="svg-brand-fill" />,
+          title: "Controller Categories",
+          link: () => `/controller`,
+        }
       : null,
     {
       icon: (
@@ -56,7 +52,7 @@ export const loginDropdown = (
         />
       ),
       title: "Orders",
-      link: "/profile?dir=ord",
+      link: () => "/profile?dir=ord",
     },
     // {
     //   icon: <FavoriteIcon className="svg-brand" />,
@@ -66,24 +62,24 @@ export const loginDropdown = (
     {
       icon: <RewardIcon className="svg-brand-fill" />,
       title: "Rewards",
-      link: "/#",
+      link: () => "/#",
     },
     {
       icon: <GiftIcon className="svg-brand-fill" />,
       title: "Gift cards",
-      link: "/#",
+      link: () => "/#",
     },
     isAuthenticated
       ? {
-        icon: (
-          <LogoutIcon
-            className="svg-brand"
-            style={{ transform: "scale(0.9)" }}
-          />
-        ),
-        title: "Logout",
-        onClick: logoutFunc,
-      }
+          icon: (
+            <LogoutIcon
+              className="svg-brand"
+              style={{ transform: "scale(0.9)" }}
+            />
+          ),
+          title: "Logout",
+          onClick: logoutFunc,
+        }
       : null,
   ] as DropdownItemProps[];
 };
@@ -97,7 +93,7 @@ export const moreDropdown = [
       />
     ),
     title: "Notification Perferences",
-    link: "/#",
+    link: () => "/#",
   },
   {
     icon: (
@@ -107,14 +103,14 @@ export const moreDropdown = [
       />
     ),
     title: "24x7 Customer Care",
-    link: "/#",
+    link: () => "/#",
   },
   {
     icon: (
       <GrowthIcon className="svg-brand" style={{ transform: "scale(0.9)" }} />
     ),
     title: "Advertise",
-    link: "/#",
+    link: () => "/#",
   },
   // {
   //   icon: <DownloadIcon className="svg-brand" />,

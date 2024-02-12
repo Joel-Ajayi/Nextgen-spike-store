@@ -14,6 +14,7 @@ export enum Roles {
 }
 
 export enum MessageType {
+  NotFound,
   Error,
   Info,
   Success,
@@ -26,6 +27,10 @@ export interface IMessage {
   header?: string | "";
   transitionFrom?: "left" | "right" | "bottom" | "top" | "";
 }
+
+export type Message = {
+  message: string;
+};
 
 export interface IError {
   code?: string | number;

@@ -1,10 +1,10 @@
 import { combineReducers } from "@reduxjs/toolkit";
 import controllerCatSlice from "./categories";
 import controllerStateSlice from "./states";
-import controllerPrdSlice from "./product";
+import controllerPrdSlice from "./products";
 
 export const controller = combineReducers({
-  category: controllerCatSlice.reducer,
+  categories: controllerCatSlice.reducer,
   state: controllerStateSlice.reducer,
-  product: controllerPrdSlice.reducer,
+  products: controllerPrdSlice.reducer,
 });

@@ -8,7 +8,7 @@ export type DropdownItemProps = {
   onClick?: (title: string) => void;
   border?: boolean;
   title: string;
-  link: string;
+  link: () => string;
   highlight?: boolean;
 };
 
@@ -23,15 +23,27 @@ function DropdownItem({
   return (
     <li className={Styles.dropdown_item}>
       {!onClick && (
-        <Link to={link} className={Styles.link}>
+        <Link to={link()} className={Styles.link}>
           {icon}
-          <div className={`${Styles.title} ${highlight ? Styles.title_bg : Styles.title_txt}`}>{title}</div>
+          <div
+            className={`${Styles.title} ${
+              highlight ? Styles.title_bg : Styles.title_txt
+            }`}
+          >
+            {title}
+          </div>
         </Link>
       )}
       {!!onClick && (
-        <div className={Styles.link} onClick={() => onClick(title)} >
+        <div className={Styles.link} onClick={() => onClick(title)}>
           {icon}
-          <div className={`${Styles.title} ${highlight ? Styles.title_bg : Styles.title_txt}`}>{title}</div>
+          <div
+            className={`${Styles.title} ${
+              highlight ? Styles.title_bg : Styles.title_txt
+            }`}
+          >
+            {title}
+          </div>
         </div>
       )}
     </li>

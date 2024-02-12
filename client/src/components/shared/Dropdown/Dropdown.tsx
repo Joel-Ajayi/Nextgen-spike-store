@@ -17,7 +17,7 @@ export type DropdownProps = {
   listOnLoad?: boolean;
   listOnHover?: boolean;
   onClick?: () => void;
-  position?: 'l' | 'c' | 'r';
+  position?: "l" | "c" | "r";
   titleClassName?: string;
   listClassName?: string;
   spacebyLine?: boolean;
@@ -31,7 +31,7 @@ export default function Dropdown({
   icon,
   onClick,
   items,
-  position = 'c',
+  position = "c",
   titleClassName,
   listClassName = "",
   listOnLoad = false,
@@ -40,7 +40,7 @@ export default function Dropdown({
   showToolTip = true,
 }: DropdownProps) {
   const [showList, setShowList] = useState(false);
-  const pos = { l: {}, c: Styles.pos_center, r: Styles.pos_right }
+  const pos = { l: {}, c: Styles.pos_center, r: Styles.pos_right };
 
   const handleOnClick = () => {
     if (!listOnHover) setShowList(!showList);
@@ -69,8 +69,9 @@ export default function Dropdown({
 
   return (
     <div
-      className={`${wrapperClassName} ${Styles.dropdown_wrapper} ${listOnHover ? Styles.dropdown_on_hover : null
-        }`}
+      className={`${wrapperClassName} ${Styles.dropdown_wrapper} ${
+        listOnHover ? Styles.dropdown_on_hover : null
+      }`}
     >
       <div className={titleClassName || Styles.title} onClick={handleOnClick}>
         {!!icon ? icon : null}
@@ -93,8 +94,9 @@ export default function Dropdown({
         >
           {showToolTip && (
             <div
-              className={`${showToolTip ? Styles.tooltip : undefined
-                } ${listClassName} ${pos[position]}`}
+              className={`${
+                showToolTip ? Styles.tooltip : undefined
+              } ${listClassName} ${pos[position]}`}
             />
           )}
           <div className={`${Styles.items} ${listClassName}`}>
