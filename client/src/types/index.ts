@@ -56,3 +56,12 @@ export type Brand = {
   name: string;
   image: (IFile | string)[];
 };
+
+export type Pagination<T> = {
+  count: number;
+  take: number;
+  page: number;
+  numPages: number;
+  skip: number;
+  list: T[];
+};

@@ -1,0 +1,39 @@
+@import "../../../../styles/mixins.scss";
+
+.content {
+  flex: 1;
+  @include desktop-wrapper;
+  padding: 25px;
+  position: relative;
+  overflow: hidden;
+
+  .spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .table_wrapper {
+    overflow-x: auto;
+    @include scrollbar;
+
+    .products_table {
+      min-width: 400px;
+
+      tbody td,
+      thead th {
+        white-space: nowrap;
+      }
+
+      thead th {
+        font-size: medium;
+      }
+
+      tbody td {
+        font-size: small;
+        font-weight: 500;
+      }
+    }
+  }
+}

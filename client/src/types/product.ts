@@ -1,5 +1,5 @@
 import { boolean } from "yup";
-import { Brand, IFile } from ".";
+import { Brand, IFile, Pagination } from ".";
 import { CategoryFeature, CategoryMini } from "./category";
 
 // export enum PaymentType {
@@ -45,6 +45,28 @@ export type Product = {
   features: ProductFeature[];
 };
 
+export type ProductMini = {
+  id: string;
+  name: string;
+  price: number;
+  cId: number;
+  brand: string;
+  discount: number;
+  rating: number;
+  numReviews: number;
+  images: string[];
+  features: ProductFeature[];
+};
+
+export type ProductMini2 = {
+  id: string;
+  name: string;
+  count: string;
+  category: string;
+  price: number;
+  rating: number;
+};
+
 export interface ProductInput extends Product {
   isValid: boolean[];
   initFeatures: ProductFeature[];
@@ -53,6 +75,7 @@ export interface ProductInput extends Product {
 export type InitialProductController = {
   formData: ProductFormData;
   product: ProductInput;
+  list: Pagination<ProductMini2>;
 };
 
 export type ProductFeature = {

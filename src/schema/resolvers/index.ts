@@ -1,11 +1,12 @@
 import GraphQLUpload from "graphql-upload/GraphQLUpload.js";
 import Mutation from "./Mutation";
 import Query from "./Query";
-import Date from "../customTypes/date";
+import { StringAndInt, AnyExceptNull } from "../customTypes";
 
 const resolvers = {
   Upload: GraphQLUpload,
-  Date,
+  StringAndInt,
+  AnyExceptNull,
   Query,
   Mutation,
 };

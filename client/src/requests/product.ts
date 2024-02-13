@@ -1,9 +1,10 @@
 import request from ".";
-import { IFile, Message } from "../types";
+import { IFile, Message, Pagination } from "../types";
 import {
   Product,
   ProductFormData,
   ProductInput,
+  ProductMini2,
   ProductUpdateReturn,
 } from "../types/product";
 
@@ -72,6 +73,18 @@ class ProductReq {
 
     const { res, msg } = await request.makeRequest(body);
     return { data: res as Product, msg };
+  }
+
+  public async getProductsMini2(skip: number, take: number) {
+    const query = `query GetProductsMini2($skip:Int!, $take:Int!) {
+      GetProductsMini2(skip:$skip, take:$take) { take count list skip page numPages }
+    }`;
+
+    const body = JSON.stringify({ query, variables: { skip, take } });
+    const { res, msg } = await request.makeRequest<Pagination<ProductMini2>>(
+      body
+    );
+    return { data: res, msg };
   }
 
   public async getProductFilterVal(id: string, filterId: string) {

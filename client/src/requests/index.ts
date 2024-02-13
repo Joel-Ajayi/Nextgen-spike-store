@@ -84,7 +84,7 @@ class Requests {
         } as IMessage;
       }
 
-      return { msg, res: null };
+      return { msg, res: null as T };
     }
   }
 }

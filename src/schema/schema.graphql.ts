@@ -5,7 +5,7 @@ type Query {
   GetCategories(parent: String): [CategoryMini!]!
   GetCategory(name: String!): Category
   GetCreateProductData(id:String): CreateProductData
-  #GetFilterPageProduct(category: String!, id: String!, reqImages: Boolean!): ProductMini
+  GetProductsMini2(skip:Int!, take:Int!):Pagination
   GetProduct(id: String!): Product
   GetProductMini(category: String!, id: String!): ProductMini
   UserQuery: User
@@ -32,11 +32,19 @@ type Message {
   message: String!
 }
 
+type Pagination {
+  list: [AnyExceptNull!]!
+  take:Int!
+  skip:Int!
+  count:Int!
+  page:Int!
+  numPages:Int!
+}
+
 # scallar type
 scalar Upload
-scalar Date
 scalar StringAndInt
-
+scalar AnyExceptNull
 
 #Brand
 type Brand {

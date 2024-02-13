@@ -34,11 +34,9 @@ function CreateProduct() {
   const sub = params.get("sub");
   const prd_id = (params.get("prd_id") || "").replace(/-/g, " ");
 
-  const { setStatusCode } = appSlice.actions;
-  const {
-    setProductFormData: setCreateProductData,
-    setInitProductInput: setInitProductData,
-  } = controllerPrdSlice.actions;
+  const setStatusCode = appSlice.actions.setStatusCode;
+  const { setProductFormData, setInitProductInput } =
+    controllerPrdSlice.actions;
 
   useEffect(() => {
     (async () => {
@@ -50,7 +48,7 @@ function CreateProduct() {
           dispatch(setStatusCode(404));
           return;
         }
-        dispatch(setCreateProductData(data));
+        dispatch(setProductFormData(data));
       }
       if (!!prd_id && product.id !== prd_id) {
         const { data, msg } = await productReq.getProduct(prd_id);
@@ -59,7 +57,7 @@ function CreateProduct() {
           return;
         }
         const images = await request.getImageFiles(data.images as string[]);
-        dispatch(setInitProductData({ ...data, images }));
+        dispatch(setInitProductInput({ ...data, images }));
       }
 
       setIsLoading(false);

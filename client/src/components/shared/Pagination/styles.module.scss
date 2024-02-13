@@ -1,0 +1,75 @@
+@import "../../../styles/vars.scss";
+
+.buttons {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 10px;
+  column-gap: 10px;
+
+  .button,
+  .button_last {
+    min-width: 30px;
+    height: 40px;
+
+    span {
+      text-align: center;
+      font-weight: 600;
+      padding-bottom: 5px;
+      width: 100%;
+      font-size: 0.9rem;
+    }
+  }
+
+  .button {
+    span {
+      color: $brand-color;
+
+      &.active,
+      &:hover {
+        border-bottom: 2px solid $brand-color;
+      }
+    }
+  }
+
+  .button_next,
+  .button_prev,
+  .button_last,
+  .button {
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .button_last {
+    cursor: auto;
+  }
+
+  .button_next,
+  .button_prev {
+    min-width: 35px;
+    height: 35px;
+    border-radius: 50%;
+    border: 1px solid black;
+
+    &:hover {
+      border: 2px solid black;
+    }
+
+    &.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+
+      &:hover {
+        border: 1px solid black !important;
+      }
+    }
+  }
+
+  .skipped {
+    font-weight: 900;
+    font-size: large;
+    color: $color-gray-text;
+  }
+}

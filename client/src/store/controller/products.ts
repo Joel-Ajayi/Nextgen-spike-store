@@ -4,8 +4,9 @@ import {
   InitialProductController,
   ProductFormData,
   Product,
+  ProductMini2,
 } from "../../types/product";
-import { IFile } from "../../types";
+import { IFile, Pagination } from "../../types";
 import { CategoryFeature, CategoryMini } from "../../types/category";
 
 export const initialState: InitialProductController = {
@@ -36,6 +37,14 @@ export const initialState: InitialProductController = {
     warrCovered: "",
     warrDuration: 1,
   },
+  list: {
+    skip: 0,
+    list: [],
+    count: 0,
+    page: 1,
+    numPages: 1,
+    take: 30,
+  },
 };
 
 const controllerPrdSlice = createSlice({
@@ -45,7 +54,7 @@ const controllerPrdSlice = createSlice({
     setProductFormData: (state, action: PayloadAction<ProductFormData>) => {
       return {
         ...state,
-        formData: { ...action.payload },
+        formData: action.payload,
       };
     },
     setProductFormFeatures: (
@@ -107,6 +116,14 @@ const controllerPrdSlice = createSlice({
         ...state,
         product: { ...state.product, isValid: action.payload },
       };
+    },
+    setProductList: (
+      state,
+      action: PayloadAction<Pagination<ProductMini2>>
+    ) => {
+      {
+        return { ...state, list: action.payload };
+      }
     },
   },
 });

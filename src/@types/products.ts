@@ -43,6 +43,15 @@ export type ProductMini = {
   features: ProductFeature[];
 };
 
+export type ProductMini2 = {
+  id: string;
+  name: string;
+  count: number;
+  category: string;
+  price: number;
+  rating: number;
+};
+
 export type FilterPageProduct = {
   id: string;
   name: string;

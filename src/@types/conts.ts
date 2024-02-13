@@ -48,6 +48,7 @@ const consts = {
     },
   },
   request: {
+    paginationTake: 30,
     methods: ["POST", "GET"],
     origins: ["https://localhost:3000", "https://studio.apollographql.com"],
   },

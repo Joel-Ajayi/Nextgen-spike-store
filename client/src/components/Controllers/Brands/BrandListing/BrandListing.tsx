@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import ControllerStyles from "../../controller.module.scss";
 import Button from "../../../shared/Button/Button";
 import SpinLoader from "../../../shared/Loader/SpinLoader/SpinLoader";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { PageSections, Pages } from "../../../../types/controller";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import brandReq from "../../../../requests/brand";
 import brandSlice from "../../../../store/controller/brands";
 import appSlice from "../../../../store/appState";
@@ -17,12 +17,11 @@ function BrandListing() {
   const [isLoading, setLoading] = useState(true);
 
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
 
   const brands = useAppSelector((state) => state.brands);
 
-  const { setBrands } = brandSlice.actions;
-  const { setBackgroundMsg } = appSlice.actions;
+  const setBrands = brandSlice.actions.setBrands;
+  const setBackgroundMsg = appSlice.actions.setBackgroundMsg;
 
   useEffect(() => {
     (async () => {

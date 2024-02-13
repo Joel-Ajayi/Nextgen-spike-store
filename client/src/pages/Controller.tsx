@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from "react";
-import { Navigate, useLocation, useSearchParams } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 import Brands from "../components/Controllers/Brands/Brands";
 import Categories from "../components/Controllers/Categories/Categories";
 import Orders from "../components/Controllers/Orders/Orders";

@@ -8,8 +8,10 @@ import {
   Product,
   ProductBoilerPlate,
   ProductMini,
+  ProductMini2,
 } from "../../../@types/products";
 import { CategoryFeature } from "../../../@types/categories";
+import { Pagination } from "../../../@types";
 
 const resolvers = {
   GetProduct: async (
@@ -142,7 +144,7 @@ const resolvers = {
             if (category) {
               categoriesPath.unshift(category.name);
               features.push(...category.features);
-              categories.push(category);
+              if (category.parent) categories.push(category);
               if (category.parent?.cId) await findPath(category.parent?.cId);
             }
           })(product.category.cId);
@@ -170,6 +172,31 @@ const resolvers = {
         extensions: { statusCode: 500 },
       });
     }
+  },
+  GetProductsMini2: async (
+    _: any,
+    query: { skip: number; take: number },
+    ctx: Context
+  ): Promise<Pagination<ProductMini2>> => {
+    const count = await ctx.db.product.count();
+    const products = await ctx.db.product.findMany({
+      take: query.take,
+      skip: query.skip,
+      select: {
+        id: true,
+        name: true,
+        category: { select: { name: true } },
+        rating: true,
+        price: true,
+        count: true,
+      },
+    });
+
+    const skip = query.skip;
+    const list = products.map((f) => ({ ...f, category: f.category.name }));
+    const page = Math.ceil(skip / query.take);
+    const numPages = Math.ceil(count / query.take);
+    return { skip, count, take: query.take, page, list, numPages };
   },
 };
 
