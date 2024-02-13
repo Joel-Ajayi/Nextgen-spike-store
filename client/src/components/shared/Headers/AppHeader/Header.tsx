@@ -206,7 +206,6 @@ function Header() {
             showCaret={false}
             items={loginItemsDropdown}
             level={1}
-            position="r"
           />
         </div>
       </div>

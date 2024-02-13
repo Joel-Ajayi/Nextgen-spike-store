@@ -23,9 +23,9 @@ function ControllerSideBar({ isFixed }: SideBarProp) {
   const { setSideBarState, setSideBarStyle, setSideBarWrapperStyle } =
     controllerStateSlice.actions;
 
-  const handleToggle = (e?: MouseEvent) => {
-    if (showBar && e) {
-      const paths = e.composedPath();
+  const handleToggle = (e?: MouseEvent, hide?: boolean) => {
+    if ((showBar && e) || hide) {
+      const paths = e ? e.composedPath() : [];
       const show =
         paths.findIndex((el) => (el as any).id === CONSTS.ids.appSideBar) !==
         -1;
@@ -66,7 +66,10 @@ function ControllerSideBar({ isFixed }: SideBarProp) {
         className={isFixed ? Styles.content_fixed : Styles.content}
       >
         <div className={Styles.bar} style={style} id={CONSTS.ids.appSideBar}>
-          <TabSideBar isFixed={isFixed} />
+          <TabSideBar
+            isFixed={isFixed}
+            toggleBar={() => handleToggle(undefined, true)}
+          />
         </div>
       </div>
     </div>

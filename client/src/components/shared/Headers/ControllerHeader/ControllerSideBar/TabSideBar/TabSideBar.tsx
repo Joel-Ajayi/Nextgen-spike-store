@@ -6,13 +6,16 @@ import DropdownItem from "../../../../Dropdown/DropdownItem/DropdownItem";
 import { useAppDispatch, useAppSelector } from "../../../../../../store/hooks";
 import controllerStateSlice from "../../../../..//../store/controller/states";
 import uniqId from "uniqid";
+import { useNavigate } from "react-router-dom";
 
 type SideBarProps = {
   isFixed: boolean;
+  toggleBar: () => void;
 };
 
-function TabSideBar({ isFixed }: SideBarProps) {
+function TabSideBar({ isFixed, toggleBar }: SideBarProps) {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<{ [x: string]: DataType }>({});
 
   const { setActiveTabs } = controllerStateSlice.actions;
@@ -61,6 +64,11 @@ function TabSideBar({ isFixed }: SideBarProps) {
     }
   };
 
+  const handleTabWithLink = (link: string) => {
+    if (link) toggleBar();
+    navigate(link, { replace: false });
+  };
+
   return (
     <>
       {isFixed && !!activeTabs.length && (
@@ -71,14 +79,14 @@ function TabSideBar({ isFixed }: SideBarProps) {
       <ul className={Styles.tabs}>
         {Object.values(activeTab).map((tab) => {
           const hasItems = !!Object.keys(tab.items).length;
-          const link = !hasItems ? tab.link : () => "";
+          const link = (!hasItems ? tab.link : () => "")();
           const clickAction = hasItems ? () => handleSetTab(tab.id) : undefined;
           return (
             <DropdownItem
               title={tab.title}
               key={uniqId()}
-              onClick={clickAction as any}
-              link={link}
+              onClick={clickAction || (() => handleTabWithLink(link))}
+              link={() => ""}
               highlight
             />
           );

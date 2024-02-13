@@ -96,6 +96,7 @@ function ControllerHeader() {
 
         {role === Roles.SuperAdmin &&
           Object.values(Pages).map((page) => {
+            if (page == Pages.DashBoard) return null;
             const hasItems = !!Object.keys(navData[page]).length;
             return (
               <Dropdown
@@ -118,7 +119,7 @@ function ControllerHeader() {
           onClick={handleSignInButton}
           title={
             isAuthenticated ? (
-              <UserAvatar infoClassName={Styles.nav_avatar} />
+              <UserAvatar isLink={false} infoClassName={Styles.nav_avatar} />
             ) : (
               <span>Login</span>
             )
@@ -127,6 +128,7 @@ function ControllerHeader() {
           titleClassName={!isAuthenticated ? Styles.login_button : ""}
           showCaret={false}
           items={loginItemsDropdown}
+          position="r"
           level={1}
         />
         <div className={Styles.side_bar}>
