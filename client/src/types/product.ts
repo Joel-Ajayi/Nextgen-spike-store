@@ -1,12 +1,5 @@
-import { boolean } from "yup";
 import { Brand, IFile, Pagination } from ".";
 import { CategoryFeature, CategoryMini } from "./category";
-
-// export enum PaymentType {
-//   ALL = 0,
-//   CARD = 1,
-//   COD = 2,
-// }
 
 export type ProductFormData = {
   categories: CategoryMini[];
@@ -17,6 +10,7 @@ export type ProductFormData = {
     val: number;
   }[];
   colours: string[][];
+  featureTypes: string[];
   features: CategoryFeature[];
 };
 

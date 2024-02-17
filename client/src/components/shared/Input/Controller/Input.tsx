@@ -28,16 +28,7 @@ type InputProps = {
   span?: boolean;
   isColor?: boolean;
   bgColor?: string;
-  type?:
-    | "number"
-    | "color"
-    | "date"
-    | "text"
-    | "textarea"
-    | "select"
-    | "image"
-    | "video"
-    | "checkbox";
+  type?: string;
   labelClassName?: string;
   rows?: number;
   cols?: number;

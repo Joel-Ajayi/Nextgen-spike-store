@@ -1,8 +1,5 @@
 import React, { useMemo } from "react";
-import {
-  CategoryFeature,
-  CategoryFeatureType,
-} from "../../../../../../types/category";
+import { CategoryFeature } from "../../../../../../types/category";
 import productValidator from "../../../../../../validators/product";
 import Input from "../../../../../shared/Input/Controller/Input";
 import { useAppSelector } from "../../../../../../store/hooks";
@@ -18,6 +15,9 @@ type FeatureProps = {
 function Feature({ onChange, id }: FeatureProps) {
   const features = useAppSelector(
     (state) => state.controller.products.formData.features
+  );
+  const featureTypes = useAppSelector(
+    (state) => state.controller.products.formData.featureTypes
   );
   const feature = useAppSelector((state) =>
     state.controller.products.formData.features.find((f) => f.id === id)
@@ -44,8 +44,7 @@ function Feature({ onChange, id }: FeatureProps) {
     )
   );
   const children = features.filter((f) => f.parentId === feature.id);
-  const type =
-    feature.type === CategoryFeatureType.Number ? "number" : "textarea";
+  const type = feature.options.length ? "select" : featureTypes[feature.type];
   const getType = (val: any) => (type === "number" ? Number(val) || 0 : val);
 
   const defaultValue =
@@ -81,7 +80,7 @@ function Feature({ onChange, id }: FeatureProps) {
         <Input
           name="options"
           label={feature.name}
-          type={`${feature.options.length ? "select" : type}`}
+          type={type}
           labelClassName={
             !feature.parentId
               ? Styles.feature_label
@@ -92,7 +91,6 @@ function Feature({ onChange, id }: FeatureProps) {
           options={options}
           asInfo={!!children.length}
           onChange={(val) => onInputChange(val as string)}
-          changeOnMount={false}
         />
       )}
       {!!children.length && (

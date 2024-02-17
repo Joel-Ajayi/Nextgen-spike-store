@@ -3,33 +3,27 @@ import { ReactComponent as DeleteIcon } from "../../../../../images/icons/delete
 import { ReactComponent as EditIcon } from "../../../../../images/icons/edit.svg";
 import { ReactComponent as SaveIcon } from "../../../../../images/icons/save.svg";
 import { GrAdd as AddIcon } from "react-icons/gr";
-import {
-  CategoryFeature,
-  CategoryFeatureType,
-} from "../../../../../types/category";
+import { CategoryFeature } from "../../../../../types/category";
 import Input from "../../../../shared/Input/Controller/Input";
-import Styles from "./feature.module.scss";
+import Styles from "./styles.module.scss";
 import { IFile } from "../../../../../types";
 import categoryValidator from "../../../../../validators/category";
-import { useAppDispatch, useAppSelector } from "../../../../../store/hooks";
-import controllerCatSlice, {
-  defaultFeature,
-} from "../../../../../store/controller/categories";
+import { useAppSelector } from "../../../../../store/hooks";
+import { defaultFeature } from "../../../../../store/controller/categories";
 import uniqId from "uniqid";
 
 type FeatureProps = {
   featureId: string;
   data?: CategoryFeature;
-  changeOnMount: boolean;
+  onChange: (features: CategoryFeature[], name: string) => void;
 };
 
-const Feature = ({ featureId, changeOnMount }: FeatureProps) => {
-  const dispatch = useAppDispatch();
-
-  const setCatgeoryInput = controllerCatSlice.actions.setCatgeoryInput;
-
+const Feature = ({ featureId, onChange }: FeatureProps) => {
   const features = useAppSelector(
     (state) => state.controller.categories.category.features
+  );
+  const featureTypes = useAppSelector(
+    (state) => state.controller.categories.formData.featureTypes
   );
 
   const index = features.findIndex((f) => f.id === featureId);
@@ -42,10 +36,6 @@ const Feature = ({ featureId, changeOnMount }: FeatureProps) => {
     return Object.keys(errors).findIndex((err) => !!errors[err]) === -1;
   }, [errors]);
 
-  const featureTypes = Object.values(CategoryFeatureType).filter(
-    (t) => !isNaN(Number(t))
-  );
-
   const children = features.filter((f) => f.parentId === featureId);
 
   const onInputChange = async (
@@ -53,32 +43,21 @@ const Feature = ({ featureId, changeOnMount }: FeatureProps) => {
     name: string
   ): Promise<string | void> => {
     const newFeatures = [...features];
-    newFeatures[index] = { ...input, [name]: value };
-    dispatch(setCatgeoryInput({ value: newFeatures, name: "features" }));
+    const newFeature = { ...input, [name]: value };
+    newFeatures[index] = newFeature;
 
-    const getError = async (name: string) => {
-      switch (name) {
-        case "name":
-          const names = [""];
-          return await categoryValidator.catFeatureName(value as string, names);
-        case "options":
-          return await categoryValidator.catFeatureOptions(value as string[]);
-        default:
-          return "";
-      }
-    };
-
-    const error = await getError(name);
+    onChange(newFeatures, "features");
+    const error = await categoryValidator.features([newFeature]);
     setErrors((prev) => ({ ...prev, [name]: error }));
     return error;
   };
 
   const addChildFeature = () => {
     const newFeatures = [...features];
-    newFeatures[index] = { ...input, options: [] };
     const newFeature = { ...defaultFeature, id: uniqId(), parentId: featureId };
+    newFeatures[index] = { ...input, options: [] };
     newFeatures.push(newFeature);
-    dispatch(setCatgeoryInput({ value: newFeatures, name: "features" }));
+    onChange(newFeatures, "features");
   };
 
   const deleteFeature = (ids: string[], newFeatures = [...features]) => {
@@ -90,16 +69,16 @@ const Feature = ({ featureId, changeOnMount }: FeatureProps) => {
     if (childFeatures.length) deleteFeature(childFeatures, newFeatures);
 
     if (ids[0] === featureId) {
-      dispatch(setCatgeoryInput({ value: newFeatures, name: "features" }));
+      onChange(newFeatures, "features");
     }
   };
 
   return (
     <div
-      className={Styles.feature_option}
+      className={Styles.sub_section}
       style={!isEditing ? { gap: 0 } : { gap: 15 }}
     >
-      <div className={Styles.options_actions}>
+      <div className={Styles.sub_section_actions}>
         {isEditing && (
           <SaveIcon
             onClick={() => setIsEditing(!isValid)}
@@ -118,31 +97,28 @@ const Feature = ({ featureId, changeOnMount }: FeatureProps) => {
         defaultValue={input.name}
         asInfo={!isEditing}
         onChange={onInputChange}
-        changeOnMount={changeOnMount}
       />
       <Input
         name="type"
         label="Type"
         type="select"
         defaultValue={input.type}
-        options={featureTypes.map((type, i) => ({
-          label: (Object.values(CategoryFeatureType) as string[])[i],
-          defaultValue: type,
+        options={featureTypes.map((label, defaultValue) => ({
+          label,
+          defaultValue,
         }))}
         onChange={onInputChange}
         asInfo={!isEditing}
-        changeOnMount={changeOnMount}
       />
       <Input
         name="options"
         label="Options*"
-        type={input.type === CategoryFeatureType.Number ? "number" : "text"}
+        type={featureTypes[input.type]}
         isMultiInput
         defaultValue=""
         defaultValues={input.options}
         onChange={onInputChange}
         asInfo={!isEditing || !!children.length}
-        changeOnMount={changeOnMount}
       />
       <Input
         name="useAsFilter"
@@ -154,9 +130,9 @@ const Feature = ({ featureId, changeOnMount }: FeatureProps) => {
         onChange={onInputChange}
       />
 
-      <section className={Styles.child_features}>
+      <section className={Styles.child_section}>
         {children.map((f) => (
-          <Feature key={f.id} featureId={f.id} changeOnMount />
+          <Feature key={f.id} featureId={f.id} onChange={onChange} />
         ))}
       </section>
     </div>

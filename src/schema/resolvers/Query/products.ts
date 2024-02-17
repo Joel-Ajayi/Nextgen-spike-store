@@ -6,12 +6,15 @@ import { colours } from "../../../db/app.data";
 import {
   PaymentType,
   Product,
-  ProductBoilerPlate,
   ProductMini,
   ProductMini2,
 } from "../../../@types/products";
-import { CategoryFeature } from "../../../@types/categories";
+import {
+  CategoryFeature,
+  CategoryFeatureType,
+} from "../../../@types/categories";
 import { Pagination } from "../../../@types";
+import { getObjKeys, getObjValues } from "../../../helpers";
 
 const resolvers = {
   GetProduct: async (
@@ -87,11 +90,7 @@ const resolvers = {
       });
     }
   },
-  GetCreateProductData: async (
-    _: any,
-    { id }: { id?: string },
-    ctx: Context
-  ): Promise<ProductBoilerPlate> => {
+  ProductFormData: async (_: any, { id }: { id?: string }, ctx: Context) => {
     // check if logged_in
     middleware.checkSuperAdmin(ctx);
 
@@ -122,9 +121,8 @@ const resolvers = {
         select: { name: true, image: true },
       });
 
-      const payments = Object.values(PaymentType).filter((k) =>
-        isNaN(Number(k))
-      );
+      const payments = getObjKeys<string>(PaymentType);
+      const featureTypes = getObjKeys<string>(CategoryFeatureType);
 
       let categoriesPath: string[] = [];
       const features: CategoryFeature[] = [];
@@ -158,13 +156,12 @@ const resolvers = {
         categories: categories.map((cat) => ({
           ...cat,
           parent: cat.parent?.id || "",
+          offers: [],
         })),
         categoriesPath,
         features,
-        paymentTypes: payments.map((type, val) => ({
-          val,
-          type: type as string,
-        })),
+        featureTypes,
+        paymentTypes: payments.map((type, val) => ({ val, type })),
       };
     } catch (error) {
       console.log((error as any).message);

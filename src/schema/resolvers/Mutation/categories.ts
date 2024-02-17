@@ -5,12 +5,16 @@ import consts from "../../../@types/conts";
 import {
   CategoryFeature,
   CategoryMini,
+  CategoryOfferType,
+  CategoryOffer,
   Category_I,
   Category_I_U,
 } from "../../../@types/categories";
 import { Context } from "../../context";
 import middleware from "../../../middlewares/middlewares";
 import { validator } from "../../../helpers/validator";
+import { FileUpload } from "graphql-upload/Upload";
+import { getObjKeys } from "../../../helpers";
 
 const resolvers = {
   CreateCategory: async (
@@ -81,9 +85,20 @@ const resolvers = {
     try {
       // validate image/
       let image: string | null | undefined = "";
+      if (data?.image) image = (await validator.files([data.image], 0))[0];
+
+      // waranty and production
       const hasWarrantyAndProduction =
         parent?.hasWarrantyAndProduction || data.hasWarrantyAndProduction;
-      if (data?.image) image = (await validator.files([data.image], 0))[0];
+
+      // validate offers banner
+      const offerTypes = getObjKeys<string>(CategoryOfferType);
+      const offersBanner = await validator.files(
+        data.offers.map((f) => f.banner) as Promise<FileUpload>[],
+        0,
+        offerTypes.length,
+        []
+      );
 
       const catCount = (await ctx.db.category.count()) + 1;
       // add category
@@ -94,7 +109,6 @@ const resolvers = {
           cId: catCount,
           description: data.description,
           image,
-          banners: [],
           brdId: brandId,
           hasWarrantyAndProduction,
           parentId: !parent?.id ? undefined : parent.id,
@@ -108,6 +122,7 @@ const resolvers = {
           hasWarrantyAndProduction: true,
           parent: { select: { name: true } },
           features: true,
+          offers: true,
         },
       });
 
@@ -136,9 +151,22 @@ const resolvers = {
         })(parentFeatures);
       }
 
-      return { ...newCat, parent: newCat.parent?.name || "" };
+      const offers: CategoryOffer[] = [];
+      if (data.offers.length) {
+        await Promise.all(
+          data.offers.map(async ({ id, ...offerInput }, i) => {
+            const data = {
+              ...offerInput,
+              banner: offersBanner[i],
+              categoryId: newCat.id,
+            };
+            offers.push(await ctx.db.categoryOffer.create({ data }));
+          })
+        );
+      }
+
+      return { ...newCat, parent: newCat.parent?.name || "", offers };
     } catch (error) {
-      console.log(error);
       throw new GraphQLError(consts.errors.server, {
         extensions: { statusCode: 500 },
       });
@@ -170,9 +198,9 @@ const resolvers = {
         image: true,
         brdId: true,
         brand: { select: { name: true } },
-        banners: true,
         parent: { select: { hasWarrantyAndProduction: true } },
         features: { select: { id: true, parentId: true } },
+        offers: true,
       },
     });
     if (!category) {
@@ -260,6 +288,39 @@ const resolvers = {
     const dataImage = data?.image ? [data?.image] : [];
     const prevImage = !!category?.image ? [category.image] : [];
     const image = (await validator.files(dataImage, 0, 1, prevImage))[0];
+    const offerTypes = getObjKeys<string>(CategoryOfferType);
+
+    // validate offers banner
+    const offersBanner = await validator.files(
+      data.offers.map((f) => f.banner) as Promise<FileUpload>[],
+      0,
+      offerTypes.length,
+      category.offers.map((f) => f.banner)
+    );
+
+    if (data.offers) {
+      await Promise.all(
+        data.offers.map(async ({ id, ...offerInput }, i) => {
+          const ObjectId = Types.ObjectId;
+          const isIdValid =
+            ObjectId.isValid(id) && String(new ObjectId(id)) === id;
+          const ObjId = isIdValid ? id : new ObjectId().toString();
+
+          const data = {
+            ...offerInput,
+            banner: offersBanner[i],
+            categoryId: category.id,
+          };
+
+          await ctx.db.categoryOffer.upsert({
+            where: { id: ObjId },
+            create: data,
+            update: data,
+          });
+        })
+      );
+    }
+
     const hasWarrantyAndProduction =
       category?.parent?.hasWarrantyAndProduction ||
       data.hasWarrantyAndProduction;
@@ -281,6 +342,7 @@ const resolvers = {
         parent: { select: { name: true } },
         hasWarrantyAndProduction: true,
         features: true,
+        offers: true,
       },
     });
 
@@ -312,6 +374,7 @@ const resolvers = {
         cId: true,
         hasWarrantyAndProduction: true,
         features: true,
+        offers: true,
       },
     });
 

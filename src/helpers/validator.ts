@@ -4,10 +4,15 @@ import { nanoid } from "nanoid";
 import { GraphQLError } from "graphql";
 import { FileUpload } from "graphql-upload/Upload";
 import { Stream } from "stream";
-import { string, object, array, boolean, mixed, number } from "yup";
-import { CategoryFeatureType, CategoryForm } from "../@types/categories";
+import { string, object, array, boolean, mixed, number, addMethod } from "yup";
+import {
+  CategoryFeatureType,
+  CategoryForm,
+  CategoryOfferType as CategoryOfferType,
+} from "../@types/categories";
 import conts from "../@types/conts";
-import { PaymentType, Product_I, Product_I_U } from "../@types/products";
+import { PaymentType, Product_I } from "../@types/products";
+import { getObjValues } from ".";
 
 class Validator {
   private productFeatures = array(
@@ -53,10 +58,7 @@ class Validator {
       .min(2, "You must have at least 2 of the product in stock")
       .required("Product count in stock is required"),
     paymentType: number()
-      .oneOf(
-        Object.values(PaymentType).map((_, i) => i) as number[],
-        "Invalid payment type"
-      )
+      .oneOf(getObjValues<number>(PaymentType), "Invalid payment type")
       .required("Payment method is required"),
     discount: number(),
     colours: array()
@@ -67,18 +69,15 @@ class Validator {
     mfgDate: string()
       .test({
         message: "Date format should be in MM-YYYY",
-        test: (val) => /^(\d{2})-(\d{4})$/.test(val as string),
+        test: (val) => /^(0[1-9]|1[0,1,2])-(20\d{2})$/.test(val as string),
       })
       .test({
         message: "Date cannot be more than current month",
         test: (date) => {
+          const splitDate = (date as string).split("-");
           var currentDate = new Date();
-          const matches = (date || "").split("-");
-          return !(
-            Number(matches[1]) > currentDate.getFullYear() ||
-            (Number(matches[1]) === currentDate.getFullYear() &&
-              Number(matches[0]) > currentDate.getMonth())
-          );
+          const inputDate = new Date(+splitDate[1], +splitDate[0]);
+          return inputDate <= currentDate;
         },
       }),
     warrDuration: number().min(1, "Warranty can't be less than a month"),
@@ -117,9 +116,7 @@ class Validator {
 
     const types = conts.files.mimeType.supportedImg;
     if (!types.includes(mimetype)) {
-      throw new GraphQLError(conts.errors.files.inCorrectImageFormat, {
-        extensions: { statusCode: 400 },
-      });
+      throw new Error(conts.errors.files.inCorrectImageFormat);
     }
 
     const chunks: any = [];
@@ -131,13 +128,10 @@ class Validator {
     const buffer = Buffer.concat(chunks);
     const b64 = rvBs64Type(buffer.toString("base64"));
     if (buffer.byteLength > maxSize) {
-      throw new GraphQLError(
+      throw new Error(
         `${conts.errors.files.exceededMaxSize} ${(
           conts.files.imgSize / 1024
-        ).toFixed(0)}kb`,
-        {
-          extensions: { statusCode: 400 },
-        }
+        ).toFixed(0)}kb`
       );
     }
 
@@ -147,9 +141,7 @@ class Validator {
     if (!!duplicateFilePath) return duplicateFilePath;
 
     if (b64s.includes(b64)) {
-      throw new GraphQLError(conts.errors.files.duplicate, {
-        extensions: { statusCode: 400 },
-      });
+      throw new Error(conts.errors.files.duplicate);
     }
     return { filename, stream: createReadStream, b64 };
   }
@@ -226,13 +218,25 @@ class Validator {
           }, 20);
         });
 
-        const comparableB64s = b64s.map(({ b64 }) => b64 || "");
-        const valifationFunc = await this.image;
-        const b64 = await valifationFunc(file, comparableB64s, prevB64s);
-        if ((b64 as any)?.filePath) {
-          prevB64s = prevB64s.filter((prev) => prev.b64 !== b64.b64);
+        try {
+          const comparableB64s = b64s.map(({ b64 }) => b64 || "");
+          const valifationFunc = await this.image;
+          const b64 = await valifationFunc(file, comparableB64s, prevB64s);
+          if ((b64 as any)?.filePath) {
+            prevB64s = prevB64s.filter((prev) => prev.b64 !== b64.b64);
+          }
+          if (!!b64) b64s.push(b64);
+        } catch (error) {
+          // delete saved files before throwing error
+          await this.deleteFiles(
+            b64s.map(({ filePath }) => filePath as string)
+          );
+
+          // throw error
+          throw new GraphQLError((error as any).message, {
+            extensions: { statusCode: 400 },
+          });
         }
-        if (!!b64) b64s.push(b64);
         currentIndex++;
       })
     );
@@ -299,24 +303,7 @@ class Validator {
   }
 
   public async category(val: CategoryForm, isUpdate = false) {
-    const featureObj = {
-      name: string()
-        .required("Name Field is empty")
-        .min(2, "Name should have more than 2 characters")
-        .max(20, "Name should have not more than 20 characters"),
-      useAsFilter: boolean().required("Required field is not provided"),
-      type: mixed()
-        .oneOf(
-          Object.values(CategoryFeatureType),
-          "Please provide valid filter type"
-        )
-        .required("Please provide filter type"),
-      options: array()
-        .of(string().max(10, "Option should have not more than 10 characters"))
-        .nullable()
-        .max(10, "Options should not be more than 10"),
-    };
-
+    const offersIndexes = getObjValues<number>(CategoryOfferType);
     const obj = {
       name: string()
         .required("Name Field is empty")
@@ -330,15 +317,69 @@ class Validator {
       image: mixed().nullable(),
       banners: array().nullable().of(mixed()),
       features: array(
-        object(
-          isUpdate
-            ? {
-                id: string().nullable(),
-                ...featureObj,
-              }
-            : featureObj
-        )
+        object({
+          name: string()
+            .required("Name Field is empty")
+            .min(2, "Name should have more than 2 characters")
+            .max(20, "Name should have not more than 20 characters"),
+          useAsFilter: boolean().required("Required field is not provided"),
+          type: mixed()
+            .oneOf(
+              Object.values(CategoryFeatureType),
+              "Please provide valid filter type"
+            )
+            .required("Please provide filter type"),
+          options: array()
+            .of(
+              string().max(10, "Option should have not more than 10 characters")
+            )
+            .nullable()
+            .max(10, "Options should not be more than 10"),
+        })
       ),
+      offers: array(
+        object({
+          type: number()
+            .oneOf(offersIndexes, "Please provide valid filter type")
+            .required("Please provide filter type"),
+          discount: number()
+            .max(100, "Discount cannot be more than 100%")
+            .min(1, "Discount should be more than 0%")
+            .required("Disocunt is required"),
+          banner: mixed().required("Offer banner is required"),
+          validUntil: string()
+            .required("Max Date of offer is required")
+            .test({
+              message: "Date format should be in DD-MM-YYYY",
+              test: (val) =>
+                /^(0[1-9]|[12][0-9]|3[01])-(0[1-9]|1[012])-(20\d{2})$/.test(
+                  val as string
+                ),
+            })
+            .test({
+              message: "Max Offer Date cannot be less than Today",
+              test: (date) => {
+                const splitDate = (date as string).split("-");
+                var currentDate = new Date();
+                const inputDate = new Date(
+                  `${splitDate[2]}-${splitDate[1]}-${+splitDate[0] + 1}`
+                );
+                return inputDate >= currentDate;
+              },
+            }),
+        })
+      )
+        .max(
+          offersIndexes.length,
+          `offers cannot be more than ${offersIndexes.length}`
+        )
+        .test({
+          message: "Unique offer type is required",
+          test: (list) =>
+            list
+              ? list?.length === new Set(list.map((item) => item.type)).size
+              : true,
+        }),
     };
 
     try {

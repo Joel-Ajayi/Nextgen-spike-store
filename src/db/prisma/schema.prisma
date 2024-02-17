@@ -39,13 +39,15 @@ model User {
   reviews       Reviews[]
   address       Address?
   orders        Order[]
-  verified      Boolean   @default(false)
-  role          Int       @default(0)
-  pwd           String
-  pwdToken      String?   @unique
-  vToken        String?   @unique
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  couponId      String[]  @unique
+
+  verified  Boolean  @default(false)
+  role      Int      @default(0)
+  pwd       String
+  pwdToken  String?  @unique
+  vToken    String?  @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Category {
@@ -58,8 +60,8 @@ model Category {
   children                 Category[]        @relation("Category")
   lvl                      Int               @default(1)
   features                 CategoryFeature[]
+  offers                   CategoryOffer[]
   image                    String?
-  banners                  String[]
   brdId                    String?           @db.ObjectId
   brand                    Brand?            @relation(fields: [brdId], references: [id])
   hasWarrantyAndProduction Boolean           @default(false)
@@ -78,6 +80,17 @@ model CategoryFeature {
   categoryId      String?          @db.ObjectId
   useAsFilter     Boolean          @default(false)
   productFeatures ProductFeature[]
+}
+
+model CategoryOffer {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  type       Int // -0-flash sales -1- free shipping
+  discount   Int
+  banner     String
+  validUntil String
+  audience   Int // -0-any-1-first-time-2-longtimeusers
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId String   @db.ObjectId
 }
 
 // name-cat-brand-price-color
@@ -159,7 +172,7 @@ model Order {
   user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   addressId     String        @db.ObjectId
   paymentStatus PAYMENTSTATUS
-  paymentMethod Int //0- card, 1-cod
+  paymentMethod Int //0- card, 1-cod - 2-all
   orderStatus   OrderStatus[]
   totalAmount   Float
   items         OrderItem[]

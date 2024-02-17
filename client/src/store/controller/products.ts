@@ -17,6 +17,7 @@ export const initialState: InitialProductController = {
     paymentTypes: [],
     colours: [],
     features: [],
+    featureTypes: [],
   },
   product: {
     id: undefined,

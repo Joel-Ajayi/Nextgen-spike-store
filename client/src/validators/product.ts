@@ -86,9 +86,9 @@ class ProductValidator {
   }
 
   public async prdMfgDate(val: string, isRequired: boolean) {
-    const rg = /^(\d{2})-(\d{4})$/;
+    const rg = /^(0[1-9]|1[0,1,2])-(20\d{2})$/;
     try {
-      await string()
+      string()
         .test({
           message: "Date format should be in MM-YYYY",
           test: (val) => rg.test(val as string),
@@ -96,13 +96,10 @@ class ProductValidator {
         .test({
           message: "Date cannot be more than current month",
           test: (date) => {
+            const splitDate = (date as string).split("-");
             var currentDate = new Date();
-            const matches = (date || "").split("-");
-            return !(
-              Number(matches[1]) > currentDate.getFullYear() ||
-              (Number(matches[1]) === currentDate.getFullYear() &&
-                Number(matches[0]) > currentDate.getMonth())
-            );
+            const inputDate = new Date(+splitDate[1], +splitDate[0]);
+            return inputDate <= currentDate;
           },
         })
         .required("Date is required")

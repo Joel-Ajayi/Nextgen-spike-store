@@ -13,7 +13,7 @@ export type Category = {
   brand: string;
   image: string[];
   features: CategoryFeature[];
-  banners: string[];
+  offers: CategoryOffer[];
 };
 
 export type Category_I = {
@@ -24,6 +24,7 @@ export type Category_I = {
   brand: string | null;
   hasWarrantyAndProduction: boolean;
   features: CategoryFeature[];
+  offers: CategoryOffer[];
 };
 
 export type Category_I_U = {
@@ -34,6 +35,7 @@ export type Category_I_U = {
   brand: string;
   hasWarrantyAndProduction: boolean;
   features: CategoryFeature[];
+  offers: CategoryOffer[];
 };
 
 export type CategoryMini = {
@@ -43,6 +45,7 @@ export type CategoryMini = {
   parent: string;
   image?: string | null;
   features: CategoryFeature[];
+  offers: CategoryOffer[];
 };
 
 export interface CategoryFeature {
@@ -53,6 +56,14 @@ export interface CategoryFeature {
   parentId: string | null;
   categoryId?: string | null;
   useAsFilter: boolean;
+}
+
+export interface CategoryOffer {
+  id: string;
+  type: number; // -0-flash sales -1- free shipping
+  discount: number;
+  banner: string | Promise<FileUpload>;
+  validUntil: string;
 }
 
 export type CategoryForm = {
@@ -67,4 +78,15 @@ export type CategoryForm = {
 export enum CategoryFeatureType {
   Text,
   Number,
+}
+
+export enum CategoryOfferType {
+  FlashSales,
+  FreeShipping,
+}
+
+export enum CategoryOfferTargetAudience {
+  AnyBody,
+  FirstTimeCustomers,
+  LongTimeUsers,
 }

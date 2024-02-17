@@ -1,12 +1,12 @@
 @import "../../../../../styles/vars.scss";
 
-.feature_option {
+.sub_section {
   position: relative;
   display: flex;
   flex-direction: column;
   min-width: 200px;
 
-  .options_actions {
+  .sub_section_actions {
     display: flex;
     position: absolute;
     right: 0px;
@@ -31,7 +31,7 @@
     }
   }
 
-  .child_features {
+  .child_section {
     margin-left: 20px;
     display: flex;
     flex-direction: column;

@@ -4,8 +4,9 @@ import uniqId from "uniqid";
 import {
   Category,
   CategoryFeature,
-  CategoryFeatureType,
+  CategoryFormData,
   CategoryMini,
+  CategoryOffer,
   InitialCategoryController,
 } from "../../types/category";
 import { IFile } from "../../types";
@@ -14,13 +15,28 @@ export const defaultFeature: CategoryFeature = {
   id: uniqId(),
   name: "",
   parentId: null,
-  type: CategoryFeatureType.Text,
+  type: 0,
   options: [],
   useAsFilter: false,
 };
 
+export const defaultOffer: CategoryOffer = {
+  id: uniqId(),
+  discount: 1,
+  audience: 0,
+  validUntil: `01-01-${new Date().getFullYear()}`,
+  banner: "",
+  type: 0,
+};
+
 export const initialState: InitialCategoryController = {
   categories: [],
+  formData: {
+    brands: [],
+    offerTypes: [],
+    featureTypes: [],
+    offerAudiences: [],
+  },
   category: {
     id: undefined,
     name: "",
@@ -28,7 +44,7 @@ export const initialState: InitialCategoryController = {
     description: "",
     parent: "",
     image: [],
-    banners: [],
+    offers: [],
     features: [defaultFeature],
     hasWarrantyAndProduction: false,
   },
@@ -38,6 +54,9 @@ const controllerCatSlice = createSlice({
   name: "ControllerCategory",
   initialState,
   reducers: {
+    setFormData: (state, action: PayloadAction<CategoryFormData>) => {
+      return { ...state, formData: action.payload };
+    },
     setCategories: (state, action: PayloadAction<CategoryMini[]>) => {
       return { ...state, categories: action.payload };
     },
@@ -58,12 +77,17 @@ const controllerCatSlice = createSlice({
         (f) => !newIds.includes(f.id)
       );
 
+      const offers = !action.payload.offers.length
+        ? [defaultOffer]
+        : action.payload.offers;
+
       return {
         ...state,
         category: {
           ...state.category,
           ...action.payload,
           features: [...prevFeatures, ...action.payload.features],
+          offers,
         },
       };
     },
@@ -72,7 +96,7 @@ const controllerCatSlice = createSlice({
       action: PayloadAction<{
         value:
           | string
-          | (IFile | number | string | CategoryFeature)[]
+          | (IFile | number | string | CategoryFeature | CategoryOffer)[]
           | number
           | boolean
           | null;

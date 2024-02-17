@@ -4,7 +4,8 @@ type Query {
   GetBrands: [Brand!]!
   GetCategories(parent: String): [CategoryMini!]!
   GetCategory(name: String!): Category
-  GetCreateProductData(id:String): CreateProductData
+  CategoryFormData:CategoryFormData!
+  ProductFormData(id:String): CreateProductData!
   GetProductsMini2(skip:Int!, take:Int!):Pagination
   GetProduct(id: String!): Product
   GetProductMini(category: String!, id: String!): ProductMini
@@ -62,10 +63,10 @@ input BrandInput {
 
 #Category
 type Category {
-  banners: [String!]!
   brand: String!
   description: String!
   features: [CategoryFeature!]!
+  offers:[CategoryOffer!]!
   hasWarrantyAndProduction:Boolean!
   id: String!
   image: [String!]!
@@ -92,11 +93,30 @@ input CategoryFeatureInput {
   type: Int!
 }
 
+type CategoryOffer {
+  id: String!
+  type: Int!
+  discount:Int!
+  audience:Int!
+  banner:String!
+  validUntil:String!
+}
+
+input CategoryOfferInput {
+  id: String!
+  type: Int!
+  discount:Int!
+  audience:Int!
+  banner:Upload!
+  validUntil:String!
+}
+
 
 input CategoryInput {
   brand: String
   description: String
   features: [CategoryFeatureInput!]!
+  offers:[CategoryOfferInput!]!
   hasWarrantyAndProduction: Boolean!
   image: Upload
   name: String!
@@ -111,17 +131,25 @@ type CategoryMini {
   parent: String!
   hasWarrantyAndProduction:Boolean!
   features: [CategoryFeature!]!
+  offers:[CategoryOffer!]!
 }
 
 input CategoryUpdateInput {
   brand: String!
   description: String
   features: [CategoryFeatureInput!]!
+  offers:[CategoryOfferInput!]!
   hasWarrantyAndProduction:Boolean!
   id: String!
   image: Upload
-  banners:[Upload]!
   name: String!
+}
+
+type CategoryFormData {
+  brands: [Brand!]!
+  offerTypes: [String!]!
+  featureTypes: [String!]!
+  offerAudiences:[String!]!
 }
 
 
@@ -232,6 +260,7 @@ type CreateProductData {
   colours: [[String!]!]
   paymentTypes: [PaymentType!]!
   categoriesPath:[String]!
+  featureTypes:[String!]!
   features:[CategoryFeature!]!
 }
 

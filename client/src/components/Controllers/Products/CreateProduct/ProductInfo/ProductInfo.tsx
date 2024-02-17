@@ -33,7 +33,6 @@ function ProductInfo() {
   ) as CategoryMini;
 
   const [isSaving, setIsSaving] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [errors, setErrors] = useState<{ [key in string]: string }>({});
 
   const setProductInput = controllerPrdSlice.actions.setProductInput;

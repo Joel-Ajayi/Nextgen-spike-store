@@ -1,8 +1,15 @@
 import { GraphQLError } from "graphql";
 import consts from "../../../@types/conts";
-import { Category, CategoryMini } from "../../../@types/categories";
+import {
+  Category,
+  CategoryFeatureType,
+  CategoryMini,
+  CategoryOfferTargetAudience,
+  CategoryOfferType as CategoryOfferType,
+} from "../../../@types/categories";
 import { Context } from "../../context";
 import middleware from "../../../middlewares/middlewares";
+import { getObjKeys } from "../../../helpers";
 
 const resolvers = {
   GetCategories: async (
@@ -24,6 +31,7 @@ const resolvers = {
           cId: true,
           parent: { select: { name: true } },
           features: true,
+          offers: true,
         },
       });
 
@@ -54,11 +62,11 @@ const resolvers = {
           lvl: true,
           description: true,
           image: true,
-          banners: true,
           hasWarrantyAndProduction: true,
           brand: { select: { name: true } },
           parent: { select: { name: true } },
           features: true,
+          offers: true,
         },
       });
 
@@ -80,6 +88,20 @@ const resolvers = {
         extensions: { statusCode: 500 },
       });
     }
+  },
+  CategoryFormData: async (_: any, {}: any, ctx: Context) => {
+    // check if logged_in
+    middleware.checkAdmin(ctx);
+    const brands = (
+      await ctx.db.brand.findMany({
+        select: { name: true, image: true },
+      })
+    ).map((brd) => ({ ...brd, image: [brd.image] }));
+
+    const featureTypes = getObjKeys<string>(CategoryFeatureType);
+    const offerTypes = getObjKeys<string>(CategoryOfferType);
+    const offerAudiences = getObjKeys<string>(CategoryOfferTargetAudience);
+    return { brands, offerTypes, featureTypes, offerAudiences };
   },
 };
 

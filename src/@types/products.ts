@@ -104,18 +104,6 @@ export type Product_I_U = {
   warrDuration?: number;
 };
 
-export type ProductBoilerPlate = {
-  brands: Brand[];
-  categories: CategoryMini[];
-  colours: string[][];
-  features: CategoryFeature[];
-  categoriesPath: string[];
-  paymentTypes: {
-    type: string;
-    val: number;
-  }[];
-};
-
 export interface ProductFeature_I {
   id?: string;
   featureId: string;

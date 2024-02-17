@@ -17,6 +17,12 @@ export const verifyJWT = async (token: any, secret: any) => {
   return decoded;
 };
 
+export const getObjKeys = <T>(enumObj: Object) =>
+  Object.values(enumObj).filter((_, i, arr) => i < arr.length / 2) as T[];
+
+export const getObjValues = <T>(enumObj: Object) =>
+  Object.values(enumObj).filter((_, i, arr) => i >= arr.length / 2) as T[];
+
 export const getSKU = (
   name: string,
   brand: string,

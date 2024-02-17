@@ -1,7 +1,4 @@
-import {
-  configureStore,
-  createSerializableStateInvariantMiddleware,
-} from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import appSlice from "./appState";
 import { controller } from "./controller";
 import userSlice from "./userState";

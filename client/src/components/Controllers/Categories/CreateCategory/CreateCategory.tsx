@@ -8,24 +8,25 @@ import uniqid from "uniqid";
 import Styles from "./createCat.module.scss";
 import { GrAdd as AddIcon } from "react-icons/gr";
 import {
-  Category,
   CategoryMini,
   CategoryFeature,
+  CategoryOffer,
 } from "../../../../types/category";
 import categoryReq from "../../../../requests/category";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
-import { Brand, IFile } from "../../../../types";
+import { IFile } from "../../../../types";
 import controllerCatSlice, {
   defaultFeature,
+  defaultOffer,
 } from "../../../../store/controller/categories";
-import Feature from "./Feature/Feature";
+import Feature from "./SubSections/Feature";
 import appSlice from "../../../../store/appState";
 import Page404 from "../../../shared/Page404/Page404";
 import SpinLoader from "../../../shared/Loader/SpinLoader/SpinLoader";
 import request from "../../../../requests";
 import validator from "../../../../validators";
 import categoryValidator from "../../../../validators/category";
-import brandReq from "../../../../requests/brand";
+import Offer from "./SubSections/Offer";
 
 type CreateCategoryProps = {
   isUpdate?: boolean;
@@ -46,6 +47,9 @@ function CreateCategory({
     (state) => state.controller.categories.categories
   );
   const input = useAppSelector((state) => state.controller.categories.category);
+  const formData = useAppSelector(
+    (state) => state.controller.categories.formData
+  );
   const index = useAppSelector((state) =>
     state.controller.categories.categories.findIndex(
       (cat) => cat.name === cat_id
@@ -56,22 +60,23 @@ function CreateCategory({
     controllerCatSlice.actions;
   const setInitCategoryInput = controllerCatSlice.actions.setInitCategoryInput;
   const setCatgeoryInput = controllerCatSlice.actions.setCatgeoryInput;
-  const { setStatusCode } = appSlice.actions;
-  const { setBackgroundMsg } = appSlice.actions;
+  const setStatusCode = appSlice.actions.setStatusCode;
+  const setBackgroundMsg = appSlice.actions.setBackgroundMsg;
+  const setFormData = controllerCatSlice.actions.setFormData;
 
   const [isLoading, setIsLoading] = useState(!!cat_id);
   const [isSaving, setIsSaving] = useState(false);
   const [parentHasWarrantyAndProduction, setParentHasWarrantyAndProduction] =
     useState(false);
-  const [brands, setBrands] = useState<Brand[]>([]);
   const [errors, setErrors] = useState<{ [key in string]: string }>({});
 
   useEffect(() => {
     (async () => {
-      const { brds, msg: brdMsg } = await brandReq.getBrands();
       if (!!cat_id) {
         const { cat, msg: catMsg } = await categoryReq.getCategory(cat_id);
         const { cat: parentCat } = await categoryReq.getCategory(parent);
+        const { data: formData } = await categoryReq.getCategoryFormData();
+
         if (catMsg?.statusCode === 404) {
           dispatch(setStatusCode(404));
         } else if (cat) {
@@ -79,39 +84,37 @@ function CreateCategory({
           if (cat.image.length) {
             image = await request.getImageFiles(cat.image as string[]);
           }
-          let banners: IFile[] = [];
-          if (cat.banners.length > 0) {
-            banners = await request.getImageFiles(cat.image as string[]);
-          }
+
           if (parentCat) {
             setParentHasWarrantyAndProduction(
               parentCat.hasWarrantyAndProduction
             );
           }
+
+          let offers: CategoryOffer[] = [];
+          if (cat.offers) {
+            offers = await Promise.all(
+              cat.offers.map(async (offer) => {
+                const banner = (
+                  await request.getImageFiles([offer.banner] as string[])
+                )[0];
+                return { ...offer, banner };
+              })
+            );
+          }
+
+          dispatch(setFormData(formData));
           dispatch(
             setInitCategoryInput({
               ...cat,
               image,
-              banners,
+              offers,
               hasWarrantyAndProduction:
                 parentCat?.hasWarrantyAndProduction ||
                 cat.hasWarrantyAndProduction,
             })
           );
         }
-      }
-
-      if (brdMsg?.statusCode === 404) {
-        setStatusCode(404);
-      } else if (brds) {
-        let brdsWithFiles = await Promise.all(
-          brds.map(async (brd) => {
-            const imgFile = await request.getImageFiles(brd.image as string[]);
-            return { ...brd, image: [imgFile[0].b64] };
-          })
-        );
-        brdsWithFiles.unshift({ name: "", image: [""] });
-        setBrands(brdsWithFiles);
       }
 
       setIsLoading(false);
@@ -127,7 +130,7 @@ function CreateCategory({
   const onInputChange = async (
     value:
       | string
-      | (IFile | number | string | CategoryFeature)[]
+      | (IFile | number | string | CategoryFeature | CategoryOffer)[]
       | number
       | boolean
       | null,
@@ -144,10 +147,13 @@ function CreateCategory({
           const files = (value as IFile[]).map((f) => f.file);
           return await validator.files(files, "image");
         }
-        case "banners": {
-          const files = (value as IFile[]).map((f) => f.file);
-          return await validator.files(files, "image", 0, 3);
-        }
+        case "features":
+          return await categoryValidator.features(value as CategoryFeature[]);
+        case "offers":
+          return await categoryValidator.offers(
+            value as CategoryOffer[],
+            formData.offerTypes.length
+          );
         default:
           return "";
       }
@@ -174,12 +180,22 @@ function CreateCategory({
     setIsSaving(false);
   };
 
-  const addChildFeature = () => {
+  const addFeature = () => {
     const newFeatures = [
       ...input.features,
       { ...defaultFeature, id: uniqid() },
     ];
     dispatch(setCatgeoryInput({ value: newFeatures, name: "features" }));
+  };
+
+  const addOffer = () => {
+    const addedOffers = input.offers.map((f) => f.type);
+    const newOfferIndex = formData.offerTypes.findIndex(
+      (_, i) => !addedOffers.includes(i)
+    );
+    const newOffer = { ...defaultOffer, type: newOfferIndex, id: uniqid() };
+    const newOffers = [...input.offers, newOffer];
+    dispatch(setCatgeoryInput({ value: newOffers, name: "offers" }));
   };
 
   const imageInput = useMemo(
@@ -196,22 +212,9 @@ function CreateCategory({
     [input.image.length, isLoading]
   );
 
-  const bannerInput = useMemo(
-    () => (
-      <Input
-        name="banners"
-        label="Category Banners*"
-        type="image"
-        isMultipleFiles
-        onChange={onInputChange}
-        defaultValues={input.banners}
-        changeOnMount={!isLoading}
-      />
-    ),
-    [input.banners.length, isLoading]
-  );
   const features = useMemo(
     () =>
+      !isLoading &&
       input.features.map(
         (feature) =>
           !feature.parentId && (
@@ -219,12 +222,20 @@ function CreateCategory({
               key={uniqid()}
               data={feature}
               featureId={feature.id as string}
-              changeOnMount={!feature.name}
+              onChange={onInputChange}
             />
           )
       ),
-
     [input.features.length, isLoading]
+  );
+
+  const offers = useMemo(
+    () =>
+      !isLoading &&
+      input.offers.map((_, i) => (
+        <Offer key={uniqid()} offerIndex={i} onChange={onInputChange} />
+      )),
+    [input.offers.length, isLoading]
   );
 
   return (
@@ -279,7 +290,7 @@ function CreateCategory({
                           type="select"
                           defaultValue={input.brand}
                           onChange={onInputChange}
-                          options={brands.map((brand) => ({
+                          options={formData.brands.map((brand) => ({
                             optionImg: brand.image[0] as string,
                             defaultValue: brand.name,
                           }))}
@@ -302,19 +313,39 @@ function CreateCategory({
                         style={{ marginTop: 15 }}
                       >
                         {imageInput}
-                        {bannerInput}
                       </section>
                     </section>
 
                     <section className={Styles.section}>
-                      <div className={Styles.feature_options_title}>
+                      <div className={Styles.sub_section_title}>
                         <span>Feature Options</span>
                         <AddIcon
                           className={Styles.add_icon}
-                          onClick={addChildFeature}
+                          onClick={addFeature}
                         />
                       </div>
-                      <div className={Styles.feature_options}>{features}</div>
+                      <div className={Styles.sub_section_content}>
+                        {features}
+                      </div>
+                    </section>
+
+                    <section className={Styles.section}>
+                      <div className={Styles.sub_section_title}>
+                        <span>Offers</span>
+                        {input.offers.length < formData.offerTypes.length && (
+                          <AddIcon
+                            className={Styles.add_icon}
+                            onClick={addOffer}
+                          />
+                        )}
+                      </div>
+                      <div
+                        className={Styles.sub_section_content}
+                        style={{ overflow: "hidden" }}
+                      >
+                        <span className={Styles.error}>{errors["offers"]}</span>
+                        {offers}
+                      </div>
                     </section>
                   </form>
                 </div>

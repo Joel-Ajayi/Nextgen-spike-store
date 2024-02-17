@@ -14,13 +14,14 @@ const productQuery = `
 class ProductReq {
   public async getProductFormData(id?: string) {
     const body = JSON.stringify({
-      query: `query GetCreateProductData($id: String) {
-                GetCreateProductData(id: $id) { 
+      query: `query ProductFormData($id: String) {
+        ProductFormData(id: $id) { 
                   colours
                   brands { name image }
                   categories { name lvl parent image cId hasWarrantyAndProduction features { id name type options parentId useAsFilter } }
                   paymentTypes { type val }
                   categoriesPath
+                  featureTypes
                   features { id name type options parentId useAsFilter }
                 }
               }`,

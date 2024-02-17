@@ -1,16 +1,24 @@
 import { IFile } from "../types";
-import { Category, CategoryMini } from "../types/category";
+import { Category, CategoryFormData, CategoryMini } from "../types/category";
 import request from ".";
 
 class CategoryReq {
   public async updateCat(data: Category, isUpdate = false) {
-    const { lvl, parent, image, banners, ...rest } = data;
-    const createQuery = `mutation CreateCategory($data: CategoryInput) { CreateCategory(data:$data) { name parent lvl } }`;
-    const updateQuery = `mutation UpdateCategory($data: CategoryUpdateInput) { UpdateCategory(data: $data) { name lvl parent } }`;
+    const { lvl, parent, image, offers, ...rest } = data;
+    const createQuery = `mutation CreateCategory($data: CategoryInput) { CreateCategory(data:$data) { name parent lvl cId
+      offers { id type validUntil banner discount audience}
+    features { id name type options useAsFilter parentId} } }`;
+    const updateQuery = `mutation UpdateCategory($data: CategoryUpdateInput) { UpdateCategory(data: $data) { name lvl parent cId
+      offers { id type validUntil banner discount audience}
+    features { id name type options useAsFilter parentId} } }`;
     const body = JSON.stringify({
       query: !isUpdate ? createQuery : updateQuery,
       variables: {
-        data: { ...rest, image: null, banners: banners.map(() => null) },
+        data: {
+          ...rest,
+          image: null,
+          offers: offers.map((f) => ({ ...f, banner: null })),
+        },
       },
     });
 
@@ -18,15 +26,14 @@ class CategoryReq {
     formData.append("operations", body);
     let map: { [key in string]: string[] } = {};
     if (image.length) map["0"] = ["variables.data.image"];
-    data.banners.forEach((_, i) => {
-      map[i + (!image.length ? 0 : 1)] = [`variables.data.banners.${i}`];
+    data.offers.forEach((_, i) => {
+      map[i + (!image.length ? 0 : 1)] = [`variables.data.offers.${i}.banner`];
     });
     formData.append("map", JSON.stringify(map));
 
     if (image.length) formData.append("0", (data.image[0] as IFile).file);
-
-    (data.banners as IFile[]).forEach(({ file }, i) => {
-      formData.append(`${i + (!image.length ? 0 : 1)}`, file);
+    data.offers.forEach(({ banner }, i) => {
+      formData.append(`${i + (!image.length ? 0 : 1)}`, (banner as IFile).file);
     });
 
     const { res, msg } = await request.makeRequest<CategoryMini>(
@@ -39,7 +46,9 @@ class CategoryReq {
   public async updateCatParent(name: string, parent: string) {
     const body = JSON.stringify({
       query: `mutation UpdateCategoryParent($name: String!, $parent: String!) {
-                UpdateCategoryParent(name: $name, parent: $parent) { name lvl parent }
+                UpdateCategoryParent(name: $name, parent: $parent) { name parent lvl cId
+                  offers { id type validUntil banner discount audience}
+                features { id name type options useAsFilter parentId} }
               }`,
       variables: {
         name,
@@ -53,8 +62,9 @@ class CategoryReq {
 
   public async getCategories(parent = "") {
     const body = JSON.stringify({
-      query:
-        "query GetCategories($parent:String) { GetCategories(parent: $parent) { name parent lvl image cId hasWarrantyAndProduction features { id name type options useAsFilter parentId} } }",
+      query: `query GetCategories($parent:String) { GetCategories(parent: $parent) { name parent lvl image cId hasWarrantyAndProduction 
+          offers { id type validUntil banner discount audience}
+          features { id name type options useAsFilter parentId} } }`,
       variables: { parent },
     });
 
@@ -65,7 +75,9 @@ class CategoryReq {
   public async getCategory(name: string) {
     const body = JSON.stringify({
       query: `query GetCategory($name: String!) { GetCategory(name: $name) {
-                 id name parent lvl description image banners hasWarrantyAndProduction brand features { id name type options useAsFilter parentId }
+                 id name parent lvl description image hasWarrantyAndProduction brand 
+                 offers { id type validUntil banner discount audience }
+                 features { id name type options useAsFilter parentId }
                 }
               }`,
       variables: { name },
@@ -73,6 +85,15 @@ class CategoryReq {
 
     const { res, msg } = await request.makeRequest<Category>(body);
     return { cat: res, msg };
+  }
+
+  public async getCategoryFormData() {
+    const body = JSON.stringify({
+      query: `query CategoryFormData { CategoryFormData { brands { name image } offerTypes featureTypes offerAudiences }}`,
+    });
+
+    const { res, msg } = await request.makeRequest<CategoryFormData>(body);
+    return { data: res, msg };
   }
 }
 
