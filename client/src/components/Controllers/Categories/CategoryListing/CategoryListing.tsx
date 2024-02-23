@@ -69,7 +69,7 @@ function CategoryListing() {
 
   const tree = useMemo(() => {
     if (isLoading) return null;
-    const width = window?.innerWidth > 500 ? window?.innerWidth - 50 : 500;
+    const width = window?.innerWidth > 1000 ? window?.innerWidth - 50 : 1000;
     let height = 100;
 
     const rawTree: ITreeNode = {
@@ -103,7 +103,7 @@ function CategoryListing() {
         rawTree={rawTree}
         height={height}
         width={width}
-        nodeWidth={130}
+        nodeWidth={180}
         nodeHeight={0}
         onAppend={onAppend}
         onMove={onMove}

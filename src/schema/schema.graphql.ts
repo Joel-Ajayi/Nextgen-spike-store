@@ -20,7 +20,7 @@ type Mutation {
   SignIn(data: SignInInput): Message
   SignOut: Message
   SignUp(data: SignUpInput): Message
-  UpdateCategory(data: CategoryUpdateInput): CategoryMini
+  UpdateCategory(data: CategoryInput_U): CategoryMini
   UpdateCategoryParent(name: String!, parent: String!): CategoryMini
   UpdateProduct(data: UpdateProductInput): ProductUpdateReturn
   VerifyAccount(email: String!): Message
@@ -44,12 +44,13 @@ type Pagination {
 
 # scallar type
 scalar Upload
-scalar StringAndInt
+scalar UploadOrUrl
 scalar AnyExceptNull
+scalar StringOrInt
 
 #Brand
 type Brand {
-  image: [String!]!
+  image: String!
   name: String!
 }
 
@@ -65,14 +66,27 @@ input BrandInput {
 type Category {
   brand: String!
   description: String!
-  features: [CategoryFeature!]!
-  offers:[CategoryOffer!]!
-  hasWarrantyAndProduction:Boolean!
   id: String!
-  image: [String!]!
   lvl: Int!
+  icon:String
   name: String!
   parent: String
+  hasWarrantyAndProduction:Boolean!
+  banner:CategoryBanner
+  features: [CategoryFeature!]!
+  offers:[CategoryOffer!]!
+}
+
+type CategoryMini {
+  lvl: Int!
+  cId: Int!
+  name: String!
+  parent: String!
+  icon:String
+  banner:CategoryBanner
+  hasWarrantyAndProduction:Boolean!
+  features: [CategoryFeature!]!
+  offers:[CategoryOffer!]!
 }
 
 type CategoryFeature {
@@ -98,7 +112,9 @@ type CategoryOffer {
   type: Int!
   discount:Int!
   audience:Int!
-  banner:String!
+  tagline:String!
+  bannerColours:[String!]!
+  image:String!
   validUntil:String!
 }
 
@@ -107,41 +123,62 @@ input CategoryOfferInput {
   type: Int!
   discount:Int!
   audience:Int!
-  banner:Upload!
+  tagline:String!
+  bannerColours:[String!]!
+  image:Upload!
   validUntil:String!
 }
 
+input CategoryOfferInput_U {
+  id: String!
+  type: Int!
+  discount:Int!
+  audience:Int!
+  tagline:String!
+  bannerColours:[String!]!
+  image:UploadOrUrl!
+  validUntil:String!
+}
+
+type CategoryBanner {
+  tagline:String!
+  bannerColours:[String!]!
+  image:String!
+}
+
+input CategoryBannerInput {
+  tagline:String!
+  bannerColours:[String!]!
+  image:Upload!
+}
+
+input CategoryBannerInput_U {
+  tagline:String!
+  bannerColours:[String!]!
+  image:UploadOrUrl!
+}
 
 input CategoryInput {
   brand: String
+  icon:Upload
   description: String
+  banner:CategoryBannerInput
   features: [CategoryFeatureInput!]!
   offers:[CategoryOfferInput!]!
   hasWarrantyAndProduction: Boolean!
-  image: Upload
   name: String!
   parent: String
 }
 
-type CategoryMini {
-  image: String
-  lvl: Int!
-  cId: Int!
-  name: String!
-  parent: String!
-  hasWarrantyAndProduction:Boolean!
-  features: [CategoryFeature!]!
-  offers:[CategoryOffer!]!
-}
-
-input CategoryUpdateInput {
+input CategoryInput_U {
   brand: String!
+  icon:UploadOrUrl
   description: String
   features: [CategoryFeatureInput!]!
-  offers:[CategoryOfferInput!]!
+  offers:[CategoryOfferInput_U!]!
   hasWarrantyAndProduction:Boolean!
+  banner:CategoryBannerInput_U
   id: String!
-  image: Upload
   name: String!
 }
 
@@ -257,7 +294,6 @@ input ProductFeatureInput {
 type CreateProductData {
   brands: [Brand]!
   categories: [CategoryMini]!
-  colours: [[String!]!]
   paymentTypes: [PaymentType!]!
   categoriesPath:[String]!
   featureTypes:[String!]!

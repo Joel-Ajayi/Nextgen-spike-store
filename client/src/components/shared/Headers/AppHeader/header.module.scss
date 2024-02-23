@@ -2,11 +2,12 @@
 @import "../../../../styles/mixins.scss";
 
 .headerWrapper {
+  position: relative;
   width: 100vw;
   display: flex;
   justify-content: center;
   align-items: stretch;
-  background-color: $brand-color;
+  z-index: 2;
 
   .content {
     @include desktop-wrapper;

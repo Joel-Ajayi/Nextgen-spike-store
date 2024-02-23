@@ -4,6 +4,7 @@ import consts from "../../../@types/conts";
 import { validator } from "../../../helpers/validator";
 import middleware from "../../../middlewares/middlewares";
 import { Context } from "../../context";
+import { upload } from "../../../helpers/uploads";
 
 const resolvers = {
   CreateBrand: async (
@@ -23,8 +24,19 @@ const resolvers = {
       });
 
       // validate image/
-      const prevImage = prevBrand ? [prevBrand.image] : [];
-      const image = (await validator.files([data.image], 1, 1, prevImage))[0];
+      const isNew = !prevBrand;
+      const minNum = isNew ? 1 : 0;
+      const files = data.image ? [data.image] : [];
+      const prevFiles = prevBrand && files.length ? [prevBrand.image] : [];
+      const image = (
+        await upload.files({
+          folder: "brd",
+          minNum,
+          maxNum: 1,
+          files,
+          prevFiles,
+        })
+      )[0];
 
       const newBrd = await ctx.db.brand.upsert({
         where: { name: data.id },

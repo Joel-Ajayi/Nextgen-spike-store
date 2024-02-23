@@ -1,4 +1,4 @@
-import Upload, { FileUpload } from "graphql-upload/Upload";
+import { FileUpload } from "graphql-upload/Upload";
 
 export type Brand = {
   name: string;
@@ -8,5 +8,5 @@ export type Brand = {
 export type Brand_I = {
   id: string;
   name: string;
-  image: Promise<FileUpload>;
+  image: Promise<FileUpload> | null;
 };

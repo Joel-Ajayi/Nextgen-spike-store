@@ -11,6 +11,7 @@ import { validator } from "../../../helpers/validator";
 import { getSKU } from "../../../helpers";
 import { Types } from "mongoose";
 import { CategoryFeature } from "../../../@types/categories";
+import { upload } from "../../../helpers/uploads";
 
 const resolvers = {
   CreateProduct: async (
@@ -101,11 +102,13 @@ const resolvers = {
     });
 
     // validate image/
-    const images = await validator.files(
-      data.images,
-      consts.files.product.min,
-      consts.files.product.max
-    );
+    const images = await upload.files({
+      folder: "prd",
+      files: data.images,
+      maxNum: consts.files.product.max,
+      minNum: consts.files.product.min,
+      prevFiles: [],
+    });
 
     // create sku
     const sku = getSKU(
@@ -295,12 +298,13 @@ const resolvers = {
     // check images
     let images: undefined | string[] = undefined;
     if (data?.images) {
-      images = await validator.files(
-        data.images,
-        consts.files.product.min,
-        consts.files.product.max,
-        product.images
-      );
+      images = await upload.files({
+        folder: "prd",
+        files: data.images,
+        maxNum: consts.files.product.max,
+        minNum: consts.files.product.min,
+        prevFiles: product.images,
+      });
     }
 
     const newPrd = await ctx.db.product.update({

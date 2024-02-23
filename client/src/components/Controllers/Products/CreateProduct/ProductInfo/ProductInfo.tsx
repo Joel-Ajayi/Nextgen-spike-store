@@ -202,14 +202,9 @@ function ProductInfo() {
               name="colours"
               label="Product Colors"
               isMultiInput
-              isColor
-              type="select"
-              defaultValue={formData.colours[0][0]}
+              type="colour"
+              defaultValue={`${product.colours[0]}`}
               defaultValues={product.colours}
-              options={formData.colours.map((colour) => ({
-                defaultValue: colour[0],
-                bgColor: colour[1],
-              }))}
               onChange={onInputChange}
             />
             <Input

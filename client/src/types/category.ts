@@ -1,4 +1,3 @@
-import { number } from "yup";
 import { Brand, IFile } from ".";
 
 export type InitialCategoryController = {
@@ -27,9 +26,17 @@ export type CategoryOffer = {
   id?: string;
   type: number; // -0-flash sales -1- free shipping
   discount: number;
+  bannerColours: string[];
+  tagline: string;
   audience: number; // -0-any-1-new-2-old
-  banner: IFile | string;
+  image: IFile | string | null;
   validUntil: string;
+};
+
+export type CategoryBanner = {
+  tagline: string;
+  bannerColours: string[];
+  image: string | IFile | null;
 };
 
 export type CategoryMini = {
@@ -37,8 +44,9 @@ export type CategoryMini = {
   cId: number;
   lvl: number;
   parent: string;
+  icon: string | IFile | null;
   hasWarrantyAndProduction: boolean;
-  image?: string;
+  banner: CategoryBanner | null;
   features: CategoryFeature[];
 };
 
@@ -49,8 +57,9 @@ export type Category = {
   brand?: string;
   parent: string;
   description: string;
-  image: (IFile | string)[];
+  icon: string | IFile | null;
   features: CategoryFeature[];
   offers: CategoryOffer[];
+  banner?: CategoryBanner | null;
   hasWarrantyAndProduction: boolean;
 };

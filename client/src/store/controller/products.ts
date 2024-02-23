@@ -15,7 +15,6 @@ export const initialState: InitialProductController = {
     categoriesPath: [],
     brands: [],
     paymentTypes: [],
-    colours: [],
     features: [],
     featureTypes: [],
   },

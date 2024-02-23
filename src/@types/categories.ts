@@ -7,34 +7,37 @@ export type Category = {
   id: string;
   name: string;
   lvl: Number;
+  icon: string;
   parent?: string | null;
   description: string;
   hasWarrantyAndProduction: boolean;
   brand: string;
-  image: string[];
+  banner: CategoryBanner;
   features: CategoryFeature[];
   offers: CategoryOffer[];
 };
 
 export type Category_I = {
   name: string;
+  icon?: Promise<FileUpload>;
   parent: string | null;
   description: string;
-  image?: Promise<FileUpload> | null;
   brand: string | null;
   hasWarrantyAndProduction: boolean;
+  banner: CategoryBanner;
   features: CategoryFeature[];
   offers: CategoryOffer[];
 };
 
 export type Category_I_U = {
   id: string;
+  icon: Promise<FileUpload> | string | null;
   name: string;
-  description?: string | null;
-  image: Promise<FileUpload>;
+  description?: string;
   brand: string;
   hasWarrantyAndProduction: boolean;
   features: CategoryFeature[];
+  banner: CategoryBanner;
   offers: CategoryOffer[];
 };
 
@@ -42,29 +45,38 @@ export type CategoryMini = {
   name: string;
   lvl: Number;
   cId: number;
+  icon: string;
   parent: string;
-  image?: string | null;
+  banner: CategoryBanner | null;
   features: CategoryFeature[];
   offers: CategoryOffer[];
 };
 
-export interface CategoryFeature {
+export type CategoryBanner = {
+  tagline: string;
+  bannerColours: string[];
+  image: string | Promise<FileUpload>;
+};
+
+export type CategoryFeature = {
   id: string;
   name: string;
   type: number;
   options: string[];
   parentId: string | null;
-  categoryId?: string | null;
   useAsFilter: boolean;
-}
+};
 
-export interface CategoryOffer {
+export type CategoryOffer = {
   id: string;
   type: number; // -0-flash sales -1- free shipping
+  tagline: string;
+  bannerColours: string[];
   discount: number;
-  banner: string | Promise<FileUpload>;
+  audience: number;
+  image: string | Promise<FileUpload>;
   validUntil: string;
-}
+};
 
 export type CategoryForm = {
   name: string;

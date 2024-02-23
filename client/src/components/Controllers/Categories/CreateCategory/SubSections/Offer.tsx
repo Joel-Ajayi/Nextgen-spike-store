@@ -13,11 +13,11 @@ type Props = {
   offerIndex: number;
   onChange: (features: CategoryOffer[], name: string) => void;
 };
+
 function Offer({ offerIndex, onChange }: Props) {
   const { offerTypes, offerAudiences } = useAppSelector(
     (state) => state.controller.categories.formData
   );
-
   const offers = useAppSelector(
     (state) => state.controller.categories.category.offers
   );
@@ -36,8 +36,8 @@ function Offer({ offerIndex, onChange }: Props) {
     value: (string | IFile | number)[] | number | string | boolean | null,
     name: string
   ) => {
-    const isBanner = name === "banner";
-    const inPutVal = isBanner ? (value as IFile[])[0] || null : value;
+    const isImage = name === "image";
+    const inPutVal = isImage ? (value as IFile[])[0] || null : value;
     const newOffers = [...offers];
     const newOffer = { ...offer, [name]: inPutVal };
     newOffers[offerIndex] = newOffer;
@@ -54,18 +54,18 @@ function Offer({ offerIndex, onChange }: Props) {
     return error;
   };
 
-  const banner = useMemo(
+  const image = useMemo(
     () => (
       <Input
-        name="banner"
-        label="Banner"
+        name="image"
+        label="Image"
         type="image"
         onChange={onInputChange}
-        defaultValues={offer?.banner ? [offer.banner] : []}
+        defaultValues={offer.image ? [offer.image] : []}
         asInfo={!isEditing}
       />
     ),
-    [offer.banner, isEditing]
+    [offer, isEditing]
   );
 
   const deleteOffer = () => {
@@ -89,6 +89,14 @@ function Offer({ offerIndex, onChange }: Props) {
         <DeleteIcon onClick={deleteOffer} />
       </div>
       <Input
+        name="tagline"
+        label="Tagline"
+        type="textarea"
+        defaultValue={offer.tagline}
+        onChange={onInputChange}
+        asInfo={!isEditing}
+      />
+      <Input
         name="type"
         label="Offer Type"
         type="select"
@@ -97,6 +105,16 @@ function Offer({ offerIndex, onChange }: Props) {
           label,
           defaultValue,
         }))}
+        onChange={onInputChange}
+        asInfo={!isEditing}
+      />
+      <Input
+        name="bannerColours"
+        label="Banner Colour"
+        type="colour"
+        isMultiInput
+        defaultValue={offer.bannerColours[0]}
+        defaultValues={offer.bannerColours}
         onChange={onInputChange}
         asInfo={!isEditing}
       />
@@ -123,12 +141,11 @@ function Offer({ offerIndex, onChange }: Props) {
       <Input
         name="validUntil"
         label="Offer Ends"
-        type="text"
         defaultValue={offer.validUntil}
         onChange={onInputChange}
         asInfo={!isEditing}
       />
-      {banner}
+      {image}
     </div>
   );
 }

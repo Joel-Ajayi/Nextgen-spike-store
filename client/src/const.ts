@@ -27,11 +27,12 @@ export const CONSTS = {
   },
   files: {
     mimeType: {
+      supportedSvg: ".svg",
       supportedImg: ".jpg,.jpeg,.bmp,.tif,.tiff,.gif,.png",
       supportedVd: ".mp4,.mkv",
     },
     vdSize: 5 * 1024 * 1024,
-    imgSize: 80 * 1024,
+    imgSize: 150 * 1024,
   },
   ids: {
     appSideBar: "APP_SIDE_BAR1",

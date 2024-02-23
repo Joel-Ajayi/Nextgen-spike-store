@@ -26,17 +26,21 @@ const resolvers = {
         select: {
           id: true,
           name: true,
+          icon: true,
           lvl: true,
           hasWarrantyAndProduction: true,
           cId: true,
           parent: { select: { name: true } },
           features: true,
+          banner: true,
           offers: true,
         },
       });
 
       return categories.map((cat) => ({
         ...cat,
+        icon: cat.icon || "",
+        banner: cat.banner[0] || null,
         parent: cat.parent?.name || "",
       }));
     } catch (error) {
@@ -60,11 +64,12 @@ const resolvers = {
           id: true,
           name: true,
           lvl: true,
+          icon: true,
           description: true,
-          image: true,
           hasWarrantyAndProduction: true,
           brand: { select: { name: true } },
           parent: { select: { name: true } },
+          banner: true,
           features: true,
           offers: true,
         },
@@ -78,10 +83,11 @@ const resolvers = {
 
       return {
         ...category,
+        icon: category.icon || "",
+        banner: category.banner[0] || null,
         brand: category.brand?.name || "",
         parent: category?.parent?.name,
         description: category.description || "",
-        image: category.image ? [category.image] : [],
       };
     } catch (error) {
       throw new GraphQLError(consts.errors.server, {
@@ -92,11 +98,9 @@ const resolvers = {
   CategoryFormData: async (_: any, {}: any, ctx: Context) => {
     // check if logged_in
     middleware.checkAdmin(ctx);
-    const brands = (
-      await ctx.db.brand.findMany({
-        select: { name: true, image: true },
-      })
-    ).map((brd) => ({ ...brd, image: [brd.image] }));
+    const brands = await ctx.db.brand.findMany({
+      select: { name: true, image: true },
+    });
 
     const featureTypes = getObjKeys<string>(CategoryFeatureType);
     const offerTypes = getObjKeys<string>(CategoryOfferType);

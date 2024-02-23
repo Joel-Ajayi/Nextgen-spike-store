@@ -2,7 +2,7 @@ import { GraphQLError } from "graphql";
 import { Context } from "../../context";
 import consts from "../../../@types/conts";
 import middleware from "../../../middlewares/middlewares";
-import { colours } from "../../../db/app.data";
+
 import {
   PaymentType,
   Product,
@@ -151,7 +151,6 @@ const resolvers = {
       categoriesPath = ["", ...categoriesPath];
 
       return {
-        colours,
         brands: brands.map((brd) => ({ ...brd, image: [brd.image] })),
         categories: categories.map((cat) => ({
           ...cat,

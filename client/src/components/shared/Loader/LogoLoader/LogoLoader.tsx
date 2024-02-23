@@ -18,7 +18,7 @@ function LogoLoader({ isLocal = false }: LoaderProps) {
 
   return (
     <div style={style} className={Styles.loader_wrapper}>
-      <img src="/uploads/logo.png" alt="page loading" />
+      <img src="/uploads/logo.svg" alt="page loading" />
     </div>
   );
 }

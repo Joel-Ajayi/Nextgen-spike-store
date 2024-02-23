@@ -11,11 +11,14 @@ import {
   CategoryMini,
   CategoryFeature,
   CategoryOffer,
+  CategoryBanner,
 } from "../../../../types/category";
 import categoryReq from "../../../../requests/category";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { IFile } from "../../../../types";
 import controllerCatSlice, {
+  defaultBanner,
+  defaultCategory,
   defaultFeature,
   defaultOffer,
 } from "../../../../store/controller/categories";
@@ -27,6 +30,7 @@ import request from "../../../../requests";
 import validator from "../../../../validators";
 import categoryValidator from "../../../../validators/category";
 import Offer from "./SubSections/Offer";
+import Banner from "./SubSections/Banner";
 
 type CreateCategoryProps = {
   isUpdate?: boolean;
@@ -41,7 +45,6 @@ function CreateCategory({
 }: CreateCategoryProps) {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-
   const statusCode = useAppSelector((state) => state.app.statusCode);
   const categories = useAppSelector(
     (state) => state.controller.categories.categories
@@ -59,7 +62,7 @@ function CreateCategory({
   const { updateCategories: updateCategory, addCategory } =
     controllerCatSlice.actions;
   const setInitCategoryInput = controllerCatSlice.actions.setInitCategoryInput;
-  const setCatgeoryInput = controllerCatSlice.actions.setCatgeoryInput;
+  const setCategoryInput = controllerCatSlice.actions.setCategoryInput;
   const setStatusCode = appSlice.actions.setStatusCode;
   const setBackgroundMsg = appSlice.actions.setBackgroundMsg;
   const setFormData = controllerCatSlice.actions.setFormData;
@@ -80,9 +83,13 @@ function CreateCategory({
         if (catMsg?.statusCode === 404) {
           dispatch(setStatusCode(404));
         } else if (cat) {
-          let image: IFile[] = [];
-          if (cat.image.length) {
-            image = await request.getImageFiles(cat.image as string[]);
+          if (cat.icon) {
+            cat.icon = (await request.getImageFiles([cat.icon] as string[]))[0];
+          }
+          if (cat?.banner) {
+            cat.banner.image = (
+              await request.getImageFiles([cat.banner.image] as string[])
+            )[0];
           }
 
           if (parentCat) {
@@ -91,28 +98,22 @@ function CreateCategory({
             );
           }
 
-          let offers: CategoryOffer[] = [];
           if (cat.offers) {
-            offers = await Promise.all(
+            cat.offers = await Promise.all(
               cat.offers.map(async (offer) => {
-                const banner = (
-                  await request.getImageFiles([offer.banner] as string[])
+                const image = (
+                  await request.getImageFiles([offer.image] as string[])
                 )[0];
-                return { ...offer, banner };
+                return { ...offer, image };
               })
             );
           }
 
+          const hasWarrantyAndProduction =
+            parentCat?.hasWarrantyAndProduction || cat.hasWarrantyAndProduction;
           dispatch(setFormData(formData));
           dispatch(
-            setInitCategoryInput({
-              ...cat,
-              image,
-              offers,
-              hasWarrantyAndProduction:
-                parentCat?.hasWarrantyAndProduction ||
-                cat.hasWarrantyAndProduction,
-            })
+            setInitCategoryInput({ ...cat, parent, hasWarrantyAndProduction })
           );
         }
       }
@@ -131,22 +132,38 @@ function CreateCategory({
     value:
       | string
       | (IFile | number | string | CategoryFeature | CategoryOffer)[]
+      | IFile
       | number
+      | CategoryBanner
       | boolean
       | null,
     name: string
   ): Promise<string | void> => {
-    dispatch(setCatgeoryInput({ value, name }));
+    const isIcon = name === "icon";
+    dispatch(
+      setCategoryInput({
+        value: isIcon ? (value as IFile[])[0] || null : value,
+        name,
+      })
+    );
     const getError = async (name: string) => {
       switch (name) {
         case "name":
           return await categoryValidator.catName(value as string);
         case "description":
           return await categoryValidator.catDesc((value as string) || "");
-        case "image": {
-          const files = (value as IFile[]).map((f) => f.file);
-          return await validator.files(files, "image");
-        }
+        case "icon":
+          const file = (value as IFile[])[0]?.file;
+          const format = ".svg+xml";
+          return await validator.files(
+            file ? [file] : [],
+            "image",
+            0,
+            1,
+            format
+          );
+        case "banner":
+          return await categoryValidator.banner(value as CategoryBanner);
         case "features":
           return await categoryValidator.features(value as CategoryFeature[]);
         case "offers":
@@ -165,8 +182,11 @@ function CreateCategory({
 
   const onSave = async () => {
     setIsSaving(true);
-    const { cat, msg } = await categoryReq.updateCat(input, isUpdate);
-    if (msg) {
+    const { cat, msg } = await categoryReq.updateCat(
+      { ...input, parent },
+      isUpdate
+    );
+    if (msg?.statusCode === 400) {
       dispatch(setBackgroundMsg(msg));
     } else if (cat) {
       if (isUpdate && categories.length) {
@@ -174,6 +194,7 @@ function CreateCategory({
       } else {
         dispatch(addCategory(cat as CategoryMini));
       }
+      dispatch(setInitCategoryInput(defaultCategory));
       const navLink = `/controller?pg=${Pages.Categories}&sec=${PageSections.CatListing}`;
       navigate(navLink, { replace: false });
     }
@@ -185,7 +206,11 @@ function CreateCategory({
       ...input.features,
       { ...defaultFeature, id: uniqid() },
     ];
-    dispatch(setCatgeoryInput({ value: newFeatures, name: "features" }));
+    onInputChange(newFeatures, "features");
+  };
+
+  const setBanner = () => {
+    onInputChange(defaultBanner, "banner");
   };
 
   const addOffer = () => {
@@ -195,21 +220,21 @@ function CreateCategory({
     );
     const newOffer = { ...defaultOffer, type: newOfferIndex, id: uniqid() };
     const newOffers = [...input.offers, newOffer];
-    dispatch(setCatgeoryInput({ value: newOffers, name: "offers" }));
+    onInputChange(newOffers, "offers");
   };
 
-  const imageInput = useMemo(
+  const icon = useMemo(
     () => (
       <Input
-        name="image"
-        label="Category Image"
-        type="image"
+        name="icon"
+        label="Catgeory Icon"
+        type="svg"
         onChange={onInputChange}
-        defaultValues={input.image}
+        defaultValues={input?.icon ? [input.icon] : []}
         changeOnMount={!isLoading}
       />
     ),
-    [input.image.length, isLoading]
+    [input.icon, isLoading]
   );
 
   const features = useMemo(
@@ -227,6 +252,11 @@ function CreateCategory({
           )
       ),
     [input.features.length, isLoading]
+  );
+
+  const banner = useMemo(
+    () => !isLoading && <Banner onChange={onInputChange} />,
+    [isLoading]
   );
 
   const offers = useMemo(
@@ -266,86 +296,97 @@ function CreateCategory({
               <div className={Styles.content}>
                 <div className={Styles.inner_content}>
                   <form className={Styles.grid_display}>
-                    <section>
-                      <section className={Styles.section}>
-                        <Input
-                          name="name"
-                          label="Name"
-                          defaultValue={input.name}
-                          onChange={onInputChange}
-                          changeOnMount={!isLoading}
-                        />
-                        <Input
-                          name="description"
-                          label="Description"
-                          defaultValue={input.description}
-                          rows={6}
-                          type="textarea"
-                          onChange={onInputChange}
-                          changeOnMount={!isLoading}
-                        />
-                        <Input
-                          name="brand"
-                          label="Brand"
-                          type="select"
-                          defaultValue={input.brand}
-                          onChange={onInputChange}
-                          options={formData.brands.map((brand) => ({
-                            optionImg: brand.image[0] as string,
-                            defaultValue: brand.name,
-                          }))}
-                          changeOnMount={!isLoading}
-                        />
-                        <Input
-                          name="hasWarrantyAndProduction"
-                          label="Has Warranty And Production Details"
-                          type="checkbox"
-                          defaultChecked={input.hasWarrantyAndProduction}
-                          onChange={onInputChange}
-                          changeOnMount={!isLoading}
-                          span
-                          asInfo={parentHasWarrantyAndProduction}
-                        />
-                      </section>
+                    <section className={Styles.section}>
+                      <Input
+                        name="name"
+                        label="Name"
+                        defaultValue={input.name}
+                        onChange={onInputChange}
+                        changeOnMount={!isLoading}
+                      />
+                      <Input
+                        name="description"
+                        label="Description"
+                        defaultValue={input.description}
+                        rows={6}
+                        type="textarea"
+                        onChange={onInputChange}
+                        changeOnMount={!isLoading}
+                      />
+                      <Input
+                        name="brand"
+                        label="Brand"
+                        type="select"
+                        defaultValue={input.brand}
+                        onChange={onInputChange}
+                        options={formData.brands.map((brand) => ({
+                          optionImg: brand.image[0] as string,
+                          defaultValue: brand.name,
+                        }))}
+                        changeOnMount={!isLoading}
+                      />
+                      <Input
+                        name="hasWarrantyAndProduction"
+                        label="Has Warranty And Production Details"
+                        type="checkbox"
+                        defaultChecked={input.hasWarrantyAndProduction}
+                        onChange={onInputChange}
+                        changeOnMount={!isLoading}
+                        span
+                        asInfo={parentHasWarrantyAndProduction}
+                      />
+                      {icon}
 
-                      <section
-                        className={Styles.section}
-                        style={{ marginTop: 15 }}
-                      >
-                        {imageInput}
+                      <section className={Styles.sub_section}>
+                        <div className={Styles.sub_section_title}>
+                          <span>Banner</span>
+                          {!input.banner && (
+                            <AddIcon
+                              className={Styles.add_icon}
+                              onClick={setBanner}
+                            />
+                          )}
+                        </div>
+                        {banner}
                       </section>
                     </section>
 
                     <section className={Styles.section}>
-                      <div className={Styles.sub_section_title}>
-                        <span>Feature Options</span>
-                        <AddIcon
-                          className={Styles.add_icon}
-                          onClick={addFeature}
-                        />
-                      </div>
-                      <div className={Styles.sub_section_content}>
-                        {features}
-                      </div>
+                      <section className={Styles.sub_section}>
+                        <div className={Styles.sub_section_title}>
+                          <span>Offers</span>
+                          {input.offers.length < formData.offerTypes.length && (
+                            <AddIcon
+                              className={Styles.add_icon}
+                              onClick={addOffer}
+                            />
+                          )}
+                        </div>
+                        <div
+                          className={Styles.sub_section_content}
+                          style={{ overflow: "hidden" }}
+                        >
+                          <span className={Styles.error}>
+                            {errors["offers"]}
+                          </span>
+                          {offers}
+                        </div>
+                      </section>
                     </section>
 
                     <section className={Styles.section}>
-                      <div className={Styles.sub_section_title}>
-                        <span>Offers</span>
-                        {input.offers.length < formData.offerTypes.length && (
+                      <section className={Styles.sub_section}>
+                        <div className={Styles.sub_section_title}>
+                          <span>Feature Options</span>
                           <AddIcon
                             className={Styles.add_icon}
-                            onClick={addOffer}
+                            onClick={addFeature}
                           />
-                        )}
-                      </div>
-                      <div
-                        className={Styles.sub_section_content}
-                        style={{ overflow: "hidden" }}
-                      >
-                        <span className={Styles.error}>{errors["offers"]}</span>
-                        {offers}
-                      </div>
+                        </div>
+                        <div className={Styles.sub_section_content}>
+                          {features}
+                        </div>
+                      </section>
                     </section>
                   </form>
                 </div>

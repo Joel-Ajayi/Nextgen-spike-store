@@ -89,7 +89,7 @@ function CatList({ pathIndex = 0 }: Props) {
           >
             <li>
               <span>{cat.name}</span>
-              {cat?.image && <img src={cat.image} />}
+              {cat.banner?.image && <img src={cat.banner.image as string} />}
             </li>
           </div>
         )),

@@ -9,7 +9,6 @@ export type ProductFormData = {
     type: string;
     val: number;
   }[];
-  colours: string[][];
   featureTypes: string[];
   features: CategoryFeature[];
 };

@@ -54,17 +54,18 @@ model Category {
   id                       String            @id @default(auto()) @map("_id") @db.ObjectId
   name                     String            @unique
   cId                      Int               @unique
+  icon                     String?
   description              String?
   parentId                 String?           @db.ObjectId
   parent                   Category?         @relation("Category", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   children                 Category[]        @relation("Category")
   lvl                      Int               @default(1)
-  features                 CategoryFeature[]
-  offers                   CategoryOffer[]
-  image                    String?
+  hasWarrantyAndProduction Boolean           @default(false)
   brdId                    String?           @db.ObjectId
   brand                    Brand?            @relation(fields: [brdId], references: [id])
-  hasWarrantyAndProduction Boolean           @default(false)
+  banner                   CategoryBanner[]
+  features                 CategoryFeature[]
+  offers                   CategoryOffer[]
   products                 Product[]
   createdAt                DateTime          @default(now())
   updatedAt                DateTime          @updatedAt
@@ -76,21 +77,32 @@ model CategoryFeature {
   type            Int
   options         String[]
   parentId        String?          @db.ObjectId
-  category        Category?        @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  categoryId      String?          @db.ObjectId
+  category        Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId      String           @db.ObjectId
   useAsFilter     Boolean          @default(false)
   productFeatures ProductFeature[]
 }
 
+model CategoryBanner {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  image         String
+  bannerColours String[]
+  tagline       String
+  category      Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId    String   @db.ObjectId
+}
+
 model CategoryOffer {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  type       Int // -0-flash sales -1- free shipping
-  discount   Int
-  banner     String
-  validUntil String
-  audience   Int // -0-any-1-first-time-2-longtimeusers
-  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  categoryId String   @db.ObjectId
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  type          Int // -0-flash sales -1- free shipping
+  tagline       String
+  image         String
+  bannerColours String[]
+  validUntil    String
+  discount      Int
+  audience      Int // -0-any-1-first-time-2-longtimeusers
+  category      Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId    String   @db.ObjectId
 }
 
 // name-cat-brand-price-color

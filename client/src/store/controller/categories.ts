@@ -3,6 +3,7 @@ import { cloneDeep } from "lodash";
 import uniqId from "uniqid";
 import {
   Category,
+  CategoryBanner,
   CategoryFeature,
   CategoryFormData,
   CategoryMini,
@@ -24,29 +25,40 @@ export const defaultOffer: CategoryOffer = {
   id: uniqId(),
   discount: 1,
   audience: 0,
+  bannerColours: ["#FFFFFF"],
+  tagline: "",
   validUntil: `01-01-${new Date().getFullYear()}`,
-  banner: "",
+  image: "",
   type: 0,
+};
+
+export const defaultBanner = {
+  image: null,
+  tagline: "",
+  bannerColours: ["#FFFFFF"],
+};
+
+export const defaultCategory: Category = {
+  id: undefined,
+  name: "",
+  brand: "",
+  description: "",
+  icon: null,
+  parent: "",
+  banner: defaultBanner,
+  offers: [],
+  features: [],
+  hasWarrantyAndProduction: false,
 };
 
 export const initialState: InitialCategoryController = {
   categories: [],
+  category: defaultCategory,
   formData: {
     brands: [],
     offerTypes: [],
     featureTypes: [],
     offerAudiences: [],
-  },
-  category: {
-    id: undefined,
-    name: "",
-    brand: "",
-    description: "",
-    parent: "",
-    image: [],
-    offers: [],
-    features: [defaultFeature],
-    hasWarrantyAndProduction: false,
   },
 };
 
@@ -72,33 +84,19 @@ const controllerCatSlice = createSlice({
       return { ...state, categories: newCatList };
     },
     setInitCategoryInput: (state, action: PayloadAction<Category>) => {
-      const newIds = action.payload.features.map((f) => f.id);
-      const prevFeatures = state.category.features.filter(
-        (f) => !newIds.includes(f.id)
-      );
-
-      const offers = !action.payload.offers.length
-        ? [defaultOffer]
-        : action.payload.offers;
-
-      return {
-        ...state,
-        category: {
-          ...state.category,
-          ...action.payload,
-          features: [...prevFeatures, ...action.payload.features],
-          offers,
-        },
-      };
+      return { ...state, category: action.payload };
     },
-    setCatgeoryInput: (
+    setCategoryInput: (
       state,
       action: PayloadAction<{
         value:
           | string
           | (IFile | number | string | CategoryFeature | CategoryOffer)[]
+          | IFile
           | number
           | boolean
+          | CategoryBanner
+          | undefined
           | null;
         name: string;
       }>

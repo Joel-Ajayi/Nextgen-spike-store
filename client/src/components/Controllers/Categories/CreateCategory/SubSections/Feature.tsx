@@ -113,7 +113,7 @@ const Feature = ({ featureId, onChange }: FeatureProps) => {
       <Input
         name="options"
         label="Options*"
-        type={featureTypes[input.type]}
+        type={featureTypes[input.type] as any}
         isMultiInput
         defaultValue=""
         defaultValues={input.options}

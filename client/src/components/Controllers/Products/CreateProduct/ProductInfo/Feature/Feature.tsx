@@ -80,7 +80,7 @@ function Feature({ onChange, id }: FeatureProps) {
         <Input
           name="options"
           label={feature.name}
-          type={type}
+          type={type as any}
           labelClassName={
             !feature.parentId
               ? Styles.feature_label

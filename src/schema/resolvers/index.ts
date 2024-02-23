@@ -1,12 +1,13 @@
 import GraphQLUpload from "graphql-upload/GraphQLUpload.js";
 import Mutation from "./Mutation";
 import Query from "./Query";
-import { StringAndInt, AnyExceptNull } from "../customTypes";
+import scalar from "../customTypes";
 
 const resolvers = {
   Upload: GraphQLUpload,
-  StringAndInt,
-  AnyExceptNull,
+  UploadOrUrl: scalar.UploadOrUrl,
+  StringOrInt: scalar.StringOrInt,
+  AnyExceptNull: scalar.AnyExceptNull,
   Query,
   Mutation,
 };

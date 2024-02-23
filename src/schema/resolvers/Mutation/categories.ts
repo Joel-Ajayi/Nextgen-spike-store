@@ -5,16 +5,18 @@ import consts from "../../../@types/conts";
 import {
   CategoryFeature,
   CategoryMini,
-  CategoryOfferType,
   CategoryOffer,
+  CategoryOfferType,
   Category_I,
   Category_I_U,
 } from "../../../@types/categories";
 import { Context } from "../../context";
 import middleware from "../../../middlewares/middlewares";
 import { validator } from "../../../helpers/validator";
-import { FileUpload } from "graphql-upload/Upload";
+import { ValidateFileProps, upload } from "../../../helpers/uploads";
 import { getObjKeys } from "../../../helpers";
+
+const ObjectId = Types.ObjectId;
 
 const resolvers = {
   CreateCategory: async (
@@ -32,7 +34,7 @@ const resolvers = {
     }
 
     // validate data
-    await validator.category(data as any);
+    await validator.category(data);
 
     // check if already added
     const addedCat = await ctx.db.category.findUnique({
@@ -82,62 +84,104 @@ const resolvers = {
       brandId = brand.id;
     }
 
-    try {
-      // validate image/
-      let image: string | null | undefined = "";
-      if (data?.image) image = (await validator.files([data.image], 0))[0];
+    const fileOptions = {
+      folder: "cat",
+      files: [],
+      maxNum: 1,
+      minNum: 0,
+      prevFiles: [],
+      removeBg: true,
+    } as ValidateFileProps;
 
+    // validate category icon
+    let icon: string | undefined = undefined;
+    if (data.icon) {
+      const format = consts.files.mimeType.supportedImg[0];
+      icon = (
+        await upload.files({
+          ...fileOptions,
+          removeBg: false,
+          format,
+          files: [data.icon],
+        })
+      )[0];
+    }
+
+    // validate offers image
+    let offersFileNames: string[] = [];
+    if (data.offers.length) {
+      const files = data.offers.filter((f) => !!f.image).map((f) => f.image);
+      offersFileNames = await upload.files({
+        ...fileOptions,
+        minNum: data.offers.length,
+        maxNum: data.offers.length,
+        files,
+      });
+    }
+
+    // validate banner image
+    let bannerFileName = "";
+    if (data.banner) {
+      const image = data.banner.image;
+      bannerFileName = (
+        await upload.files({ ...fileOptions, files: [image], minNum: 1 })
+      )[0];
+    }
+
+    try {
       // waranty and production
       const hasWarrantyAndProduction =
         parent?.hasWarrantyAndProduction || data.hasWarrantyAndProduction;
 
-      // validate offers banner
-      const offerTypes = getObjKeys<string>(CategoryOfferType);
-      const offersBanner = await validator.files(
-        data.offers.map((f) => f.banner) as Promise<FileUpload>[],
-        0,
-        offerTypes.length,
-        []
-      );
-
-      const catCount = (await ctx.db.category.count()) + 1;
+      const catCount = (await ctx.db.category.count()) + 3;
       // add category
-      const newCat = await ctx.db.category.create({
+      const newCategory = await ctx.db.category.create({
         data: {
           name: data.name,
+          icon,
           lvl: !!parent ? parent.lvl + 1 : 1,
           cId: catCount,
           description: data.description,
-          image,
           brdId: brandId,
           hasWarrantyAndProduction,
-          parentId: !parent?.id ? undefined : parent.id,
+          parentId: parent?.id,
         },
         select: {
           id: true,
           name: true,
           lvl: true,
+          icon: true,
           cId: true,
-          image: true,
           hasWarrantyAndProduction: true,
           parent: { select: { name: true } },
-          features: true,
-          offers: true,
+          banner: true,
         },
       });
 
+      if (bannerFileName) {
+        const bannerData = {
+          ...data.banner,
+          image: bannerFileName,
+          categoryId: newCategory.id,
+        };
+        await ctx.db.categoryBanner.create({ data: bannerData });
+      }
+
       // Features
+      const features: CategoryFeature[] = [];
       if (data.features?.length) {
         const parentFeatures = data.features
           .filter((f) => !f?.parentId)
-          .map((f) => ({ ...f, categoryId: newCat.id }));
+          .map((f) => ({ ...f, categoryId: newCategory.id }));
 
         await (async function saveFeature(pFeatures: CategoryFeature[]) {
           await Promise.all(
-            pFeatures.map(async ({ categoryId, ...rest }) => {
+            pFeatures.map(async ({ ...rest }) => {
               // save feature
+              const categoryId = newCategory.id;
               let feature = { categoryId, ...rest };
               feature = await ctx.db.categoryFeature.create({ data: feature });
+              features.push(feature);
 
               // get feature children
               const children = data.features
@@ -157,16 +201,25 @@ const resolvers = {
           data.offers.map(async ({ id, ...offerInput }, i) => {
             const data = {
               ...offerInput,
-              banner: offersBanner[i],
-              categoryId: newCat.id,
+              image: offersFileNames[i],
+              categoryId: newCategory.id,
             };
+
             offers.push(await ctx.db.categoryOffer.create({ data }));
           })
         );
       }
 
-      return { ...newCat, parent: newCat.parent?.name || "", offers };
+      return {
+        ...newCategory,
+        icon: newCategory.icon || "",
+        banner: null,
+        parent: newCategory.parent?.name || "",
+        offers,
+        features,
+      };
     } catch (error) {
+      console.log(error);
       throw new GraphQLError(consts.errors.server, {
         extensions: { statusCode: 500 },
       });
@@ -185,9 +238,8 @@ const resolvers = {
         extensions: { statusCode: 400 },
       });
     }
-
     // validate data
-    await validator.category(data as any, true);
+    await validator.category(data, true);
 
     // check if cat exist
     const category = await ctx.db.category.findUnique({
@@ -195,11 +247,12 @@ const resolvers = {
       select: {
         id: true,
         lvl: true,
-        image: true,
         brdId: true,
+        icon: true,
         brand: { select: { name: true } },
         parent: { select: { hasWarrantyAndProduction: true } },
         features: { select: { id: true, parentId: true } },
+        banner: true,
         offers: true,
       },
     });
@@ -216,11 +269,9 @@ const resolvers = {
     });
 
     if (!!searchedCat && category.id !== searchedCat?.id) {
-      if (!category) {
-        throw new GraphQLError("Category Name already used", {
-          extensions: { statusCode: 404 },
-        });
-      }
+      throw new GraphQLError("Category Name already used", {
+        extensions: { statusCode: 404 },
+      });
     }
 
     // check if brand exist
@@ -239,119 +290,215 @@ const resolvers = {
       brandId = null;
     }
 
-    // delete all filters
-    let prevFeaturesId = [...category.features].map((f) => f.id);
-    if (data.features?.length) {
-      // Features
-      const parentFeatures = data.features.filter((f) => !f.parentId);
-      const ObjectId = Types.ObjectId;
+    const fileOptions = {
+      folder: "cat",
+      files: [],
+      maxNum: 1,
+      minNum: 0,
+      prevFiles: [],
+      removeBg: true,
+    } as ValidateFileProps;
 
-      await (async function saveFeature(pFeatures: CategoryFeature[]) {
-        const randObjId = new ObjectId().toString();
-        await Promise.all(
-          pFeatures.map(async ({ id, parentId, ...rest }) => {
-            const isIdValid =
-              ObjectId.isValid(id) && String(new ObjectId(id)) === id;
-
-            // save feature
-            const featureData = {
-              categoryId: category.id,
-              ...rest,
-              parentId: parentId || null,
-            };
-            const feature = await ctx.db.categoryFeature.upsert({
-              where: { id: isIdValid ? id : randObjId },
-              create: featureData,
-              update: featureData,
-            });
-            prevFeaturesId = prevFeaturesId.filter((fId) => fId !== id);
-
-            // get feature children
-            const children = data.features
-              .filter((child) => child.parentId === id)
-              .map((f) => ({ ...f, parentId: feature.id }));
-
-            // save feature children
-            if (children.length) await saveFeature(children);
+    // validate category icon
+    let icon: string | null | undefined = null;
+    if (data.icon) {
+      // if image url
+      if (typeof data.icon === "string") {
+        icon = undefined;
+      } else {
+        // if image file
+        const format = consts.files.mimeType.supportedImg[0];
+        const prevFiles = category.icon ? [category.icon] : [];
+        icon = (
+          await upload.files({
+            ...fileOptions,
+            prevFiles,
+            files: [data.icon],
+            removeBg: false,
+            format,
           })
-        );
-      })(parentFeatures);
+        )[0];
+      }
+    } else if (category.icon) {
+      await upload.deleteFiles([category.icon]);
     }
-    // delete filter not modified
-    if (prevFeaturesId.length) {
-      await ctx.db.categoryFeature.deleteMany({
-        where: { id: { in: prevFeaturesId } },
+
+    // validate banner image
+    // if image file
+    let bannerFileName: string | undefined = undefined;
+    if (data.banner) {
+      // if image file
+      if (typeof data.banner.image !== "string") {
+        const prevImage = category.banner[0]?.image;
+        const image = data.banner.image;
+        const files = !image ? [] : [image];
+        const prevFiles = !prevImage ? [] : [prevImage];
+        bannerFileName = (
+          await upload.files({ ...fileOptions, files, prevFiles, minNum: 1 })
+        )[0];
+      }
+    }
+
+    // validate offers image
+    let offersImages: string[] = [];
+    if (data.offers.length) {
+      const offerTypes = getObjKeys<string>(CategoryOfferType);
+      const files = data.offers.map((f) => f.image);
+      const prevFiles = category.offers.map((f) => f.image);
+      offersImages = await upload.files({
+        ...fileOptions,
+        files,
+        prevFiles,
+        minNum: 1,
+        maxNum: offerTypes.length,
       });
-    }
-
-    // validate image
-    const dataImage = data?.image ? [data?.image] : [];
-    const prevImage = !!category?.image ? [category.image] : [];
-    const image = (await validator.files(dataImage, 0, 1, prevImage))[0];
-    const offerTypes = getObjKeys<string>(CategoryOfferType);
-
-    // validate offers banner
-    const offersBanner = await validator.files(
-      data.offers.map((f) => f.banner) as Promise<FileUpload>[],
-      0,
-      offerTypes.length,
-      category.offers.map((f) => f.banner)
-    );
-
-    if (data.offers) {
-      await Promise.all(
-        data.offers.map(async ({ id, ...offerInput }, i) => {
-          const ObjectId = Types.ObjectId;
-          const isIdValid =
-            ObjectId.isValid(id) && String(new ObjectId(id)) === id;
-          const ObjId = isIdValid ? id : new ObjectId().toString();
-
-          const data = {
-            ...offerInput,
-            banner: offersBanner[i],
-            categoryId: category.id,
-          };
-
-          await ctx.db.categoryOffer.upsert({
-            where: { id: ObjId },
-            create: data,
-            update: data,
-          });
-        })
-      );
     }
 
     const hasWarrantyAndProduction =
       category?.parent?.hasWarrantyAndProduction ||
       data.hasWarrantyAndProduction;
+    try {
+      // delete all filters
+      let prevFeaturesId = [...category.features].map((f) => f.id);
+      if (data.features?.length) {
+        // Features
+        const parentFeatures = data.features.filter((f) => !f.parentId);
+        const ObjectId = Types.ObjectId;
 
-    const updatedCategory = await ctx.db.category.update({
-      where: { id: category.id },
-      data: {
-        name: data.name,
-        description: data.description,
-        image,
-        brdId: brandId,
-        hasWarrantyAndProduction,
-      },
-      select: {
-        id: true,
-        name: true,
-        lvl: true,
-        cId: true,
-        parent: { select: { name: true } },
-        hasWarrantyAndProduction: true,
-        features: true,
-        offers: true,
-      },
-    });
+        await (async function saveFeature(pFeatures: CategoryFeature[]) {
+          const randObjId = new ObjectId().toString();
+          await Promise.all(
+            pFeatures.map(async ({ id, parentId, ...rest }) => {
+              const isIdValid =
+                ObjectId.isValid(id) && String(new ObjectId(id)) === id;
 
-    if (updatedCategory === null) {
-      throw new GraphQLError("Category not found", {
-        extensions: { statusCode: 404 },
+              // save feature
+              const featureData = {
+                categoryId: category.id,
+                ...rest,
+                parentId: parentId || null,
+              };
+              const feature = await ctx.db.categoryFeature.upsert({
+                where: { id: isIdValid ? id : randObjId },
+                create: featureData,
+                update: featureData,
+              });
+              prevFeaturesId = prevFeaturesId.filter((fId) => fId !== id);
+
+              // get feature children
+              const children = data.features
+                .filter((child) => child.parentId === id)
+                .map((f) => ({ ...f, parentId: feature.id }));
+
+              // save feature children
+              if (children.length) await saveFeature(children);
+            })
+          );
+        })(parentFeatures);
+      }
+      // delete filter not modified
+      if (prevFeaturesId.length) {
+        await ctx.db.categoryFeature.deleteMany({
+          where: { id: { in: prevFeaturesId } },
+        });
+      }
+      const prevOffers = [...category.offers];
+      if (data.offers.length) {
+        for (let index = 0; index < data.offers.length; index++) {
+          const { id, ...offerInput } = data.offers[index];
+
+          // const element = array[index];
+          const isValidId =
+            ObjectId.isValid(id) && String(new ObjectId(id)) === id;
+          const ObjId = isValidId ? id : new ObjectId().toString();
+          const inputData = {
+            ...offerInput,
+            image: offersImages[index],
+            categoryId: category.id,
+          };
+
+          await ctx.db.categoryOffer.upsert({
+            where: { id: ObjId },
+            create: inputData,
+            update: inputData,
+          });
+          prevOffers.filter((f) => f.id !== ObjId);
+        }
+      }
+
+      // delete filter not modified
+      if (prevOffers.length) {
+        const prevIds: string[] = [];
+        const prevImages: string[] = [];
+        prevOffers.forEach((f) => {
+          prevIds.push(f.id);
+          prevImages.push(f.image);
+        });
+        await ctx.db.categoryOffer.deleteMany({
+          where: { id: { in: prevIds } },
+        });
+        await upload.deleteFiles(prevImages);
+      }
+
+      if (data.banner) {
+        const bannerData = {
+          ...data.banner,
+          image: bannerFileName,
+          categoryId: category.id,
+        };
+
+        const id = category.banner[0]?.id || new ObjectId().toString();
+        await ctx.db.categoryBanner.upsert({
+          where: { id },
+          create: { ...bannerData, image: bannerFileName || "" },
+          update: bannerData,
+        });
+      } else if (category.banner[0]) {
+        await ctx.db.categoryBanner.delete({
+          where: { id: category.banner[0].id },
+        });
+        await upload.deleteFiles([category.banner[0].image]);
+      }
+
+      const updatedCategory = await ctx.db.category.update({
+        where: { id: category.id },
+        data: {
+          icon,
+          name: data.name,
+          description: data.description,
+          brdId: brandId,
+          hasWarrantyAndProduction,
+        },
+        select: {
+          id: true,
+          name: true,
+          lvl: true,
+          cId: true,
+          icon: true,
+          parent: { select: { name: true } },
+          hasWarrantyAndProduction: true,
+          features: true,
+          offers: true,
+        },
+      });
+
+      if (updatedCategory === null) {
+        throw new GraphQLError("Category not found", {
+          extensions: { statusCode: 404 },
+        });
+      }
+      return {
+        ...updatedCategory,
+        icon: updatedCategory.icon || "",
+        banner: null,
+        parent: updatedCategory.parent?.name || "",
+      };
+    } catch (error) {
+      console.log(error);
+      throw new GraphQLError(consts.errors.server, {
+        extensions: { statusCode: 500 },
       });
     }
-    return { ...updatedCategory, parent: updatedCategory.parent?.name || "" };
   },
   UpdateCategoryParent: async (
     _: any,
@@ -372,6 +519,7 @@ const resolvers = {
         id: true,
         lvl: true,
         cId: true,
+        icon: true,
         hasWarrantyAndProduction: true,
         features: true,
         offers: true,
@@ -463,7 +611,12 @@ const resolvers = {
           addedCat.hasWarrantyAndProduction,
       },
     });
-    return { ...addedCat, parent: catParent?.name || "" };
+    return {
+      ...addedCat,
+      icon: addedCat.icon || "",
+      banner: null,
+      parent: catParent?.name || "",
+    };
   },
 };
 

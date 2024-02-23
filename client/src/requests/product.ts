@@ -16,7 +16,6 @@ class ProductReq {
     const body = JSON.stringify({
       query: `query ProductFormData($id: String) {
         ProductFormData(id: $id) { 
-                  colours
                   brands { name image }
                   categories { name lvl parent image cId hasWarrantyAndProduction features { id name type options parentId useAsFilter } }
                   paymentTypes { type val }

@@ -48,7 +48,8 @@ export interface ITreeNode {
 
 export interface IFile {
   file: File;
-  b64: string;
+  src: string;
+  baseUrl: string;
 }
 
 export type Brand = {

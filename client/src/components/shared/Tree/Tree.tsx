@@ -59,7 +59,7 @@ function Tree({
   const yMax = height - margin.top - margin.bottom;
   const xMax = width - margin.left - margin.right;
 
-  const nodeHeight = 45;
+  const nodeHeight = 55;
   const centerX = -nodeWidth / 2;
   const centerY = -nodeHeight / 2 - 7.5;
 

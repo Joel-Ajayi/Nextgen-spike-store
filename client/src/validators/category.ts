@@ -1,5 +1,9 @@
 import { string, array, number, mixed, object, Schema } from "yup";
-import { CategoryFeature, CategoryOffer } from "../types/category";
+import {
+  CategoryBanner,
+  CategoryFeature,
+  CategoryOffer,
+} from "../types/category";
 import validator from ".";
 import { IFile } from "../types";
 
@@ -9,8 +13,8 @@ class CategoryValidator {
       await string()
         .required("Name Field is empty")
         .min(2, "Name should have more than 2 characters")
-        .matches(/^[a-zA-Z0-9&'\s]*$/, "Special characters not allowed")
-        .max(25, "Name should have not more than 25 characters")
+        .matches(/^[a-zA-Z0-9&(),'\s]*$/, "Special characters not allowed")
+        .max(50, "Name should have not more than 25 characters")
         .validate(val);
       return "";
     } catch (error) {
@@ -26,6 +30,36 @@ class CategoryValidator {
       return "";
     } catch (error) {
       return (error as any).message;
+    }
+  }
+
+  public async banner(val: CategoryBanner, key = "") {
+    const obj: { [key in string]: Schema } = {
+      tagline: string()
+        .max(100, "Tagline should not be more than 100 words")
+        .required("Offer tagline is required"),
+    };
+
+    try {
+      if (val) {
+        const files = !val?.image ? [] : [(val.image as IFile)?.file];
+
+        if (!key) {
+          await object(obj).validate(val);
+          const error = await validator.files(files, "image", 1);
+          return error;
+        } else {
+          if (key === "image") {
+            const error = await validator.files(files, "image", 1);
+            return error;
+          } else {
+            await obj[key]?.validate(val[key as keyof CategoryBanner]);
+          }
+        }
+      }
+      return "";
+    } catch (error) {
+      return (error as any).message as string;
     }
   }
 
@@ -52,6 +86,9 @@ class CategoryValidator {
 
   public async offers(val: CategoryOffer[], length: number, key = "") {
     const obj: { [key in string]: Schema } = {
+      tagline: string()
+        .max(100, "Tagline should not be more than 100 words")
+        .required("Offer tagline is required"),
       type: number().required("Please provide filter type"),
       audience: number(),
       discount: number()
@@ -93,15 +130,19 @@ class CategoryValidator {
           .max(length, `Offers cannot be more than ${length}`)
           .validate(val);
         await Promise.all(
-          val.map(async ({ banner }) => {
-            await validator.files([(banner as IFile).file], "image", 1);
+          val.map(async ({ image }) => {
+            const files = !image ? [] : [(image as IFile)?.file];
+            const error = await validator.files(files, "image", 1);
+            if (error) throw new Error(error);
           })
         );
       } else {
-        if (key === "banner") {
-          await validator.files([(val[0].banner as IFile)?.file], "image", 1);
+        if (key === "image") {
+          const files = val[0]?.image ? [(val[0].image as IFile)?.file] : [];
+          const error = await validator.files(files, "image", 1);
+          return error;
         } else {
-          await obj[key].validate(val[0][key as keyof CategoryOffer]);
+          await obj[key]?.validate(val[0][key as keyof CategoryOffer]);
         }
       }
 

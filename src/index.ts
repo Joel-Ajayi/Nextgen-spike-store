@@ -11,6 +11,8 @@ import cookieParser from "cookie-parser";
 import initSessionStore from "./db/session/session";
 import graphqlUpload from "graphql-upload/graphqlUploadExpress.js";
 import consts from "./@types/conts";
+import axios from "axios";
+import { Buffer } from "buffer";
 
 const {
   PORT,
@@ -66,7 +68,21 @@ declare module "express-session" {
   // graphql servers
   await graphql(app);
   app.use(express.static(path.join(__dirname, "../client/build")));
-  app.use("/uploads", express.static(path.join(__dirname, "/uploads")));
+  app.use("/uploads/:folder/:filename?", async (req, res) => {
+    const { folder, filename } = req.params;
+    let baseUrl = `https://res.cloudinary.com/${process.env.IMG_NAME}/image/upload/v1708502714/Profile_Store/${folder}`;
+    if (filename) baseUrl += `/${filename}`;
+    try {
+      const response = await axios.get(baseUrl, {
+        responseType: "arraybuffer",
+      });
+      const imageBuffer = response.data;
+      res.writeHead(200, { "content-type": response.headers["content-type"] });
+      res.end(imageBuffer);
+    } catch (error) {
+      res.sendStatus(404);
+    }
+  });
   app.get("*", (_, res) =>
     res.sendFile(path.join(__dirname, "../client/build/index.html"))
   );

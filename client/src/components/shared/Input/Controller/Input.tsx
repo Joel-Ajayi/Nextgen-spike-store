@@ -1,5 +1,6 @@
 import React, {
   CSSProperties,
+  ChangeEvent,
   useEffect,
   useLayoutEffect,
   useRef,
@@ -10,10 +11,11 @@ import { AiFillCloseCircle as CloseIcon } from "react-icons/ai";
 import { ReactComponent as CaretIcon } from "./../../../../images/icons/caret.svg";
 import { ReactComponent as AddIcon } from "./../../../../images/icons/add.svg";
 import { ReactComponent as DownloadIcon } from "./../../../../images/icons/download.svg";
-
+import { ColorResult, SketchPicker } from "react-color";
 import uniqid from "uniqid";
 import { CONSTS } from "../../../../const";
 import { IFile } from "../../../../types";
+import filesHelper from "../../../../helpers/files";
 
 type InputProps = {
   name?: string;
@@ -26,9 +28,16 @@ type InputProps = {
   ) => Promise<string | void>;
   label?: string;
   span?: boolean;
-  isColor?: boolean;
   bgColor?: string;
-  type?: string;
+  type?:
+    | "colour"
+    | "text"
+    | "number"
+    | "image"
+    | "select"
+    | "svg"
+    | "textarea"
+    | "checkbox";
   labelClassName?: string;
   rows?: number;
   cols?: number;
@@ -52,7 +61,6 @@ function Input({
   defaultValues = [],
   options = [],
   span = false,
-  isColor = false,
   isMultiInput = false,
   isMultipleFiles = false,
   defaultChecked = false,
@@ -60,18 +68,22 @@ function Input({
   asInfo = false,
 }: InputProps) {
   const isSelect = type === "select";
-  const isImage = type === "image";
+  const isImage = type === "image" || type === "svg";
+  const isSvg = type === "svg";
   const isCheckbox = type === "checkbox";
   const isTextArea = type === "textarea";
+  const isColour = type === "colour";
 
   const [error, setError] = useState("");
   const [showSelections, setShowSelections] = useState(false);
+  const [showColorPicker, setShowColorPicker] = useState(false);
   const [inputs, setInputs] = useState<(string | number | IFile)[]>([]);
+  const [colour, setColour] = useState(defaultValue || "#FFFFFF");
   const [caretStyle, setCaretStyle] = useState<CSSProperties>({
     display: "none",
   });
 
-  const inputRef = useRef<any>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useLayoutEffect(() => {
     if (changeOnMount) {
@@ -128,12 +140,22 @@ function Input({
     }
   };
 
-  const handleFileChange = (value: FileList) => {
+  const handleTextBoxChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (inputRef.current) {
+      if (isColour) {
+        inputRef.current.value = colour as string;
+        return;
+      }
+      handleChange(isCheckbox ? e.target.checked : e.target.value);
+    }
+  };
+
+  const handleFileChange = async (value: FileList) => {
     const targetFiles = isMultipleFiles ? [...inputs] : [];
     for (let index = 0; index < value.length; index++) {
       const file = value.item(index) as File;
-      const b64 = window.URL.createObjectURL(file as File);
-      targetFiles.push({ file, b64 });
+      const src = await filesHelper.getBase64String(file);
+      targetFiles.push({ file, src, baseUrl: "" });
     }
     setInputs(targetFiles);
     handleChange(targetFiles);
@@ -141,7 +163,11 @@ function Input({
 
   const handleMultiInputChange = async () => {
     if (inputRef.current && onChange) {
-      const value = inputRef.current.value;
+      const label = inputRef.current.value;
+      const defaultValue = options.find(
+        (option) => option?.label === label
+      )?.defaultValue;
+      const value = defaultValue || label;
       const isNumber = type === "number";
       const isAdded = inputs.findIndex((val) => val === value) !== -1;
       if (value && !isAdded) {
@@ -156,11 +182,9 @@ function Input({
   const handleSelectionChange = (value: string | number) => {
     setShowSelections((preVal) => !preVal);
     if (inputRef.current) {
-      const label = options.find(
-        ({ defaultValue }) => defaultValue === value
-      )?.label;
-
-      inputRef.current.value = label || value || "None";
+      const label = options.find(({ defaultValue }) => defaultValue === value)
+        ?.label as string;
+      inputRef.current.value = label || (value as string) || "None";
 
       setCaretStyle({
         left: inputRef.current.getBoundingClientRect().width - 22,
@@ -169,6 +193,22 @@ function Input({
     }
     setShowSelections(false);
     if (!isMultiInput) handleChange(value);
+  };
+
+  const handleColorChange = (colour: ColorResult) => {
+    setColour(colour.hex);
+  };
+
+  const handleClosePicker = () => {
+    if (inputRef.current) {
+      inputRef.current.value = colour as string;
+      setCaretStyle({
+        left: inputRef.current.getBoundingClientRect().width - 22,
+        transform: "rotate(180deg)",
+      });
+      handleMultiInputChange();
+    }
+    setShowColorPicker(false);
   };
 
   const handleFocus = () => {
@@ -184,6 +224,10 @@ function Input({
     if (asInfo && inputRef.current) {
       inputRef.current.blur();
     }
+  };
+
+  const onClickMultiAddIcon = () => {
+    isColour ? setShowColorPicker(true) : handleMultiInputChange();
   };
 
   const removeFromInputs = async (index: number) => {
@@ -221,22 +265,18 @@ function Input({
       {!(asInfo && isMultiInput) && (
         <div className={Styles.input}>
           <div style={isCheckbox ? { display: "flex" } : {}}>
-            {/* // text/boolean input */}
-            {type !== "textarea" && !isImage && (
+            {/* // text/boolean/color input */}
+            {!isTextArea && !isImage && (
               <input
                 ref={inputRef}
                 name={name}
                 type={type}
                 className={inputClassName()}
                 defaultValue={
-                  defaultValue === "" && type === "select"
-                    ? "None"
-                    : defaultValue
+                  defaultValue === "" && isSelect ? "None" : defaultValue
                 }
                 checked={defaultChecked}
-                onChange={(e) =>
-                  handleChange(isCheckbox ? e.target.checked : e.target.value)
-                }
+                onChange={handleTextBoxChange}
                 onFocus={handleFocus}
                 style={{
                   cursor: isSelect || isCheckbox ? "pointer" : "auto",
@@ -250,14 +290,12 @@ function Input({
             {/* // textarea input */}
             {isTextArea && (
               <textarea
-                ref={inputRef}
+                ref={inputRef as any}
                 name={name}
                 rows={rows}
                 className={inputClassName()}
                 defaultValue={defaultValue}
-                onChange={(e) => {
-                  handleChange(e.target.value);
-                }}
+                onChange={(e) => handleChange(e.target.value)}
                 onFocus={handleFocus}
                 disabled={asInfo}
               />
@@ -273,7 +311,7 @@ function Input({
                     onClick={handleFocus}
                   />
                 )}
-                {isMultiInput && <AddIcon onClick={handleMultiInputChange} />}
+                {isMultiInput && <AddIcon onClick={onClickMultiAddIcon} />}
               </div>
             )}
 
@@ -291,10 +329,28 @@ function Input({
                   className={Styles.input_box}
                   multiple={isMultipleFiles}
                   required
-                  accept={CONSTS.files.mimeType.supportedImg}
+                  accept={
+                    isSvg
+                      ? CONSTS.files.mimeType.supportedSvg
+                      : CONSTS.files.mimeType.supportedImg
+                  }
                   onChange={(e) => {
                     handleFileChange(e.target.files as FileList);
                   }}
+                />
+              </div>
+            )}
+
+            {/* Colour */}
+            {isColour && showColorPicker && (
+              <div className={Styles.color_wrapper}>
+                <CloseIcon
+                  onClick={handleClosePicker}
+                  className={Styles.close}
+                />
+                <SketchPicker
+                  color={colour as string}
+                  onChangeComplete={handleColorChange}
                 />
               </div>
             )}
@@ -331,6 +387,9 @@ function Input({
           style={asInfo ? {} : { marginTop: 5 }}
         >
           {inputs.map((input, index) => {
+            const label = options.find(
+              (option) => option.defaultValue === input
+            )?.label;
             return (
               <div className={Styles.added_input} key={uniqid()}>
                 {!asInfo && (
@@ -340,14 +399,17 @@ function Input({
                   />
                 )}
                 {isImage && (
-                  <img className={Styles.img} src={(input as IFile).b64} />
+                  <img
+                    className={Styles.img}
+                    src={`${(input as IFile).baseUrl}${(input as IFile).src}`}
+                  />
                 )}
                 {!isImage && (
                   <span
-                    style={isColor ? { background: input as string } : {}}
+                    style={isColour ? { background: input as string } : {}}
                     className={Styles.item}
                   >
-                    {input as string}
+                    {(label || input) as string}
                   </span>
                 )}
               </div>

@@ -18,15 +18,15 @@ export class ApiError extends Error {
 class Requests {
   public async getImageFiles(paths: string[]) {
     const files = await Promise.all(
-      paths.map(async (path) => {
-        const response = await axios.get(path, {
+      paths.map(async (src) => {
+        const response = await axios.get(`/uploads/${src}`, {
           responseType: "blob",
         });
         const mimeType = response.headers["content-type"];
-        const fileName = path.split("/").pop() as string;
+        const fileName = src.split("/").pop() as string;
         const file = new File([response.data], fileName, { type: mimeType });
-        const b64 = await filesHelper.getBase64String(file);
-        return { file, b64 } as IFile;
+        const baseUrl = `/uploads/`;
+        return { file, src, baseUrl };
       })
     );
     return files;

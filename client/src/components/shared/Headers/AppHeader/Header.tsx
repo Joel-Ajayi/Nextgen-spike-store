@@ -166,7 +166,10 @@ function Header() {
           <AppSideBar className={Styles.side_bar} />
           <Link to="#" className={Styles.flipkartpluswrapper_tab}>
             <div className={Styles.logoname}>
-              <i>Flipkart</i>
+              <i>
+                <span>NextGen</span>
+                <span>Spike</span>
+              </i>
             </div>
             <div className={Styles.plus}>
               <span>

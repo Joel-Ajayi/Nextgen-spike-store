@@ -6,7 +6,7 @@ class Validator {
     return string().required("Invalid email").email("Invalid email");
   }
 
-  private async image(img: File, base64s: string[]) {
+  private async image(img: File, base64s: string[], format = "") {
     const maxSize = CONSTS.files.imgSize;
 
     if (img.size > maxSize) {
@@ -17,7 +17,7 @@ class Validator {
       );
     }
 
-    const types = CONSTS.files.mimeType.supportedImg
+    const types = (format ? format : CONSTS.files.mimeType.supportedImg)
       .split(/\,.|\./g)
       .map((type) => `image/${type}`);
 
@@ -82,7 +82,8 @@ class Validator {
     files: File[],
     type: "video" | "image",
     minNum = 0,
-    maxNum = 1
+    maxNum = 1,
+    format = ""
   ) {
     try {
       if (files.length < minNum) {
@@ -109,7 +110,7 @@ class Validator {
           const bs4 =
             type === "video"
               ? await this.video(file, base64s)
-              : await this.image(file, base64s);
+              : await this.image(file, base64s, format);
           base64s.push(bs4);
           currentIndex++;
         })

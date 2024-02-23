@@ -87,7 +87,7 @@ function ControllerHeader() {
       <div className={Styles.content}>
         <div className={Styles.logo}>
           <Link to="/">
-            <img src="/uploads/logo.png" alt="logo" />
+            <img src="/uploads/logo.svg" alt="logo" />
             <div>
               <i>Controller</i>
             </div>
