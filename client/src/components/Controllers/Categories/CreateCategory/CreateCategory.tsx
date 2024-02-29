@@ -63,8 +63,6 @@ function CreateCategory({
     controllerCatSlice.actions;
   const setInitCategoryInput = controllerCatSlice.actions.setInitCategoryInput;
   const setCategoryInput = controllerCatSlice.actions.setCategoryInput;
-  const setStatusCode = appSlice.actions.setStatusCode;
-  const setBackgroundMsg = appSlice.actions.setBackgroundMsg;
   const setFormData = controllerCatSlice.actions.setFormData;
 
   const [isLoading, setIsLoading] = useState(!!cat_id);
@@ -76,13 +74,11 @@ function CreateCategory({
   useEffect(() => {
     (async () => {
       if (!!cat_id) {
-        const { cat, msg: catMsg } = await categoryReq.getCategory(cat_id);
-        const { cat: parentCat } = await categoryReq.getCategory(parent);
-        const { data: formData } = await categoryReq.getCategoryFormData();
+        const cat = await categoryReq.getCategory(cat_id);
+        const parentCat = await categoryReq.getCategory(parent);
+        const formData = await categoryReq.getCategoryFormData();
 
-        if (catMsg?.statusCode === 404) {
-          dispatch(setStatusCode(404));
-        } else if (cat) {
+        if (cat && formData) {
           if (cat.icon) {
             cat.icon = (await request.getImageFiles([cat.icon] as string[]))[0];
           }
@@ -182,13 +178,8 @@ function CreateCategory({
 
   const onSave = async () => {
     setIsSaving(true);
-    const { cat, msg } = await categoryReq.updateCat(
-      { ...input, parent },
-      isUpdate
-    );
-    if (msg?.statusCode === 400) {
-      dispatch(setBackgroundMsg(msg));
-    } else if (cat) {
+    const cat = await categoryReq.updateCat({ ...input, parent }, isUpdate);
+    if (cat) {
       if (isUpdate && categories.length) {
         dispatch(updateCategory({ index, cat }));
       } else {

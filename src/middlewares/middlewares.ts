@@ -1,6 +1,6 @@
 import { PrismaClient, User } from "@prisma/client";
 import { GraphQLError } from "graphql";
-import { prisma as db } from "../db/prisma/connect";
+import { db } from "../db/prisma/connect";
 import consts from "../@types/conts";
 import { Context } from "../schema/context";
 import bcrypt from "bcryptjs";
@@ -17,20 +17,15 @@ class MiddleWare {
     }
   }
 
-  public checkAdmin(ctx: Context) {
-    this.checkUser(ctx);
-    if (ctx.user?.role < Roles.Admin) {
-      throw new GraphQLError(consts.errors.signIn, {
-        extensions: {
-          statusCode: 401,
-        },
-      });
-    }
-  }
-
   public checkSuperAdmin(ctx: Context) {
     this.checkUser(ctx);
-    if (ctx.user?.role !== Roles.SuperAdmin) {
+    const roles = ctx.user?.roles;
+    if (
+      !(
+        roles.includes(Roles.SuperAdmin) ||
+        ctx.user?.roles.includes(Roles.Global)
+      )
+    ) {
       throw new GraphQLError(consts.errors.unAuthorized, {
         extensions: {
           statusCode: 403,
@@ -64,7 +59,7 @@ class MiddleWare {
     return user;
   }
 
-  public async alreadySignedUp(email: string, db: PrismaClient): Promise<void> {
+  public async alreadySignedUp(email: string): Promise<void> {
     const user = await db.user.findUnique({ where: { email } });
     if (user) {
       throw new GraphQLError(consts.errors.userAlreadyExist, {

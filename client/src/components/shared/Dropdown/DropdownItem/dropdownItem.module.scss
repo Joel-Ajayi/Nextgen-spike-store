@@ -18,10 +18,14 @@
       font-weight: 500;
       display: flex;
       align-items: center;
-      padding: 0 10px;
+      padding: 0 5px;
       margin: 0 5px;
       height: 100%;
       flex: 1;
+
+      @media screen and (min-width: 350px) {
+        padding: 0 10px;
+      }
     }
 
     .title_txt {
@@ -31,16 +35,14 @@
     }
 
     .title_bg {
-      border-radius: 3px;
       &:hover {
-        background-color: $brand-color;
-        color: white;
+        opacity: 0.6;
       }
     }
 
     svg {
-      width: 23px;
-      height: 23px;
+      width: 18px;
+      height: 18px;
     }
   }
 }

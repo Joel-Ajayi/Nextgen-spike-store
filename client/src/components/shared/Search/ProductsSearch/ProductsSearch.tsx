@@ -1,6 +1,6 @@
 import React from "react";
-import { ReactComponent as SearchIcon } from "../../../../images/icons/search.svg";
 import Styles from "./productsSearch.module.scss";
+import { IoSearch as SearchIcon } from "react-icons/io5";
 
 type SearchProps = {
   className?: string;

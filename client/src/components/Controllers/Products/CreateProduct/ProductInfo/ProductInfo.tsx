@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Input from "../../../../shared/Input/Controller/Input";
-import { IFile, MessageType } from "../../../../../types";
+import { IFile, MessageType, StatusCodes } from "../../../../../types";
 import { useAppSelector } from "../../../../../store/hooks";
 import Styles from "./styles.module.scss";
 import validator from "../../../../../validators";
@@ -50,15 +50,18 @@ function ProductInfo() {
 
   const onSave = async () => {
     setIsSaving(true);
-    const { data, msg } = await productReq.updateProduct(true, {
+    const data = await productReq.updateProduct(true, {
       ...product,
       sku: undefined,
     });
-    if (msg.msg) {
-      dispatch(setBackgroundMsg(msg));
-    } else if (data) {
+
+    if (data) {
       dispatch(
-        setBackgroundMsg({ msg: "Product Saved!", type: MessageType.Success })
+        setBackgroundMsg({
+          msg: "Product Saved!",
+          type: MessageType.Success,
+          statusCode: StatusCodes.Ok,
+        })
       );
       dispatch(setProductInput({ value: data.id, name: "id" }));
       dispatch(setProductInput({ value: data.sku, name: "sku" }));

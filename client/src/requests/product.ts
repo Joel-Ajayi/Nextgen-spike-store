@@ -8,9 +8,6 @@ import {
   ProductUpdateReturn,
 } from "../types/product";
 
-const productQuery = `
-  id 
-`;
 class ProductReq {
   public async getProductFormData(id?: string) {
     const body = JSON.stringify({
@@ -27,8 +24,8 @@ class ProductReq {
       variables: { id },
     });
 
-    const { res, msg } = await request.makeRequest(body);
-    return { data: res as ProductFormData, msg };
+    const res = await request.makeRequest(body);
+    return res as ProductFormData;
   }
 
   public async updateProduct(isUpdate: boolean, data: ProductInput) {
@@ -58,7 +55,7 @@ class ProductReq {
       formData.append(`${i}`, file);
     });
     const res = await request.makeRequest<ProductUpdateReturn>(formData, true);
-    return { data: res.res, msg: res.msg };
+    return res;
   }
 
   public async getProduct(id: string) {
@@ -71,8 +68,8 @@ class ProductReq {
 
     const body = JSON.stringify({ query, variables: { id } });
 
-    const { res, msg } = await request.makeRequest(body);
-    return { data: res as Product, msg };
+    const res = await request.makeRequest<Product>(body);
+    return res;
   }
 
   public async getProductsMini2(skip: number, take: number) {
@@ -81,10 +78,8 @@ class ProductReq {
     }`;
 
     const body = JSON.stringify({ query, variables: { skip, take } });
-    const { res, msg } = await request.makeRequest<Pagination<ProductMini2>>(
-      body
-    );
-    return { data: res, msg };
+    const res = await request.makeRequest<Pagination<ProductMini2>>(body);
+    return res;
   }
 
   public async getProductFilterVal(id: string, filterId: string) {
@@ -96,8 +91,8 @@ class ProductReq {
 
     const body = JSON.stringify({ query, variables: { id } });
 
-    const { res, msg } = await request.makeRequest(body);
-    return { data: res as Product, msg };
+    const res = await request.makeRequest(body);
+    return res as Product;
   }
 }
 

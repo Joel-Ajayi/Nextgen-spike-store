@@ -15,6 +15,7 @@ import middleware from "../../../middlewares/middlewares";
 import { validator } from "../../../helpers/validator";
 import { ValidateFileProps, upload } from "../../../helpers/uploads";
 import { getObjKeys } from "../../../helpers";
+import { db } from "../../../db/prisma/connect";
 
 const ObjectId = Types.ObjectId;
 
@@ -37,7 +38,7 @@ const resolvers = {
     await validator.category(data);
 
     // check if already added
-    const addedCat = await ctx.db.category.findUnique({
+    const addedCat = await db.category.findUnique({
       where: { name: data?.name },
       select: { id: true },
     });
@@ -54,7 +55,7 @@ const resolvers = {
       hasWarrantyAndProduction: boolean;
     } | null = null;
     if (data?.parent) {
-      parent = await ctx.db.category.findUnique({
+      parent = await db.category.findUnique({
         where: { name: data.parent },
         select: {
           id: true,
@@ -73,7 +74,7 @@ const resolvers = {
     // check if brand exist
     let brandId: string | null = null;
     if (data?.brand) {
-      const brand = await ctx.db.brand.findUnique({
+      const brand = await db.brand.findUnique({
         where: { name: data.brand },
       });
       if (!brand) {
@@ -133,9 +134,9 @@ const resolvers = {
       const hasWarrantyAndProduction =
         parent?.hasWarrantyAndProduction || data.hasWarrantyAndProduction;
 
-      const catCount = (await ctx.db.category.count()) + 3;
+      const catCount = (await db.category.count()) + 3;
       // add category
-      const newCategory = await ctx.db.category.create({
+      const newCategory = await db.category.create({
         data: {
           name: data.name,
           icon,
@@ -151,6 +152,7 @@ const resolvers = {
           name: true,
           lvl: true,
           icon: true,
+          numSold: true,
           cId: true,
           hasWarrantyAndProduction: true,
           parent: { select: { name: true } },
@@ -164,7 +166,7 @@ const resolvers = {
           image: bannerFileName,
           categoryId: newCategory.id,
         };
-        await ctx.db.categoryBanner.create({ data: bannerData });
+        await db.categoryBanner.create({ data: bannerData });
       }
 
       // Features
@@ -180,7 +182,7 @@ const resolvers = {
               // save feature
               const categoryId = newCategory.id;
               let feature = { categoryId, ...rest };
-              feature = await ctx.db.categoryFeature.create({ data: feature });
+              feature = await db.categoryFeature.create({ data: feature });
               features.push(feature);
 
               // get feature children
@@ -205,7 +207,7 @@ const resolvers = {
               categoryId: newCategory.id,
             };
 
-            offers.push(await ctx.db.categoryOffer.create({ data }));
+            offers.push(await db.categoryOffer.create({ data }));
           })
         );
       }
@@ -242,7 +244,7 @@ const resolvers = {
     await validator.category(data, true);
 
     // check if cat exist
-    const category = await ctx.db.category.findUnique({
+    const category = await db.category.findUnique({
       where: { id: data?.id },
       select: {
         id: true,
@@ -263,7 +265,7 @@ const resolvers = {
     }
 
     // check if cat exist
-    const searchedCat = await ctx.db.category.findUnique({
+    const searchedCat = await db.category.findUnique({
       where: { name: data?.name },
       select: { id: true },
     });
@@ -277,7 +279,7 @@ const resolvers = {
     // check if brand exist
     let brandId: string | null = category.brdId;
     if (data.brand && data.brand !== category.brand?.name) {
-      const brand = await ctx.db.brand.findUnique({
+      const brand = await db.brand.findUnique({
         where: { name: data.brand },
       });
       if (!brand) {
@@ -378,7 +380,7 @@ const resolvers = {
                 ...rest,
                 parentId: parentId || null,
               };
-              const feature = await ctx.db.categoryFeature.upsert({
+              const feature = await db.categoryFeature.upsert({
                 where: { id: isIdValid ? id : randObjId },
                 create: featureData,
                 update: featureData,
@@ -398,11 +400,12 @@ const resolvers = {
       }
       // delete filter not modified
       if (prevFeaturesId.length) {
-        await ctx.db.categoryFeature.deleteMany({
+        await db.categoryFeature.deleteMany({
           where: { id: { in: prevFeaturesId } },
         });
       }
-      const prevOffers = [...category.offers];
+
+      let prevOffers = [...category.offers];
       if (data.offers.length) {
         for (let index = 0; index < data.offers.length; index++) {
           const { id, ...offerInput } = data.offers[index];
@@ -417,16 +420,15 @@ const resolvers = {
             categoryId: category.id,
           };
 
-          await ctx.db.categoryOffer.upsert({
+          await db.categoryOffer.upsert({
             where: { id: ObjId },
             create: inputData,
             update: inputData,
           });
-          prevOffers.filter((f) => f.id !== ObjId);
+          prevOffers = prevOffers.filter((f) => f.id !== ObjId);
         }
       }
-
-      // delete filter not modified
+      // delete offfers not modified
       if (prevOffers.length) {
         const prevIds: string[] = [];
         const prevImages: string[] = [];
@@ -434,7 +436,7 @@ const resolvers = {
           prevIds.push(f.id);
           prevImages.push(f.image);
         });
-        await ctx.db.categoryOffer.deleteMany({
+        await db.categoryOffer.deleteMany({
           where: { id: { in: prevIds } },
         });
         await upload.deleteFiles(prevImages);
@@ -448,19 +450,19 @@ const resolvers = {
         };
 
         const id = category.banner[0]?.id || new ObjectId().toString();
-        await ctx.db.categoryBanner.upsert({
+        await db.categoryBanner.upsert({
           where: { id },
           create: { ...bannerData, image: bannerFileName || "" },
           update: bannerData,
         });
       } else if (category.banner[0]) {
-        await ctx.db.categoryBanner.delete({
+        await db.categoryBanner.delete({
           where: { id: category.banner[0].id },
         });
         await upload.deleteFiles([category.banner[0].image]);
       }
 
-      const updatedCategory = await ctx.db.category.update({
+      const updatedCategory = await db.category.update({
         where: { id: category.id },
         data: {
           icon,
@@ -479,6 +481,7 @@ const resolvers = {
           hasWarrantyAndProduction: true,
           features: true,
           offers: true,
+          numSold: true,
         },
       });
 
@@ -512,7 +515,7 @@ const resolvers = {
     await validator.categoryParent(name, parent);
 
     // check if cat exist
-    const addedCat = await ctx.db.category.findUnique({
+    const addedCat = await db.category.findUnique({
       where: { name },
       select: {
         name: true,
@@ -523,6 +526,7 @@ const resolvers = {
         hasWarrantyAndProduction: true,
         features: true,
         offers: true,
+        numSold: true,
       },
     });
 
@@ -542,7 +546,7 @@ const resolvers = {
 
     if (parent) {
       // check parent
-      catParent = await ctx.db.category.findUnique({
+      catParent = await db.category.findUnique({
         where: { name: parent },
         select: {
           id: true,
@@ -565,7 +569,7 @@ const resolvers = {
         });
       }
 
-      const categories = await ctx.db.category.findMany({
+      const categories = await db.category.findMany({
         select: { id: true, parent: { select: { id: true } } },
       });
 
@@ -601,7 +605,7 @@ const resolvers = {
       }
     }
 
-    await ctx.db.category.update({
+    await db.category.update({
       where: { id: addedCat.id },
       data: {
         parentId: catParent ? catParent.id : null,

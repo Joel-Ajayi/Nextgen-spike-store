@@ -1,20 +1,23 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo } from "react";
 import Styles from "./header.module.scss";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import ProductsSearch from "../../Search/ProductsSearch/ProductsSearch";
 import Dropdown from "../../Dropdown/Dropdown";
-import { ReactComponent as ProfileIcon } from "../../../../images/icons/account.svg";
-import { ReactComponent as CartIcon } from "../../../../images/icons/cart.svg";
-import { ReactComponent as CategoryIcon } from "../../../../images/icons/category.svg";
+import { MdOutlineShoppingCart as CartIcon } from "react-icons/md";
+import { MdOutlineEmail as MailsIcon } from "react-icons/md";
+import { MdFavoriteBorder as FavoriteIcon } from "react-icons/md";
+import { BiSolidCategory as CategoryIcon } from "react-icons/bi";
+import { IoSearch as SearchIcon } from "react-icons/io5";
+import { PiUsersLight as UsersIcon } from "react-icons/pi";
 import { ReactComponent as LogoutIcon } from "../../../../images/icons/logout.svg";
-import { ReactComponent as NotificationIcon } from "../../../../images/icons/notifications.svg";
+import { BsBox as ProductIcon } from "react-icons/bs";
+import { FiSettings as SettingsIcon } from "react-icons/fi";
+import { IoMdTrendingUp as Trending } from "react-icons/io";
 import { ReactComponent as QuestionIcon } from "../../../../images/icons/question-mark.svg";
-import { ReactComponent as GrowthIcon } from "../../../../images/icons/growth.svg";
-import { ReactComponent as RewardIcon } from "../../../../images/icons/badge.svg";
-import { ReactComponent as OrderIcon } from "../../../../images/icons/order.svg";
-import { ReactComponent as GiftIcon } from "../../../../images/icons/gift-card.svg";
-import { DropdownItemProps } from "../../Dropdown/DropdownItem/DropdownItem";
-import { FiSearch as SearchIcon } from "react-icons/fi";
+import { MdOutlineLocalOffer as OfferIcon } from "react-icons/md";
+import DropdownItem, {
+  DropdownItemProps,
+} from "../../Dropdown/DropdownItem/DropdownItem";
 import uniqId from "uniqid";
 import ModalWrapper from "../../Modal/Wrapper/Wrapper";
 import UserLogin from "../../../SignIn/SignIn";
@@ -22,101 +25,85 @@ import appSlice from "../../../../store/appState";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import UserAvatar from "../UserAvatar/UserAvatar";
 import AppSideBar from "./AppSideBar/AppSideBar";
-import { Roles } from "../../../../types";
 import userReq from "../../../../requests/user";
 import userSlice from "../../../../store/userState";
+import { Roles } from "../../../../types/user";
 
-export const loginDropdown = (
-  isAuthenticated: boolean,
-  role: Roles = Roles.User,
-  logoutFunc?: () => void
-) => {
-  return [
-    {
-      icon: <ProfileIcon className="svg-brand-fill" />,
-      title: "My Profile",
+export const signOutItem = (logoutFunc?: () => void) =>
+  ({
+    icon: <LogoutIcon />,
+    title: "Logout",
+    onClick: logoutFunc,
+  } as DropdownItemProps);
+
+export const authItems = [
+  { icon: <SettingsIcon />, title: "Account Settings", link: () => "/profile" },
+  { icon: <CartIcon />, title: "Orders", link: () => "/profile?dir=ord" },
+  {
+    icon: <MailsIcon />,
+    title: "Notifications",
+    link: () => "/profile?dir=ord",
+  },
+  {
+    icon: <FavoriteIcon />,
+    title: "WhishList",
+    link: () => "/profile?dir=ord",
+  },
+] as DropdownItemProps[];
+
+export const controllerItems = (roles: Roles[]) =>
+  [
+    (roles.includes(Roles.CategoryAndBrand) ||
+      roles.includes(Roles.Global)) && {
+      icon: <CategoryIcon />,
+      title: "Categories",
       link: () => "/profile",
     },
-    isAuthenticated && role > Roles.User
-      ? {
-          icon: <CategoryIcon className="svg-brand-fill" />,
-          title: "Controller Categories",
-          link: () => `/controller`,
-        }
-      : null,
-    {
-      icon: (
-        <OrderIcon
-          className="svg-brand-fill"
-          style={{ transform: "scale(0.75)" }}
-        />
-      ),
+    (roles.includes(Roles.Order) || roles.includes(Roles.Global)) && {
+      icon: <CartIcon />,
       title: "Orders",
       link: () => "/profile?dir=ord",
     },
-    // {
-    //   icon: <FavoriteIcon className="svg-brand" />,
-    //   title: "Whishlist",
-    //   link: "/#",
-    // },
-    {
-      icon: <RewardIcon className="svg-brand-fill" />,
-      title: "Rewards",
-      link: () => "/#",
+    (roles.includes(Roles.Product) || roles.includes(Roles.Global)) && {
+      icon: <ProductIcon />,
+      title: "Products",
+      link: () => "/profile?dir=ord",
     },
-    {
-      icon: <GiftIcon className="svg-brand-fill" />,
-      title: "Gift cards",
-      link: () => "/#",
+    (roles.includes(Roles.SuperAdmin) || roles.includes(Roles.Global)) && {
+      icon: <UsersIcon />,
+      title: "Users",
+      link: () => "/profile?dir=ord",
     },
-    isAuthenticated
-      ? {
-          icon: (
-            <LogoutIcon
-              className="svg-brand"
-              style={{ transform: "scale(0.9)" }}
-            />
-          ),
-          title: "Logout",
-          onClick: logoutFunc,
-        }
-      : null,
   ] as DropdownItemProps[];
-};
 
 export const moreDropdown = [
   {
-    icon: (
-      <NotificationIcon
-        className="svg-brand"
-        style={{ transform: "scale(0.9)" }}
-      />
-    ),
-    title: "Notification Perferences",
+    icon: <Trending />,
+    title: "Trending Products",
     link: () => "/#",
   },
   {
-    icon: (
-      <QuestionIcon
-        className="svg-brand-fill"
-        style={{ transform: "scale(0.65)" }}
-      />
-    ),
-    title: "24x7 Customer Care",
+    icon: <OfferIcon />,
+    title: "Special Offers",
     link: () => "/#",
   },
   {
-    icon: (
-      <GrowthIcon className="svg-brand" style={{ transform: "scale(0.9)" }} />
-    ),
-    title: "Advertise",
+    icon: <QuestionIcon />,
+    title: "Customer Services",
     link: () => "/#",
   },
-  // {
-  //   icon: <DownloadIcon className="svg-brand" />,
-  //   title: "Download App",
-  //   link: "/#",
-  // },
+] as DropdownItemProps[];
+
+export const notAuthItem = [
+  {
+    title: "Already Signed Up? Log In!",
+    link: () => "/#",
+  },
+  {
+    icon: <QuestionIcon />,
+    title: "New Customer? Sign Up!",
+    link: () => "/#",
+  },
 ] as DropdownItemProps[];
 
 function Header() {
@@ -124,7 +111,9 @@ function Header() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const { isAuthenticated, role } = useAppSelector((state) => state.user);
+  const { isAuthenticated, roles } = useAppSelector((state) => state.user);
+  const headerDropDown = useAppSelector((state) => state.app.headerDropDown);
+  const setHeaderDropDown = appSlice.actions.setHeaderDropDown;
 
   const actions = appSlice.actions;
   const { resetUserState } = userSlice.actions;
@@ -143,77 +132,97 @@ function Header() {
     navigate("/signin", { replace: false });
   };
 
-  const loginItemsDropdown = useMemo(() => {
-    if (isAuthenticated) return loginDropdown(true, role, handleSignOut);
-    return [
-      <div className={Styles.signup_item} key={uniqId()}>
-        <div>New Customer ?</div>
-        <Link to={`${pathname}?signup=true`} onClick={handleSignInButton}>
-          Sign Up
-        </Link>
-      </div>,
-      ...loginDropdown(false, role),
-    ];
+  useEffect(() => {
+    const dropDownItems = isAuthenticated
+      ? [
+          authItems,
+          controllerItems(roles),
+          moreDropdown,
+          [signOutItem(handleSignOut)],
+        ]
+      : [notAuthItem, moreDropdown, [signOutItem(handleSignOut)]];
+
+    dispatch(setHeaderDropDown(dropDownItems));
   }, [isAuthenticated]);
+
+  const dropDown = useMemo(
+    () =>
+      headerDropDown.map((item) => (
+        <div className={Styles.sub_dropdown}>
+          {item.map((child) => (
+            <DropdownItem
+              key={uniqId()}
+              title={child.title}
+              icon={child.icon}
+              link={child.link}
+              onClick={child?.onClick}
+              highlight
+            />
+          ))}
+        </div>
+      )),
+    [headerDropDown]
+  );
 
   return (
     <>
-      <ModalWrapper>
-        <UserLogin />
-      </ModalWrapper>
       <div className={Styles.headerWrapper}>
-        <div className={Styles.content}>
-          <AppSideBar className={Styles.side_bar} />
+        <div className={Styles.main_header}>
           <Link to="#" className={Styles.flipkartpluswrapper_tab}>
             <div className={Styles.logoname}>
               <i>
-                <span>NextGen</span>
-                <span>Spike</span>
+                <span>
+                  <img src="/uploads/logo.svg" alt="logo" />
+                  extGenSpike
+                </span>
               </i>
             </div>
-            <div className={Styles.plus}>
-              <span>
-                <i>Explore</i>
-              </span>
-              <span>
-                <span>
-                  <i>Plus</i>
-                </span>
-                <img
-                  src="/uploads/plus_icon.png"
-                  alt="flipkart-plus-icon"
-                  width={10}
-                  height={10}
-                />
-              </span>
-            </div>
           </Link>
-          <SearchIcon className={Styles.search_icon} />
+
           <ProductsSearch className={Styles.search_bar} />
-          <Dropdown
-            wrapperClassName={Styles.more_dropdown}
-            title={<span>More</span>}
-            level={1}
-            items={moreDropdown}
-          />
-          <Link to="#" className={Styles.cart_tab}>
-            <CartIcon className={Styles.cart_icon} />
-            <span>Cart</span>
+          <div className={Styles.other_items}>
+            <Dropdown
+              wrapperClassName={Styles.dropdown}
+              onClick={handleSignInButton}
+              title={<UserAvatar size={35} isLink={false} />}
+              position="r"
+              showCaret={false}
+              items={dropDown}
+            />
+            <Link to="#" className={Styles.tab}>
+              <SearchIcon className={Styles.icon} />
+            </Link>
+            <Link to="#" className={Styles.tab}>
+              <MailsIcon className={Styles.icon} />
+              <span>Mails</span>
+            </Link>
+            <Link to="#" className={Styles.tab}>
+              <FavoriteIcon className={Styles.icon} />
+              <span>Whishlist</span>
+            </Link>
+            <Link to="#" className={Styles.tab}>
+              <CartIcon className={Styles.icon} />
+              <span>Cart</span>
+            </Link>
+            <AppSideBar className={Styles.side_bar} />
+          </div>
+        </div>
+
+        <div className={Styles.sub_header}>
+          <Link to="" className={Styles.category}>
+            <CategoryIcon className={Styles.icon} />
+            <span>Categories</span>
           </Link>
-          <Dropdown
-            wrapperClassName={Styles.user_dropdown}
-            onClick={handleSignInButton}
-            title={isAuthenticated ? <UserAvatar /> : <span>Login</span>}
-            listClassName={Styles.user_dropdown_list}
-            titleClassName={!isAuthenticated ? Styles.login_button : ""}
-            showCaret={false}
-            items={loginItemsDropdown}
-            level={1}
-          />
+          <div className={Styles.others}>
+            <Link to="">Trending Products</Link>
+            <Link to="">Special Offers</Link>
+            <Link to="">Customer Services</Link>
+          </div>
         </div>
       </div>
     </>
   );
 }
 
-export default Header;
+const header = React.memo(Header);
+export default header;

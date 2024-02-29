@@ -6,19 +6,23 @@ import {
   RouterProvider,
   Outlet,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import SignInPage from "./pages/SignIn";
 import HomePage from "./pages/Home/Home";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import userSlice from "./store/userState";
 import appSlice from "./store/appState";
-import { IError, IMessage, MessageType, Roles } from "./types";
+import { MessageType, PubliPaths } from "./types";
 import ControllerPage from "./pages/Controller";
 import LogoLoader from "./components/shared/Loader/LogoLoader/LogoLoader";
 import ProfilePage from "./pages/Profile";
 import Page404 from "./components/shared/Page404/Page404";
-import { IUserInitailState } from "./types/user";
+import { IUserInitailState, Roles } from "./types/user";
 import userReq from "./requests/user";
+
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
 function UserRoute() {
   const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
@@ -26,36 +30,26 @@ function UserRoute() {
 }
 
 function AdminRoute() {
-  const { isAuthenticated, role } = useAppSelector((state) => state.user);
+  const { isAuthenticated, roles } = useAppSelector((state) => state.user);
   // check authentication
   if (!isAuthenticated) return <Navigate to="/signin" replace />;
   // check authorization
-  return role >= Roles.Admin ? <Outlet /> : <Page404 />;
-}
-
-function SuperAdminRoute() {
-  const { isAuthenticated, role } = useAppSelector((state) => state.user);
-  // check authentication
-  if (!isAuthenticated) return <Navigate to="/signin" replace />;
-  // check authorization
-  return role === Roles.SuperAdmin ? <Outlet /> : <Page404 />;
+  return !roles.includes(Roles.User) ? <Outlet /> : <Page404 />;
 }
 
 function GetUser() {
   const dispatch = useAppDispatch();
+  const { pathname } = useLocation();
+  const isLoading = useAppSelector((state) => state.app.isLoading);
 
   const { resetUserState, setUserState } = userSlice.actions;
   const { setAppLoading, setNetworkError } = appSlice.actions;
 
-  const isLoading = useAppSelector((state) => state.app.isLoading);
-
+  const publicPaths = Object.values(PubliPaths) as string[];
   useEffect(() => {
     (async () => {
-      const { user, msg } = await userReq.getUser();
-      if (msg?.type === MessageType.Error) {
-        dispatch(resetUserState());
-        dispatch(setNetworkError(true));
-      } else {
+      const user = await userReq.getUser();
+      if (user) {
         dispatch(
           setUserState({
             ...(user as IUserInitailState),
@@ -63,6 +57,8 @@ function GetUser() {
           })
         );
         dispatch(setNetworkError(false));
+      } else {
+        dispatch(resetUserState());
       }
       dispatch(setAppLoading(false));
     })();
@@ -72,7 +68,11 @@ function GetUser() {
     };
   }, []);
 
-  return isLoading ? <LogoLoader /> : <Outlet />;
+  return !publicPaths.includes(pathname) && isLoading ? (
+    <LogoLoader />
+  ) : (
+    <Outlet />
+  );
 }
 
 function ErrorElement() {
@@ -84,8 +84,8 @@ function Routes() {
     createRoutesFromElements(
       <Route>
         <Route element={<GetUser />} errorElement={<ErrorElement />}>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/signin" element={<SignInPage />} />
+          <Route path={PubliPaths.Home} element={<HomePage />} />
+          <Route path={PubliPaths.SignIn} element={<SignInPage />} />
           <Route element={<UserRoute />}>
             <Route path="/profile" element={<ProfilePage />} />
           </Route>

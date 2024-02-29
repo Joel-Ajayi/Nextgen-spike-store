@@ -13,6 +13,7 @@ export type Category = {
   hasWarrantyAndProduction: boolean;
   brand: string;
   banner: CategoryBanner;
+  numSold: number;
   features: CategoryFeature[];
   offers: CategoryOffer[];
 };
@@ -42,17 +43,29 @@ export type Category_I_U = {
 };
 
 export type CategoryMini = {
+  id: string;
   name: string;
   lvl: Number;
   cId: number;
   icon: string;
   parent: string;
+  numSold: number;
   banner: CategoryBanner | null;
   features: CategoryFeature[];
   offers: CategoryOffer[];
 };
 
+export type CategoryMicro = {
+  id: string;
+  name: string;
+  lvl: Number;
+  cId: number;
+  icon: string | null;
+  parent: string;
+};
+
 export type CategoryBanner = {
+  id: string;
   tagline: string;
   bannerColours: string[];
   image: string | Promise<FileUpload>;

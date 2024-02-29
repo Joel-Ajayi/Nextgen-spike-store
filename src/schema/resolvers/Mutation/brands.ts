@@ -5,6 +5,7 @@ import { validator } from "../../../helpers/validator";
 import middleware from "../../../middlewares/middlewares";
 import { Context } from "../../context";
 import { upload } from "../../../helpers/uploads";
+import { db } from "../../../db/prisma/connect";
 
 const resolvers = {
   CreateBrand: async (
@@ -19,7 +20,7 @@ const resolvers = {
 
     try {
       // check if product brand exist
-      const prevBrand = await ctx.db.brand.findUnique({
+      const prevBrand = await db.brand.findUnique({
         where: { name: data.name },
       });
 
@@ -38,7 +39,7 @@ const resolvers = {
         })
       )[0];
 
-      const newBrd = await ctx.db.brand.upsert({
+      const newBrd = await db.brand.upsert({
         where: { name: data.id },
         update: { name: data.name, image },
         create: { name: data.name, image },

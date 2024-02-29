@@ -21,16 +21,12 @@ function BrandListing() {
   const brands = useAppSelector((state) => state.brands);
 
   const setBrands = brandSlice.actions.setBrands;
-  const setBackgroundMsg = appSlice.actions.setBackgroundMsg;
 
   useEffect(() => {
     (async () => {
       if (!brands.length) {
-        const { brds, msg } = await brandReq.getBrands();
-        if (msg.msg) {
-          dispatch(setBrands([]));
-          dispatch(setBackgroundMsg(msg));
-        } else if (brds) {
+        const brds = await brandReq.getBrands();
+        if (brds) {
           dispatch(setBrands(brds));
         }
       }

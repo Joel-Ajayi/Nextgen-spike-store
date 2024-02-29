@@ -8,8 +8,8 @@ class BrandReq {
       variables: { name },
     });
 
-    const { res, msg } = await request.makeRequest<Brand>(body);
-    return { brd: res, msg };
+    const res = await request.makeRequest<Brand>(body);
+    return res;
   }
 
   public async updateBrd(data: Brand) {
@@ -24,11 +24,8 @@ class BrandReq {
     formData.append("map", JSON.stringify(map));
     formData.append("0", (data.image[0] as IFile).file);
 
-    const { res, msg } = await request.makeRequest<Brand>(
-      formData as any,
-      true
-    );
-    return { brd: res, msg };
+    const res = await request.makeRequest<Brand>(formData as any, true);
+    return res;
   }
 
   public async getBrands() {
@@ -36,8 +33,8 @@ class BrandReq {
       query: "query GetBrands { GetBrands { name image } }",
     });
 
-    const { res, msg } = await request.makeRequest<Brand[]>(body);
-    return { brds: res, msg };
+    const res = await request.makeRequest<Brand[]>(body);
+    return res;
   }
 }
 

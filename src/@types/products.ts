@@ -11,6 +11,7 @@ export type ProductInfo = {
   sku?: string;
   discount: number;
   colours: string[];
+  numSold: number;
   paymentType: number;
   images: String[];
   warrCovered: string | null;
@@ -38,6 +39,7 @@ export type ProductMini = {
   brand: string;
   discount: number;
   rating: number;
+  numSold: number;
   numReviews: number;
   images: string[];
   features: ProductFeature[];

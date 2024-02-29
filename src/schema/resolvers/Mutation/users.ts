@@ -12,6 +12,7 @@ import {
 import { GraphQLError } from "graphql";
 import { verifyJWT } from "../../../helpers";
 import { Message } from "../../../@types";
+import { db } from "../../../db/prisma/connect";
 
 const {
   SESSION_NAME,
@@ -31,23 +32,22 @@ const resolvers = {
     // validates arguments
     await validator.signIn(data);
     // check if user already exist
-    await middleware.alreadySignedUp(data.email, ctx.db);
+    await middleware.alreadySignedUp(data.email);
 
     // hash password
     const pwd = await bcrypt.hash(data.pwd, 12);
 
     // user role
-    const userCount = await ctx.db.user.count();
-    const role = userCount > 1 ? Roles.User : Roles.SuperAdmin;
+    const userCount = await db.user.count();
 
     try {
-      const user = await ctx.db.user.create({
+      const user = await db.user.create({
         data: {
           pwd,
           email: data?.email,
           fName: data?.fName,
           lName: data?.lName,
-          role,
+          roles: [0],
         },
       });
       // set session cookie
@@ -92,12 +92,12 @@ const resolvers = {
   ): Promise<Message> => {
     await middleware.checkUser(ctx);
 
-    const user = await ctx.db.user.findUnique({ where: { email } });
+    const user = await db.user.findUnique({ where: { email } });
 
     if (!!user) {
       //save token to db
       const vToken = `${user.id}${Math.floor(1000 + Math.random() * 9000)}`;
-      ctx.db.user.update({ where: { id: user.id }, data: { vToken } });
+      db.user.update({ where: { id: user.id }, data: { vToken } });
 
       // send token to email
       const token = await jwt.sign(
@@ -128,7 +128,7 @@ const resolvers = {
       });
     }
 
-    const user = await ctx.db.user.findUnique({
+    const user = await db.user.findUnique({
       where: { vToken: vToken as string },
     });
     if (!user) {
@@ -147,7 +147,7 @@ const resolvers = {
       });
     }
 
-    ctx.db.user.update({
+    db.user.update({
       where: { id: user.id },
       data: { vToken: null, verified: true },
     });
@@ -160,13 +160,13 @@ const resolvers = {
   ): Promise<Message> => {
     await middleware.alreadySignedIn(ctx);
 
-    const user = await ctx.db.user.findUnique({
+    const user = await db.user.findUnique({
       where: { email: email },
     });
     if (!!user) {
       //save token to db
       const pwdToken = `${user.id}${Math.floor(1000 + Math.random() * 9000)}`;
-      ctx.db.user.update({ where: { id: user.id }, data: { pwdToken } });
+      db.user.update({ where: { id: user.id }, data: { pwdToken } });
       // send token to email
       const token = await jwt.sign(
         pwdToken,
@@ -196,7 +196,7 @@ const resolvers = {
       });
     }
 
-    const user = await ctx.db.user.findUnique({
+    const user = await db.user.findUnique({
       where: { pwdToken: pwdToken as string },
     });
     if (!user) {
@@ -207,7 +207,7 @@ const resolvers = {
       });
     }
 
-    ctx.db.user.update({
+    db.user.update({
       where: { id: user.id },
       data: { pwdToken: null },
     });

@@ -1,14 +1,13 @@
-import { PrismaClient, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import { ExpressContext } from "apollo-server-express";
 import { Request, Response } from "express";
-import { prisma as db } from "../db/prisma/connect";
+import { db as db } from "../db/prisma/connect";
 import consts from "../@types/conts";
 
 export type Context = {
   user: User;
   req: Request;
   res: Response;
-  db: PrismaClient;
 };
 
 export async function appContext({
@@ -29,7 +28,7 @@ export async function appContext({
           fName: true,
           lName: true,
           avatar: true,
-          role: true,
+          roles: true,
           contactNumber: true,
         },
       })) as User;
@@ -38,5 +37,5 @@ export async function appContext({
     throw new Error(consts.errors.server);
   }
 
-  return { req, res, db, user };
+  return { req, res, user };
 }

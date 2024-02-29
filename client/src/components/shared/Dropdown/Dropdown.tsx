@@ -7,8 +7,7 @@ import uniqId from "uniqid";
 
 export type DropdownProps = {
   title: string | JSX.Element;
-  level: number;
-  wrapperClassName: string;
+  wrapperClassName?: string;
   icon?: JSX.Element;
   isDropdown?: true;
   showCaret?: boolean;
@@ -26,7 +25,7 @@ export type DropdownProps = {
 
 export default function Dropdown({
   title,
-  wrapperClassName,
+  wrapperClassName = "",
   link,
   icon,
   onClick,

@@ -74,11 +74,11 @@ class CategoryReq {
       requestData = formData;
     }
 
-    const { res, msg } = await request.makeRequest<CategoryMini>(
+    const res = await request.makeRequest<CategoryMini>(
       requestData,
       !!addedNumFiles
     );
-    return { cat: res, msg };
+    return res;
   }
 
   public async updateCatParent(name: string, parent: string) {
@@ -95,8 +95,8 @@ class CategoryReq {
       },
     });
 
-    const { res, msg } = await request.makeRequest(body);
-    return { cat: res as CategoryMini, msg };
+    const res = await request.makeRequest<CategoryMini>(body);
+    return res;
   }
 
   public async getCategories(parent = "") {
@@ -109,8 +109,8 @@ class CategoryReq {
       variables: { parent },
     });
 
-    const { res, msg } = await request.makeRequest<CategoryMini[]>(body);
-    return { cats: res, msg };
+    const res = await request.makeRequest<CategoryMini[]>(body);
+    return res;
   }
 
   public async getCategory(name: string) {
@@ -125,8 +125,8 @@ class CategoryReq {
       variables: { name },
     });
 
-    const { res, msg } = await request.makeRequest<Category>(body);
-    return { cat: res, msg };
+    const res = await request.makeRequest<Category>(body);
+    return res;
   }
 
   public async getCategoryFormData() {
@@ -134,8 +134,8 @@ class CategoryReq {
       query: `query CategoryFormData { CategoryFormData { brands { name image } offerTypes featureTypes offerAudiences }}`,
     });
 
-    const { res, msg } = await request.makeRequest<CategoryFormData>(body);
-    return { data: res, msg };
+    const res = await request.makeRequest<CategoryFormData>(body);
+    return res;
   }
 }
 

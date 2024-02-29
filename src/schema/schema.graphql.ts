@@ -1,5 +1,6 @@
 const typeDefs = `#graphql
 type Query {
+  LandingPageData:LandingPageData
   GetBrand(name: String!): Brand
   GetBrands: [Brand!]!
   GetCategories(parent: String): [CategoryMini!]!
@@ -60,7 +61,16 @@ input BrandInput {
   name: String!
 }
 
-
+#landing page
+type LandingPageData {
+  banners: [CategoryBanner!]!
+  offers: [CategoryOffer!]!
+  topCategories: [CategoryMini!]!
+  hotDeals: [ProductMini!]!
+  newProducts: [ProductMini!]!
+  popularProducts: [ProductMini!]!
+  categories:[CategoryMicro!]!
+}
 
 #Category
 type Category {
@@ -70,6 +80,7 @@ type Category {
   lvl: Int!
   icon:String
   name: String!
+  numSold:Int!
   parent: String
   hasWarrantyAndProduction:Boolean!
   banner:CategoryBanner
@@ -78,15 +89,26 @@ type Category {
 }
 
 type CategoryMini {
+  id:String!
   lvl: Int!
   cId: Int!
   name: String!
   parent: String!
+  numSold:Int!
   icon:String
   banner:CategoryBanner
   hasWarrantyAndProduction:Boolean!
   features: [CategoryFeature!]!
   offers:[CategoryOffer!]!
+}
+
+type CategoryMicro {
+  id:String!
+  lvl: Int!
+  cId: Int!
+  name: String!
+  parent: String!
+  icon:String
 }
 
 type CategoryFeature {
@@ -141,6 +163,7 @@ input CategoryOfferInput_U {
 }
 
 type CategoryBanner {
+  id:String!
   tagline:String!
   bannerColours:[String!]!
   image:String!
@@ -203,6 +226,7 @@ type Product {
   discount: Int!
   colours: [String!]!
   paymentType: Int!
+  numSold:Int!
   images: [String!]!
   sku:String!
   mfgDate: String
@@ -219,6 +243,8 @@ type ProductMini {
   images: [String!]!
   name: String!
   price: Int!
+  numSold:Int!
+  numReviews:Int!
   rating: Int!
 }
 
@@ -227,22 +253,6 @@ type ProductUpdateReturn {
   sku:String!
   features:[ProductFeature!]!
 }
-
-#type ProductFilterPage {
-#  brand: String!
-#  category: String
-#  colours: [String!]!
-#  description: String!
-#  discount: Int!
-#  filters: [CategoryFilterValue!]!
-#  id: String!
-#  images: [String!]!
- # name: String!
-#  numRating: Int!
-#  numReviews: Int!
-#  price: Int!
-#  rating: Int!
-#}
 
 input ProductInput {
   brand: String!
@@ -314,7 +324,7 @@ type User {
   fName: String
   id: ID!
   lName: String
-  role: Int!
+  roles: [Int!]!
 }
 
 input SignInInput {

@@ -6,7 +6,7 @@ import consts from "./@types/conts";
 import typeDefs from "./schema/schema.graphql";
 import resolvers from "./schema/resolvers";
 
-export default async (app: Application) => {
+export default async (app: any) => {
   const isProduction = process.env.NODE_ENV === "production";
   const cors = {
     origin: isProduction ? undefined : consts.request.origins,

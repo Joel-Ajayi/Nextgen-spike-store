@@ -15,6 +15,7 @@ import {
 } from "../../../@types/categories";
 import { Pagination } from "../../../@types";
 import { getObjKeys, getObjValues } from "../../../helpers";
+import { db } from "../../../db/prisma/connect";
 
 const resolvers = {
   GetProduct: async (
@@ -22,7 +23,7 @@ const resolvers = {
     { id }: { id: string },
     ctx: Context
   ): Promise<Product> => {
-    const product = await ctx.db.product.findFirst({
+    const product = await db.product.findFirst({
       where: { id },
       select: {
         id: true,
@@ -37,6 +38,7 @@ const resolvers = {
         count: true,
         description: true,
         discount: true,
+        numSold: true,
         features: true,
         mfgCountry: true,
         mfgDate: true,
@@ -58,7 +60,7 @@ const resolvers = {
     ctx: Context
   ): Promise<ProductMini> => {
     try {
-      const product = await ctx.db.product.findFirst({
+      const product = await db.product.findFirst({
         where: { id, category: { name: category } },
         select: {
           id: true,
@@ -73,6 +75,7 @@ const resolvers = {
           rating: true,
           reviews: true,
           features: true,
+          numSold: true,
         },
       });
 
@@ -112,12 +115,12 @@ const resolvers = {
     };
 
     try {
-      let categories = await ctx.db.category.findMany({
+      let categories = await db.category.findMany({
         where: { parent: null },
         select: catSelection,
       });
 
-      const brands = await ctx.db.brand.findMany({
+      const brands = await db.brand.findMany({
         select: { name: true, image: true },
       });
 
@@ -127,14 +130,14 @@ const resolvers = {
       let categoriesPath: string[] = [];
       const features: CategoryFeature[] = [];
       if (id) {
-        const product = await ctx.db.product.findUnique({
+        const product = await db.product.findUnique({
           where: { id },
           select: { category: { select: { cId: true } } },
         });
 
         if (product?.category) {
           await (async function findPath(cId: number) {
-            const category = await ctx.db.category.findUnique({
+            const category = await db.category.findUnique({
               where: { cId },
               select: catSelection,
             });
@@ -174,8 +177,8 @@ const resolvers = {
     query: { skip: number; take: number },
     ctx: Context
   ): Promise<Pagination<ProductMini2>> => {
-    const count = await ctx.db.product.count();
-    const products = await ctx.db.product.findMany({
+    const count = await db.product.count();
+    const products = await db.product.findMany({
       take: query.take,
       skip: query.skip,
       select: {

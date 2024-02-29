@@ -1,16 +1,22 @@
+import { DropdownItemProps } from "../components/shared/Dropdown/DropdownItem/DropdownItem";
+import {
+  CategoryBanner,
+  CategoryMicro,
+  CategoryMini,
+  CategoryOffer,
+} from "./category";
+import { ProductMini } from "./product";
+
 export interface IAppInitailState {
   showModal: boolean;
   isLoading: boolean;
+  isPageLoading: boolean;
   requestTimeout: boolean;
   statusCode: number;
   networkError: boolean;
   message: IMessage;
-}
-
-export enum Roles {
-  User = 0,
-  Admin = 1,
-  SuperAdmin = 2,
+  headerDropDown: DropdownItemProps[][];
+  landingPageData: LandingPageData;
 }
 
 export enum MessageType {
@@ -22,11 +28,28 @@ export enum MessageType {
 
 export interface IMessage {
   msg: string | "";
-  statusCode?: number;
+  statusCode: StatusCodes;
   type: MessageType | null;
   header?: string | "";
   transitionFrom?: "left" | "right" | "bottom" | "top" | "";
 }
+
+export enum StatusCodes {
+  Ok = 200,
+  InvalidInput = 400,
+  ServerError = 500,
+  UnAuthenticated = 401,
+  Forbidden = 403,
+  NotFound = 404,
+  ServerDown = 503,
+}
+
+export const RedirectStatusCodes = [
+  StatusCodes.UnAuthenticated,
+  StatusCodes.Forbidden,
+  StatusCodes.NotFound,
+  StatusCodes.ServerDown,
+];
 
 export type Message = {
   message: string;
@@ -66,3 +89,18 @@ export type Pagination<T> = {
   skip: number;
   list: T[];
 };
+
+export type LandingPageData = {
+  banners: CategoryBanner[];
+  offers: CategoryOffer[];
+  topCategories: (null | CategoryMini)[];
+  hotDeals: ProductMini[];
+  newProducts: ProductMini[];
+  popularProducts: ProductMini[];
+  categories: CategoryMicro[];
+};
+
+export enum PubliPaths {
+  SignIn = "/signin",
+  Home = "/",
+}

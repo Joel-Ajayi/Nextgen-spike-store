@@ -1,7 +1,16 @@
+@import "./vars.scss";
+
 @mixin desktop-wrapper {
-  max-width: 1150px;
+  max-width: 1300px;
   width: 100%;
   margin: 0 auto;
+  padding-left: 0.9rem;
+  padding-right: 0.9rem;
+
+  @media only screen and (min-width: 500px) {
+    padding-left: 1.6rem;
+    padding-right: 1.6rem;
+  }
 }
 
 @mixin scrollbar {
@@ -19,5 +28,29 @@
     background-color: darkgrey;
     opacity: 0.5;
     border-radius: 5px;
+  }
+}
+
+@mixin skeletalLoader {
+  &:empty {
+    width: 100%;
+    height: 100%;
+    display: block;
+    background-color: $color-gray3;
+    animation: shine 1.2s infinite ease-in-out;
+  }
+
+  @keyframes shine {
+    0% {
+      opacity: 0.2;
+    }
+
+    50% {
+      opacity: 0.5;
+    }
+
+    100% {
+      opacity: 0.2;
+    }
   }
 }

@@ -47,6 +47,7 @@ export type ProductMini = {
   discount: number;
   rating: number;
   numReviews: number;
+  numSold: number;
   images: string[];
   features: ProductFeature[];
 };

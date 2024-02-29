@@ -76,7 +76,7 @@ function Input({
 
   const [error, setError] = useState("");
   const [showSelections, setShowSelections] = useState(false);
-  const [showColorPicker, setShowColorPicker] = useState(false);
+  const [isColorPickerVisible, setShowColorPicker] = useState(false);
   const [inputs, setInputs] = useState<(string | number | IFile)[]>([]);
   const [colour, setColour] = useState(defaultValue || "#FFFFFF");
   const [caretStyle, setCaretStyle] = useState<CSSProperties>({
@@ -141,13 +141,14 @@ function Input({
   };
 
   const handleTextBoxChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (inputRef.current) {
-      if (isColour) {
-        inputRef.current.value = colour as string;
-        return;
+    if (isColour) {
+      if (!isColorPickerVisible) {
+        setShowColorPicker(true);
       }
-      handleChange(isCheckbox ? e.target.checked : e.target.value);
+      setColour(e.target.value.toLocaleUpperCase());
+      return;
     }
+    handleChange(isCheckbox ? e.target.checked : e.target.value);
   };
 
   const handleFileChange = async (value: FileList) => {
@@ -227,7 +228,11 @@ function Input({
   };
 
   const onClickMultiAddIcon = () => {
-    isColour ? setShowColorPicker(true) : handleMultiInputChange();
+    if (isColour) {
+      if (!isColorPickerVisible) setShowColorPicker(true);
+      return;
+    }
+    handleMultiInputChange();
   };
 
   const removeFromInputs = async (index: number) => {
@@ -342,7 +347,7 @@ function Input({
             )}
 
             {/* Colour */}
-            {isColour && showColorPicker && (
+            {isColour && isColorPickerVisible && (
               <div className={Styles.color_wrapper}>
                 <CloseIcon
                   onClick={handleClosePicker}

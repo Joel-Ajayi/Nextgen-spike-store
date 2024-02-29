@@ -33,7 +33,6 @@ function CreateBrand({ isUpdate, brd_id }: CreateBrandProps) {
     state.brands.findIndex((brd) => brd.name === brd_id)
   );
 
-  const { setStatusCode } = appSlice.actions;
   const { updateBrand, addBrand } = brandSlice.actions;
   const { setBackgroundMsg } = appSlice.actions;
   const [isLoading, setIsLoading] = useState(!!brd_id);
@@ -50,10 +49,8 @@ function CreateBrand({ isUpdate, brd_id }: CreateBrandProps) {
   useEffect(() => {
     (async () => {
       if (!!brd_id) {
-        const { brd, msg } = await brandReq.getBrand(brd_id);
-        if (msg?.statusCode === 404) {
-          setStatusCode(msg.statusCode as number);
-        } else if (brd) {
+        const brd = await brandReq.getBrand(brd_id);
+        if (brd) {
           let image: IFile[] = [];
           if (brd.image.length) {
             image = await request.getImageFiles(brd.image as any);
@@ -103,10 +100,8 @@ function CreateBrand({ isUpdate, brd_id }: CreateBrandProps) {
   const onSave = async () => {
     if (isValid) {
       setIsSaving(true);
-      const { brd, msg } = await brandReq.updateBrd(form);
-      if (msg) {
-        dispatch(setBackgroundMsg(msg));
-      } else if (brd) {
+      const brd = await brandReq.updateBrd(form);
+      if (brd) {
         if (isUpdate && brands.length) {
           dispatch(updateBrand({ index, brd }));
         } else {

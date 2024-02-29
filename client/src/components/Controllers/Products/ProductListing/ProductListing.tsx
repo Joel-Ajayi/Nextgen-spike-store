@@ -25,10 +25,11 @@ function ProductListing() {
   useEffect(() => {
     if (!pagination.list.length) {
       (async () => {
-        const { data } = await productReq.getProductsMini2(
+        const data = await productReq.getProductsMini2(
           pagination.skip,
           pagination.take
         );
+
         if (data) {
           dispatch(setProductList(data));
         }
@@ -38,9 +39,12 @@ function ProductListing() {
   }, []);
 
   const loadPage = async (skip: number) => {
-    const { data } = await productReq.getProductsMini2(skip, pagination.take);
-    dispatch(setProductList(data));
-    return { ...data, list: [] };
+    const data = await productReq.getProductsMini2(skip, pagination.take);
+    if (data) {
+      dispatch(setProductList(data));
+      return { ...data, list: [] };
+    }
+    return pagination;
   };
 
   const pageButtons = useMemo(

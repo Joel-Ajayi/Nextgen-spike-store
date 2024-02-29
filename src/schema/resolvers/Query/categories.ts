@@ -10,6 +10,7 @@ import {
 import { Context } from "../../context";
 import middleware from "../../../middlewares/middlewares";
 import { getObjKeys } from "../../../helpers";
+import { db } from "../../../db/prisma/connect";
 
 const resolvers = {
   GetCategories: async (
@@ -21,7 +22,7 @@ const resolvers = {
       let query = {};
       if (parent) query = { parent: { name: parent } };
 
-      const categories = await ctx.db.category.findMany({
+      const categories = await db.category.findMany({
         where: query,
         select: {
           id: true,
@@ -34,6 +35,7 @@ const resolvers = {
           features: true,
           banner: true,
           offers: true,
+          numSold: true,
         },
       });
 
@@ -58,7 +60,7 @@ const resolvers = {
     // check if logged_in
     middleware.checkSuperAdmin(ctx);
     try {
-      const category = await ctx.db.category.findUnique({
+      const category = await db.category.findUnique({
         where: { name },
         select: {
           id: true,
@@ -72,6 +74,7 @@ const resolvers = {
           banner: true,
           features: true,
           offers: true,
+          numSold: true,
         },
       });
 
@@ -97,8 +100,8 @@ const resolvers = {
   },
   CategoryFormData: async (_: any, {}: any, ctx: Context) => {
     // check if logged_in
-    middleware.checkAdmin(ctx);
-    const brands = await ctx.db.brand.findMany({
+    middleware.checkSuperAdmin(ctx);
+    const brands = await db.brand.findMany({
       select: { name: true, image: true },
     });
 

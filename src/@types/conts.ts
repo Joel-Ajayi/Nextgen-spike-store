@@ -42,7 +42,7 @@ const consts = {
       supportedVd: ["video/mp4", "video/mkv"],
     },
     vdSize: 5 * 1024 * 1024, //5mb
-    imgSize: 150 * 1024, //80kb
+    imgSize: 190 * 1024, //190kb
     product: {
       min: 2,
       max: 4,

@@ -1,8 +1,13 @@
 import axios from "axios";
 import { CONSTS } from "../const";
-import filesHelper from "../helpers/files";
-import { IFile, IMessage, MessageType } from "../types";
-
+import {
+  IMessage,
+  MessageType,
+  RedirectStatusCodes,
+  StatusCodes,
+} from "../types";
+import { dispatch } from "../store";
+import appSlice from "../store/appState";
 interface ApiErrorOptions extends ErrorOptions {
   statusCode: number;
 }
@@ -14,6 +19,12 @@ export class ApiError extends Error {
     this.statusCode = options?.statusCode;
   }
 }
+
+export type ThrownError = {
+  statusCode: StatusCodes;
+  message: string;
+  code: string;
+};
 
 class Requests {
   public async getImageFiles(paths: string[]) {
@@ -49,30 +60,32 @@ class Requests {
           statusCode: res.data.errors[0].statusCode,
         });
       }
+
       const resData = res.data?.data as Object;
-      return {
-        res: Object.values(resData)[0] as T,
-        msg: { msg: "", type: MessageType.Success, statusCode: 200 },
-      };
-    } catch (err) {
-      console.log(err);
+      return Object.values(resData)[0] as T;
+    } catch (error) {
+      const err = error as ThrownError;
       let msg: IMessage | null = null;
+      console.log(err);
+      //
+      dispatch(appSlice.actions.setStatusCode(err.statusCode));
+
       if (errFromServer) {
         msg = {
-          msg: (err as any)?.message,
+          msg: err.message,
           type: MessageType.Error,
-          statusCode: (err as any)?.statusCode,
+          statusCode: err.statusCode,
         } as IMessage;
       }
 
       if (
-        (err as any)?.code === CONSTS.errors.code.network ||
-        (err as any)?.code === CONSTS.errors.code.badResponse
+        err.code === CONSTS.errors.code.network ||
+        err.code === CONSTS.errors.code.badResponse
       ) {
         msg = {
           msg: CONSTS.errors.badResponse,
           type: MessageType.Error,
-          statusCode: 500,
+          statusCode: StatusCodes.ServerError,
         } as IMessage;
       }
 
@@ -80,11 +93,12 @@ class Requests {
         msg = {
           msg: CONSTS.errors.errorOccured,
           type: MessageType.Error,
-          statusCode: 500,
+          statusCode: StatusCodes.ServerError,
         } as IMessage;
       }
 
-      return { msg, res: null as T };
+      dispatch(appSlice.actions.setBackgroundMsg(msg));
+      return null;
     }
   }
 }

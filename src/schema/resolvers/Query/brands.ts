@@ -3,6 +3,7 @@ import middleware from "../../../middlewares/middlewares";
 import { Context } from "../../context";
 import consts from "../../../@types/conts";
 import { Brand } from "../../../@types/brand";
+import { db } from "../../../db/prisma/connect";
 
 const resolvers = {
   GetBrand: async (
@@ -14,7 +15,7 @@ const resolvers = {
     middleware.checkSuperAdmin(ctx);
 
     try {
-      const brand = await ctx.db.brand.findUnique({
+      const brand = await db.brand.findUnique({
         where: { name },
         select: { name: true, image: true },
       });
@@ -36,7 +37,7 @@ const resolvers = {
     // check if logged_in
     middleware.checkSuperAdmin(ctx);
     try {
-      const brands = await ctx.db.brand.findMany({
+      const brands = await db.brand.findMany({
         select: { name: true, image: true },
       });
 

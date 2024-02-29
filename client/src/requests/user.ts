@@ -5,10 +5,10 @@ import { IUserInitailState, SignInFieds, SignInForm } from "../types/user";
 class UserReq {
   public async getUser() {
     const body = JSON.stringify({
-      query: `query { UserQuery { contactNumber avatar email role fName lName id }}`,
+      query: `query { UserQuery { contactNumber avatar email roles fName lName id }}`,
     });
-    const { res, msg } = await request.makeRequest<IUserInitailState>(body);
-    return { user: res, msg };
+    const res = await request.makeRequest<IUserInitailState>(body);
+    return res;
   }
 
   public async signIn(data: SignInForm, isSignIn: boolean) {
@@ -34,10 +34,9 @@ class UserReq {
       },
     });
 
-    const { res, msg } = await request.makeRequest<string>(body);
-    console.log(msg, res);
-    const { user } = await this.getUser();
-    return { msg, user };
+    await request.makeRequest<string>(body);
+    const user = await this.getUser();
+    return user;
   }
 
   public async signOut(): Promise<void> {

@@ -12,6 +12,7 @@ import { getSKU } from "../../../helpers";
 import { Types } from "mongoose";
 import { CategoryFeature } from "../../../@types/categories";
 import { upload } from "../../../helpers/uploads";
+import { db } from "../../../db/prisma/connect";
 
 const resolvers = {
   CreateProduct: async (
@@ -20,13 +21,13 @@ const resolvers = {
     ctx: Context
   ): Promise<ProductUpdateReturn> => {
     // check if logged_in
-    middleware.checkAdmin(ctx);
+    middleware.checkSuperAdmin(ctx);
 
     // validate data
     await validator.valProduct(data);
 
     // check if product category exist
-    const productCategory = await ctx.db.category.findUnique({
+    const productCategory = await db.category.findUnique({
       where: { cId: data.cId },
       select: {
         hasWarrantyAndProduction: true,
@@ -43,7 +44,7 @@ const resolvers = {
     }
 
     // check if product brand exist
-    const productBrd = await ctx.db.brand.findUnique({
+    const productBrd = await db.brand.findUnique({
       where: { name: data.brand },
     });
 
@@ -73,7 +74,7 @@ const resolvers = {
         parentCatName = ""
       ): Promise<CategoryFeature[]> {
         if (parentCatName) {
-          const parentCategory = await ctx.db.category.findUnique({
+          const parentCategory = await db.category.findUnique({
             where: { name: parentCatName },
             select: { features: true, parent: { select: { name: true } } },
           });
@@ -121,7 +122,7 @@ const resolvers = {
 
     try {
       // add category
-      const newProduct = await ctx.db.product.create({
+      const newProduct = await db.product.create({
         data: {
           name: data.name,
           sku,
@@ -144,7 +145,7 @@ const resolvers = {
       const productFeatures = await Promise.all(
         data.features.map(async (f) => {
           const data = { ...f, productId: newProduct.id };
-          const newFeature = await ctx.db.productFeature.create({
+          const newFeature = await db.productFeature.create({
             data,
             select: { id: true, featureId: true, value: true },
           });
@@ -169,7 +170,7 @@ const resolvers = {
     { data }: { data: Product_I_U },
     ctx: Context
   ): Promise<ProductUpdateReturn> => {
-    const product = await ctx.db.product.findUnique({
+    const product = await db.product.findUnique({
       where: { id: data.id },
       select: {
         id: true,
@@ -204,7 +205,7 @@ const resolvers = {
     // get category
     const category = !isNewCategory
       ? product.category
-      : await ctx.db.category.findUnique({
+      : await db.category.findUnique({
           where: { cId: isNewCategory ? data.cId : product.category.cId },
           select: {
             cId: true,
@@ -230,7 +231,7 @@ const resolvers = {
           parentCatName = ""
         ): Promise<CategoryFeature[]> {
           if (parentCatName) {
-            const parentCategory = await ctx.db.category.findUnique({
+            const parentCategory = await db.category.findUnique({
               where: { name: parentCatName },
               select: { features: true, parent: { select: { name: true } } },
             });
@@ -262,7 +263,7 @@ const resolvers = {
     // update product brand
     let brdId: string | undefined = undefined;
     if (data?.brand && data?.brand !== product.brand.name) {
-      const brand = await ctx.db.brand.findUnique({
+      const brand = await db.brand.findUnique({
         where: { name: data.brand },
       });
 
@@ -307,7 +308,7 @@ const resolvers = {
       });
     }
 
-    const newPrd = await ctx.db.product.update({
+    const newPrd = await db.product.update({
       where: { id: data.id },
       data: {
         name: data?.name || undefined,
@@ -332,7 +333,7 @@ const resolvers = {
     if (data?.features?.length) {
       // delete previous features if new category
       if (isNewCategory) {
-        await ctx.db.productFeature.deleteMany({
+        await db.productFeature.deleteMany({
           where: { id: { in: product.features.map((f) => f.id) } },
         });
       }
@@ -344,7 +345,7 @@ const resolvers = {
           const id = isNewCategory ? randObjId : inputFeatureId || randObjId;
           const featureData = { ...inputFeature, productId: data.id };
 
-          return await ctx.db.productFeature.upsert({
+          return await db.productFeature.upsert({
             where: { id },
             create: featureData,
             update: featureData,
@@ -361,7 +362,7 @@ const resolvers = {
       newPrd.colours,
       newPrd.cId
     );
-    await ctx.db.product.update({ where: { id: data.id }, data: { sku } });
+    await db.product.update({ where: { id: data.id }, data: { sku } });
 
     return { id: newPrd.id, sku, features: productFeatures };
   },

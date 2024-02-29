@@ -1,0 +1,89 @@
+@import "../../../../styles/mixins.scss";
+@import "../../../../styles/vars.scss";
+
+.top_cats {
+  @include desktop_wrapper;
+  display: flex;
+  flex-direction: column;
+  row-gap: 0.75rem;
+
+  .header {
+    font-size: 1.2rem;
+    color: $color-deep-gray-text;
+    text-align: center;
+
+    @media only screen and (min-width: 600px) {
+      font-size: 1.5rem;
+      text-align: left;
+    }
+  }
+
+  .categories {
+    & > ul {
+      bottom: -1rem;
+    }
+    .category {
+      .icon {
+        width: 2.8rem;
+        height: 2.8rem;
+        border-radius: 50%;
+        background-color: $color-gray;
+        margin: 0 auto;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        @include skeletalLoader;
+
+        &:empty {
+          width: 2.8rem;
+          height: 2.8rem;
+        }
+
+        @media only screen and (min-width: 500px) {
+          width: 3.3rem;
+          height: 3.3rem;
+
+          &:empty {
+            width: 3.3rem;
+            height: 3.3rem;
+          }
+        }
+
+        img {
+          height: 1.7rem;
+          max-width: 1.8rem;
+
+          @media only screen and (min-width: 500px) {
+            height: 2rem;
+          }
+        }
+      }
+
+      .name {
+        div {
+          text-align: center;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+          overflow: hidden;
+          min-height: 0.7rem;
+          max-height: 2.5rem;
+          max-width: 85%;
+          border-radius: 1rem;
+          position: relative;
+          margin: 0.5rem auto 0;
+          font-size: 0.68rem;
+          color: $color-gray-text;
+          @include skeletalLoader;
+
+          &:empty {
+            width: 60%;
+          }
+
+          @media only screen and (min-width: 500px) {
+            font-size: 0.75rem;
+          }
+        }
+      }
+    }
+  }
+}

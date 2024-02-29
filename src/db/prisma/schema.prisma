@@ -40,14 +40,13 @@ model User {
   address       Address?
   orders        Order[]
   couponId      String[]  @unique
-
-  verified  Boolean  @default(false)
-  role      Int      @default(0)
-  pwd       String
-  pwdToken  String?  @unique
-  vToken    String?  @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  verified      Boolean   @default(false)
+  roles         Int[]
+  pwd           String
+  pwdToken      String?   @unique
+  vToken        String?   @unique
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model Category {
@@ -60,6 +59,7 @@ model Category {
   parent                   Category?         @relation("Category", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   children                 Category[]        @relation("Category")
   lvl                      Int               @default(1)
+  numSold                  Int               @default(0)
   hasWarrantyAndProduction Boolean           @default(false)
   brdId                    String?           @db.ObjectId
   brand                    Brand?            @relation(fields: [brdId], references: [id])
@@ -121,6 +121,7 @@ model Product {
   brdId        String           @db.ObjectId
   brand        Brand            @relation(fields: [brdId], references: [id])
   colours      String[]
+  numSold      Int              @default(0)
   discount     Int              @default(0)
   aprroved     Boolean          @default(false)
   mfgCountry   String?

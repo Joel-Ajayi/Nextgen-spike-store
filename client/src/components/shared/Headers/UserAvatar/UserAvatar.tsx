@@ -1,8 +1,8 @@
 import React from "react";
 import Styles from "./userAvatar.module.scss";
 import { useAppSelector } from "../../../../store/hooks";
-import { ReactComponent as ProfileIcon } from "../../../../images/icons/account.svg";
 import { Link } from "react-router-dom";
+import { PiUserLight as UserIcon } from "react-icons/pi";
 
 type AvatarProps = {
   size?: number;
@@ -13,20 +13,26 @@ type AvatarProps = {
 
 function UserAvatar({
   showInfo = false,
-  infoClassName = "",
   size = 32,
   isLink = true,
 }: AvatarProps) {
-  const { email, fName, lName, avatar } = useAppSelector((state) => state.user);
+  const { email, fName, lName, avatar, isAuthenticated } = useAppSelector(
+    (state) => state.user
+  );
+  const isLoading = useAppSelector((state) => state.app.isLoading);
 
   const avatarJSX = (
     <div className={Styles.avatar_wrapper}>
-      {!avatar && (
-        <div
-          className={Styles.name_initials}
-          style={{ width: size, height: size }}
-        >
-          <span>{fName.charAt(0)}</span>
+      <div
+        className={Styles.name_initials}
+        style={{ minWidth: size, minHeight: size, fontSize: 0.5 * size }}
+      >
+        {!isLoading && fName.charAt(0)}
+        {!isLoading && !isAuthenticated && <UserIcon />}
+      </div>
+      {showInfo && (
+        <div className={Styles.info}>
+          {!isLoading && `Hi, ${fName} ${lName}`}
         </div>
       )}
     </div>

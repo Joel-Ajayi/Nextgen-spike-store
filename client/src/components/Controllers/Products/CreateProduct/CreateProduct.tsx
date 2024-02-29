@@ -17,6 +17,7 @@ import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import controllerPrdSlice from "../../../../store/controller/products";
 import SpinLoader from "../../../shared/Loader/SpinLoader/SpinLoader";
 import request from "../../../../requests";
+import { RedirectStatusCodes, StatusCodes } from "../../../../types";
 
 function CreateProduct() {
   const dispatch = useAppDispatch();
@@ -34,30 +35,21 @@ function CreateProduct() {
   const sub = params.get("sub");
   const prd_id = (params.get("prd_id") || "").replace(/-/g, " ");
 
-  const setStatusCode = appSlice.actions.setStatusCode;
   const { setProductFormData, setInitProductInput } =
     controllerPrdSlice.actions;
 
   useEffect(() => {
     (async () => {
       if (!formData.categories.length) {
-        const { data, msg } = await productReq.getProductFormData(
-          prd_id || undefined
-        );
-        if (msg?.statusCode === 404) {
-          dispatch(setStatusCode(404));
-          return;
-        }
-        dispatch(setProductFormData(data));
+        const data = await productReq.getProductFormData(prd_id || undefined);
+        if (data) dispatch(setProductFormData(data));
       }
       if (!!prd_id && product.id !== prd_id) {
-        const { data, msg } = await productReq.getProduct(prd_id);
-        if (msg.statusCode === 404) {
-          dispatch(setStatusCode(404));
-          return;
+        const data = await productReq.getProduct(prd_id);
+        if (data) {
+          const images = await request.getImageFiles(data.images as string[]);
+          dispatch(setInitProductInput({ ...data, images }));
         }
-        const images = await request.getImageFiles(data.images as string[]);
-        dispatch(setInitProductInput({ ...data, images }));
       }
 
       setIsLoading(false);

@@ -36,14 +36,14 @@ function SignIn() {
   const changeAuth = () => {
     if (isModalVisible && isSignPage) dispatch(setShowModal(false));
     setIsSignIn(!isSignIn);
-    setFormData({ ...formData, fName: undefined, lName: undefined, })
+    setFormData({ ...formData, fName: undefined, lName: undefined });
   };
 
   const onInputChange = async (
     value: string,
     name: string
   ): Promise<string | void> => {
-    const { error } = await userValidator.signIn(name as SignInFieds, value)
+    const { error } = await userValidator.signIn(name as SignInFieds, value);
     setFormData({ ...formData, [name]: { value, err: error } });
     return error;
   };
@@ -52,10 +52,8 @@ function SignIn() {
     e.preventDefault();
     e.stopPropagation();
 
-    const { msg, user } = await userReq.signIn(formData, isSignIn);
-    if (msg.type === MessageType.Error) {
-      dispatch(setBackgroundMsg(msg));
-    } else if (user) {
+    const user = await userReq.signIn(formData, isSignIn);
+    if (user) {
       dispatch(setUserState({ ...user, isAuthenticated: true }));
       dispatch(setShowModal(false));
     }
@@ -85,8 +83,8 @@ function SignIn() {
           </div>
           <div className={Styles.form_wrapper}>
             <form onSubmit={onSubmit}>
-              {
-                !isSignIn && <>
+              {!isSignIn && (
+                <>
                   <Input
                     name={SignInFieds.Fname}
                     placeholder="Enter First Name"
@@ -98,7 +96,7 @@ function SignIn() {
                     onChange={onInputChange}
                   />
                 </>
-              }
+              )}
               <Input
                 name={SignInFieds.Email}
                 placeholder="Enter Email"

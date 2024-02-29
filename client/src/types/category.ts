@@ -40,14 +40,25 @@ export type CategoryBanner = {
 };
 
 export type CategoryMini = {
+  id: string;
+  numSold: number;
   name: string;
   cId: number;
   lvl: number;
   parent: string;
-  icon: string | IFile | null;
+  icon: string | IFile;
   hasWarrantyAndProduction: boolean;
   banner: CategoryBanner | null;
   features: CategoryFeature[];
+};
+
+export type CategoryMicro = {
+  id: string;
+  name: string;
+  lvl: Number;
+  cId: number;
+  icon: string;
+  parent: string;
 };
 
 export type Category = {

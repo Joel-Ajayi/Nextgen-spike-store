@@ -43,7 +43,7 @@ function CatList({ pathIndex = 0 }: Props) {
 
     let newPath: string[] = [];
 
-    let { cats } = await categoryReq.getCategories(name);
+    let cats = await categoryReq.getCategories(name);
     if (!cats) cats = [];
 
     if (hasChildrenInList) {

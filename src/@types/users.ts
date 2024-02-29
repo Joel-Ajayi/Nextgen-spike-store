@@ -1,7 +1,10 @@
 export enum Roles {
   User = 0,
-  Admin = 1,
-  SuperAdmin = 2,
+  Product = 1,
+  Order = 2,
+  CategoryAndBrand = 3,
+  SuperAdmin = 4,
+  Global = 5,
 }
 
 export type User = {
@@ -11,7 +14,7 @@ export type User = {
   fName: String;
   id: String;
   lName: String;
-  role: number;
+  roles: number[];
 };
 
 export type SignIn_I = {

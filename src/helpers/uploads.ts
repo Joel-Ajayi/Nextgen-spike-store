@@ -7,6 +7,10 @@ import { GraphQLError } from "graphql";
 import { FileUpload } from "graphql-upload/Upload";
 import consts from "../@types/conts";
 import { ReadStream } from "fs-capacitor";
+import { Readable } from "stream";
+import axios from "axios";
+import fs from "fs";
+import FormData from "form-data";
 
 cloudinary.config({
   cloud_name: process.env.IMG_NAME,
@@ -92,14 +96,35 @@ class Upload {
 
       let options: UploadApiOptions = {
         folder: `Profile_Store/${folder}`,
-        background_removal: "cloudinary_ai",
+        // background_removal: "cloudinary_ai",
         // transformation: [{ quality: 80 }],
       };
 
-      if (!file.removeBg) delete options.background_removal;
+      let stream = file.stream as Readable;
 
-      const response = (await new Promise((resolve, reject) => {
-        (file.stream as ReadStream).pipe(
+      if (!file.removeBg) {
+        delete options.background_removal;
+      } else {
+        const formData = new FormData();
+        formData.append("size", "auto");
+        formData.append("image_file", file.stream as ReadStream);
+
+        const response = await axios.post<Buffer>(
+          "https://api.remove.bg/v1.0/removebg",
+          formData,
+          {
+            responseType: "arraybuffer",
+            headers: {
+              "X-Api-Key": process.env.IMG_BG_KEY,
+              ...formData.getHeaders(),
+            },
+          }
+        );
+        stream = Readable.from(response.data);
+      }
+
+      const response = (await new Promise(async (resolve, reject) => {
+        stream.pipe(
           cloudinary.uploader.upload_stream(options, (error, response) => {
             if (error || !response) {
               console.log(error, response);

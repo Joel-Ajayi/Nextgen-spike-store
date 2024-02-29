@@ -4,8 +4,8 @@ import SpinLoader from "../Loader/SpinLoader/SpinLoader";
 import Styles from "./button.module.scss";
 
 type ButtonProps = {
-  value: string;
-  type: "button" | "submit";
+  value: string | JSX.Element;
+  type?: "button" | "submit";
   onClick?: () => void;
   isLoading?: boolean;
   disabled?: boolean;
@@ -20,16 +20,18 @@ function Button({
   isLoading = false,
   disabled = false,
   className = "",
-  type,
+  type = "button",
 }: ButtonProps) {
+  const passedValue = typeof value === "string" ? <span>{value}</span> : value;
+
   return (
     <button
-      className={`${className} ${Styles.button}`}
+      className={`${Styles.button} ${className}`}
       onClick={() => !disabled && onClick && onClick()}
       type={type}
       style={!disabled ? {} : { opacity: "0.8", cursor: "not-allowed" }}
     >
-      {!link ? <span>{value}</span> : <Link to={link}>{value}</Link>}
+      {!link ? passedValue : <Link to={link}>{value}</Link>}
       {isLoading && <SpinLoader radius={9} isSmall />}
     </button>
   );

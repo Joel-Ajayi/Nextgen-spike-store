@@ -19,7 +19,6 @@ function CategoryListing() {
 
   const { updateCategories: updateCategory, setCategories } =
     controllerCatSlice.actions;
-  const { setBackgroundMsg } = appSlice.actions;
 
   const categories = useAppSelector(
     (state) => state.controller.categories.categories
@@ -32,8 +31,7 @@ function CategoryListing() {
   useEffect(() => {
     (async () => {
       if (!categories.length) {
-        const { cats, msg } = await categoryReq.getCategories();
-        if (msg.msg) dispatch(setBackgroundMsg(msg));
+        const cats = await categoryReq.getCategories();
         if (cats) dispatch(setCategories(cats));
       }
       setLoading(false);
@@ -41,10 +39,7 @@ function CategoryListing() {
   }, []);
 
   const onMove = async (id: string, destId: string) => {
-    const { cat, msg } = await categoryReq.updateCatParent(id, destId);
-    if (msg) {
-      dispatch(setBackgroundMsg(msg));
-    }
+    const cat = await categoryReq.updateCatParent(id, destId);
     if (cat) {
       const index = categories.findIndex((cat) => cat.name === id);
       dispatch(updateCategory({ index, cat: cat as CategoryMini }));
