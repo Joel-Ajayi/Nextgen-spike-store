@@ -9,12 +9,11 @@
 
   .header {
     font-size: 1.2rem;
-    color: $color-deep-gray-text;
+    color: $color-gray13;
     text-align: center;
 
     @media only screen and (min-width: 600px) {
       font-size: 1.5rem;
-      text-align: left;
     }
   }
 
@@ -72,7 +71,7 @@
           position: relative;
           margin: 0.5rem auto 0;
           font-size: 0.68rem;
-          color: $color-gray-text;
+          color: $color-gray11;
           @include skeletalLoader;
 
           &:empty {

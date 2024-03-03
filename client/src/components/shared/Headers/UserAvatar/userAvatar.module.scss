@@ -25,7 +25,7 @@ a {
   }
 
   .name_initials {
-    background-color: $color-deep-gray-text1;
+    background-color: $color-gray12;
     border-radius: 50%;
     border: 3px solid #292929;
     text-transform: capitalize;
@@ -51,7 +51,7 @@ a {
     flex-direction: column;
     font-weight: bold;
     font-size: 0.8rem;
-    color: $color-deep-gray-text1;
+    color: $color-gray12;
     overflow: hidden;
     text-overflow: ellipsis;
     min-width: 100%;

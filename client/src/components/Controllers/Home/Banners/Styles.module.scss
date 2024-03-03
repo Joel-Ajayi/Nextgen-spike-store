@@ -170,6 +170,10 @@
           color: white;
           align-items: center;
 
+          @media only screen and (max-width: 450px) {
+            padding-left: 0rem;
+          }
+
           .content {
             @media only screen and (min-width: 700px) {
               left: 0%;
@@ -211,7 +215,7 @@
                   }
 
                   span {
-                    color: $color-deep-gray-text;
+                    color: $color-gray13;
                   }
                 }
               }
@@ -232,17 +236,22 @@
 
               &:nth-child(1) {
                 font-weight: 600;
-                font-size: 3rem;
-                line-height: 4rem;
+                font-size: 2.6rem;
+                line-height: 2.9rem;
+
+                @media only screen and (min-width: 450px) {
+                  font-size: 3.2rem;
+                  line-height: 3.5rem;
+                }
 
                 @media only screen and (min-width: 550px) {
-                  font-size: 4rem;
-                  line-height: 4.5rem;
+                  font-size: 3.8rem;
+                  line-height: 4.1rem;
                 }
 
                 @media only screen and (min-width: 700px) {
-                  font-size: 4.5rem;
-                  line-height: 5rem;
+                  font-size: 4.4rem;
+                  line-height: 4.7rem;
                 }
               }
               &:nth-child(2) {
@@ -299,12 +308,11 @@
 
   .header {
     font-size: 1.2rem;
-    color: $color-deep-gray-text;
+    color: $color-gray13;
     text-align: center;
 
     @media only screen and (min-width: 600px) {
       font-size: 1.5rem;
-      text-align: left;
     }
   }
 
@@ -386,7 +394,7 @@
 
             a {
               opacity: 0.8;
-              color: $color-deep-gray-text1;
+              color: $color-gray12;
             }
 
             @media only screen and (min-width: 500px) {
@@ -404,9 +412,6 @@
             text-align: center;
             color: white;
             margin-bottom: 10px;
-            @media only screen and (min-width: 700px) {
-              text-align: left;
-            }
 
             &:nth-child(1) {
               font-weight: 700;

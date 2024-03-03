@@ -13,7 +13,6 @@ function Footer() {
           </Link>
           <div className={Styles.spec_info}>
             <div>Home</div>
-            <div>Features</div>
             <div>Services</div>
             <div>About Us</div>
           </div>

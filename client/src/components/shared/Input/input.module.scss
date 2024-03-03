@@ -6,7 +6,7 @@
   .content {
     position: relative;
     height: 40px;
-    color: $color-gray-text2;
+    color: $color-gray8;
     .line_focus,
     .line_blur,
     .line_error {
@@ -26,13 +26,13 @@
     }
 
     .line_blur {
-      background-color: $color-gray-text3;
+      background-color: $color-gray11;
     }
 
     .placeholder {
       position: absolute;
       height: 20px;
-      color: $color-gray-text3;
+      color: $color-gray11;
       transition: 0.2s;
     }
 

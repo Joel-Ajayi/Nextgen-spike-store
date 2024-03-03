@@ -92,11 +92,11 @@ export type Pagination<T> = {
 
 export type LandingPageData = {
   banners: CategoryBanner[];
-  offers: CategoryOffer[];
+  offers: (CategoryOffer | null)[];
   topCategories: (null | CategoryMini)[];
-  hotDeals: ProductMini[];
-  newProducts: ProductMini[];
-  popularProducts: ProductMini[];
+  hotDeals: (null | ProductMini)[];
+  newProducts: (null | ProductMini)[];
+  popularProducts: (null | ProductMini)[];
   categories: CategoryMicro[];
 };
 

@@ -22,13 +22,13 @@ export const initialState: IAppInitailState = {
     transitionFrom: "",
   },
   landingPageData: {
-    hotDeals: [],
-    popularProducts: [],
     banners: [],
-    offers: [],
-    topCategories: [null, null, null, null, null, null, null, null, null, null],
-    newProducts: [],
+    offers: [null, null],
     categories: [],
+    topCategories: [null, null, null, null, null, null, null, null, null, null],
+    newProducts: [null, null, null, null, null],
+    hotDeals: [null, null, null, null, null],
+    popularProducts: [null, null, null, null, null],
   },
   headerDropDown: [],
 };

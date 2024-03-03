@@ -102,7 +102,7 @@ const resolvers = {
       name: true,
       lvl: true,
       cId: true,
-      image: true,
+      icon: true,
       parent: {
         select: {
           id: true,
@@ -154,7 +154,7 @@ const resolvers = {
       categoriesPath = ["", ...categoriesPath];
 
       return {
-        brands: brands.map((brd) => ({ ...brd, image: [brd.image] })),
+        brands,
         categories: categories.map((cat) => ({
           ...cat,
           parent: cat.parent?.id || "",

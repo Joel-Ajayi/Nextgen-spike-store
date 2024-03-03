@@ -1,27 +1,25 @@
 import React, { useMemo } from "react";
 import Styles from "./Styles.module.scss";
 import { useAppSelector } from "../../../../store/hooks";
-import Slider from "react-slick";
+import Slider, { Settings } from "react-slick";
 import { Link } from "react-router-dom";
 import Button from "../../../shared/Button/Button";
 import { MdOutlineShoppingCart as CartIcon } from "react-icons/md";
-
-const sliderSettings = {
-  dots: true,
-  infinite: true,
-  speed: 500,
-  slidesToShow: 1,
-  slidesToScroll: 1,
-  arrow: false,
-  autoPlay: true,
-};
+import uniqid from "uniqid";
 
 function MainBanners() {
-  const isLoading = useAppSelector(
-    (state) => state.app.isLoading || state.app.isPageLoading
-  );
-
   const banners = useAppSelector((state) => state.app.landingPageData.banners);
+
+  const sliderSettings = {
+    arrows: false,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    infinite: true,
+    speed: 1000,
+    autoplay: true,
+    dots: true,
+    autoplaySpeed: 5000,
+  } as Settings;
 
   return (
     <div className={Styles.main_banners}>
@@ -30,7 +28,7 @@ function MainBanners() {
           <>
             <Slider {...sliderSettings}>
               {banners.map((banner) => (
-                <Link to="" className={Styles.banner}>
+                <Link to="" className={Styles.banner} key={uniqid()}>
                   <div
                     className={Styles.background}
                     style={{

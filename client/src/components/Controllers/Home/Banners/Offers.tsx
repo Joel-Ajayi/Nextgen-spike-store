@@ -4,26 +4,30 @@ import { useAppSelector } from "../../../../store/hooks";
 import Slider from "react-slick";
 import { Link } from "react-router-dom";
 import Button from "../../../shared/Button/Button";
+import uniqid from "uniqid";
 
 function Offers() {
   const offers = useAppSelector((state) => state.app.landingPageData.offers);
+  const isLoading = useAppSelector(
+    (state) => state.app.isLoading || state.app.isPageLoading
+  );
 
   const sliderSettings = {
     dots: offers.length > 2,
     infinite: true,
     speed: 500,
-    slidesToShow: 2,
-    slidesToScroll: 2,
+    slidesToShow: offers.length > 1 ? 2 : 1,
+    slidesToScroll: offers.length > 1 ? 2 : 1,
     arrow: false,
     autoPlay: true,
   };
 
-  return (
+  return !!offers.length ? (
     <div className={Styles.offers_wrapper}>
-      <div className={Styles.header}>Offers</div>
+      <div className={Styles.header}>Special Offers</div>
       <Slider {...sliderSettings} className={Styles.offers}>
         {offers.map((banner, i) => (
-          <Link to="" className={Styles.banner}>
+          <Link to="" key={uniqid()} className={Styles.banner}>
             {banner && (
               <>
                 <div
@@ -61,7 +65,7 @@ function Offers() {
         ))}
       </Slider>
     </div>
-  );
+  ) : null;
 }
 
 export default Offers;

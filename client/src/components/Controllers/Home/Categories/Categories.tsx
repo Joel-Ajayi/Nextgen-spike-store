@@ -4,6 +4,7 @@ import { useAppSelector } from "../../../../store/hooks";
 import Slider, { Settings } from "react-slick";
 import { Link } from "react-router-dom";
 import { BiSolidCategory as CategoryIcon } from "react-icons/bi";
+import uniqid from "uniqid";
 
 const sliderSettings = {
   dots: false,
@@ -40,7 +41,7 @@ function Categories() {
   return (
     <div className={Styles.top_cats}>
       <div className={Styles.header}>Top Categories</div>
-      <Slider {...sliderSettings} className={Styles.categories}>
+      <Slider {...sliderSettings} className={Styles.categories} key={uniqid()}>
         {categories.map((cat) => (
           <Link to="" className={Styles.category}>
             <>
