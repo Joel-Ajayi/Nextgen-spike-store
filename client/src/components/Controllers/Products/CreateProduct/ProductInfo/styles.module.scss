@@ -19,9 +19,6 @@
     overflow-y: auto;
     @include scrollbar;
 
-    &::-webkit-scrollbar {
-      width: 0px;
-    }
     .main_sections {
       width: 100%;
       display: grid;

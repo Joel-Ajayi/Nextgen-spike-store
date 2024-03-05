@@ -40,16 +40,16 @@ function ControllerHeader() {
     if (tab && !activeTabs.includes(tab)) {
       const tabPath: string[] = [];
 
-      (function findPath(data: { [x: string]: DataType }, path: string[]) {
-        Object.keys(data).forEach((dataKey) => {
-          if (dataKey !== tab) {
-            findPath(data[dataKey].items, [...path, dataKey]);
-            return;
-          }
-          tabPath.push(...path, dataKey);
-        });
-      })(data, []);
-      dispatch(setActiveTabs(tabPath));
+      // (function findPath(data: { [x: string]: DataType }, path: string[]) {
+      //   Object.keys(data).forEach((dataKey) => {
+      //     if (dataKey !== tab) {
+      //       findPath(data[dataKey].items, [...path, dataKey]);
+      //       return;
+      //     }
+      //     tabPath.push(...path, dataKey);
+      //   });
+      // })(data, []);
+      // dispatch(setActiveTabs(tabPath));
     }
   }, [tab]);
 
@@ -92,20 +92,16 @@ function ControllerHeader() {
           </Link>
         </div>
 
-        {Object.values(Pages).map((page) => {
-          if (page == Pages.DashBoard) return null;
-          const hasItems = !!Object.keys(navData[page]).length;
+        {navData.map((tab) => {
           return (
             <Dropdown
               wrapperClassName={Styles.nav_item}
               key={uniqId()}
               listClassName={Styles.nav_item_dropdown}
-              title={navData[page].title}
-              showCaret
-              onClick={hasItems ? () => {} : (null as any)}
-              link={!hasItems ? navData[page].link() : ""}
+              title={tab.title}
+              link={tab?.link}
               showToolTip={false}
-              items={Object.values(navData[page].items)}
+              items={tab.items}
             />
           );
         })}
@@ -121,10 +117,8 @@ function ControllerHeader() {
             )
           }
           listClassName={Styles.user_dropdown_list}
-          titleClassName={!isAuthenticated ? Styles.login_button : ""}
-          showCaret={false}
           // items={loginItemsDropdown}
-          position="r"
+          pos="t-m"
         />
         <div className={Styles.side_bar}>
           <ControllerSideBar isFixed />

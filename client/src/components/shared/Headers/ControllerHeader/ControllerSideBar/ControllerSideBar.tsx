@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from "react";
 import Styles from "./sidebar.module.scss";
 import { HiBars3BottomLeft as SideBarIcon } from "react-icons/hi2";
 import { CONSTS } from "../../../../../const";
-import TabSideBar from "./TabSideBar/TabSideBar";
+// import TabSideBar from "./TabSideBar/TabSideBar";
 import controllerStateSlice from "../../../../../store/controller/states";
 import { useAppDispatch, useAppSelector } from "../../../../../store/hooks";
 
@@ -66,10 +66,10 @@ function ControllerSideBar({ isFixed }: SideBarProp) {
         className={isFixed ? Styles.content_fixed : Styles.content}
       >
         <div className={Styles.bar} style={style} id={CONSTS.ids.appSideBar}>
-          <TabSideBar
+          {/* <TabSideBar
             isFixed={isFixed}
             toggleBar={() => handleToggle(undefined, true)}
-          />
+          /> */}
         </div>
       </div>
     </div>

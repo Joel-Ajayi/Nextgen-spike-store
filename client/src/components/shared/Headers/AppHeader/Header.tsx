@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import Styles from "./header.module.scss";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import ProductsSearch from "../../Search/ProductsSearch/ProductsSearch";
-import Dropdown from "../../Dropdown/Dropdown";
+import Dropdown, { DropdownProps } from "../../Dropdown/Dropdown";
 import { MdOutlineShoppingCart as CartIcon } from "react-icons/md";
 import { MdOutlineEmail as MailsIcon } from "react-icons/md";
 import { MdFavoriteBorder as FavoriteIcon } from "react-icons/md";
@@ -15,9 +15,6 @@ import { FiSettings as SettingsIcon } from "react-icons/fi";
 import { IoMdTrendingUp as Trending } from "react-icons/io";
 import { ReactComponent as QuestionIcon } from "../../../../images/icons/question-mark.svg";
 import { MdOutlineLocalOffer as OfferIcon } from "react-icons/md";
-import DropdownItem, {
-  DropdownItemProps,
-} from "../../Dropdown/DropdownItem/DropdownItem";
 import uniqId from "uniqid";
 import appSlice from "../../../../store/appState";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
@@ -32,77 +29,93 @@ export const signOutItem = (logoutFunc?: () => void) =>
     icon: <LogoutIcon />,
     title: "Logout",
     onClick: logoutFunc,
-  } as DropdownItemProps);
+  } as DropdownProps);
 
-export const authItems = [
-  { icon: <SettingsIcon />, title: "Account Settings", link: () => "/profile" },
-  { icon: <CartIcon />, title: "Orders", link: () => "/profile?dir=ord" },
-  {
-    icon: <MailsIcon />,
-    title: "Notifications",
-    link: () => "/profile?dir=ord",
-  },
-  {
-    icon: <FavoriteIcon />,
-    title: "WhishList",
-    link: () => "/profile?dir=ord",
-  },
-] as DropdownItemProps[];
-
-export const controllerItems = (roles: Roles[]) =>
-  [
-    (roles.includes(Roles.CategoryAndBrand) ||
-      roles.includes(Roles.Global)) && {
-      icon: <CategoryIcon />,
-      title: "Categories",
+export const authItems = {
+  title: "",
+  items: [
+    {
+      icon: <SettingsIcon />,
+      title: "Account Settings",
       link: () => "/profile",
     },
-    (roles.includes(Roles.Order) || roles.includes(Roles.Global)) && {
-      icon: <CartIcon />,
-      title: "Orders",
+    { icon: <CartIcon />, title: "Orders", link: () => "/profile?dir=ord" },
+    {
+      icon: <MailsIcon />,
+      title: "Notifications",
       link: () => "/profile?dir=ord",
     },
-    (roles.includes(Roles.Product) || roles.includes(Roles.Global)) && {
-      icon: <ProductIcon />,
-      title: "Products",
+    {
+      icon: <FavoriteIcon />,
+      title: "WhishList",
       link: () => "/profile?dir=ord",
     },
-    (roles.includes(Roles.SuperAdmin) || roles.includes(Roles.Global)) && {
-      icon: <UsersIcon />,
-      title: "Users",
-      link: () => "/profile?dir=ord",
-    },
-  ] as DropdownItemProps[];
+  ],
+} as DropdownProps;
 
-export const moreDropdown = [
-  {
-    icon: <Trending />,
-    title: "Trending Products",
-    link: () => "/#",
-  },
-  {
-    icon: <OfferIcon />,
-    title: "Special Offers",
-    link: () => "/#",
-  },
-  {
-    icon: <QuestionIcon />,
-    title: "Customer Services",
-    link: () => "/#",
-  },
-] as DropdownItemProps[];
+export const controllerItems = (roles: Roles[]) =>
+  ({
+    title: "",
+    items: [
+      (roles.includes(Roles.CategoryAndBrand) ||
+        roles.includes(Roles.Global)) && {
+        icon: <CategoryIcon />,
+        title: "Categories",
+        link: () => "/profile",
+      },
+      (roles.includes(Roles.Order) || roles.includes(Roles.Global)) && {
+        icon: <CartIcon />,
+        title: "Orders",
+        link: () => "/profile?dir=ord",
+      },
+      (roles.includes(Roles.Product) || roles.includes(Roles.Global)) && {
+        icon: <ProductIcon />,
+        title: "Products",
+        link: () => "/profile?dir=ord",
+      },
+      (roles.includes(Roles.SuperAdmin) || roles.includes(Roles.Global)) && {
+        icon: <UsersIcon />,
+        title: "Users",
+        link: () => "/profile?dir=ord",
+      },
+    ],
+  } as DropdownProps);
 
-export const notAuthItem = [
-  {
-    title: "Already Signed Up? Log In!",
-    link: () => "/#",
-  },
-  {
-    icon: <QuestionIcon />,
-    title: "New Customer? Sign Up!",
-    link: () => "/#",
-  },
-] as DropdownItemProps[];
+export const moreDropdown = {
+  item: "",
+  items: [
+    {
+      icon: <Trending />,
+      title: "Trending Products",
+      link: () => "/#",
+    },
+    {
+      icon: <OfferIcon />,
+      title: "Special Offers",
+      link: () => "/#",
+    },
+    {
+      icon: <QuestionIcon />,
+      title: "Customer Services",
+      link: () => "/#",
+    },
+  ],
+} as DropdownProps;
+
+export const notAuthItem = {
+  title: "",
+  items: [
+    {
+      title: "Already Signed Up? Log In!",
+      link: () => "/#",
+    },
+    {
+      icon: <QuestionIcon />,
+      title: "New Customer? Sign Up!",
+      link: () => "/#",
+    },
+  ],
+} as DropdownProps;
 
 function Header() {
   const { pathname } = useLocation();
@@ -131,37 +144,18 @@ function Header() {
   };
 
   useEffect(() => {
-    const dropDownItems = isAuthenticated
-      ? [
-          authItems,
-          controllerItems(roles),
-          moreDropdown,
-          [signOutItem(handleSignOut)],
-        ]
-      : [notAuthItem, moreDropdown, [signOutItem(handleSignOut)]];
-
+    const dropDownItems = (
+      isAuthenticated
+        ? [
+            { ...authItems },
+            controllerItems(roles),
+            moreDropdown,
+            signOutItem(handleSignOut),
+          ]
+        : [notAuthItem, moreDropdown, signOutItem(handleSignOut)]
+    ) as DropdownProps[];
     dispatch(setHeaderDropDown(dropDownItems));
   }, [isAuthenticated]);
-
-  const dropDown = useMemo(
-    () =>
-      headerDropDown.map((item) => (
-        <div className={Styles.sub_dropdown}>
-          {item.map((child) => (
-            <DropdownItem
-              key={uniqId()}
-              title={child.title}
-              icon={child.icon}
-              link={child.link}
-              onClick={child?.onClick}
-              highlight
-            />
-          ))}
-        </div>
-      )),
-    [headerDropDown]
-  );
-
   return (
     <>
       <div className={Styles.headerWrapper}>
@@ -179,14 +173,16 @@ function Header() {
 
           <ProductsSearch className={Styles.search_bar} />
           <div className={Styles.other_items}>
-            <Dropdown
-              wrapperClassName={Styles.dropdown}
-              onClick={handleSignInButton}
-              title={<UserAvatar size={35} isLink={false} />}
-              position="r"
-              showCaret={false}
-              items={dropDown}
-            />
+            <div>
+              <Dropdown
+                wrapperClassName={Styles.dropdown}
+                onClick={handleSignInButton}
+                title={<UserAvatar size={35} isLink={false} />}
+                items={headerDropDown}
+                pos="t-m"
+                align="c"
+              />
+            </div>
             <Link to="#" className={Styles.tab}>
               <SearchIcon className={Styles.icon} />
             </Link>

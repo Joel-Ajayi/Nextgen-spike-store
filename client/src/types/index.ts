@@ -1,3 +1,4 @@
+import { DropdownProps } from "../components/shared/Dropdown/Dropdown";
 import { DropdownItemProps } from "../components/shared/Dropdown/DropdownItem/DropdownItem";
 import {
   CategoryBanner,
@@ -15,7 +16,7 @@ export interface IAppInitailState {
   statusCode: number;
   networkError: boolean;
   message: IMessage;
-  headerDropDown: DropdownItemProps[][];
+  headerDropDown: DropdownProps[];
   landingPageData: LandingPageData;
 }
 

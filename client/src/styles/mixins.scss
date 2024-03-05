@@ -18,14 +18,14 @@
 
   &::-webkit-scrollbar {
     height: 10px;
-    width: 5px;
+    width: 0px;
     position: relative;
   }
   &::-webkit-scrollbar-track {
     position: relative;
   }
   &::-webkit-scrollbar-thumb {
-    background-color: darkgrey;
+    background-color: white;
     opacity: 0.5;
     border-radius: 5px;
   }

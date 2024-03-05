@@ -11,7 +11,6 @@ a {
   display: flex;
   align-items: center;
   overflow: hidden;
-
   text-overflow: ellipsis;
 
   .avatar {
@@ -43,19 +42,19 @@ a {
         stroke-width: 10px;
       }
     }
-
     @include skeletalLoader;
   }
 
   .info {
     flex-direction: column;
     font-weight: bold;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
     color: $color-gray12;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    min-width: 100%;
     @include skeletalLoader;
+
+    @media screen and (min-width: 450px) {
+      font-size: 0.8rem;
+    }
   }
 
   .show_info {

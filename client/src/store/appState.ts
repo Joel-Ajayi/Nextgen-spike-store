@@ -6,6 +6,7 @@ import {
   StatusCodes,
 } from "../types";
 import { DropdownItemProps } from "../components/shared/Dropdown/DropdownItem/DropdownItem";
+import { DropdownProps } from "../components/shared/Dropdown/Dropdown";
 
 export const initialState: IAppInitailState = {
   showModal: false,
@@ -61,10 +62,7 @@ const appSlice = createSlice({
     setLandingPageData: (state, action: PayloadAction<LandingPageData>) => {
       return { ...state, landingPageData: action.payload };
     },
-    setHeaderDropDown: (
-      state,
-      action: PayloadAction<DropdownItemProps[][]>
-    ) => {
+    setHeaderDropDown: (state, action: PayloadAction<DropdownProps[]>) => {
       return { ...state, headerDropDown: action.payload };
     },
   },

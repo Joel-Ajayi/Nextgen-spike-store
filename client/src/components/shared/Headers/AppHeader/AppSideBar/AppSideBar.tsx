@@ -20,6 +20,7 @@ import userReq from "../../../../../requests/user";
 import userSlice from "../../../../../store/userState";
 import { useNavigate } from "react-router-dom";
 import { Roles } from "../../../../../types/user";
+import Dropdown from "../../../Dropdown/Dropdown";
 type BarProps = {
   className?: string;
 };
@@ -91,27 +92,20 @@ function AppSideBar({ className = "" }: BarProps) {
       <SideBarIcon className={Styles.icon} onClick={handleBarAction} />
       <div className={Styles.content} style={wrapperStyle} ref={wrapperRef}>
         <div className={Styles.bar} style={style} id={CONSTS.ids.appSideBar}>
-          {headerDropDown.map((items, i) => (
-            <section>
-              {i === 0 && (
-                <div className={Styles.avatar}>
-                  <UserAvatar size={55} showInfo />
-                </div>
-              )}
-              <ul className={Styles.items}>
-                {items.map((item: DropdownItemProps) => (
-                  <DropdownItem
-                    key={uniqId()}
-                    title={item.title}
-                    icon={item.icon}
-                    link={item.link}
-                    onClick={item?.onClick}
-                    highlight
-                  />
-                ))}
-              </ul>
-            </section>
-          ))}
+          <Dropdown
+            wrapperClassName={Styles.dropdown}
+            listClassName={Styles.items}
+            titleClassName={Styles.avatar}
+            showToolTip={false}
+            listOnHover={false}
+            title={
+              <div className={Styles.avatar_inner}>
+                <UserAvatar size={55} showInfo />
+              </div>
+            }
+            items={headerDropDown}
+            listOnLoad
+          />
         </div>
       </div>
     </div>
