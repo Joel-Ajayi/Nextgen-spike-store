@@ -32,6 +32,11 @@ function Product({ product }: Props) {
   return (
     <div className={Styles.product}>
       <div className={Styles.image}>
+        {product && (
+          <div className={Styles.favorite_icon}>
+            <FavoriteIcon />
+          </div>
+        )}
         {product && <img src={`/uploads/${product.images[0]}`} />}
       </div>
       <div className={Styles.name}>{product && product.name}</div>
@@ -72,15 +77,9 @@ function Product({ product }: Props) {
           </div>
         )}
       </div>
-      <div className={Styles.actions}>
-        <div>
-          <FavoriteIcon className={Styles.favorite_icon} />
-        </div>
-        <div>
-          <AddIcon />
-          <CartIcon className={Styles.cart_icon} />
-          <span>Add To Cart</span>
-        </div>
+      <div className={Styles.add_to_cart}>
+        <CartIcon className={Styles.cart_icon} />
+        Add To Cart
       </div>
     </div>
   );

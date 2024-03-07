@@ -29,6 +29,7 @@ export type DropdownProps = {
   onClick?: (title: string) => void;
   align?: "r" | "c" | "l";
   pos?: "m-r" | "m-l" | "r-m" | "m" | "t-m";
+  childPos?: "m-r" | "m-l" | "r-m" | "m" | "t-m";
   spacebyLine?: boolean;
   showToolTip?: boolean;
   lvl?: number;
@@ -41,7 +42,8 @@ export default function Dropdown({
   icon,
   onClick,
   items = [],
-  pos = "m",
+  pos = "t-m",
+  childPos = "m",
   listClassName = "",
   wrapperClassName = "",
   titleClassName = "",
@@ -59,7 +61,9 @@ export default function Dropdown({
   const [itemsStyles, setItemsStyles] = useState<CSSProperties>({});
   const rootRef = useRef<HTMLDivElement | null>(null);
   const myRef = useRef<HTMLDivElement | null>(null);
+
   const isRoot = lvl === 1;
+  const isVerticalPos = pos === "m" || pos === "t-m";
 
   const alignments = {
     l: Styles.align_l,
@@ -68,6 +72,8 @@ export default function Dropdown({
   };
 
   const tooltipClass = (() => {
+    if (isRoot) return Styles.align_b;
+
     switch (pos) {
       case "r-m":
       case "m-r":
@@ -83,14 +89,12 @@ export default function Dropdown({
     switch (pos) {
       case "m":
         setItemsStyles({});
-        return { position: "relative" };
+        return { position: "static" };
       case "t-m":
         let marginTop = "-80vh";
-        if (myRef.current) {
-          marginTop = `${-myRef.current.clientHeight - 2}px`;
-        } else if (isRoot && rootRef.current) {
-          marginTop = `${-rootRef.current.clientHeight - 2}px`;
-        }
+        const ref = !isRoot ? myRef.current : rootRef.current;
+        if (ref && ref.clientHeight) marginTop = `${-ref.clientHeight - 2}px`;
+
         setItemsStyles({ marginTop: !showList ? marginTop : 0 });
         return {
           position: !isRoot ? "relative" : "absolute",
@@ -98,25 +102,27 @@ export default function Dropdown({
         };
       case "m-r":
         setItemsStyles({});
-        setItemsStyles({});
         return {
           left: `${showList ? 100 : 0}%`,
           top: 0,
-          paddingLeft: "0.2rem",
+          paddingLeft: "0.4rem",
+          position: "absolute",
         };
       case "m-l":
         setItemsStyles({});
         return {
           left: `-${showList ? 100 : 0}%`,
           top: 0,
-          paddingRight: "0.2rem",
+          paddingRight: "0.4rem",
           flexDirection: "row-reverse",
+          position: "absolute",
         };
       case "r-m":
         setItemsStyles({});
         return {
           left: `${!showList ? 100 : 0}%`,
           top: 0,
+          position: "absolute",
         };
       default:
         return {};
@@ -124,26 +130,26 @@ export default function Dropdown({
   };
 
   const setPosStyles = (showList: boolean) => {
-    if (!rootRef.current) {
-      rootRef.current = document.getElementById(rootId) as HTMLDivElement;
-    }
+    const showOveflow = !(isVerticalPos || pos === "r-m");
 
     if (rootRef.current) {
-      if (!isRoot && pos !== "r-m") {
-        if (showList) {
-          rootRef.current.style.overflow = "visible";
-        }
+      if (!isRoot && showOveflow) {
+        if (showList) rootRef.current.style.overflow = "visible";
       } else {
         rootRef.current.style.overflow = "hidden";
       }
     }
 
-    setDropDownStyle({ ...getBounds(showList), zIndex });
+    setDropDownStyle({ ...getBounds(showList), zIndex, display: "flex" });
     setShowList(showList);
   };
 
   useLayoutEffect(() => {
-    setDropDownStyle({ ...getBounds(false), zIndex });
+    if (!rootRef.current) {
+      rootRef.current = document.getElementById(rootId) as HTMLDivElement;
+    }
+
+    setDropDownStyle({ ...getBounds(false), zIndex, display: "flex" });
     return () => {
       setPosStyles(false);
     };
@@ -152,8 +158,8 @@ export default function Dropdown({
   const handleShowList = (show = !showList) => {
     if (items.length && !!title && !listOnLoad && showTitle) {
       setPosStyles(show);
-      if (onClick && typeof title === "string") onClick(title);
     }
+    if (onClick && typeof title === "string") onClick(title);
   };
 
   const handleHover = (show: boolean) => {
@@ -162,7 +168,7 @@ export default function Dropdown({
 
   const zIndex = useMemo(() => {
     if (pos === "r-m") return 1;
-    return pos !== "m-r" && pos !== "m-l" ? 0 : -1;
+    return pos !== "m-r" && pos !== "m-l" ? -1 : -2;
   }, [showList]);
 
   const unmount = isRoot ? !showList : false;
@@ -177,10 +183,12 @@ export default function Dropdown({
             icon={item?.icon}
             link={item?.link}
             onClick={item?.onClick}
-            pos={item?.pos}
+            pos={item?.childPos || childPos}
+            childPos={item?.childPos || childPos}
             items={item.items}
             showTitle={item?.showTitle}
             listOnHover={listOnHover}
+            listOnLoad={item?.listOnLoad}
             lvl={lvl + 1}
           />
         </li>
@@ -193,7 +201,7 @@ export default function Dropdown({
       !!title &&
       showTitle && (
         <>
-          {showToolTip && showList && showTitle && !!title && (
+          {showToolTip && showList && showTitle && !!title && pos !== "r-m" && (
             <div className={`${Styles.tooltip} ${tooltipClass}`}>
               <div className={`${Styles.icon} `} />
             </div>
@@ -211,9 +219,17 @@ export default function Dropdown({
     );
   }, [showList, tooltipClass]);
 
+  const itemsClassName = useMemo(() => {
+    return `${Styles.items} ${listClassName} ${
+      pos === "r-m" && showList ? Styles.overflow : ""
+    } ${isVerticalPos || pos === "r-m" ? Styles.border_bottom : ""} ${
+      !(isVerticalPos || pos === "r-m") ? Styles.border : ""
+    } ${isVerticalPos ? Styles.no_padding : ""}`;
+  }, [showList]);
+
   return (
     <div
-      className={`${wrapperClassName} ${Styles.dropdown_wrapper} `}
+      className={`${wrapperClassName} ${Styles.dropdown_wrapper}`}
       style={{ position: !isRoot ? "static" : "relative" }}
       onPointerEnter={() => handleHover(true)}
       onPointerLeave={() => handleHover(false)}
@@ -245,12 +261,7 @@ export default function Dropdown({
           id={rootId}
           style={dropDownStyle}
         >
-          <div
-            className={`${Styles.items} ${listClassName} ${
-              pos === "r-m" && showList ? Styles.overflow : ""
-            }`}
-            style={itemsStyles}
-          >
+          <div className={itemsClassName} style={itemsStyles}>
             {pos === "r-m" && (
               <div
                 className={Styles.return_back}

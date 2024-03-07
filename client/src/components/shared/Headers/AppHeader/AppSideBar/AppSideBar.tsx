@@ -20,7 +20,14 @@ import userReq from "../../../../../requests/user";
 import userSlice from "../../../../../store/userState";
 import { useNavigate } from "react-router-dom";
 import { Roles } from "../../../../../types/user";
-import Dropdown from "../../../Dropdown/Dropdown";
+import Dropdown, { DropdownProps } from "../../../Dropdown/Dropdown";
+import {
+  authItems,
+  controllerItems,
+  moreDropdown,
+  notAuthItem,
+  signOutItem,
+} from "../Header";
 type BarProps = {
   className?: string;
 };
@@ -30,7 +37,9 @@ function AppSideBar({ className = "" }: BarProps) {
   const navigate = useNavigate();
 
   const { isAuthenticated, roles } = useAppSelector((state) => state.user);
-  const headerDropDown = useAppSelector((state) => state.app.headerDropDown);
+  const { categories, topCategories } = useAppSelector(
+    (state) => state.app.landingPageData
+  );
   const { resetUserState } = userSlice.actions;
 
   const [showBar, setShowBar] = useState(false);
@@ -87,6 +96,40 @@ function AppSideBar({ className = "" }: BarProps) {
     };
   }, [wrapperRef.current, style]);
 
+  const getCategoryChildren = (parent = ""): DropdownProps[] => {
+    return categories
+      .filter((c) => c.parent === parent)
+      .map((c) => ({
+        title: c.name,
+        items: getCategoryChildren(c.name),
+        pos: "r-m",
+      }));
+  };
+
+  const headerDropDoown: DropdownProps[] = useMemo(() => {
+    return isAuthenticated
+      ? [
+          { ...authItems },
+          {
+            title: "Top Categories",
+            items: [
+              ...topCategories
+                .filter((c, i) => !!c && i < 5)
+                .map((c) => ({ title: c?.name })),
+              {
+                title: "All Categories",
+                items: getCategoryChildren(),
+                childPos: "r-m",
+              },
+            ],
+          },
+          controllerItems(roles),
+          moreDropdown,
+          signOutItem(handleSignOut),
+        ]
+      : [notAuthItem, moreDropdown, signOutItem(handleSignOut)];
+  }, [isAuthenticated, topCategories, categories]);
+
   return (
     <div className={`${Styles.bar_wrapper} ${className}`}>
       <SideBarIcon className={Styles.icon} onClick={handleBarAction} />
@@ -103,7 +146,8 @@ function AppSideBar({ className = "" }: BarProps) {
                 <UserAvatar size={55} showInfo />
               </div>
             }
-            items={headerDropDown}
+            pos="m"
+            items={headerDropDoown}
             listOnLoad
           />
         </div>

@@ -16,7 +16,6 @@ export interface IAppInitailState {
   statusCode: number;
   networkError: boolean;
   message: IMessage;
-  headerDropDown: DropdownProps[];
   landingPageData: LandingPageData;
 }
 

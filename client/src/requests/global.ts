@@ -13,7 +13,7 @@ class GlobalReq {
           hotDeals { brand category discount id images name price numSold numReviews rating }
           newProducts { brand category discount id images name price numSold numReviews rating }
           popularProducts { brand category discount id images name price numSold numReviews rating }
-          
+          categories { id lvl cId name parent icon }
         }
       }
     `,

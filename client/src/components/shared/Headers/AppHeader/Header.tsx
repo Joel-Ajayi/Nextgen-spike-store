@@ -32,7 +32,7 @@ export const signOutItem = (logoutFunc?: () => void) =>
   } as DropdownProps);
 
 export const authItems = {
-  title: "",
+  title: "Account",
   items: [
     {
       icon: <SettingsIcon />,
@@ -55,7 +55,7 @@ export const authItems = {
 
 export const controllerItems = (roles: Roles[]) =>
   ({
-    title: "",
+    title: "Controller",
     items: [
       (roles.includes(Roles.CategoryAndBrand) ||
         roles.includes(Roles.Global)) && {
@@ -121,10 +121,11 @@ function Header() {
   const { pathname } = useLocation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-
+  const isLoading = useAppSelector((state) => state.app.isLoading);
   const { isAuthenticated, roles } = useAppSelector((state) => state.user);
-  const headerDropDown = useAppSelector((state) => state.app.headerDropDown);
-  const setHeaderDropDown = appSlice.actions.setHeaderDropDown;
+  const categories = useAppSelector(
+    (state) => state.app.landingPageData.categories
+  );
 
   const actions = appSlice.actions;
   const { resetUserState } = userSlice.actions;
@@ -143,19 +144,31 @@ function Header() {
     navigate("/signin", { replace: false });
   };
 
-  useEffect(() => {
-    const dropDownItems = (
-      isAuthenticated
-        ? [
-            { ...authItems },
-            controllerItems(roles),
-            moreDropdown,
-            signOutItem(handleSignOut),
-          ]
-        : [notAuthItem, moreDropdown, signOutItem(handleSignOut)]
-    ) as DropdownProps[];
-    dispatch(setHeaderDropDown(dropDownItems));
-  }, [isAuthenticated]);
+  const headerDropDoown: DropdownProps[] = useMemo(() => {
+    if (isLoading) return [];
+    return isAuthenticated
+      ? [
+          { ...authItems, showTitle: false },
+          { ...controllerItems(roles), showTitle: false },
+          moreDropdown,
+          signOutItem(handleSignOut),
+        ]
+      : [notAuthItem, moreDropdown, signOutItem(handleSignOut)];
+  }, [isAuthenticated, isLoading]);
+
+  const categoryTree = useMemo(
+    () =>
+      (function getChildren(parent = "", lvl = 0): DropdownProps[] {
+        return categories
+          .filter((c) => c.parent === parent)
+          .map((c) => ({
+            title: c.name,
+            items: getChildren(c.name, lvl + 1),
+          }));
+      })(),
+    [categories.length]
+  );
+
   return (
     <>
       <div className={Styles.headerWrapper}>
@@ -178,8 +191,7 @@ function Header() {
                 wrapperClassName={Styles.dropdown}
                 onClick={handleSignInButton}
                 title={<UserAvatar size={35} isLink={false} />}
-                items={headerDropDown}
-                pos="t-m"
+                items={headerDropDoown}
                 align="c"
               />
             </div>
@@ -203,10 +215,19 @@ function Header() {
         </div>
 
         <div className={Styles.sub_header}>
-          <Link to="" className={Styles.category}>
-            <CategoryIcon className={Styles.icon} />
-            <span>Categories</span>
-          </Link>
+          <Dropdown
+            title={
+              <div className={Styles.category_inner}>
+                <CategoryIcon className={Styles.icon} />
+                <span>Categories</span>
+              </div>
+            }
+            titleClassName={Styles.category}
+            childPos="m-r"
+            align="r"
+            items={categoryTree}
+          />
+
           <div className={Styles.others}>
             <Link to="">Trending Products</Link>
             <Link to="">Special Offers</Link>

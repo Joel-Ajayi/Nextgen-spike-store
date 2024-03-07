@@ -31,7 +31,6 @@ export const initialState: IAppInitailState = {
     hotDeals: [null, null, null, null, null],
     popularProducts: [null, null, null, null, null],
   },
-  headerDropDown: [],
 };
 
 const appSlice = createSlice({
@@ -61,9 +60,6 @@ const appSlice = createSlice({
     },
     setLandingPageData: (state, action: PayloadAction<LandingPageData>) => {
       return { ...state, landingPageData: action.payload };
-    },
-    setHeaderDropDown: (state, action: PayloadAction<DropdownProps[]>) => {
-      return { ...state, headerDropDown: action.payload };
     },
   },
 });

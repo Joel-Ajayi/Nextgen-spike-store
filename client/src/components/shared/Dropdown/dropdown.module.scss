@@ -2,7 +2,6 @@
 @import "../../../styles/mixins.scss";
 
 .dropdown_wrapper {
-  position: relative;
   flex-direction: column;
   height: inherit;
   z-index: 1;
@@ -36,7 +35,7 @@
 
       &.align_r,
       &.align_l {
-        top: calc(50% + 0.35rem);
+        top: 50%;
       }
 
       &.align_l {
@@ -55,7 +54,7 @@
         left: inherit;
         border-width: 0.35rem;
         border-style: solid;
-        border-color: transparent transparent $color-gray9 transparent;
+        border-color: transparent transparent $color-gray4 transparent;
       }
 
       .icon {
@@ -104,12 +103,11 @@
 
   & > .dropdown {
     flex: 1;
-    display: flex;
-    position: absolute;
+    display: none;
     min-width: 250px;
-    width: 100%;
     transition: left 0.25s linear, right 0.25s linear, top 0.25s linear;
     flex-direction: row;
+    width: 100%;
 
     &.align_l {
       right: 100%;
@@ -130,9 +128,20 @@
       transition: margin 0.25s linear;
       padding: 0.3rem 0;
       width: 100%;
-      background-color: white;
       border-radius: 5px;
-      border-bottom: 1px solid $color-gray3;
+      background-color: white;
+
+      &.border {
+        border: 1px solid $color-gray4;
+      }
+
+      &.border_bottom {
+        border-bottom: 1px solid $color-gray4;
+      }
+
+      &.no_padding {
+        padding: 0;
+      }
 
       &.overflow {
         min-height: inherit;
@@ -157,7 +166,6 @@
       }
 
       & > ul {
-        overflow: auto;
         @include scrollbar();
         flex: 1;
         list-style-type: none;
