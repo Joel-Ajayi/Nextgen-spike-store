@@ -25,14 +25,22 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
 function UserRoute() {
+  const { pathname } = useLocation();
+
   const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
-  return isAuthenticated ? <Outlet /> : <Navigate to="/signin" replace />;
+  return isAuthenticated ? (
+    <Outlet />
+  ) : (
+    <Navigate to={`/signin?redirect=${pathname.slice(1)}`} replace />
+  );
 }
 
 function AdminRoute() {
+  const { pathname } = useLocation();
   const { isAuthenticated, roles } = useAppSelector((state) => state.user);
   // check authentication
-  if (!isAuthenticated) return <Navigate to="/signin" replace />;
+  if (!isAuthenticated)
+    return <Navigate to={`/signin?redirect=${pathname.slice(1)}`} replace />;
   // check authorization
   return !roles.includes(Roles.User) ? <Outlet /> : <Page404 />;
 }

@@ -6,10 +6,9 @@ import appSlice from "../../store/appState";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import userReq from "../../requests/user";
 import { SignInFieds, SignInForm } from "../../types/user";
-import { MessageType } from "../../types";
 import userSlice from "../../store/userState";
-import validator from "../../validators";
 import userValidator from "../../validators/user";
+import Button from "../shared/Button/Button";
 
 function SignIn() {
   let [params] = useSearchParams();
@@ -25,6 +24,7 @@ function SignIn() {
 
   const [isSignIn, setIsSignIn] = useState(true);
   const [formData, setFormData] = useState<SignInForm>({});
+  const [isLoading, setIsLoading] = useState(false);
 
   useLayoutEffect(() => {
     if (params.get("signup") === "true") {
@@ -49,14 +49,17 @@ function SignIn() {
   };
 
   const onSubmit = async (e: React.FormEvent) => {
+    if (isLoading) return;
+
     e.preventDefault();
     e.stopPropagation();
-
+    setIsLoading(true);
     const user = await userReq.signIn(formData, isSignIn);
     if (user) {
       dispatch(setUserState({ ...user, isAuthenticated: true }));
       dispatch(setShowModal(false));
     }
+    setIsLoading(false);
   };
 
   return (
@@ -64,6 +67,7 @@ function SignIn() {
       <div className={Styles.content}>
         <div className={Styles.login_wrapper}>
           <div className={Styles.info_wrapper}>
+            <img src="/uploads/login_img" />
             <div className={Styles.info}>
               {isSignIn && (
                 <>
@@ -111,26 +115,23 @@ function SignIn() {
               />
               <div className={Styles.info}>
                 <p>
-                  By continuing, you agree to Flipkart's Terms of Use and
+                  By continuing, you agree to NextgenSpike's Terms of Use and
                   Privacy Policy.
                 </p>
               </div>
               <div>
-                {!isSignIn && (
-                  <button className={Styles.login_button}>
-                    Create Account
-                  </button>
-                )}
-                {isSignIn && (
-                  <button className={Styles.login_button}>Login</button>
-                )}
+                <Button
+                  className={Styles.submit_button}
+                  isLoading={isLoading}
+                  type="submit"
+                  value={isSignIn ? "Log In" : "Create Account"}
+                />
               </div>
             </form>
-            <div className={Styles.toggle_auth}>
-              {isSignIn && (
-                <p onClick={changeAuth}>New to Flipkart ?. Create Account</p>
-              )}
-              {!isSignIn && <p onClick={changeAuth}>Existing User ?. Log in</p>}
+            <div className={Styles.toggle_auth} onClick={changeAuth}>
+              {isSignIn
+                ? "New to NextgenSpike ?. Create Account"
+                : "Existing User ?. Log in"}
             </div>
           </div>
         </div>

@@ -163,7 +163,11 @@ export default function Dropdown({
   };
 
   const handleHover = (show: boolean) => {
-    if (listOnHover && showList !== show) handleShowList(show);
+    if (listOnHover && showList !== show) {
+      if (items.length && !!title && !listOnLoad && showTitle) {
+        setPosStyles(show);
+      }
+    }
   };
 
   const zIndex = useMemo(() => {

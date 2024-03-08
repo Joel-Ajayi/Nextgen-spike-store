@@ -107,12 +107,12 @@ export const notAuthItem = {
   items: [
     {
       title: "Already Signed Up? Log In!",
-      link: () => "/#",
+      link: () => "/signin",
     },
     {
       icon: <QuestionIcon />,
       title: "New Customer? Sign Up!",
-      link: () => "/#",
+      link: () => "/signin?signup=true",
     },
   ],
 } as DropdownProps;
@@ -153,7 +153,7 @@ function Header() {
           moreDropdown,
           signOutItem(handleSignOut),
         ]
-      : [notAuthItem, moreDropdown, signOutItem(handleSignOut)];
+      : [notAuthItem, moreDropdown];
   }, [isAuthenticated, isLoading]);
 
   const categoryTree = useMemo(

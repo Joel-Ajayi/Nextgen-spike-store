@@ -127,7 +127,7 @@ function AppSideBar({ className = "" }: BarProps) {
           moreDropdown,
           signOutItem(handleSignOut),
         ]
-      : [notAuthItem, moreDropdown, signOutItem(handleSignOut)];
+      : [notAuthItem, moreDropdown];
   }, [isAuthenticated, topCategories, categories]);
 
   return (
