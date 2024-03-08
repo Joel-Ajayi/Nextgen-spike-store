@@ -40,18 +40,20 @@ function Product({ product }: Props) {
         {product && <img src={`/uploads/${product.images[0]}`} />}
       </div>
       <div className={Styles.name}>{product && product.name}</div>
-      <div className={Styles.soldandrating}>
-        <div className={Styles.rating}>
-          {product && product.rating > 0 && product.rating <= 3 && (
+      <div className={Styles.rating}>
+        {[0, 1, 2, 3, 4].map((rating) => {
+          return rating < (product?.rating || 0) &&
+            (product?.rating || 0) < rating + 1 ? (
             <FaStarHalfStroke className={Styles.star} />
-          )}
-          {(!product ||
-            (product && (product.rating < 1 || product.rating > 3))) && (
-            <GiRoundStar className={Styles.star} />
-          )}
-          <span>{product?.rating || 0}</span>
-        </div>
-        <div className={Styles.sold}>{`${product?.numSold || 0} Sold`}</div>
+          ) : (
+            <GiRoundStar
+              className={`${
+                rating < (product?.rating || 0) ? Styles.star : Styles.star_less
+              }`}
+            />
+          );
+        }, [])}
+        {`(${product?.numSold || 0})`}
       </div>
       <div className={Styles.priceanddiscount}>
         <div

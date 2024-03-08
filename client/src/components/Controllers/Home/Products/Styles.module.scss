@@ -44,7 +44,11 @@
     grid-template-columns: repeat(2, calc(calc(100% / 2) - 0.8rem));
     place-items: center;
 
-    @media only screen and (min-width: 800px) {
+    @media only screen and (min-width: 650px) {
+      grid-template-columns: repeat(3, calc(calc(100% / 3) - 1.15rem));
+    }
+
+    @media only screen and (min-width: 900px) {
       grid-template-columns: repeat(4, calc(calc(100% / 4) - 1.15rem));
     }
   }
@@ -58,23 +62,20 @@
 
   .image {
     position: relative;
-    max-height: 270px;
-    padding: 10% 5%;
+    padding: 20% 12%;
     width: 100%;
-    max-height: 270px;
+    max-height: 400px;
+    height: 100%;
     display: flex;
     align-items: center;
     border-radius: 5px;
     justify-content: center;
     margin-bottom: 0.25rem;
+    background-color: #f3f3f3;
     @include skeletalLoader;
 
     &:empty {
       min-height: 260px;
-    }
-
-    @media only screen and (min-width: 500px) {
-      max-height: 270px;
     }
 
     .favorite_icon {
@@ -83,18 +84,25 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      top: 0.75rem;
-      left: 0.75rem;
-      height: 1.6rem;
-      width: 1.6rem;
+      top: 0.5rem;
+      left: 0.4rem;
+      height: 1.4rem;
+      width: 1.4rem;
       border-radius: 50%;
       background-color: white;
-      box-shadow: 1px 1px 3px $color-gray6;
-      padding: 0.2rem;
+      box-shadow: 1px 1px 3px $color-gray4;
+      padding: 0.15rem;
+
+      @media only screen and (min-width: 450px) {
+        height: 1.6rem;
+        width: 1.6rem;
+        padding: 0.25rem;
+      }
 
       svg {
         height: 100%;
         width: 100%;
+        margin-top: 1px;
         color: $color-gray4;
       }
     }
@@ -128,31 +136,31 @@
     }
   }
 
-  .soldandrating {
+  .rating {
     display: flex;
+    align-items: center;
+    column-gap: 0.1rem;
     font-size: 0.75rem;
-    flex-wrap: wrap;
-    gap: 0.6rem;
-    font-weight: 700;
-    color: $color-gray12;
 
-    .rating {
-      width: max-content;
-      display: flex;
-      align-items: center;
-      column-gap: 0.2rem;
-      padding-right: 0.6rem;
-      border-right: 1px solid $color-gray4;
-      .star {
-        color: #e5b80b;
-      }
+    .star {
+      color: $brand-color;
+      width: 10px;
     }
-    .sold {
-      width: max-content;
-      background-color: $color-gray1;
-      padding: 0 0.5rem;
-      border-radius: 0.15rem;
-      height: min-content;
+
+    .star_less {
+      color: $color-gray3;
+    }
+
+    @media only screen and (min-width: 650px) {
+      font-size: 0.9rem;
+    }
+
+    .star_less,
+    .start {
+      width: 13px;
+      @media only screen and (min-width: 650px) {
+        width: 15px;
+      }
     }
   }
 
@@ -160,13 +168,18 @@
     display: flex;
     column-gap: 0.6rem;
     flex-wrap: wrap;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+
+    @media only screen and (min-width: 450px) {
+      font-size: 1rem;
+    }
 
     .price,
     .discount {
       display: flex;
       color: $brand-color;
       align-items: center;
+      font-weight: 700;
 
       .naira {
         height: max-content;
@@ -181,6 +194,8 @@
       &.cancel_price {
         text-decoration: line-through;
         color: $color-gray4;
+        font-size: 0.85rem;
+        font-weight: 600;
 
         .naira {
           color: $color-gray4;
@@ -191,34 +206,45 @@
 
   .add_to_cart {
     display: flex;
-    padding: 0.4rem 0.6rem;
-    border-radius: 0.3em;
     align-items: center;
     justify-content: center;
-    background-color: $brand-color;
-    color: white;
     cursor: pointer;
-    font-size: 0.7rem;
+    font-weight: 700;
+    font-size: 0.65rem;
     column-gap: 0.35rem;
-    text-wrap: nowrap;
+    padding: 0.3rem 0.5rem;
+    border-radius: 0.7rem;
+    width: max-content;
+    border: 2px solid $color-gray6;
 
-    @media only screen and (min-width: 350px) {
-      font-size: 0.75rem;
-      column-gap: 0.5rem;
-      padding: 0.4rem 1rem;
+    color: $color-gray12;
+    background-color: transparent;
+
+    &.added {
+      color: white;
+      background-color: $brand-color;
+      border: none;
     }
 
-    @media only screen and (min-width: 550px) {
-      font-size: 0.8rem;
+    @media only screen and (min-width: 500px) {
+      border-radius: 0.85rem;
+      font-size: 0.7rem;
+      padding: 0.4rem 0.6rem;
+    }
+
+    @media only screen and (min-width: 650px) {
+      border-radius: 1rem;
+      font-size: 0.75rem;
+      padding: 0.5rem 1rem;
     }
 
     svg {
-      height: 1rem;
-      width: 1rem;
+      height: 0.95rem;
+      width: 0.95rem;
 
-      @media only screen and (min-width: 350px) {
-        height: 1.2rem;
-        width: 1.2rem;
+      @media only screen and (min-width: 650px) {
+        height: 1.1rem;
+        width: 1.1rem;
       }
     }
 

@@ -44,7 +44,9 @@ function Feature({ onChange, id }: FeatureProps) {
     )
   );
   const children = features.filter((f) => f.parentId === feature.id);
-  const type = feature.options.length ? "select" : featureTypes[feature.type];
+  const type = feature.options.length
+    ? "select"
+    : featureTypes[feature.type].toLowerCase();
   const getType = (val: any) => (type === "number" ? Number(val) || 0 : val);
 
   const defaultValue =

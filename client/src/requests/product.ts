@@ -14,7 +14,7 @@ class ProductReq {
       query: `query ProductFormData($id: String) {
         ProductFormData(id: $id) { 
                   brands { name image }
-                  categories { name lvl parent icon cId hasWarrantyAndProduction features { id name type options parentId useAsFilter } }
+                  categories { id name lvl parent icon cId hasWarrantyAndProduction features { id name type options parentId useAsFilter } }
                   paymentTypes { type val }
                   categoriesPath
                   featureTypes

@@ -312,7 +312,7 @@ const resolvers = {
       where: { id: data.id },
       data: {
         name: data?.name || undefined,
-        cId: typeof data?.price === "number" ? data?.cId : undefined,
+        cId: typeof data?.cId === "number" ? data?.cId : undefined,
         description: data?.description || undefined,
         price: typeof data?.price === "number" ? data?.price : undefined,
         count: typeof data?.count === "number" ? data.count : undefined,
@@ -332,11 +332,7 @@ const resolvers = {
     let productFeatures = product.features;
     if (data?.features?.length) {
       // delete previous features if new category
-      if (isNewCategory) {
-        await db.productFeature.deleteMany({
-          where: { id: { in: product.features.map((f) => f.id) } },
-        });
-      }
+      let prevFeaturesId = product.features.map((f) => f.id);
 
       // create new features
       productFeatures = await Promise.all(
@@ -345,6 +341,10 @@ const resolvers = {
           const id = isNewCategory ? randObjId : inputFeatureId || randObjId;
           const featureData = { ...inputFeature, productId: data.id };
 
+          if (isNewCategory) {
+            prevFeaturesId = prevFeaturesId.filter((prevId) => prevId !== id);
+          }
+
           return await db.productFeature.upsert({
             where: { id },
             create: featureData,
@@ -352,6 +352,12 @@ const resolvers = {
           });
         })
       );
+
+      if (isNewCategory) {
+        await db.productFeature.deleteMany({
+          where: { id: { in: prevFeaturesId } },
+        });
+      }
     }
 
     // create sku

@@ -25,7 +25,14 @@
     }
 
     li {
+      display: flex;
+      align-items: center;
       list-style-type: none;
+      column-gap: 0.4rem;
+
+      img {
+        height: 20px;
+      }
     }
   }
 }

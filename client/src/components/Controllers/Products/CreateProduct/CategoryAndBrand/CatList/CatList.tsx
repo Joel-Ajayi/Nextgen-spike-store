@@ -27,34 +27,22 @@ function CatList({ pathIndex = 0 }: Props) {
   );
 
   const setCategoryListPath = controllerPrdSlice.actions.setCategoryListPath;
-  const setCategoryList = controllerPrdSlice.actions.setCategoryList;
   const setProductInput = controllerPrdSlice.actions.setProductInput;
   const setProductFormFeatures =
     controllerPrdSlice.actions.setProductFormFeatures;
 
-  const pathVal = path[pathIndex];
+  const pathVal = categories.find((c) => c.name === path[pathIndex])?.id || "";
   const hasChildrenInList = pathIndex < path.length - 1;
-
-  const [isLoading, setIsLoading] = useState(false);
 
   const addPath = async (name: string, cId: number) => {
     if (name === path[path.length - 1]) return;
-    setIsLoading(true);
 
     let newPath: string[] = [];
 
-    let cats = await categoryReq.getCategories(name);
-    if (!cats) cats = [];
-
     if (hasChildrenInList) {
       newPath = path.filter((_, i) => i <= pathIndex);
-      const newCats = categories.filter(({ parent }) =>
-        newPath.includes(parent)
-      );
       newPath = [...newPath, name];
-      dispatch(setCategoryList([...newCats, ...cats]));
     } else {
-      dispatch(setCategoryList([...categories, ...cats]));
       newPath = [...path, name];
     }
 
@@ -72,7 +60,6 @@ function CatList({ pathIndex = 0 }: Props) {
     dispatch(setProductInput({ value: productFeatures, name: "features" }));
     dispatch(setCategoryListPath(newPath));
     dispatch(setProductFormFeatures(features));
-    setIsLoading(false);
   };
 
   const items = useMemo(
@@ -88,8 +75,8 @@ function CatList({ pathIndex = 0 }: Props) {
             key={uniqId()}
           >
             <li>
+              {cat.icon && <img src={`/uploads/${cat.icon}`} />}
               <span>{cat.name}</span>
-              {cat.banner?.image && <img src={cat.banner.image as string} />}
             </li>
           </div>
         )),
@@ -104,12 +91,7 @@ function CatList({ pathIndex = 0 }: Props) {
         </div>
       )}
       {!!items.length && <ul className={Styles.list}>{items}</ul>}
-      {isLoading && (
-        <div className={Styles.spinner}>
-          <Spinner brandColor radius={10} />
-        </div>
-      )}
-      {hasChildrenInList && !isLoading && <CatList pathIndex={pathIndex + 1} />}
+      {hasChildrenInList && <CatList pathIndex={pathIndex + 1} />}
     </>
   );
 }

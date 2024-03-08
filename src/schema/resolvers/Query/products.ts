@@ -115,8 +115,7 @@ const resolvers = {
     };
 
     try {
-      let categories = await db.category.findMany({
-        where: { parent: null },
+      const categories = await db.category.findMany({
         select: catSelection,
       });
 
@@ -137,15 +136,11 @@ const resolvers = {
 
         if (product?.category) {
           await (async function findPath(cId: number) {
-            const category = await db.category.findUnique({
-              where: { cId },
-              select: catSelection,
-            });
+            const category = categories.find((c) => c.cId === cId);
 
             if (category) {
               categoriesPath.unshift(category.name);
               features.push(...category.features);
-              if (category.parent) categories.push(category);
               if (category.parent?.cId) await findPath(category.parent?.cId);
             }
           })(product.category.cId);
