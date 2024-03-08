@@ -100,6 +100,16 @@ export type LandingPageData = {
   categories: CategoryMicro[];
 };
 
+export enum Paths {
+  Controller = "/controller",
+  Products = "/products",
+  Product = "product",
+  Home = "/",
+  SignIn = "/signIn",
+  Cart = "cart",
+  Checkout = "checkout",
+}
+
 export enum PubliPaths {
   SignIn = "/signin",
   Home = "/",

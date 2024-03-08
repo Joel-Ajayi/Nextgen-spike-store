@@ -149,7 +149,7 @@ function ProductInfo() {
             />
           )
       ),
-    []
+    [formData.features]
   );
 
   const images = useMemo(

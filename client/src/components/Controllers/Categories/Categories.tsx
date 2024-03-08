@@ -1,14 +1,13 @@
 import React, { useEffect, useMemo } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { PageSections } from "../../../types/controller";
-import ControllerHeader from "../../shared/Headers/ControllerHeader/ControllerHeader";
 import Page404 from "../../shared/Page404/Page404";
 import CategoryListing from "./CategoryListing/CategoryListing";
 import CreateCategory from "./CreateCategory/CreateCategory";
 
 function Categories() {
   let [params] = useSearchParams();
-  const sec = params.get("sec");
+  let { sec } = useParams();
   const cat_id = (params.get("cat_id") || "").replace(/-/g, " ");
   const parent = (params.get("parent") || "").replace(/-/g, " ");
 
@@ -26,12 +25,7 @@ function Categories() {
     }
   }, [sec]);
 
-  return (
-    <>
-      <ControllerHeader />
-      {currentPage}
-    </>
-  );
+  return currentPage;
 }
 
 export default Categories;

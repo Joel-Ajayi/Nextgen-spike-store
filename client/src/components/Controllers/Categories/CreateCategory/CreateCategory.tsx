@@ -186,7 +186,7 @@ function CreateCategory({
         dispatch(addCategory(cat as CategoryMini));
       }
       dispatch(setInitCategoryInput(defaultCategory));
-      const navLink = `/controller?pg=${Pages.Categories}&sec=${PageSections.CatListing}`;
+      const navLink = `/controller/${Pages.Categories}/${PageSections.CatListing}`;
       navigate(navLink, { replace: false });
     }
     setIsSaving(false);
@@ -270,128 +270,124 @@ function CreateCategory({
             </div>
           )}
           <div className={ControllerStyles.wrapper}>
-            <>
-              <div className={ControllerStyles.sec_header}>
-                <div className={ControllerStyles.header_content}>
-                  <div className={ControllerStyles.title}>Create Category</div>
-                  <div>
-                    <Button
-                      value="ALL CATEGORIES"
-                      type="button"
-                      className={Styles.all_cat_button}
-                      link={`/controller?pg=${Pages.Categories}&sec=${PageSections.CatListing}`}
-                    />
-                  </div>
+            <div className={ControllerStyles.sec_header}>
+              <div className={ControllerStyles.header_content}>
+                <div className={ControllerStyles.title}>Create Category</div>
+                <div>
+                  <Button
+                    value="ALL CATEGORIES"
+                    type="button"
+                    className={Styles.all_cat_button}
+                    link={`/controller/${Pages.Categories}/${PageSections.CatListing}`}
+                  />
                 </div>
               </div>
-              <div className={Styles.content}>
-                <div className={Styles.inner_content}>
-                  <form className={Styles.grid_display}>
-                    <section className={Styles.section}>
-                      <Input
-                        name="name"
-                        label="Name"
-                        defaultValue={input.name}
-                        onChange={onInputChange}
-                        changeOnMount={!isLoading}
-                      />
-                      <Input
-                        name="description"
-                        label="Description"
-                        defaultValue={input.description}
-                        rows={6}
-                        type="textarea"
-                        onChange={onInputChange}
-                        changeOnMount={!isLoading}
-                      />
-                      <Input
-                        name="brand"
-                        label="Brand"
-                        type="select"
-                        defaultValue={input.brand}
-                        onChange={onInputChange}
-                        options={formData.brands.map((brand) => ({
-                          optionImg: brand.image[0] as string,
-                          defaultValue: brand.name,
-                        }))}
-                        changeOnMount={!isLoading}
-                      />
-                      <Input
-                        name="hasWarrantyAndProduction"
-                        label="Has Warranty And Production Details"
-                        type="checkbox"
-                        defaultChecked={input.hasWarrantyAndProduction}
-                        onChange={onInputChange}
-                        changeOnMount={!isLoading}
-                        span
-                        asInfo={parentHasWarrantyAndProduction}
-                      />
-                      {icon}
+            </div>
+            <div className={ControllerStyles.content}>
+              <div className={ControllerStyles.inner_content}>
+                <form className={Styles.grid_display}>
+                  <section className={Styles.section}>
+                    <Input
+                      name="name"
+                      label="Name"
+                      defaultValue={input.name}
+                      onChange={onInputChange}
+                      changeOnMount={!isLoading}
+                    />
+                    <Input
+                      name="description"
+                      label="Description"
+                      defaultValue={input.description}
+                      rows={6}
+                      type="textarea"
+                      onChange={onInputChange}
+                      changeOnMount={!isLoading}
+                    />
+                    <Input
+                      name="brand"
+                      label="Brand"
+                      type="select"
+                      defaultValue={input.brand}
+                      onChange={onInputChange}
+                      options={formData.brands.map((brand) => ({
+                        optionImg: brand.image[0] as string,
+                        defaultValue: brand.name,
+                      }))}
+                      changeOnMount={!isLoading}
+                    />
+                    <Input
+                      name="hasWarrantyAndProduction"
+                      label="Has Warranty And Production Details"
+                      type="checkbox"
+                      defaultChecked={input.hasWarrantyAndProduction}
+                      onChange={onInputChange}
+                      changeOnMount={!isLoading}
+                      span
+                      asInfo={parentHasWarrantyAndProduction}
+                    />
+                    {icon}
 
-                      <section className={Styles.sub_section}>
-                        <div className={Styles.sub_section_title}>
-                          <span>Banner</span>
-                          {!input.banner && (
-                            <AddIcon
-                              className={Styles.add_icon}
-                              onClick={setBanner}
-                            />
-                          )}
-                        </div>
-                        {banner}
-                      </section>
-                    </section>
-
-                    <section className={Styles.section}>
-                      <section className={Styles.sub_section}>
-                        <div className={Styles.sub_section_title}>
-                          <span>Offers</span>
-                          {input.offers.length < formData.offerTypes.length && (
-                            <AddIcon
-                              className={Styles.add_icon}
-                              onClick={addOffer}
-                            />
-                          )}
-                        </div>
-                        <div
-                          className={Styles.sub_section_content}
-                          style={{ overflow: "hidden" }}
-                        >
-                          <span className={Styles.error}>
-                            {errors["offers"]}
-                          </span>
-                          {offers}
-                        </div>
-                      </section>
-                    </section>
-
-                    <section className={Styles.section}>
-                      <section className={Styles.sub_section}>
-                        <div className={Styles.sub_section_title}>
-                          <span>Feature Options</span>
+                    <section className={Styles.sub_section}>
+                      <div className={Styles.sub_section_title}>
+                        <span>Banner</span>
+                        {!input.banner && (
                           <AddIcon
                             className={Styles.add_icon}
-                            onClick={addFeature}
+                            onClick={setBanner}
                           />
-                        </div>
-                        <div className={Styles.sub_section_content}>
-                          {features}
-                        </div>
-                      </section>
+                        )}
+                      </div>
+                      {banner}
                     </section>
-                  </form>
+                  </section>
+
+                  <section className={Styles.section}>
+                    <section className={Styles.sub_section}>
+                      <div className={Styles.sub_section_title}>
+                        <span>Offers</span>
+                        {input.offers.length < formData.offerTypes.length && (
+                          <AddIcon
+                            className={Styles.add_icon}
+                            onClick={addOffer}
+                          />
+                        )}
+                      </div>
+                      <div
+                        className={Styles.sub_section_content}
+                        style={{ overflow: "hidden" }}
+                      >
+                        <span className={Styles.error}>{errors["offers"]}</span>
+                        {offers}
+                      </div>
+                    </section>
+                  </section>
+
+                  <section className={Styles.section}>
+                    <section className={Styles.sub_section}>
+                      <div className={Styles.sub_section_title}>
+                        <span>Feature Options</span>
+                        <AddIcon
+                          className={Styles.add_icon}
+                          onClick={addFeature}
+                        />
+                      </div>
+                      <div className={Styles.sub_section_content}>
+                        {features}
+                      </div>
+                    </section>
+                  </section>
+                </form>
+                <div className={Styles.button_wrapper}>
+                  <Button
+                    value="Save"
+                    type="button"
+                    isLoading={isSaving}
+                    disabled={!isValid}
+                    onClick={onSave}
+                  />
                 </div>
               </div>
-              <div className={Styles.button_wrapper}>
-                <Button
-                  value="Save"
-                  type="button"
-                  isLoading={isSaving}
-                  disabled={!isValid}
-                  onClick={onSave}
-                />
-              </div>
-            </>
+            </div>
           </div>
         </>
       )}

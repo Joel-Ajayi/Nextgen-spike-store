@@ -44,7 +44,7 @@ function BrandListing() {
               value="ADD NEW BRAND"
               type="button"
               className={Styles.all_brd_button}
-              link={`/controller?pg=${Pages.Brand}&sec=${PageSections.CreateBrd}`}
+              link={`/controller/${Pages.Brand}/${PageSections.CreateBrd}`}
             />
           </div>
         </div>
@@ -65,7 +65,7 @@ function BrandListing() {
                   <td>
                     <Link
                       className={Styles.edit_button}
-                      to={`/controller?pg=${Pages.Brand}&sec=${PageSections.UpdateBrd}&brd_id=${brand.name}`}
+                      to={`/controller/${Pages.Brand}/${PageSections.UpdateBrd}?brd_id=${brand.name}`}
                     >
                       <MdModeEdit height="100%" />
                       Edit

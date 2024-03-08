@@ -396,7 +396,7 @@ function Input({
               (option) => option.defaultValue === input
             )?.label;
             return (
-              <div className={Styles.added_input} key={uniqid()}>
+              <div className={`${Styles.added_input}`} key={uniqid()}>
                 {!asInfo && (
                   <CloseIcon
                     onClick={() => removeFromInputs(index)}

@@ -67,7 +67,7 @@ function ProductListing() {
             <Button
               value="NEW PRODUCT"
               type="button"
-              link={`/controller?pg=${Pages.Products}&sec=${PageSections.CreatePrd}`}
+              link={`/controller/${Pages.Products}/${PageSections.CreatePrd}`}
             />
           </div>
         </div>
@@ -113,7 +113,7 @@ function ProductListing() {
                     <td>
                       <Link
                         className={Styles.edit_button}
-                        to={`/controller?pg=${Pages.Products}&sec=${PageSections.CreatePrd}&prd_id=${product.id}`}
+                        to={`/controller/${Pages.Products}/${PageSections.CreatePrd}/?prd_id=${product.id}`}
                       >
                         <RiEditFill height="100%" />
                       </Link>

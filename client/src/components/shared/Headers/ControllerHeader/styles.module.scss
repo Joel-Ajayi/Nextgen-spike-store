@@ -2,81 +2,52 @@
 @import "../../../../styles/mixins.scss";
 
 .headerWrapper {
-  width: 100vw;
-  height: 50px;
   display: flex;
   justify-content: center;
-  background-color: $brand-color;
+  box-shadow: 1px 0 4px black;
+  border-bottom: 1px solid $color-gray2;
 
   .content {
     @include desktop-wrapper;
     display: flex;
     align-items: center;
     height: inherit;
-    column-gap: 5%;
     width: 100%;
     justify-content: space-between;
-
-    @media screen and (max-width: 799px) {
-      justify-content: space-between;
-    }
-
-    @media screen and (max-width: 1200px) {
-      padding: 20px 25px;
-    }
+    min-height: 3.5rem;
 
     .logo {
-      @media screen and (max-width: 799px) {
-        order: 2;
-        margin-left: auto;
-      }
-
       a {
         display: flex;
         align-items: center;
+        font-size: 1.1rem;
+
+        @media screen and (min-width: 600px) {
+          font-size: 1.3rem;
+        }
+
         img {
           width: 30px;
         }
-
-        div {
-          font-size: 18px;
-          font-weight: bold;
-          margin-left: 5px;
-          color: white;
-        }
       }
     }
 
-    .nav_item_dropdown {
-      font-weight: 500;
+    .nav_tab {
+      height: 100%;
     }
+    .dropdown {
+      height: 100%;
+      display: none;
 
-    .nav_item {
-      font-size: 13px !important;
-      font-weight: 500;
-      color: white;
-      cursor: pointer;
-
-      @media screen and (max-width: 799px) {
-        display: none;
-      }
-
-      a {
-        color: white;
-        text-decoration: none;
+      @media screen and (min-width: 750px) {
+        display: block;
       }
     }
 
     .side_bar {
-      @media screen and (min-width: 800px) {
+      display: flex;
+      @media screen and (min-width: 750px) {
         display: none;
-      }
-    }
-
-    .nav_avatar {
-      margin-left: auto;
-      @media screen and (max-width: 799px) {
-        display: none !important;
       }
     }
   }

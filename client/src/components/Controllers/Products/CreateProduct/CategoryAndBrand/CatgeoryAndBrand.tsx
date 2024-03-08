@@ -93,11 +93,9 @@ function CatgeoryAndBrand() {
           value="Next"
           type="button"
           disabled={!isValid}
-          link={`/controller?pg=${Pages.Products}&sec=${
-            PageSections.CreatePrd
-          }&sub=${CreatePrdSections.ProductInfo}${
-            prd_id ? `&prd_id=${prd_id}` : ""
-          }`}
+          link={`/controller/${Pages.Products}/${PageSections.CreatePrd}?sub=${
+            CreatePrdSections.ProductInfo
+          }${prd_id ? `&prd_id=${prd_id}` : ""}`}
         />
       </section>
     </div>

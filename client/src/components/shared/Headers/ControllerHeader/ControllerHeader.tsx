@@ -2,7 +2,7 @@ import React, { useEffect, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import UserAvatar from "../UserAvatar/UserAvatar";
 import Styles from "./styles.module.scss";
-import Dropdown from "../../Dropdown/Dropdown";
+import Dropdown, { DropdownProps } from "../../Dropdown/Dropdown";
 import {
   Link,
   useLocation,
@@ -12,13 +12,13 @@ import {
 import userSlice from "../../../../store/userState";
 import { Pages } from "../../../../types/controller";
 import userReq from "../../../../requests/user";
-import ControllerSideBar from "./ControllerSideBar/ControllerSideBar";
-import { authItems } from "../AppHeader/Header";
+import { authItems, controllerItems, signOutItem } from "../AppHeader/Header";
 import uniqId from "uniqid";
 import appSlice from "../../../../store/appState";
 import controllerStateSlice from "../../../../store/controller/states";
 import navData, { DataType } from "./data";
 import data from "./data";
+import AppSideBar from "../AppSideBar/AppSideBar";
 
 function ControllerHeader() {
   let [params] = useSearchParams();
@@ -31,7 +31,7 @@ function ControllerHeader() {
 
   const tab = params.get("sub");
 
-  const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
+  const { isAuthenticated, roles } = useAppSelector((state) => state.user);
   const activeTabs = useAppSelector(
     (state) => state.controller.state.activeTabs
   );
@@ -80,49 +80,47 @@ function ControllerHeader() {
     ];
   }, [isAuthenticated]);
 
+  const userDropDoown: DropdownProps[] = useMemo(
+    () => [{ ...authItems, showTitle: false }, signOutItem(handleSignOut)],
+    []
+  );
+
   return (
     <div className={Styles.headerWrapper}>
       <div className={Styles.content}>
         <div className={Styles.logo}>
           <Link to="/">
             <img src="/uploads/logo.svg" alt="logo" />
-            <div>
-              <i>Controller</i>
-            </div>
+            <i>Controller</i>
           </Link>
         </div>
 
         {navData.map((tab) => {
           return (
             <Dropdown
-              wrapperClassName={Styles.nav_item}
               key={uniqId()}
-              listClassName={Styles.nav_item_dropdown}
+              wrapperClassName={Styles.dropdown}
+              titleClassName={Styles.nav_tab}
               title={tab.title}
-              link={tab?.link}
-              showToolTip={false}
               items={tab.items}
+              listOnHover
+              childPos="t-m"
+              align="c"
             />
           );
         })}
 
         <Dropdown
-          wrapperClassName={Styles.nav_item}
+          wrapperClassName={Styles.dropdown}
+          titleClassName={Styles.nav_tab}
           onClick={handleSignInButton}
-          title={
-            isAuthenticated ? (
-              <UserAvatar isLink={false} infoClassName={Styles.nav_avatar} />
-            ) : (
-              <span>Login</span>
-            )
-          }
-          listClassName={Styles.user_dropdown_list}
-          // items={loginItemsDropdown}
-          pos="t-m"
+          title={<UserAvatar size={35} isLink={false} />}
+          items={userDropDoown}
+          listOnHover
+          align="l"
         />
-        <div className={Styles.side_bar}>
-          <ControllerSideBar isFixed />
-        </div>
+
+        <AppSideBar className={Styles.side_bar} />
       </div>
     </div>
   );

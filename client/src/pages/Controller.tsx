@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Navigate, useSearchParams } from "react-router-dom";
+import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import Brands from "../components/Controllers/Brands/Brands";
 import Categories from "../components/Controllers/Categories/Categories";
 import Orders from "../components/Controllers/Orders/Orders";
@@ -9,10 +9,10 @@ import { Pages } from "../types/controller";
 import Dashboard from "../components/Controllers/Dashboard/Dashboard";
 import { useAppSelector } from "../store/hooks";
 import { Roles } from "../types/user";
+import ControllerHeader from "../components/shared/Headers/ControllerHeader/ControllerHeader";
 
 function ControllerPage() {
-  let [params] = useSearchParams();
-  const page = params.get("pg");
+  let { pg: page } = useParams();
   const roles = useAppSelector((state) => state.user.roles);
 
   const isAuthorized = (role: Roles) =>
@@ -36,16 +36,17 @@ function ControllerPage() {
         return <Dashboard />;
       default:
         return !page ? (
-          <Navigate to={`/controller?pg=${Pages.DashBoard}`} replace />
+          <Navigate to={`/controller/${Pages.DashBoard}`} replace />
         ) : (
           <Navigate to="*" replace />
         );
     }
-    return <Navigate to={`/controller?pg=${Pages.DashBoard}`} replace />;
+    return <Navigate to={`/controller/${Pages.DashBoard}`} replace />;
   }, [page]);
 
   return (
     <>
+      <ControllerHeader />
       <BackgroundMsg />
       {currentPage}
     </>

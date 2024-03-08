@@ -54,13 +54,13 @@ export default function Dropdown({
   lvl = 1,
   align = "r",
 }: DropdownProps) {
-  const [showList, setShowList] = useState(
-    listOnLoad || !showTitle || !title || false
-  );
+  const initShow = listOnLoad || !showTitle || !title || pos === "m";
+  const [showList, setShowList] = useState(initShow);
   const [dropDownStyle, setDropDownStyle] = useState<CSSProperties>({});
   const [itemsStyles, setItemsStyles] = useState<CSSProperties>({});
   const rootRef = useRef<HTMLDivElement | null>(null);
   const myRef = useRef<HTMLDivElement | null>(null);
+  let myHeight = useRef<null | number>(0);
 
   const isRoot = lvl === 1;
   const isVerticalPos = pos === "m" || pos === "t-m";
@@ -93,7 +93,12 @@ export default function Dropdown({
       case "t-m":
         let marginTop = "-80vh";
         const ref = !isRoot ? myRef.current : rootRef.current;
-        if (ref && ref.clientHeight) marginTop = `${-ref.clientHeight - 2}px`;
+        if (ref && ref.clientHeight) {
+          if (!myHeight.current) {
+            myHeight.current = ref.clientHeight;
+          }
+          marginTop = `-${(myHeight.current || ref.clientHeight) + 2}px`;
+        }
 
         setItemsStyles({ marginTop: !showList ? marginTop : 0 });
         return {
@@ -149,14 +154,14 @@ export default function Dropdown({
       rootRef.current = document.getElementById(rootId) as HTMLDivElement;
     }
 
-    setDropDownStyle({ ...getBounds(false), zIndex, display: "flex" });
+    setDropDownStyle({ ...getBounds(initShow), zIndex, display: "flex" });
     return () => {
-      setPosStyles(false);
+      setPosStyles(initShow);
     };
   }, []);
 
   const handleShowList = (show = !showList) => {
-    if (items.length && !!title && !listOnLoad && showTitle) {
+    if (items.length && !!title && !listOnLoad && showTitle && pos !== "m") {
       setPosStyles(show);
     }
     if (onClick && typeof title === "string") onClick(title);
@@ -172,14 +177,13 @@ export default function Dropdown({
 
   const zIndex = useMemo(() => {
     if (pos === "r-m") return 1;
-    return pos !== "m-r" && pos !== "m-l" ? -1 : -2;
+    return isVerticalPos ? 0 : -1;
   }, [showList]);
 
-  const unmount = isRoot ? !showList : false;
   const listItems = useMemo(
     () =>
       items?.map((item) => (
-        <li>
+        <li key={uniqId()}>
           <Dropdown
             key={uniqId()}
             rootId={rootId}
@@ -197,7 +201,7 @@ export default function Dropdown({
           />
         </li>
       )),
-    [items, unmount]
+    [items, showList]
   );
 
   const titleContent = useMemo(() => {
@@ -211,11 +215,22 @@ export default function Dropdown({
             </div>
           )}
           {icon}
-          {<div className={Styles.title}>{title}</div>}
+          {link && link() ? (
+            <Link className={Styles.title} to={link()}>
+              {title}
+            </Link>
+          ) : (
+            <div className={Styles.title} onClick={() => handleShowList()}>
+              {title}
+            </div>
+          )}
           {!!items.length && !isRoot && (
             <CaretIcon
               className={Styles.caret}
-              style={{ transform: `rotate(${!showList ? -180 : 0}deg)` }}
+              onClick={() => handleShowList()}
+              style={{
+                transform: `rotate(${showList || pos === "m" ? 0 : -180}deg)`,
+              }}
             />
           )}
         </>
@@ -223,44 +238,48 @@ export default function Dropdown({
     );
   }, [showList, tooltipClass]);
 
+  const titleClass = useMemo(() => {
+    return `${Styles.title} ${titleClassName}`;
+  }, []);
+
   const itemsClassName = useMemo(() => {
     return `${Styles.items} ${listClassName} ${
       pos === "r-m" && showList ? Styles.overflow : ""
-    } ${isVerticalPos || pos === "r-m" ? Styles.border_bottom : ""} ${
-      !(isVerticalPos || pos === "r-m") ? Styles.border : ""
-    } ${isVerticalPos ? Styles.no_padding : ""}`;
+    }  ${isVerticalPos ? Styles.no_padding : ""}`;
   }, [showList]);
+
+  const itemsWrapperClassName = useMemo(
+    () =>
+      `${Styles.dropdown} ${!isRoot ? Styles.child : ""} ${alignments[align]} ${
+        (isVerticalPos || pos === "r-m") && showList ? Styles.border_bottom : ""
+      } ${
+        showTitle && !!title && !isRoot && isVerticalPos
+          ? Styles.child_padding
+          : ""
+      } ${
+        (!(isVerticalPos || pos === "r-m") || isRoot) && showList
+          ? Styles.border
+          : ""
+      } ${isRoot ? Styles.root : ""}`,
+    [showList]
+  );
 
   return (
     <div
       className={`${wrapperClassName} ${Styles.dropdown_wrapper}`}
       style={{ position: !isRoot ? "static" : "relative" }}
-      onPointerEnter={() => handleHover(true)}
-      onPointerLeave={() => handleHover(false)}
+      onMouseEnter={() => handleHover(true)}
+      onMouseLeave={() => handleHover(false)}
     >
       {showTitle && (
         <>
-          {!!link && !items.length && title && (
-            <Link className={`${Styles.title} ${titleClassName}`} to={link()}>
-              {titleContent}
-            </Link>
-          )}
-          {(!link || !!items.length) && title && (
-            <div
-              onClick={() => handleShowList()}
-              className={`${Styles.title} ${titleClassName}`}
-            >
-              {titleContent}
-            </div>
-          )}
+          <div className={titleClass}>{titleContent}</div>
         </>
       )}
 
       {!!items.length && (
         <div
-          className={`${Styles.dropdown} ${!isRoot ? Styles.child : ""} ${
-            alignments[align]
-          }`}
+          className={itemsWrapperClassName}
           ref={myRef}
           id={rootId}
           style={dropDownStyle}

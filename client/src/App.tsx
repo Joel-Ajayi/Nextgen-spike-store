@@ -23,6 +23,7 @@ import userReq from "./requests/user";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+import ControllerHeader from "./components/shared/Headers/ControllerHeader/ControllerHeader";
 
 function UserRoute() {
   const { pathname } = useLocation();
@@ -98,7 +99,7 @@ function Routes() {
             <Route path="/profile" element={<ProfilePage />} />
           </Route>
           <Route element={<AdminRoute />}>
-            <Route path="/controller" element={<ControllerPage />} />
+            <Route path="/controller/:pg?/:sec?" element={<ControllerPage />} />
           </Route>
         </Route>
         <Route path="*" element={<Page404 />} />

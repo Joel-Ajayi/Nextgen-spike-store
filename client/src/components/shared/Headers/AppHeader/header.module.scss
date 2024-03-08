@@ -5,13 +5,10 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 10px;
   justify-content: center;
   align-items: stretch;
   width: 100%;
   @include desktop-wrapper();
-  padding-top: 1.5rem;
-  padding-bottom: 1.5rem;
 
   @media screen and (min-width: 800px) {
     padding-bottom: 0.25rem;
@@ -30,6 +27,8 @@
     justify-content: space-between;
     height: inherit;
     column-gap: 3.5%;
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
 
     .flipkartpluswrapper_tab {
       text-decoration: none;
@@ -177,7 +176,6 @@
     justify-content: space-between;
     display: none;
     border-top: 1px solid $color-gray2;
-    padding-top: 0.7rem;
 
     @media screen and (min-width: 600px) {
       display: flex;
@@ -203,6 +201,9 @@
         cursor: pointer;
         font-size: 0.8rem;
         color: $color-gray10;
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
     }
   }

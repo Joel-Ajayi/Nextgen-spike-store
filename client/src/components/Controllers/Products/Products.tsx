@@ -1,6 +1,5 @@
 import React, { useMemo } from "react";
-import ControllerHeader from "../../shared/Headers/ControllerHeader/ControllerHeader";
-import { useSearchParams } from "react-router-dom";
+import { useParams, useSearchParams } from "react-router-dom";
 import { PageSections } from "../../../types/controller";
 import CreateProduct from "./CreateProduct/CreateProduct";
 import Page404 from "../../shared/Page404/Page404";
@@ -8,7 +7,7 @@ import ProductListing from "./ProductListing/ProductListing";
 
 function Products() {
   let [params] = useSearchParams();
-  const sec = params.get("sec");
+  let { sec } = useParams();
   const prd_id = (params.get("prd_id") || "").replace(/-/g, " ");
   // const parent = (params.get("parent") || "").replace(/-/g, " ");
 
@@ -26,12 +25,7 @@ function Products() {
     }
   }, [sec]);
 
-  return (
-    <>
-      <ControllerHeader />
-      {currentPage}
-    </>
-  );
+  return currentPage;
 }
 
 export default Products;

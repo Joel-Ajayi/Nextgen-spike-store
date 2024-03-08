@@ -5,12 +5,14 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 25px 0px 25px 25px;
 
   .header {
-    font-size: x-large;
-    font-weight: 500;
-    color: $color-gray5;
+    font-size: 1.25rem;
+    color: $color-gray12;
+
+    @media only screen and (min-width: 500px) {
+      font-size: larger;
+    }
   }
 
   .forms {
@@ -25,7 +27,6 @@
       gap: 20px;
       grid-template-columns: 1fr;
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      padding-right: 25px;
 
       @media only screen and (max-width: 1000px) and (min-width: 800px) {
         grid-template-columns: 1fr;
@@ -46,9 +47,12 @@
           row-gap: 5px;
           padding-top: 10px;
           .sub_section_header {
-            font-size: large;
-            font-weight: 500;
-            color: $color-gray5;
+            font-size: 1.1rem;
+            color: $color-gray11;
+
+            @media only screen and (min-width: 500px) {
+              font-size: large;
+            }
           }
 
           section {
@@ -69,10 +73,10 @@
   }
 
   .save_button {
+    margin-top: 2rem;
     button {
-      margin: 10px 30px 0 auto;
-      max-width: 250px;
       width: 100%;
+      max-width: 300px;
     }
   }
 }

@@ -47,17 +47,17 @@ function CategoryListing() {
   };
 
   const onAppend = (id: string) => {
-    let link = `/controller?pg=${Pages.Categories}&sec=${PageSections.CreateCat}`;
+    let link = `/controller/${Pages.Categories}/${PageSections.CreateCat}`;
     if (id)
-      link += id ? `&parent=${id.replace(/\s/g, "-").replace("&", "%26")}` : "";
+      link += id ? `?parent=${id.replace(/\s/g, "-").replace("&", "%26")}` : "";
     navigate(link, { replace: false });
   };
 
   const onEdit = (id: string) => {
     navigate(
-      `/controller?pg=${Pages.Categories}&sec=${
-        PageSections.UpdateCat
-      }&cat_id=${id.replace(/\s/g, "-").replace("&", "%26")}`,
+      `/controller/${Pages.Categories}/${PageSections.UpdateCat}?cat_id=${id
+        .replace(/\s/g, "-")
+        .replace("&", "%26")}`,
       { replace: false }
     );
   };
@@ -117,7 +117,7 @@ function CategoryListing() {
               value="ADD NEW CATEGORY"
               type="button"
               className={Styles.all_cat_button}
-              link={`/controller?pg=${Pages.Categories}&sec=${PageSections.CreateCat}`}
+              link={`/controller/${Pages.Categories}/${PageSections.CreateCat}`}
             />
           </div>
         </div>

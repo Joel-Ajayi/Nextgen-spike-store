@@ -1,3 +1,9 @@
+export enum Pages {
+  Account = "account",
+  Orders = "Orders",
+  Notifications = "mail",
+}
+
 export enum SignInFieds {
   Email = "email",
   Pwd = "pwd",

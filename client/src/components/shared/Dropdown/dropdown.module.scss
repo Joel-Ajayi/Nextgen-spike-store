@@ -54,7 +54,7 @@
         left: inherit;
         border-width: 0.35rem;
         border-style: solid;
-        border-color: transparent transparent $color-gray4 transparent;
+        border-color: transparent transparent $color-gray8 transparent;
       }
 
       .icon {
@@ -93,8 +93,8 @@
     }
 
     .caret {
-      transition: transform 0.25s linear;
-      width: 20px;
+      transition: transform 0.2s linear;
+      width: 30px;
       margin-top: 3px;
       margin-left: 3px;
       color: $color-gray9;
@@ -104,14 +104,35 @@
   & > .dropdown {
     flex: 1;
     display: none;
-    min-width: 250px;
-    transition: left 0.25s linear, right 0.25s linear, top 0.25s linear;
+    min-width: 220px;
+    transition: left 0.2s linear, right 0.2s linear, top 0.2s linear;
     flex-direction: row;
     width: 100%;
+    border-radius: 5px;
+
+    &.root {
+      top: 100%;
+    }
+
+    &.child_padding {
+      & > .items > ul > li > div > {
+        .title {
+          padding: 0.6rem 1rem 0.6rem 1.4rem !important;
+        }
+      }
+    }
+
+    &.border {
+      border: 1px solid $color-gray4;
+    }
+
+    &.border_bottom {
+      border-bottom: 1px solid $color-gray4;
+    }
 
     &.align_l {
-      right: 100%;
-      transform: translate(-100%);
+      left: -100%;
+      transform: translate(-50%);
     }
 
     &.align_c {
@@ -128,16 +149,7 @@
       transition: margin 0.25s linear;
       padding: 0.3rem 0;
       width: 100%;
-      border-radius: 5px;
       background-color: white;
-
-      &.border {
-        border: 1px solid $color-gray4;
-      }
-
-      &.border_bottom {
-        border-bottom: 1px solid $color-gray4;
-      }
 
       &.no_padding {
         padding: 0;

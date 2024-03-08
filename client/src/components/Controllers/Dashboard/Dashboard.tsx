@@ -1,10 +1,8 @@
-import React from 'react'
-import ControllerHeader from '../../shared/Headers/ControllerHeader/ControllerHeader'
+import React from "react";
+import ControllerHeader from "../../shared/Headers/ControllerHeader/ControllerHeader";
 
 function Dashboard() {
-    return (
-        <ControllerHeader />
-    )
+  return <div>Dash</div>;
 }
 
-export default Dashboard
+export default Dashboard;

@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from "react";
-import ControllerSideBar from "../../../shared/Headers/ControllerHeader/ControllerSideBar/ControllerSideBar";
 import {
   CreatePrdSections,
   PageSections,
@@ -57,7 +56,7 @@ function CreateProduct() {
   }, []);
 
   const currentPage = useMemo(() => {
-    let navLink = `/controller?pg=${Pages.Products}&sec=${PageSections.CreatePrd}&sub=${CreatePrdSections.CategoryAndBrand}`;
+    let navLink = `/controller/${Pages.Products}/${PageSections.CreatePrd}?sub=${CreatePrdSections.CategoryAndBrand}`;
     navLink += prd_id ? `&prd_id=${prd_id}` : "";
 
     if (isLoading && sub) {
@@ -92,16 +91,13 @@ function CreateProduct() {
               value="ALL PRODUCTS"
               type="button"
               className={Styles.all_prd_button}
-              link={`/controller?pg=${Pages.Products}&sec=${PageSections.PrdListing}`}
+              link={`/controller/${Pages.Products}/${PageSections.PrdListing}`}
             />
           </div>
         </div>
       </div>
-      <div className={Styles.content}>
-        <div className={Styles.sidebar}>
-          <ControllerSideBar isFixed={false} />
-        </div>
-        {currentPage}
+      <div className={ControllerStyles.content}>
+        <div className={ControllerStyles.inner_content}>{currentPage}</div>
       </div>
     </div>
   );
