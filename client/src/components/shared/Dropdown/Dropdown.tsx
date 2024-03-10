@@ -25,6 +25,8 @@ export type DropdownProps = {
   link?: () => string;
   items?: DropdownProps[];
   listOnLoad?: boolean;
+  showCaret?: boolean;
+  rootRef?: CSSStyleDeclaration;
   listOnHover?: boolean;
   onClick?: (title: string) => void;
   align?: "r" | "c" | "l";
@@ -37,7 +39,6 @@ export type DropdownProps = {
 
 export default function Dropdown({
   title,
-  rootId = uniqId(),
   link,
   icon,
   onClick,
@@ -49,7 +50,9 @@ export default function Dropdown({
   titleClassName = "",
   listOnHover = true,
   showTitle = true,
+  rootRef,
   listOnLoad = false,
+  showCaret = !!items.length,
   showToolTip = true,
   lvl = 1,
   align = "r",
@@ -58,7 +61,7 @@ export default function Dropdown({
   const [showList, setShowList] = useState(initShow);
   const [dropDownStyle, setDropDownStyle] = useState<CSSProperties>({});
   const [itemsStyles, setItemsStyles] = useState<CSSProperties>({});
-  const rootRef = useRef<HTMLDivElement | null>(null);
+  const [myRefState, setMyRefState] = useState<CSSStyleDeclaration>();
   const myRef = useRef<HTMLDivElement | null>(null);
   let myHeight = useRef<null | number>(0);
 
@@ -92,7 +95,7 @@ export default function Dropdown({
         return { position: "static" };
       case "t-m":
         let marginTop = "-80vh";
-        const ref = !isRoot ? myRef.current : rootRef.current;
+        const ref = myRef.current;
         if (ref && ref.clientHeight) {
           if (!myHeight.current) {
             myHeight.current = ref.clientHeight;
@@ -100,9 +103,12 @@ export default function Dropdown({
           marginTop = `-${(myHeight.current || ref.clientHeight) + 2}px`;
         }
 
-        setItemsStyles({ marginTop: !showList ? marginTop : 0 });
+        setItemsStyles({
+          marginTop: !showList ? marginTop : 0,
+          position: isRoot ? "relative" : undefined,
+        });
         return {
-          position: !isRoot ? "relative" : "absolute",
+          position: !isRoot ? "static" : "absolute",
           overflow: "hidden",
         };
       case "m-r":
@@ -136,28 +142,27 @@ export default function Dropdown({
 
   const setPosStyles = (showList: boolean) => {
     const showOveflow = !(isVerticalPos || pos === "r-m");
-
-    if (rootRef.current) {
+    const ref = isRoot ? myRefState : rootRef;
+    if (ref) {
       if (!isRoot && showOveflow) {
-        if (showList) rootRef.current.style.overflow = "visible";
-      } else {
-        rootRef.current.style.overflow = "hidden";
+        if (showList) ref.overflow = "visible";
+      } else if (isRoot && !showList) {
+        ref.overflow = "hidden";
       }
     }
 
-    setDropDownStyle({ ...getBounds(showList), zIndex, display: "flex" });
+    setDropDownStyle({ ...getBounds(showList), zIndex });
     setShowList(showList);
   };
 
-  useLayoutEffect(() => {
-    if (!rootRef.current) {
-      rootRef.current = document.getElementById(rootId) as HTMLDivElement;
+  useEffect(() => {
+    if (myRef.current && isRoot) {
+      setMyRefState(myRef.current.style);
     }
+  }, [myRef.current]);
 
-    setDropDownStyle({ ...getBounds(initShow), zIndex, display: "flex" });
-    return () => {
-      setPosStyles(initShow);
-    };
+  useLayoutEffect(() => {
+    setDropDownStyle({ ...getBounds(initShow), zIndex });
   }, []);
 
   const handleShowList = (show = !showList) => {
@@ -186,7 +191,6 @@ export default function Dropdown({
         <li key={uniqId()}>
           <Dropdown
             key={uniqId()}
-            rootId={rootId}
             title={item?.title}
             icon={item?.icon}
             link={item?.link}
@@ -195,13 +199,14 @@ export default function Dropdown({
             childPos={item?.childPos || childPos}
             items={item.items}
             showTitle={item?.showTitle}
+            rootRef={isRoot ? myRefState : rootRef}
             listOnHover={listOnHover}
             listOnLoad={item?.listOnLoad}
             lvl={lvl + 1}
           />
         </li>
       )),
-    [items, showList]
+    [items, showList, myRefState]
   );
 
   const titleContent = useMemo(() => {
@@ -224,7 +229,7 @@ export default function Dropdown({
               {title}
             </div>
           )}
-          {!!items.length && !isRoot && (
+          {showCaret && (
             <CaretIcon
               className={Styles.caret}
               onClick={() => handleShowList()}
@@ -236,7 +241,7 @@ export default function Dropdown({
         </>
       )
     );
-  }, [showList, tooltipClass]);
+  }, [showList, tooltipClass, showCaret]);
 
   const titleClass = useMemo(() => {
     return `${Styles.title} ${titleClassName}`;
@@ -281,7 +286,6 @@ export default function Dropdown({
         <div
           className={itemsWrapperClassName}
           ref={myRef}
-          id={rootId}
           style={dropDownStyle}
         >
           <div className={itemsClassName} style={itemsStyles}>

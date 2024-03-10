@@ -40,12 +40,12 @@
 
       &.align_l {
         transform: translateY(-50%) rotate(-90deg);
-        left: -0.5rem;
+        left: -0.65rem;
       }
 
       &.align_r {
         transform: translateY(-50%) rotate(90deg);
-        right: -0.5rem;
+        right: -0.65rem;
       }
 
       @mixin arrow {
@@ -103,7 +103,7 @@
 
   & > .dropdown {
     flex: 1;
-    display: none;
+    display: flex;
     min-width: 220px;
     transition: left 0.2s linear, right 0.2s linear, top 0.2s linear;
     flex-direction: row;
