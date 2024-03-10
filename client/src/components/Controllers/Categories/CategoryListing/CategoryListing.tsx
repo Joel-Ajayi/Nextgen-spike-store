@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import controllerCatSlice from "../../../../store/controller/categories";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import { ITreeNode } from "../../../../types";
-import { Pages, PageSections } from "../../../../types/controller";
+import { ControllerPaths, PageSections } from "../../../../types/controller";
 import Button from "../../../shared/Button/Button";
 import Tree from "../../../shared/Tree/Tree";
 import ControllerStyles from "../../controller.module.scss";
@@ -47,7 +47,7 @@ function CategoryListing() {
   };
 
   const onAppend = (id: string) => {
-    let link = `/controller/${Pages.Categories}/${PageSections.CreateCat}`;
+    let link = `/controller/${ControllerPaths.Categories}/${PageSections.CreateCat}`;
     if (id)
       link += id ? `?parent=${id.replace(/\s/g, "-").replace("&", "%26")}` : "";
     navigate(link, { replace: false });
@@ -55,9 +55,9 @@ function CategoryListing() {
 
   const onEdit = (id: string) => {
     navigate(
-      `/controller/${Pages.Categories}/${PageSections.UpdateCat}?cat_id=${id
-        .replace(/\s/g, "-")
-        .replace("&", "%26")}`,
+      `/controller/${ControllerPaths.Categories}/${
+        PageSections.UpdateCat
+      }?cat_id=${id.replace(/\s/g, "-").replace("&", "%26")}`,
       { replace: false }
     );
   };
@@ -117,7 +117,7 @@ function CategoryListing() {
               value="ADD NEW CATEGORY"
               type="button"
               className={Styles.all_cat_button}
-              link={`/controller/${Pages.Categories}/${PageSections.CreateCat}`}
+              link={`/controller/${ControllerPaths.Categories}/${PageSections.CreateCat}`}
             />
           </div>
         </div>

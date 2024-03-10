@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import {
   CreatePrdSections,
   PageSections,
-  Pages,
+  ControllerPaths,
 } from "../../../../types/controller";
 import ProductInfo from "./ProductInfo/ProductInfo";
 import { Navigate, useSearchParams } from "react-router-dom";
@@ -56,7 +56,7 @@ function CreateProduct() {
   }, []);
 
   const currentPage = useMemo(() => {
-    let navLink = `/controller/${Pages.Products}/${PageSections.CreatePrd}?sub=${CreatePrdSections.CategoryAndBrand}`;
+    let navLink = `/controller/${ControllerPaths.Products}/${PageSections.CreatePrd}?sub=${CreatePrdSections.CategoryAndBrand}`;
     navLink += prd_id ? `&prd_id=${prd_id}` : "";
 
     if (isLoading && sub) {
@@ -91,7 +91,7 @@ function CreateProduct() {
               value="ALL PRODUCTS"
               type="button"
               className={Styles.all_prd_button}
-              link={`/controller/${Pages.Products}/${PageSections.PrdListing}`}
+              link={`/controller/${ControllerPaths.Products}/${PageSections.PrdListing}`}
             />
           </div>
         </div>

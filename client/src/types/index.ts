@@ -101,16 +101,14 @@ export type LandingPageData = {
 };
 
 export enum Paths {
-  Controller = "/controller",
+  Home = "/",
   Products = "/products",
   Product = "product",
-  Home = "/",
-  SignIn = "/signIn",
+  Profile = "/profile",
   Cart = "cart",
   Checkout = "checkout",
+  SignIn = "/signIn",
+  Controller = "/controller",
 }
 
-export enum PubliPaths {
-  SignIn = "/signin",
-  Home = "/",
-}
+export const PublicPaths = [Paths.Home, Paths.Products, Paths.Cart];

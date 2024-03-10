@@ -11,7 +11,7 @@ import Input from "../../../shared/Input/Controller/Input";
 import Page404 from "../../../shared/Page404/Page404";
 import SpinLoader from "../../../shared/Loader/SpinLoader/SpinLoader";
 import Button from "../../../shared/Button/Button";
-import { PageSections, Pages } from "../../../../types/controller";
+import { PageSections, ControllerPaths } from "../../../../types/controller";
 import brandValidator from "../../../../validators/brand";
 import validator from "../../../../validators";
 import brandSlice from "../../../../store/controller/brands";
@@ -107,7 +107,7 @@ function CreateBrand({ isUpdate, brd_id }: CreateBrandProps) {
         } else {
           dispatch(addBrand(brd));
         }
-        const navLink = `/controller/${Pages.Brand}/${PageSections.BrdListing}`;
+        const navLink = `/controller/${ControllerPaths.Brand}/${PageSections.BrdListing}`;
         navigate(navLink, { replace: false });
       }
       setIsSaving(false);
@@ -133,7 +133,7 @@ function CreateBrand({ isUpdate, brd_id }: CreateBrandProps) {
                       value="ALL Brands"
                       type="button"
                       className={Styles.all_cat_button}
-                      link={`/controller/${Pages.Brand}/${PageSections.BrdListing}`}
+                      link={`/controller/${ControllerPaths.Brand}/${PageSections.BrdListing}`}
                     />
                   </div>
                 </div>

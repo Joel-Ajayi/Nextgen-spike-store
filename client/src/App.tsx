@@ -13,22 +13,23 @@ import HomePage from "./pages/Home/Home";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import userSlice from "./store/userState";
 import appSlice from "./store/appState";
-import { MessageType, PubliPaths } from "./types";
+import { Paths, PublicPaths } from "./types";
 import ControllerPage from "./pages/Controller";
 import LogoLoader from "./components/shared/Loader/LogoLoader/LogoLoader";
 import ProfilePage from "./pages/Profile";
 import Page404 from "./components/shared/Page404/Page404";
-import { IUserInitailState, Roles } from "./types/user";
+import { ControllerRoles, IUserInitailState, Roles } from "./types/user";
 import userReq from "./requests/user";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import ControllerHeader from "./components/shared/Headers/ControllerHeader/ControllerHeader";
+import Products from "./pages/Products";
+import Product from "./pages/Product";
+import Checkout from "./pages/Checkout";
 
-function UserRoute() {
+function ProtectedRoute() {
   const { pathname } = useLocation();
-
-  const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
+  const { isAuthenticated, roles } = useAppSelector((state) => state.user);
   return isAuthenticated ? (
     <Outlet />
   ) : (
@@ -36,14 +37,16 @@ function UserRoute() {
   );
 }
 
-function AdminRoute() {
+function AdminProtectedRoute() {
   const { pathname } = useLocation();
   const { isAuthenticated, roles } = useAppSelector((state) => state.user);
   // check authentication
   if (!isAuthenticated)
     return <Navigate to={`/signin?redirect=${pathname.slice(1)}`} replace />;
   // check authorization
-  return !roles.includes(Roles.User) ? <Outlet /> : <Page404 />;
+  const hasControllerRole = !!roles.find((r) => ControllerRoles.includes(r));
+
+  return hasControllerRole ? <Outlet /> : <Page404 />;
 }
 
 function GetUser() {
@@ -54,7 +57,6 @@ function GetUser() {
   const { resetUserState, setUserState } = userSlice.actions;
   const { setAppLoading, setNetworkError } = appSlice.actions;
 
-  const publicPaths = Object.values(PubliPaths) as string[];
   useEffect(() => {
     (async () => {
       const user = await userReq.getUser();
@@ -77,7 +79,7 @@ function GetUser() {
     };
   }, []);
 
-  return !publicPaths.includes(pathname) && isLoading ? (
+  return !(PublicPaths as string[]).includes(pathname) && isLoading ? (
     <LogoLoader />
   ) : (
     <Outlet />
@@ -93,13 +95,20 @@ function Routes() {
     createRoutesFromElements(
       <Route>
         <Route element={<GetUser />} errorElement={<ErrorElement />}>
-          <Route path={PubliPaths.Home} element={<HomePage />} />
-          <Route path={PubliPaths.SignIn} element={<SignInPage />} />
-          <Route element={<UserRoute />}>
-            <Route path="/profile" element={<ProfilePage />} />
+          <Route path={Paths.Home} element={<HomePage />} />
+          <Route path={Paths.SignIn} element={<SignInPage />} />
+          <Route path={`${Paths.Products}/:cat_id?`} element={<Products />} />
+          <Route path={`${Paths.Product}/:prd_id`} element={<Product />} />
+          <Route path={Paths.Cart} element={<Product />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path={`${Paths.Profile}/:pg`} element={<ProfilePage />} />
+            <Route path={Paths.Checkout} element={<Checkout />} />
           </Route>
-          <Route element={<AdminRoute />}>
-            <Route path="/controller/:pg?/:sec?" element={<ControllerPage />} />
+          <Route element={<AdminProtectedRoute />}>
+            <Route
+              path={`${Paths.Controller}/:pg?/:sec?`}
+              element={<ControllerPage />}
+            />
           </Route>
         </Route>
         <Route path="*" element={<Page404 />} />

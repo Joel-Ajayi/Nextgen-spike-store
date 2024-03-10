@@ -1,7 +1,7 @@
 import {
   CreatePrdSections,
   PageSections,
-  Pages,
+  ControllerPaths,
 } from "../../../../types/controller";
 import { DropdownProps } from "../../Dropdown/Dropdown";
 
@@ -20,58 +20,59 @@ const getParam = (param: string) => {
 const data: DropdownProps[] = [
   {
     title: "Dashboard",
-    id: Pages.DashBoard,
-    link: () => `/controller/${Pages.DashBoard}`,
-    childPos: "r-m",
+    id: ControllerPaths.DashBoard,
+    link: () => `/controller/${ControllerPaths.DashBoard}`,
   },
   {
     title: "Users",
-    id: Pages.DashBoard,
-    childPos: "r-m",
-    link: () => `/controller/${Pages.DashBoard}`,
+    id: ControllerPaths.Users,
+    link: () => `/controller/${ControllerPaths.Users}`,
   },
   {
     title: "Categories",
-    id: Pages.Categories,
-    link: () => `/controller/${Pages.Categories}`,
+    id: ControllerPaths.Categories,
+    link: () => `/controller/${ControllerPaths.Categories}`,
     childPos: "r-m",
     items: [
       {
         title: "All Categories",
         id: PageSections.CatListing,
         link: () =>
-          `/controller/${Pages.Categories}/${PageSections.CatListing}`,
+          `/controller/${ControllerPaths.Categories}/${PageSections.CatListing}`,
         items: [],
       },
       {
         title: "Add Category",
         id: PageSections.CreateCat,
-        link: () => `/controller/${Pages.Categories}/${PageSections.CreateCat}`,
+        link: () =>
+          `/controller/${ControllerPaths.Categories}/${PageSections.CreateCat}`,
         items: [],
       },
     ],
   },
   {
     title: "Products",
-    id: Pages.Products,
-    link: () => `/controller/${Pages.Products}`,
+    id: ControllerPaths.Products,
+    link: () => `/controller/${ControllerPaths.Products}`,
     childPos: "r-m",
     items: [
       {
         title: "All Products",
         id: PageSections.PrdListing,
-        link: () => `/controller/${Pages.Products}/${PageSections.PrdListing}`,
+        link: () =>
+          `/controller/${ControllerPaths.Products}/${PageSections.PrdListing}`,
       },
       {
         title: "Add Product",
         id: PageSections.CreatePrd,
-        link: () => `/controller?/${Pages.Products}/${PageSections.CreatePrd}`,
+        link: () =>
+          `/controller?/${ControllerPaths.Products}/${PageSections.CreatePrd}`,
         items: [
           {
             title: "Category And Brand",
             link: () => {
               const prdId = getParam("prd_id");
-              return `/controller/${Pages.Products}/${
+              return `/controller/${ControllerPaths.Products}/${
                 PageSections.CreatePrd
               }?sub=${CreatePrdSections.CategoryAndBrand}${
                 prdId ? `&prd_id=${prdId}` : ""
@@ -83,7 +84,7 @@ const data: DropdownProps[] = [
             title: "Product Info",
             link: () => {
               const prdId = getParam("prd_id");
-              return `/controller/${Pages.Products}/${
+              return `/controller/${ControllerPaths.Products}/${
                 PageSections.CreatePrd
               }?sub=${CreatePrdSections.ProductInfo}${
                 prdId ? `&prd_id=${prdId}` : ""
@@ -98,31 +99,34 @@ const data: DropdownProps[] = [
   {
     title: "Brands",
     childPos: "r-m",
-    link: () => `/controller/${Pages.Brand}`,
-    id: Pages.Brand,
+    link: () => `/controller/${ControllerPaths.Brand}`,
+    id: ControllerPaths.Brand,
     items: [
       {
         title: "All Brands",
         id: PageSections.BrdListing,
-        link: () => `/controller/${Pages.Brand}/${PageSections.BrdListing}`,
+        link: () =>
+          `/controller/${ControllerPaths.Brand}/${PageSections.BrdListing}`,
       },
       {
         title: "Add Brand",
         id: PageSections.CreateBrd,
-        link: () => `/controller/${Pages.Brand}/${PageSections.CreateBrd}`,
+        link: () =>
+          `/controller/${ControllerPaths.Brand}/${PageSections.CreateBrd}`,
       },
     ],
   },
   {
     title: "Orders",
     childPos: "r-m",
-    link: () => `/controller/${Pages.Orders}`,
-    id: Pages.Orders,
+    link: () => `/controller/${ControllerPaths.Orders}`,
+    id: ControllerPaths.Orders,
     items: [
       {
         title: "Order Items",
         id: PageSections.OrdListings,
-        link: () => `/controller/${Pages.Orders}/${PageSections.OrdListings}`,
+        link: () =>
+          `/controller/${ControllerPaths.Orders}/${PageSections.OrdListings}`,
       },
     ],
   },

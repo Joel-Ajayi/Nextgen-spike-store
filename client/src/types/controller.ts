@@ -1,9 +1,10 @@
-export enum Pages {
+export enum ControllerPaths {
   Categories = "categorires",
   Products = "products",
   Brand = "brand",
   Orders = "orders",
   DashBoard = "dash",
+  Users = "Users",
 }
 
 export enum PageSections {

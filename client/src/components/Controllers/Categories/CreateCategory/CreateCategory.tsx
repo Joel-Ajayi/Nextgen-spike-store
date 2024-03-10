@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Pages, PageSections } from "../../../../types/controller";
+import { ControllerPaths, PageSections } from "../../../../types/controller";
 import Button from "../../../shared/Button/Button";
 import Input from "../../../shared/Input/Controller/Input";
 import ControllerStyles from "../../controller.module.scss";
@@ -73,10 +73,12 @@ function CreateCategory({
 
   useEffect(() => {
     (async () => {
+      const formData = await categoryReq.getCategoryFormData();
+      dispatch(setFormData(formData));
+
       if (!!cat_id) {
         const cat = await categoryReq.getCategory(cat_id);
         const parentCat = await categoryReq.getCategory(parent);
-        const formData = await categoryReq.getCategoryFormData();
 
         if (cat && formData) {
           if (cat.icon) {
@@ -107,11 +109,12 @@ function CreateCategory({
 
           const hasWarrantyAndProduction =
             parentCat?.hasWarrantyAndProduction || cat.hasWarrantyAndProduction;
-          dispatch(setFormData(formData));
           dispatch(
             setInitCategoryInput({ ...cat, parent, hasWarrantyAndProduction })
           );
         }
+      } else {
+        if (input.id) dispatch(setInitCategoryInput(defaultCategory));
       }
 
       setIsLoading(false);
@@ -186,7 +189,7 @@ function CreateCategory({
         dispatch(addCategory(cat as CategoryMini));
       }
       dispatch(setInitCategoryInput(defaultCategory));
-      const navLink = `/controller/${Pages.Categories}/${PageSections.CatListing}`;
+      const navLink = `/controller/${ControllerPaths.Categories}/${PageSections.CatListing}`;
       navigate(navLink, { replace: false });
     }
     setIsSaving(false);
@@ -278,7 +281,7 @@ function CreateCategory({
                     value="ALL CATEGORIES"
                     type="button"
                     className={Styles.all_cat_button}
-                    link={`/controller/${Pages.Categories}/${PageSections.CatListing}`}
+                    link={`/controller/${ControllerPaths.Categories}/${PageSections.CatListing}`}
                   />
                 </div>
               </div>

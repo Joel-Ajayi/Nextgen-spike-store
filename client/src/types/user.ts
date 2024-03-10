@@ -1,4 +1,4 @@
-export enum Pages {
+export enum UserPaths {
   Account = "account",
   Orders = "Orders",
   Notifications = "mail",
@@ -23,6 +23,14 @@ export enum Roles {
   SuperAdmin = 4,
   Global = 5,
 }
+
+export const ControllerRoles = [
+  Roles.Product,
+  Roles.CategoryAndBrand,
+  Roles.Global,
+  Roles.Order,
+  Roles.SuperAdmin,
+];
 
 export interface IUserInitailState {
   isAuthenticated?: boolean;

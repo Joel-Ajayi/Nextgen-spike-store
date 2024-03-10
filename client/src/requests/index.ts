@@ -98,7 +98,7 @@ class Requests {
       }
 
       dispatch(appSlice.actions.setBackgroundMsg(msg));
-      return null;
+      return null as T;
     }
   }
 }

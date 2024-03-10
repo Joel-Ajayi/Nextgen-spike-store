@@ -9,7 +9,7 @@ import Button from "../../../../shared/Button/Button";
 import {
   CreatePrdSections,
   PageSections,
-  Pages,
+  ControllerPaths,
 } from "../../../../../types/controller";
 import brandValidator from "../../../../../validators/brand";
 import { useSearchParams } from "react-router-dom";
@@ -93,9 +93,11 @@ function CatgeoryAndBrand() {
           value="Next"
           type="button"
           disabled={!isValid}
-          link={`/controller/${Pages.Products}/${PageSections.CreatePrd}?sub=${
-            CreatePrdSections.ProductInfo
-          }${prd_id ? `&prd_id=${prd_id}` : ""}`}
+          link={`/controller/${ControllerPaths.Products}/${
+            PageSections.CreatePrd
+          }?sub=${CreatePrdSections.ProductInfo}${
+            prd_id ? `&prd_id=${prd_id}` : ""
+          }`}
         />
       </section>
     </div>

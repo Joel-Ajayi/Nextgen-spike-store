@@ -8,9 +8,8 @@ import { MdOutlineEmail as MailsIcon } from "react-icons/md";
 import { MdFavoriteBorder as FavoriteIcon } from "react-icons/md";
 import { BiSolidCategory as CategoryIcon } from "react-icons/bi";
 import { IoSearch as SearchIcon } from "react-icons/io5";
-import { PiUsersLight as UsersIcon } from "react-icons/pi";
+import { FaBoxOpen as ProductIcon } from "react-icons/fa";
 import { ReactComponent as LogoutIcon } from "../../../../images/icons/logout.svg";
-import { BsBox as ProductIcon } from "react-icons/bs";
 import { FiSettings as SettingsIcon } from "react-icons/fi";
 import { IoMdTrendingUp as Trending } from "react-icons/io";
 import { ReactComponent as QuestionIcon } from "../../../../images/icons/question-mark.svg";
@@ -23,8 +22,9 @@ import AppSideBar from "../AppSideBar/AppSideBar";
 import userReq from "../../../../requests/user";
 import userSlice from "../../../../store/userState";
 import { Roles } from "../../../../types/user";
-import { PageSections, Pages } from "../../../../types/controller";
-import { Pages as UserPages } from "../../../../types/user";
+import { PageSections, ControllerPaths } from "../../../../types/controller";
+import { UserPaths } from "../../../../types/user";
+import { Paths } from "../../../../types";
 
 export const authItems = {
   title: "",
@@ -37,12 +37,12 @@ export const authItems = {
     {
       icon: <CartIcon />,
       title: "Orders",
-      link: () => `/profile?pg=${UserPages.Orders}`,
+      link: () => `/profile?pg=${UserPaths.Orders}`,
     },
     {
       icon: <MailsIcon />,
       title: "Notifications",
-      link: () => `/profile?pg=${UserPages.Notifications}`,
+      link: () => `/profile?pg=${UserPaths.Notifications}`,
     },
   ],
 } as DropdownProps;
@@ -54,24 +54,25 @@ export const controllerItems = (roles: Roles[]) =>
       (roles.includes(Roles.SuperAdmin) || roles.includes(Roles.Global)) && {
         icon: <MdDashboard />,
         title: "Dashboard",
-        link: () => "/controller",
+        link: () => `/${Paths.Controller}`,
       },
       (roles.includes(Roles.CategoryAndBrand) ||
         roles.includes(Roles.Global)) && {
         icon: <CategoryIcon />,
         title: "Categories",
         link: () =>
-          `/controller/${Pages.Categories}/${PageSections.CatListing}`,
+          `/${Paths.Controller}/${ControllerPaths.Categories}/${PageSections.CatListing}`,
       },
       (roles.includes(Roles.Order) || roles.includes(Roles.Global)) && {
         icon: <CartIcon />,
         title: "Orders",
-        link: () => `/controller/${Pages.Orders}`,
+        link: () => `/${Paths.Controller}/${ControllerPaths.Orders}`,
       },
       (roles.includes(Roles.Product) || roles.includes(Roles.Global)) && {
         icon: <ProductIcon />,
         title: "Products",
-        link: () => `/controller/${Pages.Products}/${PageSections.PrdListing}`,
+        link: () =>
+          `/${Paths.Controller}/${ControllerPaths.Products}/${PageSections.PrdListing}`,
       },
       ,
     ],
@@ -81,19 +82,24 @@ export const moreDropdown = {
   item: "",
   items: [
     {
+      icon: <ProductIcon />,
+      title: "Products",
+      link: () => Paths.Products,
+    },
+    {
       icon: <Trending />,
       title: "Trending Products",
-      link: () => "/#",
+      link: () => Paths.Products,
     },
     {
       icon: <OfferIcon />,
-      title: "Special Offers",
-      link: () => "/#",
+      title: "Offers",
+      link: () => Paths.Products,
     },
     {
       icon: <QuestionIcon />,
       title: "Customer Services",
-      link: () => "/#",
+      link: () => Paths.Products,
     },
   ],
 } as DropdownProps;
@@ -162,8 +168,7 @@ export default function Header() {
     return isAuthenticated
       ? [
           { ...authItems, showTitle: false },
-          { ...controllerItems(roles), showTitle: false },
-          moreDropdown,
+          controllerItems(roles),
           signOutItem(handleSignOut),
         ]
       : [notAuthItem, moreDropdown];
@@ -207,6 +212,7 @@ export default function Header() {
                 title={<UserAvatar size={35} isLink={false} />}
                 items={headerDropDoown}
                 align="c"
+                showCaret={false}
               />
             </div>
             <Link to="#" className={Styles.tab}>

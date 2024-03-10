@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import Table from "react-bootstrap/Table";
 import Styles from "./styles.module.scss";
 import Button from "../../../shared/Button/Button";
-import { PageSections, Pages } from "../../../../types/controller";
+import { PageSections, ControllerPaths } from "../../../../types/controller";
 import ControllerStyles from "../../controller.module.scss";
 import SpinLoader from "../../../shared/Loader/SpinLoader/SpinLoader";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
@@ -67,7 +67,7 @@ function ProductListing() {
             <Button
               value="NEW PRODUCT"
               type="button"
-              link={`/controller/${Pages.Products}/${PageSections.CreatePrd}`}
+              link={`/controller/${ControllerPaths.Products}/${PageSections.CreatePrd}`}
             />
           </div>
         </div>
@@ -113,7 +113,7 @@ function ProductListing() {
                     <td>
                       <Link
                         className={Styles.edit_button}
-                        to={`/controller/${Pages.Products}/${PageSections.CreatePrd}/?prd_id=${product.id}`}
+                        to={`/controller/${ControllerPaths.Products}/${PageSections.CreatePrd}/?prd_id=${product.id}`}
                       >
                         <RiEditFill height="100%" />
                       </Link>

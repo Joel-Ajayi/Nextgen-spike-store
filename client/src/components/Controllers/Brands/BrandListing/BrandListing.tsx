@@ -3,7 +3,7 @@ import ControllerStyles from "../../controller.module.scss";
 import Button from "../../../shared/Button/Button";
 import SpinLoader from "../../../shared/Loader/SpinLoader/SpinLoader";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
-import { PageSections, Pages } from "../../../../types/controller";
+import { PageSections, ControllerPaths } from "../../../../types/controller";
 import { Link } from "react-router-dom";
 import brandReq from "../../../../requests/brand";
 import brandSlice from "../../../../store/controller/brands";
@@ -44,7 +44,7 @@ function BrandListing() {
               value="ADD NEW BRAND"
               type="button"
               className={Styles.all_brd_button}
-              link={`/controller/${Pages.Brand}/${PageSections.CreateBrd}`}
+              link={`/controller/${ControllerPaths.Brand}/${PageSections.CreateBrd}`}
             />
           </div>
         </div>
@@ -65,7 +65,7 @@ function BrandListing() {
                   <td>
                     <Link
                       className={Styles.edit_button}
-                      to={`/controller/${Pages.Brand}/${PageSections.UpdateBrd}?brd_id=${brand.name}`}
+                      to={`/controller/${ControllerPaths.Brand}/${PageSections.UpdateBrd}?brd_id=${brand.name}`}
                     >
                       <MdModeEdit height="100%" />
                       Edit

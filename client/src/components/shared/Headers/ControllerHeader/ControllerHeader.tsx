@@ -10,7 +10,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import userSlice from "../../../../store/userState";
-import { Pages } from "../../../../types/controller";
+import { ControllerPaths } from "../../../../types/controller";
 import userReq from "../../../../requests/user";
 import { authItems, controllerItems, signOutItem } from "../AppHeader/Header";
 import uniqId from "uniqid";
@@ -103,6 +103,7 @@ function ControllerHeader() {
               titleClassName={Styles.nav_tab}
               title={tab.title}
               items={tab.items}
+              link={tab.items?.length ? undefined : tab?.link}
               listOnHover
               childPos="t-m"
               align="c"

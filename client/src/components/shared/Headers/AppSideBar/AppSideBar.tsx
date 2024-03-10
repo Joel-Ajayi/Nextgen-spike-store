@@ -148,10 +148,11 @@ function AppSideBar({ className = "" }: BarProps) {
 
   const controllerHomeDropdown = useMemo(
     () =>
-      !isController && {
+      !isController &&
+      roles.length && {
         ...controllerHomeItems(roles),
       },
-    [isProfile]
+    [isProfile, roles]
   );
 
   const controllerDropDown = useMemo(
@@ -200,6 +201,7 @@ function AppSideBar({ className = "" }: BarProps) {
                 <UserAvatar size={55} showInfo />
               </div>
             }
+            showCaret={false}
             pos="m"
             items={navs}
             listOnLoad

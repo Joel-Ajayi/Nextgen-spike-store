@@ -5,7 +5,7 @@ import Categories from "../components/Controllers/Categories/Categories";
 import Orders from "../components/Controllers/Orders/Orders";
 import Products from "../components/Controllers/Products/Products";
 import BackgroundMsg from "../components/shared/BackgroundMsg/BackgroundMsg";
-import { Pages } from "../types/controller";
+import { ControllerPaths } from "../types/controller";
 import Dashboard from "../components/Controllers/Dashboard/Dashboard";
 import { useAppSelector } from "../store/hooks";
 import { Roles } from "../types/user";
@@ -20,28 +20,28 @@ function ControllerPage() {
 
   const currentPage = useMemo(() => {
     switch (page) {
-      case Pages.Categories:
+      case ControllerPaths.Categories:
         if (!isAuthorized(Roles.CategoryAndBrand)) break;
         return <Categories />;
-      case Pages.Products:
+      case ControllerPaths.Products:
         if (!isAuthorized(Roles.Product)) break;
         return <Products />;
-      case Pages.Brand:
+      case ControllerPaths.Brand:
         if (!isAuthorized(Roles.CategoryAndBrand)) break;
         return <Brands />;
-      case Pages.Orders:
+      case ControllerPaths.Orders:
         if (!isAuthorized(Roles.Order)) break;
         return <Orders />;
-      case Pages.DashBoard:
+      case ControllerPaths.DashBoard:
         return <Dashboard />;
       default:
         return !page ? (
-          <Navigate to={`/controller/${Pages.DashBoard}`} replace />
+          <Navigate to={`/controller/${ControllerPaths.DashBoard}`} replace />
         ) : (
           <Navigate to="*" replace />
         );
     }
-    return <Navigate to={`/controller/${Pages.DashBoard}`} replace />;
+    return <Navigate to={`/controller/${ControllerPaths.DashBoard}`} replace />;
   }, [page]);
 
   return (
