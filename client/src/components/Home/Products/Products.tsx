@@ -1,9 +1,9 @@
 import React from "react";
-import { useAppSelector } from "../../../../store/hooks";
+import { useAppSelector } from "../../../store/hooks";
 import Styles from "./Styles.module.scss";
 import Product from "./Product";
 import uniqid from "uniqid";
-import Button from "../../../shared/Button/Button";
+import Button from "../../shared/Button/Button";
 
 function Products() {
   const { newProducts, hotDeals, popularProducts } = useAppSelector(

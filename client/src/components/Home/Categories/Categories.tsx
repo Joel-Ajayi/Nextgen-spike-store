@@ -1,6 +1,6 @@
 import React from "react";
 import Styles from "./Styles.module.scss";
-import { useAppSelector } from "../../../../store/hooks";
+import { useAppSelector } from "../../../store/hooks";
 import Slider, { Settings } from "react-slick";
 import { Link } from "react-router-dom";
 import { BiSolidCategory as CategoryIcon } from "react-icons/bi";

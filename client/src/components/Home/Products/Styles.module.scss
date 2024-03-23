@@ -1,5 +1,5 @@
-@import "../../../../styles/mixins.scss";
-@import "../../../../styles/vars.scss";
+@import "../../../styles/mixins.scss";
+@import "../../../styles/vars.scss";
 
 .wrapper_section {
   gap: 1.5rem;
@@ -91,12 +91,12 @@
       border-radius: 50%;
       background-color: white;
       box-shadow: 1px 1px 3px $color-gray4;
-      padding: 0.15rem;
+      padding: 0.1rem;
 
       @media only screen and (min-width: 450px) {
         height: 1.6rem;
         width: 1.6rem;
-        padding: 0.25rem;
+        padding: 0.2rem;
       }
 
       svg {

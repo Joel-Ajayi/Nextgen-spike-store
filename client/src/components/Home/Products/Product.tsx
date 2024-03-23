@@ -1,13 +1,13 @@
 import React, { useMemo } from "react";
-import { ProductMini } from "../../../../types/product";
+import { ProductMini } from "../../../types/product";
 import Styles from "./Styles.module.scss";
-import { useAppSelector } from "../../../../store/hooks";
+import { useAppSelector } from "../../../store/hooks";
 import { TbCurrencyNaira } from "react-icons/tb";
 import { GiRoundStar } from "react-icons/gi";
 import { FaStarHalfStroke } from "react-icons/fa6";
 import { MdFavoriteBorder as FavoriteIcon } from "react-icons/md";
 import { IoAddOutline as AddIcon } from "react-icons/io5";
-import helpers from "../../../../helpers";
+import helpers from "../../../helpers";
 import { MdOutlineShoppingCart as CartIcon } from "react-icons/md";
 
 type Props = {

@@ -2,16 +2,16 @@ import React, { useEffect } from "react";
 import BackgroundMsg from "../../components/shared/BackgroundMsg/BackgroundMsg";
 import Header from "../../components/shared/Headers/AppHeader/Header";
 import Styles from "./styles.module.scss";
-import MainBanners from "../../components/Controllers/Home/Banners/MainBanners";
-import Categories from "../../components/Controllers/Home/Categories/Categories";
-import SubBanners from "../../components/Controllers/Home/Banners/Offers";
+import MainBanners from "../../components/Home/Banners/MainBanners";
+import Categories from "../../components/Home/Categories/Categories";
+import SubBanners from "../../components/Home/Banners/Offers";
 import Footer from "../../components/shared/Footer/Footer";
 import { useAppSelector } from "../../store/hooks";
 import appSlice from "../../store/appState";
 import globalReq from "../../requests/global";
 import { useDispatch } from "react-redux";
-import Features from "../../components/Controllers/Home/Features/Features";
-import Products from "../../components/Controllers/Home/Products/Products";
+import Features from "../../components/Home/Features/Features";
+import Products from "../../components/Home/Products/Products";
 
 function HomePage() {
   const dispatch = useDispatch();

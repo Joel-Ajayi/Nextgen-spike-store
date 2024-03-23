@@ -1,4 +1,4 @@
-import { LandingPageData } from "../../../@types";
+import { LandingPageData, SearchRes, SearchResType } from "../../../@types";
 import { CategoryBanner } from "../../../@types/categories";
 import { db } from "../../../db/prisma/connect";
 
@@ -111,7 +111,12 @@ export default {
 
     const hotDeals = (
       await db.product.findMany({
-        where: { discount: { gt: 0 } },
+        where: {
+          OR: [
+            { discount: { gt: 0 } },
+            { category: { offers: { every: { id: { not: undefined } } } } },
+          ],
+        },
         orderBy: { discount: "desc" },
         take: 6,
         select: selectProduct,
@@ -144,5 +149,32 @@ export default {
       hotDeals: [hotDeals[0], hotDeals[0], hotDeals[0], hotDeals[0]],
       categories,
     };
+  },
+  SearchGlobal: async (
+    _: any,
+    query: { search: string }
+  ): Promise<SearchRes[]> => {
+    const categories = (
+      await db.category.findMany({
+        where: { name: { mode: "insensitive", contains: query.search } },
+        select: { name: true, id: true },
+      })
+    ).map((cat) => ({ ...cat, type: SearchResType.Category }));
+
+    const products = (
+      await db.product.findMany({
+        where: { name: { mode: "insensitive", contains: query.search } },
+        select: { name: true, id: true },
+      })
+    ).map((cat) => ({ ...cat, type: SearchResType.Product }));
+
+    const brands = (
+      await db.brand.findMany({
+        where: { name: { mode: "insensitive", contains: query.search } },
+        select: { name: true, id: true },
+      })
+    ).map((cat) => ({ ...cat, type: SearchResType.Brand }));
+
+    return [...categories, ...brands, ...products];
   },
 };

@@ -5,8 +5,6 @@ import {
   LandingPageData,
   StatusCodes,
 } from "../types";
-import { DropdownItemProps } from "../components/shared/Dropdown/DropdownItem/DropdownItem";
-import { DropdownProps } from "../components/shared/Dropdown/Dropdown";
 
 export const initialState: IAppInitailState = {
   showModal: false,

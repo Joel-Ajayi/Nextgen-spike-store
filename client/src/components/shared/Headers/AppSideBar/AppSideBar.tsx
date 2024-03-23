@@ -6,20 +6,13 @@ import React, {
   useMemo,
 } from "react";
 import Styles from "./sidebar.module.scss";
-import { ReactComponent as CategoryIcon } from "../../../../../images/icons/category.svg";
 import { HiBars3BottomLeft as SideBarIcon } from "react-icons/hi2";
 import { CONSTS } from "../../../../const";
-import { MdOutlineShoppingCart as CartIcon } from "react-icons/md";
-import DropdownItem, {
-  DropdownItemProps,
-} from "../../Dropdown/DropdownItem/DropdownItem";
-import uniqId from "uniqid";
 import UserAvatar from "../UserAvatar/UserAvatar";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import userReq from "../../../../requests/user";
 import userSlice from "../../../../store/userState";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Roles } from "../../../../types/user";
 import Dropdown, { DropdownProps } from "../../Dropdown/Dropdown";
 import {
   authItems,

@@ -39,7 +39,7 @@ export const initialState: InitialProductController = {
   },
   list: {
     skip: 0,
-    list: [],
+    list: [[]],
     count: 0,
     page: 1,
     numPages: 1,

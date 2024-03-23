@@ -1,6 +1,10 @@
 import { Brand, IFile, Pagination } from ".";
 import { CategoryFeature, CategoryMini } from "./category";
 
+export enum ProductsPageParams {
+  SortBy = "",
+}
+
 export type ProductFormData = {
   categories: CategoryMini[];
   categoriesPath: string[];

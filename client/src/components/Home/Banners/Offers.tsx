@@ -1,9 +1,9 @@
 import React, { useMemo } from "react";
 import Styles from "./Styles.module.scss";
-import { useAppSelector } from "../../../../store/hooks";
+import { useAppSelector } from "../../../store/hooks";
 import Slider from "react-slick";
 import { Link } from "react-router-dom";
-import Button from "../../../shared/Button/Button";
+import Button from "../../shared/Button/Button";
 import uniqid from "uniqid";
 
 function Offers() {

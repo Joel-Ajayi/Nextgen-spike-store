@@ -7,10 +7,10 @@ import { GrFormPrevious, GrFormNext } from "react-icons/gr";
 type Props<T> = {
   pagination: PaginationType<T>;
   specifiedMaxButtons?: number;
-  callBack: (skip: number) => Promise<PaginationType<T>>;
+  callBack: (page: number) => Promise<PaginationType<T>>;
 };
 
-function Pagination<T>({ specifiedMaxButtons = 10, ...props }: Props<T>) {
+function Pagination<T>({ specifiedMaxButtons = 4, ...props }: Props<T>) {
   const [pagination, setPagination] = useState(props.pagination);
   const [pageLoading, setPageLoading] = useState(0);
   const [wrapperWidth, setWrapperWidth] = useState(1);
@@ -62,8 +62,7 @@ function Pagination<T>({ specifiedMaxButtons = 10, ...props }: Props<T>) {
   const loadMore = async (page: number) => {
     if (pageLoading !== 0) return;
     setPageLoading(page);
-    const skip = pagination.take * (page - 1);
-    const newPagination = await props.callBack(skip);
+    const newPagination = await props.callBack(page);
     setPagination(newPagination);
     setPageLoading(0);
   };

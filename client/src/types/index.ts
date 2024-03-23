@@ -1,5 +1,3 @@
-import { DropdownProps } from "../components/shared/Dropdown/Dropdown";
-import { DropdownItemProps } from "../components/shared/Dropdown/DropdownItem/DropdownItem";
 import {
   CategoryBanner,
   CategoryMicro,
@@ -87,7 +85,23 @@ export type Pagination<T> = {
   page: number;
   numPages: number;
   skip: number;
-  list: T[];
+  list: T[][];
+};
+
+export enum SearchSort {
+  Popular = "Popular",
+  Newest = "Newest",
+  Price = "lowest to highest",
+  Price2 = "highest to lowest",
+}
+
+export type Search = {
+  skip: number;
+  search?: string;
+  category?: string;
+  sortBy?: SearchSort;
+  offers?: boolean;
+  discount?: boolean;
 };
 
 export type LandingPageData = {

@@ -1,5 +1,7 @@
 const typeDefs = `#graphql
 type Query {
+  SearchGlobal(search:String!):[SearchRes!]!
+  FilterProducts(query:ProductsFilterInput!):[ProductMini!]!
   LandingPageData:LandingPageData
   GetBrand(name: String!): Brand
   GetBrands: [Brand!]!
@@ -35,7 +37,7 @@ type Message {
 }
 
 type Pagination {
-  list: [AnyExceptNull!]!
+  list: [[AnyExceptNull!]]!
   take:Int!
   skip:Int!
   count:Int!
@@ -48,6 +50,12 @@ scalar Upload
 scalar UploadOrUrl
 scalar AnyExceptNull
 scalar StringOrInt
+
+type SearchRes {
+  id:String!
+  type:Int! #0=brand,1=cat,2=brd
+  name:String!
+}
 
 #Brand
 type Brand {
@@ -212,9 +220,33 @@ type CategoryFormData {
   offerAudiences:[String!]!
 }
 
-
-
 #Product
+input ProductsFilterInput {
+  skip: Int!
+  take:Int!
+  category: String
+  brands: [String!]!
+  colours: [String!]!
+  sortBy: ProductFilterSort
+  price: ProductFilterRange
+  offers: [Int!]!
+  discount: ProductFilterRange
+  rating: ProductFilterRange
+  filters: [ProductFeatureInput!]!
+}
+
+input ProductFilterRange {
+  from:Int!
+  to:Int!
+}
+
+enum ProductFilterSort {
+  Popular
+  Newest
+  lowest_to_highest
+  highest_to_lowest
+}
+
 type Product {
   id: String!
   name: String!

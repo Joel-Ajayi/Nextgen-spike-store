@@ -216,9 +216,6 @@ export default function Header() {
               />
             </div>
             <Link to="#" className={Styles.tab}>
-              <SearchIcon className={Styles.icon} />
-            </Link>
-            <Link to="#" className={Styles.tab}>
               <MailsIcon className={Styles.icon} />
               <span>Mails</span>
             </Link>
@@ -236,23 +233,21 @@ export default function Header() {
 
         {!isProfile && (
           <div className={Styles.sub_header}>
-            <Dropdown
-              title={
-                <div className={Styles.category_inner}>
-                  <CategoryIcon className={Styles.icon} />
-                  <span>Categories</span>
-                </div>
-              }
-              titleClassName={Styles.category}
-              align="r"
-              childPos="m-r"
-              items={categoryTree}
-            />
+            <div className={Styles.content}>
+              <Dropdown
+                title="Categories"
+                icon={<CategoryIcon className={Styles.icon} />}
+                titleClassName={Styles.category_inner}
+                align="r"
+                childPos="m-r"
+                items={categoryTree}
+              />
 
-            <div className={Styles.others}>
-              <Link to="">Trending Products</Link>
-              <Link to="">Special Offers</Link>
-              <Link to="">Customer Services</Link>
+              <div className={Styles.others}>
+                <Link to="">Trending Products</Link>
+                <Link to="">Special Offers</Link>
+                <Link to="">Customer Services</Link>
+              </div>
             </div>
           </div>
         )}

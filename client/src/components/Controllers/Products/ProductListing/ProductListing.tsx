@@ -92,36 +92,41 @@ function ProductListing() {
                 </tr>
               </thead>
               <tbody>
-                {pagination.list.map((product) => (
-                  <tr key={uniqId()}>
-                    <td>{product.name}</td>
-                    <td>{product.category}</td>
-                    <td>{product.count}</td>
-                    <td>{product.price}</td>
-                    <td>
-                      {[1, 2, 3, 4, 5].map((index) =>
-                        index >= product.rating ? (
-                          <TbStarFilled
-                            key={uniqId()}
-                            style={{ paddingRight: 2 }}
-                          />
-                        ) : (
-                          <TbStar key={uniqId()} style={{ paddingRight: 2 }} />
-                        )
-                      )}
-                    </td>
-                    <td>
-                      <Link
-                        className={Styles.edit_button}
-                        to={`/controller/${ControllerPaths.Products}/${PageSections.CreatePrd}/?prd_id=${product.id}`}
-                      >
-                        <RiEditFill height="100%" />
-                      </Link>
-                      {<span style={{ padding: "0px 10px" }}>/</span>}
-                      <MdDelete height="100%" />
-                    </td>
-                  </tr>
-                ))}
+                {pagination.list.map((page) =>
+                  page.map((product) => (
+                    <tr key={uniqId()}>
+                      <td>{product.name}</td>
+                      <td>{product.category}</td>
+                      <td>{product.count}</td>
+                      <td>{product.price}</td>
+                      <td>
+                        {[1, 2, 3, 4, 5].map((index) =>
+                          index >= product.rating ? (
+                            <TbStarFilled
+                              key={uniqId()}
+                              style={{ paddingRight: 2 }}
+                            />
+                          ) : (
+                            <TbStar
+                              key={uniqId()}
+                              style={{ paddingRight: 2 }}
+                            />
+                          )
+                        )}
+                      </td>
+                      <td>
+                        <Link
+                          className={Styles.edit_button}
+                          to={`/controller/${ControllerPaths.Products}/${PageSections.CreatePrd}/?prd_id=${product.id}`}
+                        >
+                          <RiEditFill height="100%" />
+                        </Link>
+                        {<span style={{ padding: "0px 10px" }}>/</span>}
+                        <MdDelete height="100%" />
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </Table>
           </div>
