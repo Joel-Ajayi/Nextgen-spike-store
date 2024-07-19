@@ -15,6 +15,7 @@ export interface IAppInitailState {
   networkError: boolean;
   message: IMessage;
   landingPageData: LandingPageData;
+  headerData: HeaderData;
 }
 
 export enum MessageType {
@@ -88,20 +89,10 @@ export type Pagination<T> = {
   list: T[][];
 };
 
-export enum SearchSort {
-  Popular = "Popular",
-  Newest = "Newest",
-  Price = "lowest to highest",
-  Price2 = "highest to lowest",
-}
-
-export type Search = {
-  skip: number;
-  search?: string;
-  category?: string;
-  sortBy?: SearchSort;
-  offers?: boolean;
-  discount?: boolean;
+export type SearchResponse = {
+  id: string;
+  name: string;
+  type: number;
 };
 
 export type LandingPageData = {
@@ -111,8 +102,19 @@ export type LandingPageData = {
   hotDeals: (null | ProductMini)[];
   newProducts: (null | ProductMini)[];
   popularProducts: (null | ProductMini)[];
-  categories: CategoryMicro[];
 };
+
+export type HeaderData = {
+  categories: CategoryMicro[];
+  topCategories: CategoryMini[];
+  searchResultTypes: number[];
+};
+
+export enum SearchResultType {
+  Brand,
+  Category,
+  Product,
+}
 
 export enum Paths {
   Home = "/",

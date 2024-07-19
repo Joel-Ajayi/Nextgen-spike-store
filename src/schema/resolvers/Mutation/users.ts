@@ -10,9 +10,9 @@ import {
   userVerificationEmail,
 } from "../../../emails/verification";
 import { GraphQLError } from "graphql";
-import { verifyJWT } from "../../../helpers";
 import { Message } from "../../../@types";
 import { db } from "../../../db/prisma/connect";
+import helpers from "../../../helpers";
 
 const {
   SESSION_NAME,
@@ -119,7 +119,7 @@ const resolvers = {
     { token }: { token: string },
     ctx: Context
   ): Promise<Message> => {
-    const vToken = await verifyJWT(token, EMAIL_VERIFICATION_SECRET);
+    const vToken = await helpers.verifyJWT(token, EMAIL_VERIFICATION_SECRET);
     if (!vToken) {
       throw new GraphQLError(consts.errors.invalidToken, {
         extensions: {
@@ -187,7 +187,10 @@ const resolvers = {
     { token }: { token: string },
     ctx: Context
   ) => {
-    const pwdToken = await verifyJWT(token, PASSWORD_VERIFICATION_SECRET);
+    const pwdToken = await helpers.verifyJWT(
+      token,
+      PASSWORD_VERIFICATION_SECRET
+    );
     if (!pwdToken) {
       throw new GraphQLError(consts.errors.invalidToken, {
         extensions: {

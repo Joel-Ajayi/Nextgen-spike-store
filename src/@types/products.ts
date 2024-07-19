@@ -1,6 +1,13 @@
 import { FileUpload } from "graphql-upload/Upload";
-import { CategoryFeature, CategoryMini } from "./categories";
+import {
+  CategoryFeature,
+  CategoryMicro,
+  CategoryMini,
+  CategoryFeaturesMini,
+  CategoryOfferType,
+} from "./categories";
 import { Brand } from "./brand";
+import { Pagination } from ".";
 
 export type ProductInfo = {
   id: string;
@@ -104,6 +111,41 @@ export type Product_I_U = {
   features?: ProductFeature[];
   warrCovered?: string;
   warrDuration?: number;
+};
+
+export enum ProductFilterSort {
+  Popular = "Popular",
+  Newest = "Newest",
+  Price = "lowest to highest",
+  Price2 = "highest to lowest",
+}
+
+export type ProductFilterRange = {
+  from: number;
+  to: number;
+};
+
+export type ProductFilter = {
+  isFirstCall: boolean;
+  skip: number;
+  take: number;
+  category: string | null;
+  brands: string[];
+  colours: string[];
+  sortBy: ProductFilterSort | null;
+  price: ProductFilterRange | null;
+  offers: string[];
+  discount: ProductFilterRange;
+  rating: ProductFilterRange;
+  filters: ProductFeature_I[];
+};
+
+export type ProductFilterRes = {
+  offers: string[];
+  brands: string[];
+  filters: CategoryFeaturesMini[];
+  products: Pagination<ProductMini>;
+  colours: string[];
 };
 
 export interface ProductFeature_I {

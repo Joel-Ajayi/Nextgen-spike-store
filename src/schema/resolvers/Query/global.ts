@@ -1,9 +1,10 @@
-import { LandingPageData, SearchRes, SearchResType } from "../../../@types";
+import { SearchRes, SearchResType as SearchResultType } from "../../../@types";
 import { CategoryBanner } from "../../../@types/categories";
 import { db } from "../../../db/prisma/connect";
+import helpers from "../../../helpers";
 
 export default {
-  LandingPageData: async (_: any): Promise<LandingPageData> => {
+  LandingPageData: async (_: any) => {
     const offers = await db.categoryOffer.findManyRandom(10, {
       select: {
         id: true,
@@ -47,19 +48,6 @@ export default {
       features: [],
       parent: "",
     }));
-
-    const categories = (
-      await db.category.findMany({
-        select: {
-          id: true,
-          name: true,
-          lvl: true,
-          cId: true,
-          icon: true,
-          parent: { select: { name: true } },
-        },
-      })
-    ).map((c) => ({ ...c, parent: c.parent?.name || "" }));
 
     const selectProduct = {
       id: true,
@@ -147,8 +135,48 @@ export default {
         popularProducts[0],
       ],
       hotDeals: [hotDeals[0], hotDeals[0], hotDeals[0], hotDeals[0]],
-      categories,
     };
+  },
+  HeaderData: async () => {
+    const topCategories = (
+      await db.category.findMany({
+        orderBy: { numSold: "desc" },
+        select: {
+          id: true,
+          name: true,
+          lvl: true,
+          cId: true,
+          icon: true,
+          numSold: true,
+          hasWarrantyAndProduction: true,
+        },
+        take: 12,
+      })
+    ).map((c) => ({
+      ...c,
+      icon: c.icon as string,
+      offers: [],
+      banner: null,
+      features: [],
+      parent: "",
+    }));
+
+    const categories = (
+      await db.category.findMany({
+        select: {
+          id: true,
+          name: true,
+          lvl: true,
+          cId: true,
+          icon: true,
+          parent: { select: { name: true } },
+        },
+      })
+    ).map((c) => ({ ...c, parent: c.parent?.name || "" }));
+
+    const searchResultTypes = helpers.getObjValues<number>(SearchResultType);
+
+    return { topCategories, categories, searchResultTypes };
   },
   SearchGlobal: async (
     _: any,
@@ -159,21 +187,21 @@ export default {
         where: { name: { mode: "insensitive", contains: query.search } },
         select: { name: true, id: true },
       })
-    ).map((cat) => ({ ...cat, type: SearchResType.Category }));
+    ).map((cat) => ({ ...cat, type: SearchResultType.Category }));
 
     const products = (
       await db.product.findMany({
         where: { name: { mode: "insensitive", contains: query.search } },
         select: { name: true, id: true },
       })
-    ).map((cat) => ({ ...cat, type: SearchResType.Product }));
+    ).map((cat) => ({ ...cat, type: SearchResultType.Product }));
 
     const brands = (
       await db.brand.findMany({
         where: { name: { mode: "insensitive", contains: query.search } },
         select: { name: true, id: true },
       })
-    ).map((cat) => ({ ...cat, type: SearchResType.Brand }));
+    ).map((cat) => ({ ...cat, type: SearchResultType.Brand }));
 
     return [...categories, ...brands, ...products];
   },

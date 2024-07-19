@@ -14,15 +14,15 @@ function Products() {
   const setProducts = productsSlice.actions.setProducts;
 
   const getProducts = async (page = 1) => {
-    if (!pagination.list[page - 1]) {
-      const skip = pagination.take * (page - 1);
-      const { list, ...rest } = await productReq.search({ skip });
-      const newList = [...pagination.list];
-      newList[page - 1] = list[0];
-      const newPagination = { ...rest, list: newList };
-      dispatch(setProducts(newPagination));
-      return newPagination;
-    }
+    // if (!pagination.list[page - 1]) {
+    //   const skip = pagination.take * (page - 1);
+    //   const { list, ...rest } = await productReq.search({ skip });
+    //   const newList = [...pagination.list];
+    //   newList[page - 1] = list[0];
+    //   const newPagination = { ...rest, list: newList };
+    //   dispatch(setProducts(newPagination));
+    //   return newPagination;
+    // }
     return pagination;
   };
 

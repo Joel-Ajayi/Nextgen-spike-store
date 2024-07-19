@@ -97,7 +97,10 @@ function Routes() {
         <Route element={<GetUser />} errorElement={<ErrorElement />}>
           <Route path={Paths.Home} element={<HomePage />} />
           <Route path={Paths.SignIn} element={<SignInPage />} />
-          <Route path={`${Paths.Products}/:cat_id?`} element={<Products />} />
+          <Route
+            path={`${Paths.Products}/:category?/:brand?`}
+            element={<Products />}
+          />
           <Route path={`${Paths.Product}/:prd_id`} element={<Product />} />
           <Route path={Paths.Cart} element={<Product />} />
           <Route element={<ProtectedRoute />}>

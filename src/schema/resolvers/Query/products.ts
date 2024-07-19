@@ -6,17 +6,42 @@ import middleware from "../../../middlewares/middlewares";
 import {
   PaymentType,
   Product,
+  ProductFilter,
+  ProductFilterRes,
+  ProductFilterSort,
   ProductMini,
   ProductMini2,
 } from "../../../@types/products";
 import {
   CategoryFeature,
   CategoryFeatureType,
+  CategoryMicro,
+  CategoryOfferType,
 } from "../../../@types/categories";
-import { Pagination, ProductFilter, ProductFilterSort } from "../../../@types";
-import { getObjKeys, getObjValues } from "../../../helpers";
+import { Pagination } from "../../../@types";
 import { db } from "../../../db/prisma/connect";
 import { Prisma } from "@prisma/client";
+import { string } from "yup/lib/locale";
+import helpers from "../../../helpers";
+import { Brand } from "../../../@types/brand";
+
+const productMiniSelect = {
+  id: true,
+  name: true,
+  price: true,
+  cId: true,
+  brand: true,
+  discount: true,
+  rating: true,
+  numSold: true,
+  category: true,
+  images: true,
+  _count: {
+    select: {
+      reviews: true,
+    },
+  },
+};
 
 const resolvers = {
   GetProduct: async (
@@ -63,21 +88,7 @@ const resolvers = {
     try {
       const product = await db.product.findFirst({
         where: { id, category: { name: category } },
-        select: {
-          id: true,
-          name: true,
-          cId: true,
-          images: true,
-          brand: true,
-          colours: true,
-          price: true,
-          description: true,
-          discount: true,
-          rating: true,
-          reviews: true,
-          features: true,
-          numSold: true,
-        },
+        select: { ...productMiniSelect, features: true },
       });
 
       if (!product) {
@@ -86,8 +97,8 @@ const resolvers = {
         });
       }
 
-      const { reviews, ...rest } = product;
-      return { ...rest, numReviews: reviews.length, brand: rest.brand.name };
+      const { _count, ...rest } = product;
+      return { ...rest, numReviews: _count.reviews, brand: rest.brand.name };
     } catch (error) {
       throw new GraphQLError(consts.errors.server, {
         extensions: { statusCode: 500 },
@@ -124,8 +135,8 @@ const resolvers = {
         select: { name: true, image: true },
       });
 
-      const payments = getObjKeys<string>(PaymentType);
-      const featureTypes = getObjKeys<string>(CategoryFeatureType);
+      const payments = helpers.getObjKeys<string>(PaymentType);
+      const featureTypes = helpers.getObjKeys<string>(CategoryFeatureType);
 
       let categoriesPath: string[] = [];
       const features: CategoryFeature[] = [];
@@ -195,9 +206,7 @@ const resolvers = {
   FilterProducts: async (
     _: any,
     query: ProductFilter
-  ): Promise<Pagination<ProductMini>> => {
-    const count = await db.product.count();
-
+  ): Promise<ProductFilterRes> => {
     const orderBy: Prisma.ProductOrderByWithRelationInput[] = [];
     if (query.sortBy) {
       switch (query.sortBy.replace("_", " ")) {
@@ -222,12 +231,12 @@ const resolvers = {
       }
     }
 
-    let priceFilter: Prisma.FloatFilter | undefined = undefined;
+    let priceFilter: Prisma.FloatFilter | undefined;
     if (query.price) {
       priceFilter = { gte: query.price.from, lte: query.price.to };
     }
 
-    let discountFilter: Prisma.IntFilter | undefined = undefined;
+    let discountFilter: Prisma.IntFilter | undefined;
     if (query.discount) {
       const isInfinity = query.discount.to < query.discount.from;
       discountFilter = {
@@ -236,125 +245,142 @@ const resolvers = {
       };
     }
 
-    let ratingFilter: Prisma.IntFilter | undefined = undefined;
+    let ratingFilter: Prisma.IntFilter | undefined;
     if (query.rating) {
       ratingFilter = { gte: query.rating.from, lte: query.rating.to };
     }
 
-    let featureFilter: Prisma.ProductFeatureListRelationFilter | undefined =
-      undefined;
+    let featureFilter: Prisma.ProductWhereInput[] | undefined;
     if (query.filters.length) {
-      featureFilter = {
-        every: {
-          featureId: { in: query.filters.map((f) => f.featureId) },
-          value: { in: query.filters.map((f) => f.value) },
-        },
-      };
+      featureFilter = query.filters.map(({ featureId, value }) => ({
+        features: { some: { featureId, value } },
+      }));
     }
 
-    let coloursFiler: Prisma.StringNullableListFilter | undefined = undefined;
+    let coloursFiler: Prisma.StringNullableListFilter | undefined;
     if (query.colours) {
       coloursFiler = { hasSome: query.colours };
     }
 
-    let brandFilter: Prisma.BrandWhereInput | undefined = undefined;
+    let brandFilter: Prisma.BrandWhereInput | undefined;
     if (query.brands) {
       brandFilter = { name: { in: query.brands } };
     }
 
-    const categories: string[] = [];
+    let catParentandChildNames: string[] = [];
     const parentCats = query.category
       ? [query.category]
       : (await db.category.findMany({ where: { parentId: null } }))?.map(
           (c) => c.name
         );
     if (parentCats.length) {
-      await (async function findChildren(
-        children: string[],
-        parentHasOffer = false
-      ) {
-        await Promise.all(
-          children.map(async (name) => {
-            const category = await db.category.findFirst({
-              where: { name },
-              select: {
-                name: true,
-                children: { select: { name: true } },
-                offers: { select: { type: true } },
-              },
-            });
-
-            const checkOffers = !!query.offers.length;
-            const hasOffer =
-              !checkOffers ||
-              category?.offers.findIndex((o) =>
-                query.offers.includes(o.type)
-              ) !== 0;
-
-            if (category) {
-              if (hasOffer || (!hasOffer && parentHasOffer)) {
-                categories.push(category?.name);
-
-                if (category?.children.length) {
-                  await findChildren(
-                    category.children.map((c) => c.name),
-                    hasOffer
-                  );
-                }
-              }
-            }
-          })
-        );
-      })(parentCats);
+      catParentandChildNames = await helpers.getParentandChildNames(
+        parentCats,
+        query.offers
+      );
     }
 
+    const queryfilters: {
+      where: Prisma.ProductWhereInput;
+      orderBy: Prisma.ProductOrderByWithRelationInput[];
+    } = {
+      where: {
+        category: catParentandChildNames.length
+          ? { name: { in: catParentandChildNames } }
+          : undefined,
+        rating: ratingFilter,
+        brand: brandFilter,
+        price: priceFilter,
+        discount: discountFilter,
+        colours: coloursFiler,
+        AND: featureFilter,
+      },
+      orderBy,
+    };
+
+    const products = await db.product.findMany({
+      ...queryfilters,
+      select: { ...productMiniSelect, colours: true },
+    });
+
     const list = [
-      (
-        await db.product.findMany({
-          where: {
-            category: categories.length
-              ? { name: { in: categories } }
-              : undefined,
-            brand: brandFilter,
-            price: priceFilter,
-            discount: discountFilter,
-            colours: coloursFiler,
-            features: featureFilter,
-          },
-          orderBy,
-          skip: query.skip,
-          take: query.take,
-          select: {
-            id: true,
-            name: true,
-            price: true,
-            cId: true,
-            brand: true,
-            discount: true,
-            rating: true,
-            numSold: true,
-            category: true,
-            images: true,
-            _count: {
-              select: {
-                reviews: true,
-              },
-            },
-          },
-        })
-      ).map((prd) => ({
-        ...prd,
-        brand: prd.brand.name,
-        features: [],
-        numReviews: prd._count.reviews,
-        _count: undefined,
-        category: prd.category?.name || "",
-      })),
+      products
+        .filter(
+          (_, i) => i + 1 > query.skip && i + 1 <= query.take + query.skip
+        )
+        .map((prd) => ({
+          ...prd,
+          brand: prd.brand.name,
+          features: [],
+          numReviews: prd._count.reviews,
+          _count: undefined,
+          category: prd.category?.name || "",
+        })),
     ];
 
     const page = Math.ceil(query.skip / query.take);
-    const numPages = Math.ceil(count / query.take);
-    return { skip: query.skip, count, take: query.take, page, list, numPages };
+    const numPages = Math.ceil(products.length / query.take);
+    const offers = helpers.getObjValues<string>(CategoryOfferType);
+
+    let brands: string[] = [];
+    await (async function getParent(category: string) {
+      if (query.isFirstCall) {
+        if (category) {
+          const cat = await db.category.findUnique({
+            where: { name: category },
+            select: {
+              parent: {
+                select: { name: true, parent: { select: { name: true } } },
+              },
+            },
+          });
+          brands.push(category);
+          if (cat?.parent?.name) brands.push(cat.parent.name);
+          if (cat?.parent?.parent?.name) {
+            await getParent(cat.parent.parent.name);
+          }
+        } else {
+          brands = (await db.brand.findMany({ select: { name: true } })).map(
+            (b) => b.name
+          );
+        }
+      }
+    })(query.category as string);
+
+    //feature filters
+    let filters: {
+      id: string;
+      name: string;
+      options: string[];
+    }[] = [];
+    if (query.category && query.isFirstCall) {
+      filters = await db.categoryFeature.findMany({
+        where: { category: { name: query.category }, useAsFilter: true },
+        select: { name: true, id: true, options: true },
+      });
+    }
+
+    const colours: string[] = [];
+    if (query.isFirstCall) {
+      products.forEach((p) => {
+        colours.push(...p.colours);
+      });
+    }
+
+    return {
+      offers,
+      brands,
+      colours,
+      filters,
+      products: {
+        skip: query.skip,
+        count: products.length,
+        take: query.take,
+        page,
+        list,
+        numPages,
+      },
+    };
   },
 };
 

@@ -2,7 +2,7 @@ import { FileUpload } from "graphql-upload/Upload";
 
 export type Brand = {
   name: string;
-  image: String[];
+  image: string[];
 };
 
 export type Brand_I = {

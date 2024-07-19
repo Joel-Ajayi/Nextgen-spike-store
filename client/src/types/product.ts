@@ -65,6 +65,46 @@ export type ProductMini2 = {
   rating: number;
 };
 
+export enum ProductFilterSort {
+  Popular = "Popular",
+  Newest = "Newest",
+  Price = "lowest to highest",
+  Price2 = "highest to lowest",
+}
+
+export type ProductFilterRange = {
+  from: number;
+  to: number;
+};
+
+export type ProductFilter = {
+  skip: number;
+  take: number;
+  category: string | null;
+  brands: string[];
+  colours: string[];
+  sortBy: ProductFilterSort | null;
+  price: ProductFilterRange | null;
+  offers: string[];
+  discount: ProductFilterRange;
+  rating: ProductFilterRange;
+  filters: {
+    featureId: string;
+    value: string | number;
+  }[];
+};
+
+export type productFilterReturn = {
+  offers: string[];
+  products: Pagination<ProductMini>;
+  filters: {
+    id: string;
+    name: string;
+    options: string[];
+  }[];
+  brands: string[];
+};
+
 export interface ProductInput extends Product {
   isValid: boolean[];
   initFeatures: ProductFeature[];

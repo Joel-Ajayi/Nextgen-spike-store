@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import {
+  HeaderData,
   IAppInitailState,
   IMessage,
   LandingPageData,
@@ -23,11 +24,15 @@ export const initialState: IAppInitailState = {
   landingPageData: {
     banners: [],
     offers: [null, null],
-    categories: [],
     topCategories: [null, null, null, null, null, null, null, null, null, null],
     newProducts: [null, null, null, null, null],
     hotDeals: [null, null, null, null, null],
     popularProducts: [null, null, null, null, null],
+  },
+  headerData: {
+    categories: [],
+    topCategories: [],
+    searchResultTypes: [],
   },
 };
 
@@ -58,6 +63,9 @@ const appSlice = createSlice({
     },
     setLandingPageData: (state, action: PayloadAction<LandingPageData>) => {
       return { ...state, landingPageData: action.payload };
+    },
+    setHeaderData: (state, action: PayloadAction<HeaderData>) => {
+      return { ...state, headerData: action.payload };
     },
   },
 });

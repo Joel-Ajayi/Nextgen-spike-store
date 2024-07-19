@@ -12,7 +12,6 @@
   height: 100%;
   width: 100%;
   z-index: 2;
-  overflow: hidden;
   padding: 3px 3px;
 
   @media only screen and (min-width: 850px) {
@@ -81,11 +80,37 @@
     max-height: 100%;
     overflow: auto;
     @include scrollbar;
+    background-color: white;
+    border-radius: 5px;
+    gap: 0.7rem;
+    display: flex;
+    flex-direction: column;
 
     @media screen and (min-width: 850px) {
-      height: 200px;
+      height: min-content;
+      max-height: 200px;
       position: absolute;
       top: 100%;
+    }
+
+    a {
+      display: flex;
+      align-items: center;
+      column-gap: 0.3rem;
+      max-width: 100%;
+      font-size: 0.8rem;
+
+      span {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        word-wrap: none;
+        color: $color-gray7;
+
+        b {
+          color: $color-gray11;
+        }
+      }
     }
   }
 

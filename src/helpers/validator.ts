@@ -7,8 +7,7 @@ import {
   Category_I_U,
 } from "../@types/categories";
 import { PaymentType, Product_I } from "../@types/products";
-import { getObjValues } from ".";
-
+import helpers from ".";
 class Validator {
   private productFeatures = array(
     object({
@@ -53,7 +52,7 @@ class Validator {
       .min(2, "You must have at least 2 of the product in stock")
       .required("Product count in stock is required"),
     paymentType: number()
-      .oneOf(getObjValues<number>(PaymentType), "Invalid payment type")
+      .oneOf(helpers.getObjValues<number>(PaymentType), "Invalid payment type")
       .required("Payment method is required"),
     discount: number(),
     colours: array()
@@ -101,7 +100,7 @@ class Validator {
   }
 
   public async category(val: Category_I | Category_I_U, isUpdate = false) {
-    const offersIndexes = getObjValues<number>(CategoryOfferType);
+    const offersIndexes = helpers.getObjValues<number>(CategoryOfferType);
     const obj = {
       name: string()
         .required("Name Field is empty")

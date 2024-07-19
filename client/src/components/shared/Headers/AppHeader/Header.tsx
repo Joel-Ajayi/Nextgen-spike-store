@@ -1,13 +1,11 @@
 import React, { useEffect, useMemo } from "react";
 import Styles from "./header.module.scss";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import ProductsSearch from "../../Search/ProductsSearch/ProductsSearch";
 import Dropdown, { DropdownProps } from "../../Dropdown/Dropdown";
 import { MdOutlineShoppingCart as CartIcon } from "react-icons/md";
 import { MdOutlineEmail as MailsIcon } from "react-icons/md";
 import { MdFavoriteBorder as FavoriteIcon } from "react-icons/md";
 import { BiSolidCategory as CategoryIcon } from "react-icons/bi";
-import { IoSearch as SearchIcon } from "react-icons/io5";
 import { FaBoxOpen as ProductIcon } from "react-icons/fa";
 import { ReactComponent as LogoutIcon } from "../../../../images/icons/logout.svg";
 import { FiSettings as SettingsIcon } from "react-icons/fi";
@@ -25,6 +23,8 @@ import { Roles } from "../../../../types/user";
 import { PageSections, ControllerPaths } from "../../../../types/controller";
 import { UserPaths } from "../../../../types/user";
 import { Paths } from "../../../../types";
+import globalReq from "../../../../requests/global";
+import ProductsSearch from "../../Input/ProductsSearch/ProductsSearch";
 
 export const authItems = {
   title: "",
@@ -142,12 +142,11 @@ export default function Header() {
 
   const isLoading = useAppSelector((state) => state.app.isLoading);
   const { isAuthenticated, roles } = useAppSelector((state) => state.user);
-  const categories = useAppSelector(
-    (state) => state.app.landingPageData.categories
-  );
+  const categories = useAppSelector((state) => state.app.headerData.categories);
 
   const actions = appSlice.actions;
-  const { resetUserState } = userSlice.actions;
+  const resetUserState = userSlice.actions.resetUserState;
+  const setHeaderData = appSlice.actions.setHeaderData;
 
   const handleSignInButton = () => {
     if (!isAuthenticated) {
@@ -156,6 +155,15 @@ export default function Header() {
       }
     }
   };
+
+  useEffect(() => {
+    if (!categories.length) {
+      (async () => {
+        const res = await globalReq.getHeaderData();
+        dispatch(setHeaderData(res));
+      })();
+    }
+  }, []);
 
   const handleSignOut = async () => {
     await userReq.signOut();

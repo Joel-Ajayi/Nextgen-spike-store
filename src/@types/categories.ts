@@ -80,6 +80,12 @@ export type CategoryFeature = {
   useAsFilter: boolean;
 };
 
+export type CategoryFeaturesMini = {
+  id: string;
+  options: string[];
+  name: string;
+};
+
 export type CategoryOffer = {
   id: string;
   type: number; // -0-flash sales -1- free shipping

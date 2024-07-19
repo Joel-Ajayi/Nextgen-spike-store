@@ -2,10 +2,13 @@ import request from ".";
 import { IFile, Message, Pagination } from "../types";
 import {
   Product,
+  ProductFilter,
   ProductFormData,
   ProductInput,
+  ProductMini,
   ProductMini2,
   ProductUpdateReturn,
+  productFilterReturn as ProductFilterReturn,
 } from "../types/product";
 
 class ProductReq {
@@ -93,6 +96,21 @@ class ProductReq {
 
     const res = await request.makeRequest(body);
     return res as Product;
+  }
+
+  public async getProducts(
+    filter: ProductFilter
+  ): Promise<ProductFilterReturn> {
+    let query = `query FilterProducts($data:ProductsFilterInput) {
+      FilterProducts(data:$data) { 
+        offers brands filters { name id options } 
+        products { take count list skip page numPages } 
+      }
+    }`;
+
+    const body = JSON.stringify({ query, variables: filter });
+    const res = await request.makeRequest<ProductFilterReturn>(body);
+    return res;
   }
 }
 

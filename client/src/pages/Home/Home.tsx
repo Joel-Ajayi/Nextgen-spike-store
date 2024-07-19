@@ -16,7 +16,7 @@ import Products from "../../components/Home/Products/Products";
 function HomePage() {
   const dispatch = useDispatch();
   const isLoaded = useAppSelector(
-    (state) => !!state.app.landingPageData.categories?.length
+    (state) => state.app.landingPageData.topCategories[0] !== null
   );
 
   const setLandingPageData = appSlice.actions.setLandingPageData;

@@ -3,6 +3,7 @@ type Query {
   SearchGlobal(search:String!):[SearchRes!]!
   FilterProducts(query:ProductsFilterInput!):[ProductMini!]!
   LandingPageData:LandingPageData
+  HeaderData:HeaderData
   GetBrand(name: String!): Brand
   GetBrands: [Brand!]!
   GetCategories(parent: String): [CategoryMini!]!
@@ -51,11 +52,7 @@ scalar UploadOrUrl
 scalar AnyExceptNull
 scalar StringOrInt
 
-type SearchRes {
-  id:String!
-  type:Int! #0=brand,1=cat,2=brd
-  name:String!
-}
+
 
 #Brand
 type Brand {
@@ -77,7 +74,18 @@ type LandingPageData {
   hotDeals: [ProductMini!]!
   newProducts: [ProductMini!]!
   popularProducts: [ProductMini!]!
+}
+
+type HeaderData {
+  topCategories: [CategoryMini!]!
   categories:[CategoryMicro!]!
+  searchResultTypes:[Int!]!
+}
+
+type SearchRes {
+  id:String!
+  type:Int! #0=brand,1=cat,2=brd
+  name:String!
 }
 
 #Category
@@ -126,6 +134,12 @@ type CategoryFeature {
   name: String!
   options: [String!]!
   type: Int!
+}
+
+type CategoryOfferMini {
+  id:String!
+  name: String!
+  options: [String!]!
 }
 
 input CategoryFeatureInput {
@@ -222,6 +236,7 @@ type CategoryFormData {
 
 #Product
 input ProductsFilterInput {
+  isFirstCall:Boolean!
   skip: Int!
   take:Int!
   category: String
@@ -229,10 +244,18 @@ input ProductsFilterInput {
   colours: [String!]!
   sortBy: ProductFilterSort
   price: ProductFilterRange
-  offers: [Int!]!
+  offers: [String!]!
   discount: ProductFilterRange
   rating: ProductFilterRange
   filters: [ProductFeatureInput!]!
+}
+
+type ProductFilterReturn {
+  offers:[String!]!
+  products:Pagination!
+  brands:[String!]!
+  filters:[CategoryOfferMini!]!
+  colours: [String!]!
 }
 
 input ProductFilterRange {

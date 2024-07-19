@@ -37,7 +37,7 @@ function AppSideBar({ className = "" }: BarProps) {
 
   const { isAuthenticated, roles } = useAppSelector((state) => state.user);
   const { categories, topCategories } = useAppSelector(
-    (state) => state.app.landingPageData
+    (state) => state.app.headerData
   );
   const { resetUserState } = userSlice.actions;
 
