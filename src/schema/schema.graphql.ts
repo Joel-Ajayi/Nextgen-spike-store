@@ -130,7 +130,6 @@ type CategoryMicro {
 type CategoryFeature {
   id: String!
   useAsFilter: Boolean!
-  parentId: String
   name: String!
   options: [String!]!
   type: Int!
@@ -145,7 +144,6 @@ type CategoryOfferMini {
 input CategoryFeatureInput {
   id: String!
   useAsFilter: Boolean!
-  parentId: String
   name: String!
   options: [String!]!
   type: Int!

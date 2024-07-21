@@ -118,7 +118,7 @@ function ControllerHeader() {
           title={<UserAvatar size={35} isLink={false} />}
           items={userDropDoown}
           listOnHover
-          align="l"
+          align="c"
         />
 
         <AppSideBar className={Styles.side_bar} />

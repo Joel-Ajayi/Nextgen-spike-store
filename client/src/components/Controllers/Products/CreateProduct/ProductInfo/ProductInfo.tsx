@@ -139,16 +139,13 @@ function ProductInfo() {
 
   const features = useMemo(
     () =>
-      formData.features.map(
-        (f) =>
-          !f.parentId && (
-            <Feature
-              key={uniqid()}
-              id={f.id || uniqid()}
-              onChange={onInputChange}
-            />
-          )
-      ),
+      formData.features.map((f) => (
+        <Feature
+          key={uniqid()}
+          id={f.id || uniqid()}
+          onChange={onInputChange}
+        />
+      )),
     [formData.features]
   );
 

@@ -2,15 +2,12 @@ import React, { useMemo, useState } from "react";
 import { ReactComponent as DeleteIcon } from "../../../../../images/icons/delete.svg";
 import { ReactComponent as EditIcon } from "../../../../../images/icons/edit.svg";
 import { ReactComponent as SaveIcon } from "../../../../../images/icons/save.svg";
-import { GrAdd as AddIcon } from "react-icons/gr";
 import { CategoryFeature } from "../../../../../types/category";
 import Input from "../../../../shared/Input/Controller/Input";
 import Styles from "./styles.module.scss";
 import { IFile } from "../../../../../types";
 import categoryValidator from "../../../../../validators/category";
 import { useAppSelector } from "../../../../../store/hooks";
-import { defaultFeature } from "../../../../../store/controller/categories";
-import uniqId from "uniqid";
 
 type FeatureProps = {
   featureId: string;
@@ -36,8 +33,6 @@ const Feature = ({ featureId, onChange }: FeatureProps) => {
     return Object.keys(errors).findIndex((err) => !!errors[err]) === -1;
   }, [errors]);
 
-  const children = features.filter((f) => f.parentId === featureId);
-
   const onInputChange = async (
     value: string | (IFile | number | string)[] | number | boolean | null,
     name: string
@@ -52,22 +47,8 @@ const Feature = ({ featureId, onChange }: FeatureProps) => {
     return error;
   };
 
-  const addChildFeature = () => {
-    const newFeatures = [...features];
-    const newFeature = { ...defaultFeature, id: uniqId(), parentId: featureId };
-    newFeatures[index] = { ...input, options: [] };
-    newFeatures.push(newFeature);
-    onChange(newFeatures, "features");
-  };
-
   const deleteFeature = (ids: string[], newFeatures = [...features]) => {
     newFeatures = newFeatures.filter((f) => !ids.includes(f.id));
-    const childFeatures = newFeatures
-      .filter((f) => f.parentId && ids.includes(f.parentId))
-      .map((f) => f.id);
-
-    if (childFeatures.length) deleteFeature(childFeatures, newFeatures);
-
     if (ids[0] === featureId) {
       onChange(newFeatures, "features");
     }
@@ -84,9 +65,6 @@ const Feature = ({ featureId, onChange }: FeatureProps) => {
             onClick={() => setIsEditing(!isValid)}
             className={`${!isValid ? Styles.disabled : ""} ${Styles.save_icon}`}
           />
-        )}
-        {!isEditing && (
-          <AddIcon onClick={addChildFeature} className={Styles.add_icon} />
         )}
         {!isEditing && <EditIcon onClick={() => setIsEditing(true)} />}
         <DeleteIcon onClick={() => deleteFeature([featureId])} />
@@ -118,7 +96,7 @@ const Feature = ({ featureId, onChange }: FeatureProps) => {
         defaultValue=""
         defaultValues={input.options}
         onChange={onInputChange}
-        asInfo={!isEditing || !!children.length}
+        asInfo={!isEditing}
       />
       <Input
         name="useAsFilter"
@@ -129,12 +107,6 @@ const Feature = ({ featureId, onChange }: FeatureProps) => {
         asInfo={!isEditing}
         onChange={onInputChange}
       />
-
-      <section className={Styles.child_section}>
-        {children.map((f) => (
-          <Feature key={f.id} featureId={f.id} onChange={onChange} />
-        ))}
-      </section>
     </div>
   );
 };

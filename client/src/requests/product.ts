@@ -17,11 +17,11 @@ class ProductReq {
       query: `query ProductFormData($id: String) {
         ProductFormData(id: $id) { 
                   brands { name image }
-                  categories { id name lvl parent icon cId hasWarrantyAndProduction features { id name type options parentId useAsFilter } }
+                  categories { id name lvl parent icon cId hasWarrantyAndProduction features { id name type options useAsFilter } }
                   paymentTypes { type val }
                   categoriesPath
                   featureTypes
-                  features { id name type options parentId useAsFilter }
+                  features { id name type options useAsFilter }
                 }
               }`,
       variables: { id },

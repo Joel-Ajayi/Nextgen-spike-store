@@ -43,7 +43,6 @@ function Feature({ onChange, id }: FeatureProps) {
       (f) => f.featureId === id
     )
   );
-  const children = features.filter((f) => f.parentId === feature.id);
   const type = feature.options.length
     ? "select"
     : featureTypes[feature.type].toLowerCase();
@@ -60,7 +59,7 @@ function Feature({ onChange, id }: FeatureProps) {
       : [...productFeatures, newFeature];
     if (isIndex) newProductFeatures[index] = newFeature;
     onChange(newProductFeatures, "features");
-    return !children.length ? productValidator.productFeature(value) : "";
+    return productValidator.productFeature(value);
   };
 
   const options = useMemo(
@@ -68,49 +67,18 @@ function Feature({ onChange, id }: FeatureProps) {
     []
   );
 
-  const childFeatures = useMemo(
-    () =>
-      children.map((f) => (
-        <Feature id={f.id} key={uniqId()} onChange={onChange} />
-      )),
-    []
-  );
-
   return (
     <div className={Styles.feature}>
-      {!children.length && (
-        <Input
-          name="options"
-          label={feature.name}
-          type={type as any}
-          labelClassName={
-            !feature.parentId
-              ? Styles.feature_label
-              : Styles.feature_label_child
-          }
-          defaultValue={defaultValue}
-          rows={3}
-          options={options}
-          asInfo={!!children.length}
-          onChange={(val) => onInputChange(val as string)}
-        />
-      )}
-      {!!children.length && (
-        <div>
-          <span
-            className={
-              !feature.parentId
-                ? Styles.feature_label
-                : Styles.feature_label_child
-            }
-          >
-            {feature.name}
-          </span>
-        </div>
-      )}
-      {!!children.length && (
-        <div className={Styles.feature_children}>{childFeatures}</div>
-      )}
+      <Input
+        name="options"
+        label={feature.name}
+        type={type as any}
+        labelClassName={Styles.feature_label}
+        defaultValue={defaultValue}
+        rows={3}
+        options={options}
+        onChange={(val) => onInputChange(val as string)}
+      />
     </div>
   );
 }

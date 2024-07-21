@@ -119,6 +119,10 @@ function CreateCategory({
 
       setIsLoading(false);
     })();
+
+    return () => {
+      dispatch(setInitCategoryInput(defaultCategory));
+    };
   }, []);
 
   const isValid = useMemo(() => {
@@ -234,17 +238,14 @@ function CreateCategory({
   const features = useMemo(
     () =>
       !isLoading &&
-      input.features.map(
-        (feature) =>
-          !feature.parentId && (
-            <Feature
-              key={uniqid()}
-              data={feature}
-              featureId={feature.id as string}
-              onChange={onInputChange}
-            />
-          )
-      ),
+      input.features.map((feature) => (
+        <Feature
+          key={uniqid()}
+          data={feature}
+          featureId={feature.id as string}
+          onChange={onInputChange}
+        />
+      )),
     [input.features.length, isLoading]
   );
 

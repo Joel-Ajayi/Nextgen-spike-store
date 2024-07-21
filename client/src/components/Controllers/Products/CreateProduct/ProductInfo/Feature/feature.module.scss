@@ -4,23 +4,7 @@
   min-width: 200px;
   .feature_label {
     font-size: 14px !important;
-  }
-
-  .feature_label_child {
-    font-size: 0.85em !important;
-  }
-
-  .feature_label,
-  .feature_label_child {
     font-weight: 600;
     color: $color-gray12;
-  }
-
-  .feature_children {
-    display: flex;
-    flex-direction: column;
-    row-gap: 7px;
-    padding-top: 5px;
-    padding-left: 10px;
   }
 }

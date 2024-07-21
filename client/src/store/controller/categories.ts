@@ -15,7 +15,6 @@ import { IFile } from "../../types";
 export const defaultFeature: CategoryFeature = {
   id: uniqId(),
   name: "",
-  parentId: null,
   type: 0,
   options: [],
   useAsFilter: false,

@@ -9,7 +9,7 @@ import {
 } from "../../../@types/categories";
 import { Context } from "../../context";
 import middleware from "../../../middlewares/middlewares";
-import { getObjKeys } from "../../../helpers";
+import helpers from "../../../helpers";
 import { db } from "../../../db/prisma/connect";
 
 const resolvers = {
@@ -105,9 +105,11 @@ const resolvers = {
       select: { name: true, image: true },
     });
 
-    const featureTypes = getObjKeys<string>(CategoryFeatureType);
-    const offerTypes = getObjKeys<string>(CategoryOfferType);
-    const offerAudiences = getObjKeys<string>(CategoryOfferTargetAudience);
+    const featureTypes = helpers.getObjKeys<string>(CategoryFeatureType);
+    const offerTypes = helpers.getObjKeys<string>(CategoryOfferType);
+    const offerAudiences = helpers.getObjKeys<string>(
+      CategoryOfferTargetAudience
+    );
     return { brands, offerTypes, featureTypes, offerAudiences };
   },
 };

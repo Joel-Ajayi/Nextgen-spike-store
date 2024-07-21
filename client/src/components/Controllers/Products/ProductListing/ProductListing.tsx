@@ -23,19 +23,17 @@ function ProductListing() {
   const setProductList = controllerPrdSlice.actions.setProductList;
 
   useEffect(() => {
-    if (!pagination.list.length) {
-      (async () => {
-        const data = await productReq.getProductsMini2(
-          pagination.skip,
-          pagination.take
-        );
+    (async () => {
+      const data = await productReq.getProductsMini2(
+        pagination.skip,
+        pagination.take
+      );
 
-        if (data) {
-          dispatch(setProductList(data));
-        }
-        setIsLoading(false);
-      })();
-    }
+      if (data) {
+        dispatch(setProductList(data));
+      }
+      setIsLoading(false);
+    })();
   }, []);
 
   const loadPage = async (skip: number) => {

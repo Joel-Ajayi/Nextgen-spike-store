@@ -8,7 +8,7 @@ class CategoryReq {
     const returnData = `
     name parent lvl cId icon
     offers { id type validUntil image tagline bannerColours discount audience }
-    features { id name type options useAsFilter parentId}`;
+    features { id name type options useAsFilter }`;
 
     const input = {
       ...rest,
@@ -87,7 +87,7 @@ class CategoryReq {
                 UpdateCategoryParent(name: $name, parent: $parent) { 
                 name parent lvl cId icon
                 offers { id type validUntil image tagline bannerColours discount audience}
-                features { id name type options useAsFilter parentId} }
+                features { id name type options useAsFilter} }
               }`,
       variables: {
         name,
@@ -105,7 +105,7 @@ class CategoryReq {
           name parent lvl cId icon hasWarrantyAndProduction
           banner { image tagline bannerColours }  
           offers { id type validUntil image tagline bannerColours discount audience}
-          features { id name type options useAsFilter parentId} } }`,
+          features { id name type options useAsFilter} } }`,
       variables: { parent },
     });
 
@@ -119,7 +119,7 @@ class CategoryReq {
                  id name parent lvl description hasWarrantyAndProduction brand icon
                  banner { image tagline bannerColours } 
                  offers { id type validUntil image tagline bannerColours discount audience }
-                 features { id name type options useAsFilter parentId }
+                 features { id name type options useAsFilter }
                 }
               }`,
       variables: { name },

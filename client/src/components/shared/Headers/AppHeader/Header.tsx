@@ -54,25 +54,25 @@ export const controllerItems = (roles: Roles[]) =>
       (roles.includes(Roles.SuperAdmin) || roles.includes(Roles.Global)) && {
         icon: <MdDashboard />,
         title: "Dashboard",
-        link: () => `/${Paths.Controller}`,
+        link: () => Paths.Controller,
       },
       (roles.includes(Roles.CategoryAndBrand) ||
         roles.includes(Roles.Global)) && {
         icon: <CategoryIcon />,
         title: "Categories",
         link: () =>
-          `/${Paths.Controller}/${ControllerPaths.Categories}/${PageSections.CatListing}`,
+          `${Paths.Controller}/${ControllerPaths.Categories}/${PageSections.CatListing}`,
       },
       (roles.includes(Roles.Order) || roles.includes(Roles.Global)) && {
         icon: <CartIcon />,
         title: "Orders",
-        link: () => `/${Paths.Controller}/${ControllerPaths.Orders}`,
+        link: () => `${Paths.Controller}/${ControllerPaths.Orders}`,
       },
       (roles.includes(Roles.Product) || roles.includes(Roles.Global)) && {
         icon: <ProductIcon />,
         title: "Products",
         link: () =>
-          `/${Paths.Controller}/${ControllerPaths.Products}/${PageSections.PrdListing}`,
+          `${Paths.Controller}/${ControllerPaths.Products}/${PageSections.PrdListing}`,
       },
       ,
     ],

@@ -14,7 +14,7 @@ import { Context } from "../../context";
 import middleware from "../../../middlewares/middlewares";
 import { validator } from "../../../helpers/validator";
 import { ValidateFileProps, upload } from "../../../helpers/uploads";
-import { getObjKeys } from "../../../helpers";
+import helpers from "../../../helpers";
 import { db } from "../../../db/prisma/connect";
 
 const ObjectId = Types.ObjectId;
@@ -172,29 +172,15 @@ const resolvers = {
       // Features
       const features: CategoryFeature[] = [];
       if (data.features?.length) {
-        const parentFeatures = data.features
-          .filter((f) => !f?.parentId)
-          .map((f) => ({ ...f, categoryId: newCategory.id }));
-
-        await (async function saveFeature(pFeatures: CategoryFeature[]) {
-          await Promise.all(
-            pFeatures.map(async ({ ...rest }) => {
-              // save feature
-              const categoryId = newCategory.id;
-              let feature = { categoryId, ...rest };
-              feature = await db.categoryFeature.create({ data: feature });
-              features.push(feature);
-
-              // get feature children
-              const children = data.features
-                .filter((child) => child.parentId === feature.name)
-                .map((f) => ({ ...f, categoryId, parentId: feature.id }));
-
-              // save feature children
-              if (children.length) await saveFeature(children);
-            })
-          );
-        })(parentFeatures);
+        await Promise.all(
+          data.features.map(async ({ ...rest }) => {
+            // save feature
+            const categoryId = newCategory.id;
+            let feature = { categoryId, ...rest };
+            feature = await db.categoryFeature.create({ data: feature });
+            features.push(feature);
+          })
+        );
       }
 
       const offers: CategoryOffer[] = [];
@@ -344,7 +330,7 @@ const resolvers = {
     // validate offers image
     let offersImages: string[] = [];
     if (data.offers.length) {
-      const offerTypes = getObjKeys<string>(CategoryOfferType);
+      const offerTypes = helpers.getObjKeys<string>(CategoryOfferType);
       const files = data.offers.map((f) => f.image);
       const prevFiles = category.offers.map((f) => f.image);
       offersImages = await upload.files({
@@ -360,45 +346,28 @@ const resolvers = {
       category?.parent?.hasWarrantyAndProduction ||
       data.hasWarrantyAndProduction;
     try {
-      // delete all filters
+      // delete all features
       let prevFeaturesId = [...category.features].map((f) => f.id);
       if (data.features?.length) {
         // Features
-        const parentFeatures = data.features.filter((f) => !f.parentId);
         const ObjectId = Types.ObjectId;
-
-        await (async function saveFeature(pFeatures: CategoryFeature[]) {
-          const randObjId = new ObjectId().toString();
-          await Promise.all(
-            pFeatures.map(async ({ id, parentId, ...rest }) => {
-              const isIdValid =
-                ObjectId.isValid(id) && String(new ObjectId(id)) === id;
-
-              // save feature
-              const featureData = {
-                categoryId: category.id,
-                ...rest,
-                parentId: parentId || null,
-              };
-              const feature = await db.categoryFeature.upsert({
-                where: { id: isIdValid ? id : randObjId },
-                create: featureData,
-                update: featureData,
-              });
-              prevFeaturesId = prevFeaturesId.filter((fId) => fId !== id);
-
-              // get feature children
-              const children = data.features
-                .filter((child) => child.parentId === id)
-                .map((f) => ({ ...f, parentId: feature.id }));
-
-              // save feature children
-              if (children.length) await saveFeature(children);
-            })
-          );
-        })(parentFeatures);
+        const randObjId = new ObjectId().toString();
+        await Promise.all(
+          data.features.map(async ({ id, ...rest }) => {
+            const isIdValid =
+              ObjectId.isValid(id) && String(new ObjectId(id)) === id;
+            // save feature
+            const featureData = { categoryId: category.id, ...rest };
+            const feature = await db.categoryFeature.upsert({
+              where: { id: isIdValid ? id : randObjId },
+              create: featureData,
+              update: featureData,
+            });
+            prevFeaturesId = prevFeaturesId.filter((fId) => fId !== id);
+          })
+        );
       }
-      // delete filter not modified
+      // delete features not modified
       if (prevFeaturesId.length) {
         await db.categoryFeature.deleteMany({
           where: { id: { in: prevFeaturesId } },

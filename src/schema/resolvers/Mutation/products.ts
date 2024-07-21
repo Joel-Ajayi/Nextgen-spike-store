@@ -8,7 +8,7 @@ import {
   ProductUpdateReturn,
 } from "../../../@types/products";
 import { validator } from "../../../helpers/validator";
-import { getSKU } from "../../../helpers";
+import helpers from "../../../helpers";
 import { Types } from "mongoose";
 import { CategoryFeature } from "../../../@types/categories";
 import { upload } from "../../../helpers/uploads";
@@ -88,10 +88,6 @@ const resolvers = {
         return [];
       })(productCategory.parent?.name)),
     ];
-    // filter features to get only features without sub features
-    features = features.filter(
-      (feature) => features.findIndex((f) => f.parentId === feature.id) === -1
-    );
 
     const inputFeatureIds = data.features.map(({ featureId }) => featureId);
     features.forEach(({ id, name }) => {
@@ -112,7 +108,7 @@ const resolvers = {
     });
 
     // create sku
-    const sku = getSKU(
+    const sku = helpers.getSKU(
       data.name,
       data.brand,
       data.price,
@@ -177,10 +173,10 @@ const resolvers = {
         images: true,
         category: {
           select: {
+            name: true,
             cId: true,
             parent: { select: { name: true, id: true } },
             hasWarrantyAndProduction: true,
-            features: true,
             brand: { select: { name: true } },
           },
         },
@@ -208,10 +204,10 @@ const resolvers = {
       : await db.category.findUnique({
           where: { cId: isNewCategory ? data.cId : product.category.cId },
           select: {
+            name: true,
             cId: true,
             parent: { select: { name: true, id: true } },
             hasWarrantyAndProduction: true,
-            features: true,
             brand: { select: { name: true } },
           },
         });
@@ -224,40 +220,34 @@ const resolvers = {
 
     if (data.features?.length) {
       // Category features
-      let features = [
-        ...category.features,
-        // get features of parent category
-        ...(await (async function getFeatures(
-          parentCatName = ""
-        ): Promise<CategoryFeature[]> {
-          if (parentCatName) {
-            const parentCategory = await db.category.findUnique({
-              where: { name: parentCatName },
-              select: { features: true, parent: { select: { name: true } } },
-            });
-            if (parentCategory) {
-              return [
-                ...parentCategory.features,
-                ...(await getFeatures(parentCategory.parent?.name)),
-              ];
-            }
-          }
-          return [];
-        })(category.parent?.name)),
-      ];
-      // filter features to get only features without sub features
-      features = features.filter(
-        (feature) => features.findIndex((f) => f.parentId === feature.id) === -1
-      );
-
       const inputFeatureIds = data.features.map(({ featureId }) => featureId);
-      features.forEach(({ id, name }) => {
-        if (!inputFeatureIds.includes(id)) {
-          throw new GraphQLError(`${name} feature is required`, {
-            extensions: { statusCode: 404 },
+
+      // check if features up in the tree are inputed
+      await (async function getFeatures(
+        parentCatName = ""
+      ): Promise<CategoryFeature[]> {
+        if (parentCatName) {
+          const parentCategory = await db.category.findUnique({
+            where: { name: parentCatName },
+            select: {
+              id: true,
+              features: true,
+              parent: { select: { name: true } },
+            },
           });
+          if (parentCategory) {
+            parentCategory.features.forEach((feature) => {
+              if (!inputFeatureIds.includes(feature.id)) {
+                throw new GraphQLError(`${feature.name} feature is required`, {
+                  extensions: { statusCode: 400 },
+                });
+              }
+            });
+            await getFeatures(parentCategory.parent?.name);
+          }
         }
-      });
+        return [];
+      })(category.name);
     }
 
     // update product brand
@@ -361,7 +351,7 @@ const resolvers = {
     }
 
     // create sku
-    const sku = getSKU(
+    const sku = helpers.getSKU(
       newPrd.name,
       data.brand || product.brand.name,
       newPrd.price,

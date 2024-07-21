@@ -18,7 +18,6 @@ export type CategoryFeature = {
   name: string;
   type: number;
   options: string[];
-  parentId: string | null;
   useAsFilter: boolean;
 };
 

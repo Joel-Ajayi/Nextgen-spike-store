@@ -76,7 +76,6 @@ model CategoryFeature {
   name            String
   type            Int
   options         String[]
-  parentId        String?          @db.ObjectId
   category        Category         @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId      String           @db.ObjectId
   useAsFilter     Boolean          @default(false)
