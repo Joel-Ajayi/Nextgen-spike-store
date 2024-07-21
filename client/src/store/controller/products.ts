@@ -5,9 +5,30 @@ import {
   ProductFormData,
   Product,
   ProductMini2,
+  ProductInput,
 } from "../../types/product";
 import { IFile, Pagination } from "../../types";
 import { CategoryFeature, CategoryMini } from "../../types/category";
+
+export const initControllerProduct: ProductInput = {
+  id: undefined,
+  cId: -1,
+  brand: "",
+  isValid: [],
+  features: [],
+  initFeatures: [],
+  name: "",
+  description: "",
+  price: 0,
+  images: [],
+  colours: [],
+  count: 0,
+  mfgDate: "",
+  discount: 0,
+  paymentType: 0,
+  warrCovered: "",
+  warrDuration: 0,
+};
 
 export const initialState: InitialProductController = {
   formData: {
@@ -18,25 +39,7 @@ export const initialState: InitialProductController = {
     features: [],
     featureTypes: [],
   },
-  product: {
-    id: undefined,
-    cId: -1,
-    brand: "",
-    isValid: [],
-    features: [],
-    initFeatures: [],
-    name: "",
-    description: "",
-    price: 0,
-    images: [],
-    colours: [],
-    count: 0,
-    mfgDate: 2010,
-    discount: 0,
-    paymentType: 0,
-    warrCovered: "",
-    warrDuration: 1,
-  },
+  product: initControllerProduct,
   list: {
     skip: 0,
     list: [[]],

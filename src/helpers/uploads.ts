@@ -102,26 +102,26 @@ class Upload {
 
       let stream = file.stream as Readable;
 
-      if (!file.removeBg) {
-        delete options.background_removal;
-      } else {
-        const formData = new FormData();
-        formData.append("size", "auto");
-        formData.append("image_file", file.stream as ReadStream);
+      // if (!file.removeBg) {
+      //   delete options.background_removal;
+      // } else {
+      //   const formData = new FormData();
+      //   formData.append("size", "auto");
+      //   formData.append("image_file", file.stream as ReadStream);
 
-        const response = await axios.post<Buffer>(
-          "https://api.remove.bg/v1.0/removebg",
-          formData,
-          {
-            responseType: "arraybuffer",
-            headers: {
-              "X-Api-Key": process.env.IMG_BG_KEY,
-              ...formData.getHeaders(),
-            },
-          }
-        );
-        stream = Readable.from(response.data);
-      }
+      //   const response = await axios.post<Buffer>(
+      //     "https://api.remove.bg/v1.0/removebg",
+      //     formData,
+      //     {
+      //       responseType: "arraybuffer",
+      //       headers: {
+      //         "X-Api-Key": process.env.IMG_BG_KEY,
+      //         ...formData.getHeaders(),
+      //       },
+      //     }
+      //   );
+      //   stream = Readable.from(response.data);
+      // }
 
       const response = (await new Promise(async (resolve, reject) => {
         stream.pipe(

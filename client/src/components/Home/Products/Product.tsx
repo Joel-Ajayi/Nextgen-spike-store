@@ -6,7 +6,7 @@ import { TbCurrencyNaira } from "react-icons/tb";
 import { GiRoundStar } from "react-icons/gi";
 import { FaStarHalfStroke } from "react-icons/fa6";
 import { MdFavoriteBorder as FavoriteIcon } from "react-icons/md";
-import { IoAddOutline as AddIcon } from "react-icons/io5";
+import uniqid from "uniqid";
 import helpers from "../../../helpers";
 import { MdOutlineShoppingCart as CartIcon } from "react-icons/md";
 
@@ -44,9 +44,10 @@ function Product({ product }: Props) {
         {[0, 1, 2, 3, 4].map((rating) => {
           return rating < (product?.rating || 0) &&
             (product?.rating || 0) < rating + 1 ? (
-            <FaStarHalfStroke className={Styles.star} />
+            <FaStarHalfStroke key={uniqid()} className={Styles.star} />
           ) : (
             <GiRoundStar
+              key={uniqid()}
               className={`${
                 rating < (product?.rating || 0) ? Styles.star : Styles.star_less
               }`}

@@ -66,7 +66,7 @@ const data: DropdownProps[] = [
         title: "Add Product",
         id: PageSections.CreatePrd,
         link: () =>
-          `/controller?/${ControllerPaths.Products}/${PageSections.CreatePrd}`,
+          `/controller/${ControllerPaths.Products}/${PageSections.CreatePrd}`,
         items: [
           {
             title: "Category And Brand",

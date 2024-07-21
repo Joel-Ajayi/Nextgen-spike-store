@@ -26,7 +26,7 @@ const resolvers = {
         });
       }
 
-      return { ...brand, image: [brand.image] };
+      return { ...brand, image: brand.image };
     } catch (error) {
       throw new GraphQLError(consts.errors.server, {
         extensions: { statusCode: 500 },
@@ -41,7 +41,7 @@ const resolvers = {
         select: { name: true, image: true },
       });
 
-      return brands.map((brd) => ({ ...brd, image: [brd.image] }));
+      return brands.map((brd) => ({ ...brd, image: brd.image }));
     } catch (error) {
       throw new GraphQLError(consts.errors.server, {
         extensions: { statusCode: 500 },

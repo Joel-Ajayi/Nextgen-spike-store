@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import {
   CreatePrdSections,
   PageSections,
@@ -13,16 +13,14 @@ import Button from "../../../shared/Button/Button";
 import productReq from "../../../../requests/product";
 import appSlice from "../../../../store/appState";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
-import controllerPrdSlice from "../../../../store/controller/products";
+import controllerPrdSlice, {
+  initControllerProduct,
+} from "../../../../store/controller/products";
 import SpinLoader from "../../../shared/Loader/SpinLoader/SpinLoader";
 import request from "../../../../requests";
-import { RedirectStatusCodes, StatusCodes } from "../../../../types";
 
 function CreateProduct() {
   const dispatch = useAppDispatch();
-  const formData = useAppSelector(
-    (state) => state.controller.products.formData
-  );
   const product = useAppSelector((state) => state.controller.products.product);
   const isFirstFormValid = useAppSelector(
     (state) => state.controller.products.product.isValid[0]
@@ -37,12 +35,10 @@ function CreateProduct() {
   const { setProductFormData, setInitProductInput } =
     controllerPrdSlice.actions;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     (async () => {
-      if (!formData.categories.length) {
-        const data = await productReq.getProductFormData(prd_id || undefined);
-        if (data) dispatch(setProductFormData(data));
-      }
+      const formData = await productReq.getProductFormData(prd_id || undefined);
+      if (formData) dispatch(setProductFormData(formData));
       if (!!prd_id && product.id !== prd_id) {
         const data = await productReq.getProduct(prd_id);
         if (data) {
@@ -53,7 +49,7 @@ function CreateProduct() {
 
       setIsLoading(false);
     })();
-  }, []);
+  }, [prd_id]);
 
   const currentPage = useMemo(() => {
     let navLink = `/controller/${ControllerPaths.Products}/${PageSections.CreatePrd}?sub=${CreatePrdSections.CategoryAndBrand}`;
@@ -79,7 +75,7 @@ function CreateProduct() {
       default:
         return <Navigate to={navLink} replace />;
     }
-  }, [sub, isLoading]);
+  }, [sub, prd_id, isLoading]);
 
   return (
     <div className={ControllerStyles.wrapper}>

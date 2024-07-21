@@ -46,7 +46,7 @@ const resolvers = {
         select: { name: true, image: true },
       });
 
-      return { ...newBrd, image: [newBrd.image] };
+      return { ...newBrd, image: newBrd.image };
     } catch (error) {
       throw new GraphQLError(consts.errors.server, {
         extensions: { statusCode: 500 },

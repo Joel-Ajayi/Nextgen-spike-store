@@ -49,7 +49,9 @@ function MainBanners() {
                   <div className={Styles.taglines_wrapper}>
                     <div className={Styles.content}>
                       {banner.tagline.split(/\n/).map((text) => (
-                        <div className={Styles.tagline}>{text}</div>
+                        <div className={Styles.tagline} key={uniqid()}>
+                          {text}
+                        </div>
                       ))}
                       <Button
                         link="hs"

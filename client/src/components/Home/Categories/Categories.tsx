@@ -41,9 +41,9 @@ function Categories() {
   return (
     <div className={Styles.top_cats}>
       <div className={Styles.header}>Top Categories</div>
-      <Slider {...sliderSettings} className={Styles.categories} key={uniqid()}>
+      <Slider {...sliderSettings} className={Styles.categories}>
         {categories.map((cat) => (
-          <Link to="" className={Styles.category}>
+          <Link to="" className={Styles.category} key={uniqid()}>
             <>
               <div className={Styles.icon}>
                 {cat && (

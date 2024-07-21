@@ -34,7 +34,7 @@ export type Product = {
   paymentType: number;
   images: (IFile | string)[];
   sku?: string;
-  mfgDate: number;
+  mfgDate: "";
   warrCovered: string;
   warrDuration: number;
   cId: number;

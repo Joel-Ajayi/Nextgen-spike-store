@@ -52,8 +52,8 @@ function CreateBrand({ isUpdate, brd_id }: CreateBrandProps) {
         const brd = await brandReq.getBrand(brd_id);
         if (brd) {
           let image: IFile[] = [];
-          if (brd.image.length) {
-            image = await request.getImageFiles(brd.image as any);
+          if (brd.image) {
+            image = await request.getImageFiles([brd.image as any]);
           }
           setForm({ ...brd, image });
         }

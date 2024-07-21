@@ -38,7 +38,7 @@ class Validator {
     description: string()
       .required("Description is required")
       .min(50, "Description should have at least 50 characters")
-      .max(200, "Description should have at most 200 characters"),
+      .max(700, "Description should have at most 700 characters"),
     price: number()
       .min(0.1, "Price value cannot be less than 100")
       .max(500000, "Price cannot be more than 500,000")
@@ -63,18 +63,20 @@ class Validator {
     mfgDate: string()
       .test({
         message: "Date format should be in MM-YYYY",
-        test: (val) => /^(0[1-9]|1[0,1,2])-(20\d{2})$/.test(val as string),
+        test: (val) =>
+          /^(0[1-9]|1[0,1,2])-(20\d{2})$/.test(val as string) || !val,
       })
       .test({
         message: "Date cannot be more than current month",
         test: (date) => {
+          if (!date) return true;
           const splitDate = (date as string).split("-");
           var currentDate = new Date();
           const inputDate = new Date(+splitDate[1], +splitDate[0]);
           return inputDate <= currentDate;
         },
       }),
-    warrDuration: number().min(1, "Warranty can't be less than a month"),
+    warrDuration: number(),
     warrCovered: string(),
   };
 

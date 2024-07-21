@@ -50,7 +50,7 @@ function ProductInfo() {
 
   const onSave = async () => {
     setIsSaving(true);
-    const data = await productReq.updateProduct(true, {
+    const data = await productReq.updateProduct(isUpdate, {
       ...product,
       sku: undefined,
     });
@@ -254,7 +254,7 @@ function ProductInfo() {
                     label="Production Date"
                     defaultValue={product.mfgDate}
                     onChange={onInputChange}
-                    unit="year"
+                    unit="mm-yyyy"
                   />
                 </section>
               </div>
