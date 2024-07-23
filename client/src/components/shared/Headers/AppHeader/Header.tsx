@@ -84,22 +84,22 @@ export const moreDropdown = {
     {
       icon: <ProductIcon />,
       title: "Products",
-      link: () => Paths.Products,
+      link: () => Paths.Catalog,
     },
     {
       icon: <Trending />,
       title: "Trending Products",
-      link: () => Paths.Products,
+      link: () => Paths.Catalog,
     },
     {
       icon: <OfferIcon />,
       title: "Offers",
-      link: () => Paths.Products,
+      link: () => Paths.Catalog,
     },
     {
       icon: <QuestionIcon />,
       title: "Customer Services",
-      link: () => Paths.Products,
+      link: () => Paths.Catalog,
     },
   ],
 } as DropdownProps;

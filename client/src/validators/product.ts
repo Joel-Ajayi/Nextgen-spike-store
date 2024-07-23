@@ -1,6 +1,4 @@
-import { max } from "lodash";
 import { array, number, string } from "yup";
-import { CategoryFeature } from "../types/category";
 import { ProductFeature } from "../types/product";
 
 class ProductValidator {
@@ -9,8 +7,8 @@ class ProductValidator {
       await string()
         .required("Name Field is empty")
         .min(5, "Name should have more than 5 characters")
-        .matches(/^[a-zA-Z0-9'\s]*$/, "Special characters not allowed")
-        .max(50, "Name should have not more than 50 characters")
+        .matches(/^[a-zA-Z0-9',+()".\s-]*$/, "Special characters not allowed")
+        .max(100, "Name should have not more than 50 characters")
         .validate(val);
       return "";
     } catch (error) {
@@ -22,7 +20,7 @@ class ProductValidator {
     try {
       await string()
         .min(50, "Description should have at least 50 characters")
-        .max(700, "Description should have at most 700 characters")
+        .max(1300, "Description should have at most 1300 characters")
         .validate(val);
       return "";
     } catch (error) {
@@ -42,8 +40,7 @@ class ProductValidator {
   public async prdPrice(val = 0) {
     try {
       await number()
-        .min(0.1, "Price value cannot be less than 100")
-        .max(500000, "Price cannot be more than 500,000")
+        .min(500, "Price value cannot be less than 500")
         .required("Price is Required")
         .validate(val);
       return "";
@@ -88,14 +85,15 @@ class ProductValidator {
   public async prdMfgDate(val: string, isRequired: boolean) {
     const rg = /^(0[1-9]|1[0,1,2])-(20\d{2})$/;
     try {
-      string()
+      await string()
         .test({
           message: "Date format should be in MM-YYYY",
-          test: (val) => rg.test(val as string),
+          test: (val) => rg.test(val as string) || !val,
         })
         .test({
           message: "Date cannot be more than current month",
           test: (date) => {
+            if (!date) return true;
             const splitDate = (date as string).split("-");
             var currentDate = new Date();
             const inputDate = new Date(+splitDate[1], +splitDate[0]);
@@ -106,7 +104,8 @@ class ProductValidator {
         .validate(val);
       return "";
     } catch (error) {
-      if (!isRequired) return "";
+      if (!isRequired && (error as any).message === "Date is required")
+        return "";
       return (error as any).message;
     }
   }
@@ -115,11 +114,12 @@ class ProductValidator {
     try {
       await number()
         .min(1, "Warranty must be at least a month")
-        .required("Warranty must be at least a month")
+        .required("Warranty is required")
         .validate(val);
       return "";
     } catch (error) {
-      if (!isRequired) return "";
+      if (!isRequired && (error as any).message === "Warranty is required")
+        return "";
       return (error as any).message;
     }
   }
@@ -129,11 +129,16 @@ class ProductValidator {
       if (isRequired && !val) return "Warranty Covered is required";
 
       await string()
-        .min(5, "Warranty covered must be at least 5 characters")
         .max(150, "Warranty covered must be at most 150 characters")
+        .required("Warranty covered is required")
         .validate(val);
       return "";
     } catch (error) {
+      if (
+        !isRequired &&
+        (error as any).message === "Warranty covered is required"
+      )
+        return "";
       return (error as any).message;
     }
   }

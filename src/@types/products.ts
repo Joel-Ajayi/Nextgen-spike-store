@@ -1,13 +1,4 @@
 import { FileUpload } from "graphql-upload/Upload";
-import {
-  CategoryFeature,
-  CategoryMicro,
-  CategoryMini,
-  CategoryFeaturesMini,
-  CategoryOfferType,
-} from "./categories";
-import { Brand } from "./brand";
-import { Pagination } from ".";
 
 export type ProductInfo = {
   id: string;
@@ -61,19 +52,6 @@ export type ProductMini2 = {
   rating: number;
 };
 
-export type FilterPageProduct = {
-  id: string;
-  name: string;
-  price: number;
-  brand: string;
-  discount: number;
-  rating: number;
-  numRating: number;
-  numReviews: number;
-  colours: string[];
-  images: string[];
-};
-
 export type Product_I = {
   name: string;
   cId: number;
@@ -113,41 +91,6 @@ export type Product_I_U = {
   warrDuration?: number;
 };
 
-export enum ProductFilterSort {
-  Popular = "Popular",
-  Newest = "Newest",
-  Price = "lowest to highest",
-  Price2 = "highest to lowest",
-}
-
-export type ProductFilterRange = {
-  from: number;
-  to: number;
-};
-
-export type ProductFilter = {
-  isFirstCall: boolean;
-  skip: number;
-  take: number;
-  category: string | null;
-  brands: string[];
-  colours: string[];
-  sortBy: ProductFilterSort | null;
-  price: ProductFilterRange | null;
-  offers: string[];
-  discount: ProductFilterRange;
-  rating: ProductFilterRange;
-  filters: ProductFeature_I[];
-};
-
-export type ProductFilterRes = {
-  offers: string[];
-  brands: string[];
-  filters: CategoryFeaturesMini[];
-  products: Pagination<ProductMini>;
-  colours: string[];
-};
-
 export interface ProductFeature_I {
   id?: string;
   featureId: string;
@@ -163,3 +106,42 @@ export enum PaymentType {
   CARD,
   COD,
 }
+
+export enum CatalogQuery {
+  SortBy = "sort_by",
+  Search = "search",
+  Category = "category",
+  Brand = "brand",
+  Discount = "discount",
+  Price = "price",
+  Rating = "rating",
+  Offers = "offer",
+}
+
+export enum CatalogSortQueries {
+  Newest = "newest",
+  Popular = "popular",
+  Hotdeals = "hotdeals",
+  PriceDesc = "price_desc",
+  Price_asc = "price_asc",
+  Rating = "rating",
+}
+
+export type CatalogFilter = {
+  id: string;
+  options: string[];
+};
+
+export type QueryCatalog = {
+  sortBy: string;
+  brands: string[];
+  category: string;
+  discount: number;
+  search: string;
+  isCategoryChanged: boolean;
+  offer: string;
+  rating: number;
+  priceMax: number;
+  priceMin: number;
+  filters: CatalogFilter[];
+};

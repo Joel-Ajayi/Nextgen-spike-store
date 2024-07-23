@@ -23,7 +23,7 @@ import userReq from "./requests/user";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import Products from "./pages/Products";
+import Catalog from "./pages/Catalog";
 import Product from "./pages/Product";
 import Checkout from "./pages/Checkout";
 
@@ -97,10 +97,7 @@ function Routes() {
         <Route element={<GetUser />} errorElement={<ErrorElement />}>
           <Route path={Paths.Home} element={<HomePage />} />
           <Route path={Paths.SignIn} element={<SignInPage />} />
-          <Route
-            path={`${Paths.Products}/:category?/:brand?`}
-            element={<Products />}
-          />
+          <Route path={`${Paths.Catalog}/`} element={<Catalog />} />
           <Route path={`${Paths.Product}/:prd_id`} element={<Product />} />
           <Route path={Paths.Cart} element={<Product />} />
           <Route element={<ProtectedRoute />}>

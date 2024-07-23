@@ -118,7 +118,7 @@ export enum SearchResultType {
 
 export enum Paths {
   Home = "/",
-  Products = "/products",
+  Catalog = "/catalog",
   Product = "product",
   Profile = "/profile",
   Cart = "cart",
@@ -127,4 +127,24 @@ export enum Paths {
   Controller = "/controller",
 }
 
-export const PublicPaths = [Paths.Home, Paths.Products, Paths.Cart];
+export enum CatalogQuery {
+  SortBy = "sort_by",
+  Search = "search",
+  Category = "category",
+  Brand = "brand",
+  Discount = "discount",
+  Price = "price",
+  Rating = "rating",
+  Offers = "offer",
+}
+
+export enum CatalogSortQueries {
+  Newest = "newest",
+  Popular = "popular",
+  Hotdeals = "hotdeals",
+  PriceDesc = "price_desc",
+  Price_asc = "price_asc",
+  Rating = "rating",
+}
+
+export const PublicPaths = [Paths.Home, Paths.Catalog, Paths.Cart];

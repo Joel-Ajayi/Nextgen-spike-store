@@ -1,6 +1,5 @@
 class Helpers {
   public reduceNumberLenth(price: number) {
-    console.log(price);
     if (price > 1000) {
       if (price > 1000000) {
         return `${(price / 1000000).toFixed(2)}M`;

@@ -34,19 +34,18 @@ class Validator {
     name: string()
       .required("Product name is required")
       .min(5, "Product name should have more than 5 characters")
-      .max(50, "Product name should not exceed 50 characters"),
+      .max(100, "Product name should not exceed 50 characters"),
     description: string()
       .required("Description is required")
       .min(50, "Description should have at least 50 characters")
-      .max(700, "Description should have at most 700 characters"),
+      .max(1300, "Description should have at most 1300 characters"),
     price: number()
-      .min(0.1, "Price value cannot be less than 100")
-      .max(500000, "Price cannot be more than 500,000")
+      .min(500, "Price value cannot be less than 500")
       .required("Product price is required"),
     images: array()
       .required("No image was uploaded")
-      .min(2, "More than 1 image should be uploaded")
-      .max(4, "Not more than 4 images should be uploaded")
+      .min(1, "More than 1 image should be uploaded")
+      .max(3, "Not more than 3 images should be uploaded")
       .of(mixed()),
     count: number()
       .min(2, "You must have at least 2 of the product in stock")

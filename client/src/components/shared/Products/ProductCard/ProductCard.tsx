@@ -1,20 +1,22 @@
 import React, { useMemo } from "react";
-import { ProductMini } from "../../../types/product";
+import { ProductMini } from "../../../../types/product";
 import Styles from "./Styles.module.scss";
-import { useAppSelector } from "../../../store/hooks";
+import { useAppSelector } from "../../../../store/hooks";
 import { TbCurrencyNaira } from "react-icons/tb";
 import { GiRoundStar } from "react-icons/gi";
 import { FaStarHalfStroke } from "react-icons/fa6";
 import { MdFavoriteBorder as FavoriteIcon } from "react-icons/md";
 import uniqid from "uniqid";
-import helpers from "../../../helpers";
+import helpers from "../../../../helpers";
 import { MdOutlineShoppingCart as CartIcon } from "react-icons/md";
+import { Link } from "react-router-dom";
+import { Paths } from "../../../../types";
 
 type Props = {
   product: null | ProductMini;
 };
 
-function Product({ product }: Props) {
+function ProductCard({ product }: Props) {
   const isLoading = useAppSelector(
     (state) => state.app.isLoading || state.app.isPageLoading
   );
@@ -30,7 +32,7 @@ function Product({ product }: Props) {
   );
 
   return (
-    <div className={Styles.product}>
+    <Link to={`${Paths.Product}/${product?.id}`} className={Styles.product}>
       <div className={Styles.image}>
         {product && (
           <div className={Styles.favorite_icon}>
@@ -75,6 +77,7 @@ function Product({ product }: Props) {
               <>
                 <TbCurrencyNaira className={Styles.naira} />
                 {discountPrice}
+                <div className={Styles.tag}>{`-${product.discount}%`}</div>
               </>
             )}
           </div>
@@ -84,8 +87,8 @@ function Product({ product }: Props) {
         <CartIcon className={Styles.cart_icon} />
         Add To Cart
       </div>
-    </div>
+    </Link>
   );
 }
 
-export default Product;
+export default ProductCard;

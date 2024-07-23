@@ -1,14 +1,14 @@
 import React from "react";
 import Header from "../components/shared/Headers/AppHeader/Header";
-import ProductsFilterPage from "../components/Products/Products";
+import CataglogPage from "../components/Catalog/Catalog";
 
-function Products() {
+function Catalog() {
   return (
     <>
       <Header />
-      <ProductsFilterPage />
+      <CataglogPage />
     </>
   );
 }
 
-export default Products;
+export default Catalog;

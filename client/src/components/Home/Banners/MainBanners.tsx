@@ -6,6 +6,7 @@ import { Link } from "react-router-dom";
 import Button from "../../shared/Button/Button";
 import { MdOutlineShoppingCart as CartIcon } from "react-icons/md";
 import uniqid from "uniqid";
+import { CatalogQuery, Paths } from "../../../types";
 
 function MainBanners() {
   const banners = useAppSelector((state) => state.app.landingPageData.banners);
@@ -28,7 +29,7 @@ function MainBanners() {
           <>
             <Slider {...sliderSettings}>
               {banners.map((banner) => (
-                <Link to="" className={Styles.banner} key={uniqid()}>
+                <div className={Styles.banner} key={uniqid()}>
                   <div
                     className={Styles.background}
                     style={{
@@ -54,7 +55,7 @@ function MainBanners() {
                         </div>
                       ))}
                       <Button
-                        link="hs"
+                        link={`${Paths.Catalog}/?${CatalogQuery.Category}=${banner.category}`}
                         value={
                           <div className={Styles.link_value}>
                             <CartIcon />
@@ -65,7 +66,7 @@ function MainBanners() {
                       />
                     </div>
                   </div>
-                </Link>
+                </div>
               ))}
             </Slider>
           </>

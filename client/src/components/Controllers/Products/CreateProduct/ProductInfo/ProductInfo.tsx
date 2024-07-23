@@ -126,7 +126,7 @@ function ProductInfo() {
           );
         case "images": {
           const files = (value as IFile[]).map((f) => f.file);
-          return await validator.files(files, "image", 2, 3);
+          return await validator.files(files, "image", 1, 3);
         }
         default:
           return "";

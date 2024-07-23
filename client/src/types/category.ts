@@ -30,12 +30,14 @@ export type CategoryOffer = {
   audience: number; // -0-any-1-new-2-old
   image: IFile | string | null;
   validUntil: string;
+  category?: string;
 };
 
 export type CategoryBanner = {
   tagline: string;
   bannerColours: string[];
   image: string | IFile | null;
+  category?: string;
 };
 
 export type CategoryMini = {

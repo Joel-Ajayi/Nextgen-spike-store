@@ -1,9 +1,10 @@
 import React from "react";
 import { useAppSelector } from "../../../store/hooks";
 import Styles from "./Styles.module.scss";
-import Product from "./Product";
+import ProductCard from "../../shared/Products/ProductCard/ProductCard";
 import uniqid from "uniqid";
 import Button from "../../shared/Button/Button";
+import { CatalogQuery, CatalogSortQueries, Paths } from "../../../types";
 
 function Products() {
   const { newProducts, hotDeals, popularProducts } = useAppSelector(
@@ -19,13 +20,13 @@ function Products() {
             <Button
               value={"See More"}
               type="button"
-              link="/"
+              link={`${Paths.Catalog}/?${CatalogQuery.SortBy}=${CatalogSortQueries.Hotdeals}`}
               className={Styles.see_more}
             />
           </div>
           <div className={Styles.products}>
             {hotDeals.map((product) => (
-              <Product product={product} key={uniqid()} />
+              <ProductCard product={product} key={uniqid()} />
             ))}
           </div>
         </div>
@@ -36,13 +37,13 @@ function Products() {
           <Button
             value={"See More"}
             type="button"
-            link="/"
+            link={`${Paths.Catalog}/?${CatalogQuery.SortBy}=${CatalogSortQueries.Newest}`}
             className={Styles.see_more}
           />
         </div>
         <div className={Styles.products}>
           {newProducts.map((product) => (
-            <Product product={product} key={uniqid()} />
+            <ProductCard product={product} key={uniqid()} />
           ))}
         </div>
       </div>
@@ -52,13 +53,13 @@ function Products() {
           <Button
             value={"See More"}
             type="button"
-            link="/"
+            link={`${Paths.Catalog}/?${CatalogQuery.SortBy}=${CatalogSortQueries.Popular}`}
             className={Styles.see_more}
           />
         </div>
         <div className={Styles.products}>
           {popularProducts.map((product) => (
-            <Product product={product} key={uniqid()} />
+            <ProductCard product={product} key={uniqid()} />
           ))}
         </div>
       </div>

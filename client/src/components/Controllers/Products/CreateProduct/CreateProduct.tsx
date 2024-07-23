@@ -11,11 +11,8 @@ import ControllerStyles from "./../../controller.module.scss";
 import Styles from "./createProduct.module.scss";
 import Button from "../../../shared/Button/Button";
 import productReq from "../../../../requests/product";
-import appSlice from "../../../../store/appState";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
-import controllerPrdSlice, {
-  initControllerProduct,
-} from "../../../../store/controller/products";
+import controllerPrdSlice from "../../../../store/controller/products";
 import SpinLoader from "../../../shared/Loader/SpinLoader/SpinLoader";
 import request from "../../../../requests";
 

@@ -4,26 +4,22 @@ import consts from "../../../@types/conts";
 import middleware from "../../../middlewares/middlewares";
 
 import {
+  CatalogSortQueries,
   PaymentType,
   Product,
-  ProductFilter,
-  ProductFilterRes,
-  ProductFilterSort,
   ProductMini,
   ProductMini2,
+  QueryCatalog,
 } from "../../../@types/products";
 import {
   CategoryFeature,
+  CategoryFeaturesMini,
   CategoryFeatureType,
-  CategoryMicro,
-  CategoryOfferType,
 } from "../../../@types/categories";
 import { Pagination } from "../../../@types";
 import { db } from "../../../db/prisma/connect";
-import { Prisma } from "@prisma/client";
-import { string } from "yup/lib/locale";
 import helpers from "../../../helpers";
-import { Brand } from "../../../@types/brand";
+import { CategoryOffer, Prisma } from "@prisma/client";
 
 const productMiniSelect = {
   id: true,
@@ -152,7 +148,7 @@ const resolvers = {
 
             if (category) {
               categoriesPath.unshift(category.name);
-              features.push(...category.features);
+              features.push(...category.features.filter((f) => f.useAsFilter));
               if (category.parent?.cId) await findPath(category.parent?.cId);
             }
           })(product.category.cId);
@@ -203,183 +199,185 @@ const resolvers = {
     const numPages = Math.ceil(count / query.take);
     return { skip, count, take: query.take, page, list, numPages };
   },
-  FilterProducts: async (
-    _: any,
-    query: ProductFilter
-  ): Promise<ProductFilterRes> => {
+  QueryCatalog: async (_: any, query: QueryCatalog) => {
+    const whereAND: Prisma.ProductWhereInput[] = [];
     const orderBy: Prisma.ProductOrderByWithRelationInput[] = [];
+
+    let offers: CategoryOffer[] = [];
+    if (query.offer && query.category) {
+      const offer = await db.categoryOffer.findFirst({
+        where: { id: query.offer, category: { name: query.category } },
+      });
+      if (offer) offers.push(offer);
+    } else {
+      if (query.category) {
+        const category = await db.category.findFirst({
+          where: { name: query.category },
+          select: { offers: true },
+        });
+        if (category?.offers?.length) offers.push(...category.offers);
+      }
+    }
+
+    const priceMin = 999999999;
+    const priceMax = 0;
+    if (query.priceMax && query.priceMin) {
+      whereAND.push({ price: { gte: query.priceMin, lte: query.priceMax } });
+    }
+    if (query.rating) {
+      whereAND.push({ rating: query.rating });
+    }
+    if (query.discount) {
+      whereAND.push({ discount: { gte: query.discount } });
+    }
+    if (query.search) {
+      whereAND.push({ name: { mode: "insensitive", contains: query.search } });
+    }
+    if (query.brands.length) {
+      whereAND.push({ brand: { name: { in: query.brands } } });
+    }
+    if (query.filters.length) {
+      whereAND.push(
+        ...query.filters.map((f) => ({
+          features: { some: { id: f.id, value: { in: f.options } } },
+        }))
+      );
+    }
+
     if (query.sortBy) {
-      switch (query.sortBy.replace("_", " ")) {
-        case ProductFilterSort.Newest:
+      switch (query.sortBy) {
+        case CatalogSortQueries.Hotdeals:
+          orderBy.push({ discount: "desc" });
+          break;
+        case CatalogSortQueries.Newest:
           orderBy.push({ createdAt: "desc" });
           break;
-        case ProductFilterSort.Popular:
-          orderBy.push(
-            { rating: "desc" },
-            { numSold: "desc" },
-            { reviews: { _count: "desc" } }
-          );
+        case CatalogSortQueries.Popular:
+          orderBy.push({ numSold: "desc" });
+          orderBy.push({ rating: "desc" });
           break;
-        case ProductFilterSort.Price:
+        case CatalogSortQueries.PriceDesc:
+          orderBy.push({ price: "desc" });
+          break;
+        case CatalogSortQueries.Price_asc:
           orderBy.push({ price: "asc" });
           break;
-        case ProductFilterSort.Price2:
-          orderBy.push({ price: "desc" });
+        case CatalogSortQueries.Rating:
+          orderBy.push({ rating: "desc" });
           break;
         default:
           break;
       }
     }
 
-    let priceFilter: Prisma.FloatFilter | undefined;
-    if (query.price) {
-      priceFilter = { gte: query.price.from, lte: query.price.to };
-    }
-
-    let discountFilter: Prisma.IntFilter | undefined;
-    if (query.discount) {
-      const isInfinity = query.discount.to < query.discount.from;
-      discountFilter = {
-        gte: query.discount.from,
-        lte: isInfinity ? undefined : query.discount.to,
-      };
-    }
-
-    let ratingFilter: Prisma.IntFilter | undefined;
-    if (query.rating) {
-      ratingFilter = { gte: query.rating.from, lte: query.rating.to };
-    }
-
-    let featureFilter: Prisma.ProductWhereInput[] | undefined;
-    if (query.filters.length) {
-      featureFilter = query.filters.map(({ featureId, value }) => ({
-        features: { some: { featureId, value } },
-      }));
-    }
-
-    let coloursFiler: Prisma.StringNullableListFilter | undefined;
-    if (query.colours) {
-      coloursFiler = { hasSome: query.colours };
-    }
-
-    let brandFilter: Prisma.BrandWhereInput | undefined;
-    if (query.brands) {
-      brandFilter = { name: { in: query.brands } };
-    }
-
-    let catParentandChildNames: string[] = [];
-    const parentCats = query.category
-      ? [query.category]
-      : (await db.category.findMany({ where: { parentId: null } }))?.map(
-          (c) => c.name
-        );
-    if (parentCats.length) {
-      catParentandChildNames = await helpers.getParentandChildNames(
-        parentCats,
-        query.offers
-      );
-    }
-
-    const queryfilters: {
-      where: Prisma.ProductWhereInput;
-      orderBy: Prisma.ProductOrderByWithRelationInput[];
-    } = {
-      where: {
-        category: catParentandChildNames.length
-          ? { name: { in: catParentandChildNames } }
-          : undefined,
-        rating: ratingFilter,
-        brand: brandFilter,
-        price: priceFilter,
-        discount: discountFilter,
-        colours: coloursFiler,
-        AND: featureFilter,
-      },
-      orderBy,
-    };
-
-    const products = await db.product.findMany({
-      ...queryfilters,
-      select: { ...productMiniSelect, colours: true },
-    });
-
-    const list = [
-      products
-        .filter(
-          (_, i) => i + 1 > query.skip && i + 1 <= query.take + query.skip
-        )
-        .map((prd) => ({
-          ...prd,
-          brand: prd.brand.name,
-          features: [],
-          numReviews: prd._count.reviews,
-          _count: undefined,
-          category: prd.category?.name || "",
-        })),
-    ];
-
-    const page = Math.ceil(query.skip / query.take);
-    const numPages = Math.ceil(products.length / query.take);
-    const offers = helpers.getObjValues<string>(CategoryOfferType);
-
-    let brands: string[] = [];
-    await (async function getParent(category: string) {
-      if (query.isFirstCall) {
-        if (category) {
-          const cat = await db.category.findUnique({
-            where: { name: category },
+    let categories: string[] = [];
+    const brands: string[] = [];
+    const filters: CategoryFeaturesMini[] = [];
+    if (query.isCategoryChanged) {
+      if (!query.category) {
+        categories = (
+          await db.category.findMany({
             select: {
-              parent: {
-                select: { name: true, parent: { select: { name: true } } },
+              name: true,
+              products: { select: { brand: { select: { name: true } } } },
+            },
+          })
+        ).map((c) => {
+          brands.push(
+            ...c.products
+              .filter((p) => !brands.includes(p.brand.name))
+              .map((p) => p.brand.name)
+          );
+          return c.name;
+        });
+      } else {
+        await (async function getDeepCategory(parent: string) {
+          categories.push(query.category);
+
+          const children = await db.category.findMany({
+            where: { parent: { name: parent } },
+            select: {
+              name: true,
+              products: { select: { brand: { select: { name: true } } } },
+              features: parent !== query.category ? undefined : {},
+            },
+          });
+
+          await Promise.all(
+            children.map(async (child) => {
+              brands.push(
+                ...child.products
+                  .filter((p) => !brands.includes(p.brand.name))
+                  .map((p) => p.brand.name)
+              );
+              await getDeepCategory(child.name);
+            })
+          );
+        })(query.category);
+      }
+
+      whereAND.push({ category: { name: { in: categories } } });
+
+      if (query.category) {
+        await (async function filterUpCategoryTree(cName: string) {
+          const category = await db.category.findUnique({
+            where: { name: cName },
+            select: {
+              parent: { select: { name: true } },
+              features: {
+                select: {
+                  id: true,
+                  options: true,
+                  name: true,
+                  useAsFilter: true,
+                },
               },
             },
           });
-          brands.push(category);
-          if (cat?.parent?.name) brands.push(cat.parent.name);
-          if (cat?.parent?.parent?.name) {
-            await getParent(cat.parent.parent.name);
+
+          if (category) {
+            filters.push(...category.features.filter((f) => f.useAsFilter));
+            if (category.parent?.name) {
+              await filterUpCategoryTree(category.parent?.name);
+            }
           }
-        } else {
-          brands = (await db.brand.findMany({ select: { name: true } })).map(
-            (b) => b.name
-          );
-        }
+        })(query.category);
       }
-    })(query.category as string);
-
-    //feature filters
-    let filters: {
-      id: string;
-      name: string;
-      options: string[];
-    }[] = [];
-    if (query.category && query.isFirstCall) {
-      filters = await db.categoryFeature.findMany({
-        where: { category: { name: query.category }, useAsFilter: true },
-        select: { name: true, id: true, options: true },
-      });
     }
 
-    const colours: string[] = [];
-    if (query.isFirstCall) {
-      products.forEach((p) => {
-        colours.push(...p.colours);
-      });
-    }
+    const products = (
+      await db.product.findMany({
+        where: { AND: whereAND },
+        orderBy,
+        select: {
+          id: true,
+          name: true,
+          price: true,
+          cId: true,
+          brand: true,
+          discount: true,
+          rating: true,
+          numSold: true,
+          category: true,
+          images: true,
+          reviews: { select: { id: true } },
+        },
+      })
+    ).map((p) => ({
+      ...p,
+      brand: p.brand.name,
+      features: [],
+      numReviews: p.reviews.length,
+      reviews: undefined,
+      category: p.category?.name || "",
+    }));
 
     return {
       offers,
+      price: `${priceMin}-${priceMax}`,
       brands,
-      colours,
+      products,
       filters,
-      products: {
-        skip: query.skip,
-        count: products.length,
-        take: query.take,
-        page,
-        list,
-        numPages,
-      },
     };
   },
 };

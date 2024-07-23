@@ -5,6 +5,7 @@ import Slider from "react-slick";
 import { Link } from "react-router-dom";
 import Button from "../../shared/Button/Button";
 import uniqid from "uniqid";
+import { CatalogQuery, Paths } from "../../../types";
 
 function Offers() {
   const offers = useAppSelector((state) => state.app.landingPageData.offers);
@@ -27,7 +28,7 @@ function Offers() {
       <div className={Styles.header}>Special Offers</div>
       <Slider {...sliderSettings} className={Styles.offers}>
         {offers.map((banner, i) => (
-          <Link to="" key={uniqid()} className={Styles.banner}>
+          <div key={uniqid()} className={Styles.banner}>
             {banner && (
               <>
                 <div
@@ -50,10 +51,12 @@ function Offers() {
                 <div className={Styles.taglines_wrapper}>
                   <div className={Styles.content}>
                     {banner.tagline.split(/\n/).map((text) => (
-                      <div className={Styles.tagline}>{text}</div>
+                      <div key={uniqid()} className={Styles.tagline}>
+                        {text}
+                      </div>
                     ))}
                     <Button
-                      link="hs"
+                      link={`${Paths.Catalog}/?${CatalogQuery.Category}=${banner?.category}&${CatalogQuery.Offers}=${banner?.id}`}
                       value={(i + 1) % 2 === 0 ? "Shop Now" : "Discover Now"}
                       className={Styles.button_link}
                     />
@@ -61,7 +64,7 @@ function Offers() {
                 </div>
               </>
             )}
-          </Link>
+          </div>
         ))}
       </Slider>
     </div>

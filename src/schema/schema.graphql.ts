@@ -1,7 +1,7 @@
 const typeDefs = `#graphql
 type Query {
-  SearchGlobal(search:String!):[SearchRes!]!
-  FilterProducts(query:ProductsFilterInput!):[ProductMini!]!
+  SearchCatalog(search:String!):[SearchRes!]!
+  QueryCatalog(query:CatalogInput):CatalogResponse!
   LandingPageData:LandingPageData
   HeaderData:HeaderData
   GetBrand(name: String!): Brand
@@ -135,12 +135,6 @@ type CategoryFeature {
   type: Int!
 }
 
-type CategoryOfferMini {
-  id:String!
-  name: String!
-  options: [String!]!
-}
-
 input CategoryFeatureInput {
   id: String!
   useAsFilter: Boolean!
@@ -158,6 +152,7 @@ type CategoryOffer {
   bannerColours:[String!]!
   image:String!
   validUntil:String!
+  category:String
 }
 
 input CategoryOfferInput {
@@ -187,6 +182,7 @@ type CategoryBanner {
   tagline:String!
   bannerColours:[String!]!
   image:String!
+  category:String
 }
 
 input CategoryBannerInput {
@@ -233,39 +229,46 @@ type CategoryFormData {
 }
 
 #Product
-input ProductsFilterInput {
-  isFirstCall:Boolean!
-  skip: Int!
-  take:Int!
+input CatalogInput {
+  isCategoryChanged:Boolean!
   category: String
+  search:String
+  offer:String
   brands: [String!]!
-  colours: [String!]!
-  sortBy: ProductFilterSort
-  price: ProductFilterRange
-  offers: [String!]!
-  discount: ProductFilterRange
-  rating: ProductFilterRange
-  filters: [ProductFeatureInput!]!
+  sortBy: CatalogSort
+  priceMax: Int
+  priceMin:Int
+  discount: Int
+  rating: Int
+  filters: [CatalogFilterInput!]!
 }
 
-type ProductFilterReturn {
+input CatalogFilterInput {
+  id: String
+  options: [String!]!
+}
+
+type CatalogFilter {
+  id:String!
+  name: String!
+  options: [String!]!
+}
+
+type CatalogResponse {
   offers:[String!]!
-  products:Pagination!
+  products:[ProductMini!]!
+  price:String!
   brands:[String!]!
-  filters:[CategoryOfferMini!]!
-  colours: [String!]!
+  filters:[CatalogFilter!]!
 }
 
-input ProductFilterRange {
-  from:Int!
-  to:Int!
-}
-
-enum ProductFilterSort {
-  Popular
-  Newest
-  lowest_to_highest
-  highest_to_lowest
+enum CatalogSort {
+  popular
+  newest
+  hotdeals
+  price_desc
+  price_asc
+  rating
 }
 
 type Product {

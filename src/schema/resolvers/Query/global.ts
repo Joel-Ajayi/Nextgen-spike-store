@@ -5,25 +5,36 @@ import helpers from "../../../helpers";
 
 export default {
   LandingPageData: async (_: any) => {
-    const offers = await db.categoryOffer.findManyRandom(10, {
-      select: {
-        id: true,
-        tagline: true,
-        image: true,
-        bannerColours: true,
-        audience: true,
-        validUntil: true,
-        type: true,
-        discount: true,
-      },
-    });
+    const offers = (
+      await db.categoryOffer.findManyRandom(10, {
+        select: {
+          id: true,
+          tagline: true,
+          image: true,
+          bannerColours: true,
+          audience: true,
+          validUntil: true,
+          type: true,
+          discount: true,
+          category: { select: { name: true } },
+        },
+      })
+    ).map((o) => ({ ...o, category: o.category.name }));
     const count = 10 - offers.length;
 
-    let banners: CategoryBanner[] = [];
+    let banners: (CategoryBanner & { category: string })[] = [];
     if (count !== 10) {
-      banners = await db.categoryBanner.findManyRandom(count, {
-        select: { id: true, tagline: true, image: true, bannerColours: true },
-      });
+      banners = (
+        await db.categoryBanner.findManyRandom(count, {
+          select: {
+            id: true,
+            tagline: true,
+            category: { select: { name: true } },
+            image: true,
+            bannerColours: true,
+          },
+        })
+      ).map((b) => ({ ...b, category: b.category.name }));
     }
 
     const topCategories = (
@@ -80,11 +91,7 @@ export default {
 
     const popularProducts = (
       await db.product.findMany({
-        orderBy: [
-          { rating: "desc" },
-          { numSold: "desc" },
-          { reviews: { _count: "desc" } },
-        ],
+        orderBy: [{ rating: "desc" }, { numSold: "desc" }],
         take: 6,
         select: selectProduct,
       })
@@ -122,19 +129,9 @@ export default {
       offers,
       topCategories,
       banners,
-      newProducts: [
-        newProducts[0],
-        newProducts[0],
-        newProducts[0],
-        newProducts[0],
-      ],
-      popularProducts: [
-        popularProducts[0],
-        popularProducts[0],
-        popularProducts[0],
-        popularProducts[0],
-      ],
-      hotDeals: [hotDeals[0], hotDeals[0], hotDeals[0], hotDeals[0]],
+      newProducts,
+      popularProducts,
+      hotDeals,
     };
   },
   HeaderData: async () => {
@@ -178,7 +175,7 @@ export default {
 
     return { topCategories, categories, searchResultTypes };
   },
-  SearchGlobal: async (
+  SearchCatalog: async (
     _: any,
     query: { search: string }
   ): Promise<SearchRes[]> => {

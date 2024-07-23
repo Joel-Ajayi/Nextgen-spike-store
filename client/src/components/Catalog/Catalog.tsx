@@ -3,10 +3,9 @@ import Styles from "./styles.module.scss";
 import Pagination from "../shared/Pagination/Pagination";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import productsSlice from "../../store/products";
-import productReq from "../../requests/product";
-import Product from "../Home/Products/Product";
+import ProductCard from "../shared/Products/ProductCard/ProductCard";
 
-function Products() {
+function Cataglog() {
   const dispatch = useAppDispatch();
   const [isLoading, setIsLoading] = useState(true);
   const pagination = useAppSelector((state) => state.products);
@@ -56,7 +55,7 @@ function Products() {
           </div>
           <div className={Styles.products}>
             {pagination.list.map((page) =>
-              page.map((product) => <Product product={product} />)
+              page.map((product) => <ProductCard product={product} />)
             )}
           </div>
           {paginationJSX}
@@ -66,4 +65,4 @@ function Products() {
   );
 }
 
-export default Products;
+export default Cataglog;
