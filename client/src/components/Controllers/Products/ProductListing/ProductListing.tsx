@@ -21,6 +21,7 @@ function ProductListing() {
   const pagination = useAppSelector((state) => state.controller.products.list);
 
   const setProductList = controllerPrdSlice.actions.setProductList;
+  const setPage = controllerPrdSlice.actions.setPage;
 
   useEffect(() => {
     (async () => {
@@ -36,13 +37,14 @@ function ProductListing() {
     })();
   }, []);
 
-  const loadPage = async (skip: number) => {
-    const data = await productReq.getProductsMini2(skip, pagination.take);
-    if (data) {
-      dispatch(setProductList(data));
-      return { ...data, list: [] };
+  const loadPage = async (page: number, skip: number) => {
+    if (!pagination.list[page]) {
+      const data = await productReq.getProductsMini2(skip, pagination.take);
+      if (data) dispatch(setProductList(data));
+    } else {
+      dispatch(setPage({ skip, page }));
     }
-    return pagination;
+    return { ...pagination, skip, page, list: [] };
   };
 
   const pageButtons = useMemo(
@@ -53,7 +55,7 @@ function ProductListing() {
           callBack={loadPage}
         />
       ),
-    [isLoading]
+    [isLoading, pagination.page]
   );
 
   return (
@@ -90,41 +92,36 @@ function ProductListing() {
                 </tr>
               </thead>
               <tbody>
-                {pagination.list.map((page) =>
-                  page.map((product) => (
-                    <tr key={uniqId()}>
-                      <td>{product.name}</td>
-                      <td>{product.category}</td>
-                      <td>{product.count}</td>
-                      <td>{product.price}</td>
-                      <td>
-                        {[1, 2, 3, 4, 5].map((index) =>
-                          index >= product.rating ? (
-                            <TbStarFilled
-                              key={uniqId()}
-                              style={{ paddingRight: 2 }}
-                            />
-                          ) : (
-                            <TbStar
-                              key={uniqId()}
-                              style={{ paddingRight: 2 }}
-                            />
-                          )
-                        )}
-                      </td>
-                      <td>
-                        <Link
-                          className={Styles.edit_button}
-                          to={`/controller/${ControllerPaths.Products}/${PageSections.CreatePrd}/?prd_id=${product.id}`}
-                        >
-                          <RiEditFill height="100%" />
-                        </Link>
-                        {<span style={{ padding: "0px 10px" }}>/</span>}
-                        <MdDelete height="100%" />
-                      </td>
-                    </tr>
-                  ))
-                )}
+                {pagination.list[pagination.page].map((product) => (
+                  <tr key={uniqId()}>
+                    <td>{product.name}</td>
+                    <td>{product.category}</td>
+                    <td>{product.count}</td>
+                    <td>{product.price}</td>
+                    <td>
+                      {[1, 2, 3, 4, 5].map((index) =>
+                        index >= product.rating ? (
+                          <TbStarFilled
+                            key={uniqId()}
+                            style={{ paddingRight: 2 }}
+                          />
+                        ) : (
+                          <TbStar key={uniqId()} style={{ paddingRight: 2 }} />
+                        )
+                      )}
+                    </td>
+                    <td>
+                      <Link
+                        className={Styles.edit_button}
+                        to={`/controller/${ControllerPaths.Products}/${PageSections.CreatePrd}/?prd_id=${product.id}`}
+                      >
+                        <RiEditFill height="100%" />
+                      </Link>
+                      {<span style={{ padding: "0px 10px" }}>/</span>}
+                      <MdDelete height="100%" />
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </Table>
           </div>
