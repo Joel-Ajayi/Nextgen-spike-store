@@ -7,7 +7,7 @@ import {
   ProductMini2,
   ProductInput,
 } from "../../types/product";
-import { IFile, Pagination } from "../../types";
+import { APIPagination, IFile, Pagination } from "../../types";
 import { CategoryFeature, CategoryMini } from "../../types/category";
 
 export const initControllerProduct: ProductInput = {
@@ -42,11 +42,11 @@ export const initialState: InitialProductController = {
   product: initControllerProduct,
   list: {
     skip: 0,
-    list: [[]],
+    list: { 1: [] },
     count: 0,
     page: 1,
     numPages: 1,
-    take: 30,
+    take: 2,
   },
 };
 
@@ -122,11 +122,23 @@ const controllerPrdSlice = createSlice({
     },
     setProductList: (
       state,
-      action: PayloadAction<Pagination<ProductMini2>>
+      action: PayloadAction<APIPagination<ProductMini2>>
     ) => {
-      {
-        return { ...state, list: action.payload };
-      }
+      const list = {
+        ...state.list.list,
+        [action.payload.page]: action.payload.list,
+      };
+      return { ...state, list: { ...action.payload, list } };
+    },
+    setPage: (state, action: PayloadAction<{ skip: number; page: number }>) => {
+      return {
+        ...state,
+        list: {
+          ...state.list,
+          skip: action.payload.skip,
+          page: action.payload.page,
+        },
+      };
     },
   },
 });

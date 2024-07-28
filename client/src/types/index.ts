@@ -80,14 +80,23 @@ export type Brand = {
   image: (IFile | string)[];
 };
 
-export type Pagination<T> = {
+export type APIPagination<T> = {
   count: number;
   take: number;
   page: number;
   numPages: number;
   skip: number;
-  list: T[][];
+  list: T[];
 };
+
+export interface Pagination<T> {
+  count: number;
+  take: number;
+  page: number;
+  numPages: number;
+  skip: number;
+  list: { [key in number]: T[] };
+}
 
 export type SearchResponse = {
   id: string;
@@ -131,19 +140,22 @@ export enum CatalogQuery {
   SortBy = "sort_by",
   Search = "search",
   Category = "category",
+  Colours = "colours",
   Brand = "brand",
   Discount = "discount",
   Price = "price",
   Rating = "rating",
-  Offers = "offer",
+  Offer = "offer",
+  Page = "page",
+  Filters = "filters",
 }
 
 export enum CatalogSortQueries {
-  Newest = "newest",
-  Popular = "popular",
-  Hotdeals = "hotdeals",
-  PriceDesc = "price_desc",
-  Price_asc = "price_asc",
+  Newest_Arrivals = "newest",
+  Popularity = "popular",
+  Hot_Deals = "hotdeals",
+  Price_Descending = "price_desc",
+  Price_Ascending = "price_asc",
   Rating = "rating",
 }
 

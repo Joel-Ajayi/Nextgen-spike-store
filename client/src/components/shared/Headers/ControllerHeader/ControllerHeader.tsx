@@ -3,55 +3,24 @@ import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import UserAvatar from "../UserAvatar/UserAvatar";
 import Styles from "./styles.module.scss";
 import Dropdown, { DropdownProps } from "../../Dropdown/Dropdown";
-import {
-  Link,
-  useLocation,
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import userSlice from "../../../../store/userState";
-import { ControllerPaths } from "../../../../types/controller";
 import userReq from "../../../../requests/user";
-import { authItems, controllerItems, signOutItem } from "../AppHeader/Header";
+import { authItems, signOutItem } from "../AppHeader/Header";
 import uniqId from "uniqid";
 import appSlice from "../../../../store/appState";
-import controllerStateSlice from "../../../../store/controller/states";
-import navData, { DataType } from "./data";
+import navData from "./data";
 import data from "./data";
 import AppSideBar from "../AppSideBar/AppSideBar";
 
 function ControllerHeader() {
-  let [params] = useSearchParams();
   const { pathname } = useLocation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { resetUserState } = userSlice.actions;
   const { setShowModal } = appSlice.actions;
-  const { setActiveTabs } = controllerStateSlice.actions;
-
-  const tab = params.get("sub");
 
   const { isAuthenticated, roles } = useAppSelector((state) => state.user);
-  const activeTabs = useAppSelector(
-    (state) => state.controller.state.activeTabs
-  );
-
-  useEffect(() => {
-    if (tab && !activeTabs.includes(tab)) {
-      const tabPath: string[] = [];
-
-      // (function findPath(data: { [x: string]: DataType }, path: string[]) {
-      //   Object.keys(data).forEach((dataKey) => {
-      //     if (dataKey !== tab) {
-      //       findPath(data[dataKey].items, [...path, dataKey]);
-      //       return;
-      //     }
-      //     tabPath.push(...path, dataKey);
-      //   });
-      // })(data, []);
-      // dispatch(setActiveTabs(tabPath));
-    }
-  }, [tab]);
 
   const handleSignOut = async () => {
     await userReq.signOut();
@@ -68,22 +37,18 @@ function ControllerHeader() {
     }
   };
 
-  const loginItemsDropdown = useMemo(() => {
-    if (isAuthenticated) return authItems;
-    return [
-      <div className={Styles.signup_item} key={uniqId()}>
-        <div>New Customer ?</div>
-        <Link to={`${pathname}?signup=true`} onClick={handleSignInButton}>
-          Sign Up
-        </Link>
-      </div>,
-    ];
-  }, [isAuthenticated]);
-
   const userDropDoown: DropdownProps[] = useMemo(
     () => [{ ...authItems, showTitle: false }, signOutItem(handleSignOut)],
     []
   );
+
+  const navs = useMemo(() => {
+    return [
+      authItems,
+      { title: "Controller", items: data },
+      signOutItem(handleSignOut),
+    ].filter((item) => !!item) as DropdownProps[];
+  }, [isAuthenticated]);
 
   return (
     <div className={Styles.headerWrapper}>
@@ -106,6 +71,7 @@ function ControllerHeader() {
               link={tab.items?.length ? undefined : tab?.link}
               listOnHover
               childPos="t-m"
+              showCaret={false}
               align="c"
             />
           );
@@ -118,10 +84,28 @@ function ControllerHeader() {
           title={<UserAvatar size={35} isLink={false} />}
           items={userDropDoown}
           listOnHover
-          align="c"
+          showCaret={false}
+          align="l"
         />
 
-        <AppSideBar className={Styles.side_bar} />
+        <AppSideBar className={Styles.side_bar}>
+          <Dropdown
+            wrapperClassName={Styles.dropdown}
+            listClassName={Styles.items}
+            titleClassName={Styles.avatar}
+            showToolTip={false}
+            listOnHover={false}
+            title={
+              <div className={Styles.avatar_inner}>
+                <UserAvatar size={55} showInfo />
+              </div>
+            }
+            showCaret={false}
+            pos="m"
+            items={navs}
+            listOnLoad
+          />
+        </AppSideBar>
       </div>
     </div>
   );

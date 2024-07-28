@@ -1,22 +1,27 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Pagination as PaginationType } from "../../../types";
 import SpinLoader from "../Loader/SpinLoader/SpinLoader";
 import Styles from "./styles.module.scss";
 import { GrFormPrevious, GrFormNext } from "react-icons/gr";
 import uniqId from "uniqid";
+import { useAppSelector } from "../../../store/hooks";
+import helpers from "../../../helpers";
 
 type Props<T> = {
-  pagination: PaginationType<T>;
   specifiedMaxButtons?: number;
-  callBack: (page: number, skip: number) => Promise<PaginationType<T>>;
+  callBack: (page: number, skip: number, isLoaded: boolean) => void;
+  path: string;
 };
 
-function Pagination<T>({ specifiedMaxButtons = 5, ...props }: Props<T>) {
-  const [pagination, setPagination] = useState(props.pagination);
+function Pagination<T>({ specifiedMaxButtons = 5, path, ...props }: Props<T>) {
   const [pageLoading, setPageLoading] = useState(0);
   const [wrapperWidth, setWrapperWidth] = useState(1);
   const [page, setPage] = useState(1);
+
   const ref = useRef<HTMLDivElement>(null);
+
+  const pagination = useAppSelector((state) =>
+    helpers.getStateByPath<T>(state, path)
+  );
 
   const onResize = () => {
     if (ref.current) {
@@ -27,8 +32,8 @@ function Pagination<T>({ specifiedMaxButtons = 5, ...props }: Props<T>) {
   };
 
   const maxButtons = useMemo(
-    () => Math.min(Math.ceil(wrapperWidth / 100), specifiedMaxButtons),
-    [wrapperWidth]
+    () => Math.min(pagination.numPages, specifiedMaxButtons),
+    [wrapperWidth, pagination]
   );
 
   const buttons = useMemo(
@@ -39,9 +44,13 @@ function Pagination<T>({ specifiedMaxButtons = 5, ...props }: Props<T>) {
         }),
       ].map((_, index, arr) => {
         let buttonPage = index === 0 ? 1 : pagination.numPages;
-        const isAtStart = page < 4;
-        const isAtEnd = page + 4 >= pagination.numPages && page >= 4;
-        const isMiddle = !isAtEnd && !isAtStart;
+        const isAtStart = page < 4 && maxButtons !== pagination.numPages;
+        const isAtEnd =
+          page + 4 >= pagination.numPages &&
+          page >= 4 &&
+          maxButtons !== pagination.numPages;
+        const isMiddle =
+          !isAtEnd && !isAtStart && maxButtons !== pagination.numPages;
 
         if (index + 1 !== arr.length && index !== 0) {
           if (isAtStart) {
@@ -68,17 +77,9 @@ function Pagination<T>({ specifiedMaxButtons = 5, ...props }: Props<T>) {
         const isSpanStart = index === 0 && (isAtEnd || isMiddle);
 
         return (
-          <>
-            {isSpanEnd ? (
-              <span key={uniqId()} className={Styles.skipped}>
-                ...
-              </span>
-            ) : null}
-            <div
-              className={Styles.button}
-              key={uniqId()}
-              onClick={() => loadMore(buttonPage)}
-            >
+          <div className={Styles.button} key={uniqId()}>
+            {isSpanEnd ? <span className={Styles.skipped}>...</span> : null}
+            <div className={Styles.page} onClick={() => loadMore(buttonPage)}>
               {pageLoading === buttonPage ? (
                 <SpinLoader isSmall radius={8} brandColor />
               ) : (
@@ -87,15 +88,11 @@ function Pagination<T>({ specifiedMaxButtons = 5, ...props }: Props<T>) {
                 </span>
               )}
             </div>
-            {isSpanStart ? (
-              <span key={uniqId()} className={Styles.skipped}>
-                ...
-              </span>
-            ) : null}
-          </>
+            {isSpanStart ? <span className={Styles.skipped}>...</span> : null}
+          </div>
         );
       }),
-    [maxButtons, page, pageLoading, pagination.page]
+    [maxButtons, page, pageLoading, pagination]
   );
 
   useEffect(() => {
@@ -112,8 +109,11 @@ function Pagination<T>({ specifiedMaxButtons = 5, ...props }: Props<T>) {
     if (pageLoading !== 0) return;
     setPageLoading(page);
     const skip = (page - 1) * pagination.take;
-    const newPagination = await props.callBack(page, skip);
-    setPagination(newPagination);
+    await props.callBack(
+      page,
+      skip,
+      !!pagination.list[page]?.length && !!pagination.list[page][0]
+    );
     setPage(page);
     setPageLoading(0);
   };
@@ -124,7 +124,6 @@ function Pagination<T>({ specifiedMaxButtons = 5, ...props }: Props<T>) {
       loadMore(newStart);
     }
   };
-
   return pagination.numPages > 1 ? (
     <div className={Styles.buttons} ref={ref}>
       {pagination.numPages >= 1 && (

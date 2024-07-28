@@ -1,9 +1,9 @@
-import { PayloadAction, configureStore } from "@reduxjs/toolkit";
+import { configureStore } from "@reduxjs/toolkit";
 import appSlice from "./appState";
 import { controller } from "./controller";
 import userSlice from "./userState";
 import brandSlice from "./controller/brands";
-import productsSlice from "./products";
+import catalogSlice from "./catalog";
 
 const store = configureStore({
   reducer: {
@@ -11,7 +11,7 @@ const store = configureStore({
     app: appSlice.reducer,
     brands: brandSlice.reducer,
     controller: controller,
-    products: productsSlice.reducer,
+    catalog: catalogSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false }),

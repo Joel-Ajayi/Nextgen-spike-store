@@ -6,55 +6,56 @@
   justify-content: center;
   padding: 10px;
   column-gap: 10px;
-
-  .button,
-  .button_last {
-    min-width: 30px;
-    height: 40px;
-
-    span {
-      text-align: center;
-      font-weight: 600;
-      padding-bottom: 5px;
-      width: 100%;
-      font-size: 0.9rem;
-    }
-  }
+  align-items: center;
 
   .button {
-    span {
-      color: $brand-color;
+    display: flex;
+    align-items: center;
+    .page {
+      min-width: 30px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
 
-      &.active,
-      &:hover {
-        border-bottom: 2px solid $brand-color;
+      span {
+        text-align: center;
+        font-weight: 600;
+        padding-bottom: 5px;
+        width: 100%;
+        font-size: 0.9rem;
+        color: $brand-color;
+
+        &.active,
+        &:hover {
+          border-bottom: 2px solid $brand-color;
+        }
       }
     }
   }
 
   .button_next,
-  .button_prev,
-  .button_last,
-  .button {
+  .button_prev {
     cursor: pointer;
     display: flex;
     justify-content: center;
     align-items: center;
   }
 
-  .button_last {
-    cursor: auto;
-  }
-
   .button_next,
   .button_prev {
-    min-width: 35px;
-    height: 35px;
-    border-radius: 50%;
-    border: 1px solid black;
+    min-width: 40px;
+    height: 30px;
+    border-radius: 3px;
+    border: 1px solid $brand-color;
 
     &:hover {
-      border: 2px solid black;
+      border: 2px solid $brand-color;
+    }
+
+    svg {
+      color: $brand-color;
     }
 
     &.disabled {
@@ -62,7 +63,7 @@
       cursor: not-allowed;
 
       &:hover {
-        border: 1px solid black !important;
+        border: 1px solid $brand-color !important;
       }
     }
   }

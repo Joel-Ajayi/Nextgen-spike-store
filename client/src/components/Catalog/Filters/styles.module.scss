@@ -1,0 +1,21 @@
+@import "../../../styles/mixins.scss";
+
+.filters {
+  display: flex;
+  height: 100%;
+  flex-direction: column;
+  row-gap: 1em;
+  overflow-y: auto;
+  @include scrollbar();
+  // overflow: hidden;
+
+  .filter {
+    font-size: 0.9em;
+    .filter_header {
+      font-size: 1.1em;
+      * {
+        text-transform: uppercase;
+      }
+    }
+  }
+}

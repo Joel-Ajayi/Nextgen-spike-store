@@ -8,19 +8,11 @@
   justify-content: center;
   align-items: stretch;
   width: 100%;
-  -webkit-box-shadow: 0px 10px 5px 0px rgba(0, 0, 0, 0.75);
-  -moz-box-shadow: 0px 10px 5px 0px rgba(0, 0, 0, 0.75);
-  box-shadow: 0 3px 2px -2px $color-gray6;
-  z-index: 1;
+  box-shadow: 0 2px 2px $color-gray4;
+  -webkit-box-shadow: 0 2px 2px $color-gray4;
 
   @media screen and (min-width: 800px) {
     padding-bottom: 0.25rem;
-  }
-
-  .side_bar {
-    @media screen and (min-width: 850px) {
-      display: none !important;
-    }
   }
 
   .main_header {
@@ -28,18 +20,17 @@
     width: inherit;
     align-items: center;
     justify-content: space-between;
-    height: inherit;
-    columns: 20px;
+    column-gap: 20px;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
 
     @media screen and (min-width: 500px) {
-      columns: 35px;
+      column-gap: 35px;
     }
     @media screen and (min-width: 850px) {
       column-gap: 3.5%;
     }
 
-    padding-top: 0.7rem;
-    padding-bottom: 0.7rem;
     @include desktop-wrapper();
 
     .flipkartpluswrapper_tab {
@@ -91,44 +82,14 @@
         text-decoration: none;
       }
 
-      .dropdown {
+      & > .dropdown {
         z-index: $z-index;
         @media screen and (max-width: 849px) {
           display: none !important;
         }
 
-        .sub_dropdown {
-          &:not(:last-child) {
-            border-bottom: 1px solid $color-gray2;
-          }
-        }
-
-        .login_button {
-          color: white;
-          background-color: $brand-color;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          height: 30px;
-          width: 120px;
-          border-radius: 1px;
-          padding-bottom: 4px;
-          box-shadow: 1px 1px 5px rgb(134, 134, 134);
-          cursor: pointer;
-        }
-
-        .signup_item {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 20px;
-          font-size: 0.9em;
-          font-weight: 600;
-
-          a {
-            color: $brand-color;
-            text-decoration: none;
-          }
+        .title {
+          padding: 0 !important;
         }
       }
 
@@ -171,6 +132,36 @@
             display: inline;
             width: auto;
           }
+        }
+      }
+
+      .side_bar {
+        .avatar {
+          background-color: $color-gray;
+          width: 100%;
+          z-index: -1;
+          .avatar_inner {
+            padding: 0;
+          }
+        }
+
+        .dropdown {
+          display: flex;
+        }
+
+        .items {
+          max-height: 100%;
+          display: flex;
+          flex-direction: column;
+          overflow-x: hidden;
+          width: 100%;
+
+          & > ul {
+            overflow-y: auto;
+          }
+        }
+        @media screen and (min-width: 850px) {
+          display: none !important;
         }
       }
     }

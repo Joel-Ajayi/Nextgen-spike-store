@@ -20,7 +20,7 @@ function Products() {
             <Button
               value={"See More"}
               type="button"
-              link={`${Paths.Catalog}/?${CatalogQuery.SortBy}=${CatalogSortQueries.Hotdeals}`}
+              link={`${Paths.Catalog}/?${CatalogQuery.SortBy}=${CatalogSortQueries.Hot_Deals}`}
               className={Styles.see_more}
             />
           </div>
@@ -37,7 +37,7 @@ function Products() {
           <Button
             value={"See More"}
             type="button"
-            link={`${Paths.Catalog}/?${CatalogQuery.SortBy}=${CatalogSortQueries.Newest}`}
+            link={`${Paths.Catalog}/?${CatalogQuery.SortBy}=${CatalogSortQueries.Newest_Arrivals}`}
             className={Styles.see_more}
           />
         </div>
@@ -53,7 +53,7 @@ function Products() {
           <Button
             value={"See More"}
             type="button"
-            link={`${Paths.Catalog}/?${CatalogQuery.SortBy}=${CatalogSortQueries.Popular}`}
+            link={`${Paths.Catalog}/?${CatalogQuery.SortBy}=${CatalogSortQueries.Popularity}`}
             className={Styles.see_more}
           />
         </div>

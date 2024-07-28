@@ -49,6 +49,34 @@
       @media screen and (min-width: 750px) {
         display: none;
       }
+      .avatar {
+        background-color: $color-gray;
+        width: 100%;
+        z-index: -1;
+      }
+
+      .avatar_inner {
+        padding: 0.4rem 0;
+      }
+
+      .dropdown {
+        display: flex;
+      }
+
+      .items {
+        max-height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden;
+        width: 100%;
+
+        & > ul {
+          overflow-y: auto;
+        }
+      }
+      @media screen and (min-width: 850px) {
+        display: none !important;
+      }
     }
   }
 }

@@ -1,5 +1,5 @@
 import request from ".";
-import { IFile, Message, Pagination } from "../types";
+import { APIPagination, IFile, Message, Pagination } from "../types";
 import {
   Product,
   ProductFilter,
@@ -9,6 +9,8 @@ import {
   ProductMini2,
   ProductUpdateReturn,
   productFilterReturn as ProductFilterReturn,
+  QueryCatalogParams,
+  CatalogStateAPI,
 } from "../types/product";
 
 class ProductReq {
@@ -81,35 +83,23 @@ class ProductReq {
     }`;
 
     const body = JSON.stringify({ query, variables: { skip, take } });
-    const res = await request.makeRequest<Pagination<ProductMini2>>(body);
+    const res = await request.makeRequest<APIPagination<ProductMini2>>(body);
     return res;
   }
 
-  public async getProductFilterVal(id: string, filterId: string) {
-    let query = `#graphql query GetProductFilterValue($pId: String!, $filterId:String!) {
-      GetProductFilterValue(pId: $pId, filterId:$filterId) { 
-        
-       }
-    }`;
-
-    const body = JSON.stringify({ query, variables: { id } });
-
-    const res = await request.makeRequest(body);
-    return res as Product;
-  }
-
-  public async getProducts(
-    filter: ProductFilter
-  ): Promise<ProductFilterReturn> {
-    let query = `query FilterProducts($data:ProductsFilterInput) {
-      FilterProducts(data:$data) { 
-        offers brands filters { name id options } 
+  public async queryCatalog(filters: QueryCatalogParams) {
+    let query = `query QueryCatalog($data:CatalogInput!) {
+      QueryCatalog(data:$data) { 
+        offers {id type validUntil image tagline bannerColours discount audience}
+        brands 
+        price 
         products { take count list skip page numPages } 
+        filters {id name options }
       }
     }`;
 
-    const body = JSON.stringify({ query, variables: filter });
-    const res = await request.makeRequest<ProductFilterReturn>(body);
+    const body = JSON.stringify({ query, variables: { data: filters } });
+    const res = await request.makeRequest<CatalogStateAPI>(body);
     return res;
   }
 }

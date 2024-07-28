@@ -5,7 +5,6 @@
   align-items: center;
   position: relative;
   border-right: 2px;
-
   .icon {
     fill: $color-gray11;
     cursor: pointer;
@@ -24,15 +23,31 @@
     height: 100vh;
 
     .bar {
+      display: flex;
+      flex-direction: column;
       position: relative;
       background-color: $color-gray1 !important;
-      max-width: 70%;
       left: -100%;
       height: inherit;
       transition: 0.3s linear;
       overflow: hidden;
       box-shadow: 0px 2px 10px $color-gray4;
       min-width: 220px;
+      max-width: 85%;
+
+      .back {
+        display: flex;
+        align-items: center;
+        font-size: 1rem;
+        color: black;
+        column-gap: 0.3rem;
+        background-color: white;
+        box-shadow: 0 2px 3px $color-gray3;
+        -webkit-box-shadow: 0 2px 3px $color-gray3;
+        padding: 0.7rem;
+        font-weight: 600;
+        margin-bottom: 3px;
+      }
 
       @media screen and (min-width: 550px) {
         max-width: 60%;
@@ -41,30 +56,8 @@
         max-width: 55%;
       }
 
-      .avatar {
-        background-color: $color-gray;
-        width: 100%;
-        z-index: -1;
-      }
-
-      .avatar_inner {
-        padding: 0.4rem 0;
-      }
-
-      .dropdown {
-        display: flex;
-      }
-
-      .items {
-        max-height: 100%;
-        display: flex;
-        flex-direction: column;
-        overflow-x: hidden;
-        width: 100%;
-
-        & > ul {
-          overflow-y: auto;
-        }
+      &.full_width {
+        max-width: 100% !important;
       }
     }
   }

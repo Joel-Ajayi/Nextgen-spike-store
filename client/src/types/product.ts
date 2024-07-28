@@ -1,5 +1,5 @@
-import { Brand, IFile, Pagination } from ".";
-import { CategoryFeature, CategoryMini } from "./category";
+import { APIPagination, Brand, IFile, Pagination } from ".";
+import { CategoryFeature, CategoryMini, CategoryOffer } from "./category";
 
 export enum ProductsPageParams {
   SortBy = "",
@@ -120,4 +120,44 @@ export type ProductFeature = {
   id?: string;
   featureId: string;
   value: string | number;
+};
+
+export type CatalogFilter = {
+  id: string;
+  name: string;
+  options: string[];
+};
+
+export type CatalogStateAPI = {
+  isCategoryChanged: boolean;
+  price: string;
+  offers: CategoryOffer[];
+  products: APIPagination<ProductMini>;
+  brands: string[];
+  filters: CatalogFilter[];
+};
+
+export type CatalogStateType = {
+  price: string;
+  offers: CategoryOffer[];
+  products: Pagination<ProductMini | null>;
+  brands: string[];
+  filters: CatalogFilter[];
+};
+
+export type QueryCatalogParams = {
+  skip: number;
+  take: number;
+  count: number;
+  sortBy: string;
+  brands: string[];
+  category: string;
+  colours: string[];
+  discount: number;
+  search: string;
+  offer: string;
+  rating: number;
+  priceMax: number;
+  priceMin: number;
+  filters: { id: string; options: string[] }[];
 };

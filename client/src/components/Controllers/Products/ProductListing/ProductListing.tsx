@@ -37,25 +37,21 @@ function ProductListing() {
     })();
   }, []);
 
-  const loadPage = async (page: number, skip: number) => {
-    if (!pagination.list[page]) {
+  const loadPage = async (page: number, skip: number, isLoaded: boolean) => {
+    if (!isLoaded) {
       const data = await productReq.getProductsMini2(skip, pagination.take);
       if (data) dispatch(setProductList(data));
-    } else {
-      dispatch(setPage({ skip, page }));
+      return;
     }
-    return { ...pagination, skip, page, list: [] };
+    dispatch(setPage({ skip, page }));
   };
 
   const pageButtons = useMemo(
     () =>
       !isLoading && (
-        <Pagination
-          pagination={{ ...pagination, list: [] }}
-          callBack={loadPage}
-        />
+        <Pagination path="controller.products.list" callBack={loadPage} />
       ),
-    [isLoading, pagination.page]
+    [isLoading]
   );
 
   return (

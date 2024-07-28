@@ -56,7 +56,7 @@ function Offers() {
                       </div>
                     ))}
                     <Button
-                      link={`${Paths.Catalog}/?${CatalogQuery.Category}=${banner?.category}&${CatalogQuery.Offers}=${banner?.id}`}
+                      link={`${Paths.Catalog}/?${CatalogQuery.Category}=${banner?.category}&${CatalogQuery.Offer}=${banner?.id}`}
                       value={(i + 1) % 2 === 0 ? "Shop Now" : "Discover Now"}
                       className={Styles.button_link}
                     />
