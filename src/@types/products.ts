@@ -133,12 +133,15 @@ export type CatalogFilter = {
 };
 
 export type QueryCatalog = {
+  skip: number;
+  take: number;
+  count: number;
   sortBy: string;
   brands: string[];
   category: string;
+  colours: string[];
   discount: number;
   search: string;
-  isCategoryChanged: boolean;
   offer: string;
   rating: number;
   priceMax: number;

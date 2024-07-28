@@ -3,6 +3,7 @@ import consts from "../@types/conts";
 import { db } from "../db/prisma/connect";
 import { CategoryOfferType } from "../@types/categories";
 import { GraphQLError } from "graphql";
+import colours from "../db/colours";
 
 class Helpers {
   public verifyJWT = async (token: any, secret: any) => {
@@ -114,16 +115,37 @@ class Helpers {
     return { r, g, b };
   };
 
-  public areColoursClose = (hex1: string, hex2: string) => {
-    const rgb1 = this.hexToRgb(hex1);
+  private colourDistance = (
+    rgb1: { r: number; g: number; b: number },
+    hex2: string
+  ) => {
     const rgb2 = this.hexToRgb(hex2);
 
-    const distance = Math.sqrt(
-      (rgb1.r - rgb2.r) ** 2 + (rgb1.g - rgb2.g) ** 2 + (rgb1.b - rgb2.b) ** 2
+    return Math.sqrt(
+      Math.pow(rgb1.r - rgb2.r, 2) +
+        Math.pow(rgb1.g - rgb2.g, 2) +
+        Math.pow(rgb1.b - rgb2.b, 2)
     );
+  };
 
-    const threshold = 25;
-    return distance < threshold;
+  public getCloseClolour = (hex: string) => {
+    let minDistance = Infinity;
+    let closeColour = "";
+    const rgb1 = this.hexToRgb(hex);
+    for (const colour of colours) {
+      const distance = this.colourDistance(rgb1, colour[1]);
+      if (distance < minDistance) {
+        closeColour = colour[1];
+        minDistance = distance;
+      }
+    }
+    return closeColour;
+  };
+
+  public paginate = (count: number, take: number, skip: number) => {
+    const page = Math.ceil((skip + take) / take);
+    const numPages = Math.ceil(count / take);
+    return { skip, page, numPages, take, count };
   };
 }
 

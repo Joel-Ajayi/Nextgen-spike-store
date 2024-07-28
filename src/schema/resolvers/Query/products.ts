@@ -15,11 +15,13 @@ import {
   CategoryFeature,
   CategoryFeaturesMini,
   CategoryFeatureType,
+  CategoryOffer,
 } from "../../../@types/categories";
-import { Pagination } from "../../../@types";
 import { db } from "../../../db/prisma/connect";
 import helpers from "../../../helpers";
-import { CategoryOffer, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import colours from "../../../db/colours";
+import { query } from "express";
 
 const productMiniSelect = {
   id: true,
@@ -175,10 +177,7 @@ const resolvers = {
       });
     }
   },
-  GetProductsMini2: async (
-    _: any,
-    query: { skip: number; take: number }
-  ): Promise<Pagination<ProductMini2>> => {
+  GetProductsMini2: async (_: any, query: { skip: number; take: number }) => {
     const count = await db.product.count();
     const products = await db.product.findMany({
       take: query.take,
@@ -192,89 +191,87 @@ const resolvers = {
         count: true,
       },
     });
-
-    const skip = query.skip;
-    const list = [products.map((f) => ({ ...f, category: f.category.name }))];
-    const page = Math.ceil(skip / query.take);
-    const numPages = Math.ceil(count / query.take);
-    return { skip, count, take: query.take, page, list, numPages };
+    const list = products.map((f) => ({ ...f, category: f.category.name }));
+    return { list, ...helpers.paginate(count, query.take, query.skip) };
   },
-  QueryCatalog: async (_: any, query: QueryCatalog) => {
-    const whereAND: Prisma.ProductWhereInput[] = [];
-    const orderBy: Prisma.ProductOrderByWithRelationInput[] = [];
-
-    let offers: CategoryOffer[] = [];
-    if (query.offer && query.category) {
-      const offer = await db.categoryOffer.findFirst({
-        where: { id: query.offer, category: { name: query.category } },
-      });
-      if (offer) offers.push(offer);
-    } else {
-      if (query.category) {
-        const category = await db.category.findFirst({
-          where: { name: query.category },
-          select: { offers: true },
+  QueryCatalog: async (_: any, { data }: { data: QueryCatalog }) => {
+    try {
+      const whereAND: Prisma.ProductWhereInput[] = [];
+      const orderBy: Prisma.ProductOrderByWithRelationInput[] = [];
+      let offers: CategoryOffer[] = [];
+      if (data.offer && data.category) {
+        const offer = await db.categoryOffer.findFirst({
+          where: { id: data.offer, category: { name: data.category } },
         });
-        if (category?.offers?.length) offers.push(...category.offers);
+        if (offer) offers.push(offer);
+      } else {
+        if (data.category) {
+          const category = await db.category.findFirst({
+            where: { name: data.category },
+            select: { offers: true },
+          });
+          if (category?.offers?.length) offers.push(...category.offers);
+        }
       }
-    }
 
-    const priceMin = 999999999;
-    const priceMax = 0;
-    if (query.priceMax && query.priceMin) {
-      whereAND.push({ price: { gte: query.priceMin, lte: query.priceMax } });
-    }
-    if (query.rating) {
-      whereAND.push({ rating: query.rating });
-    }
-    if (query.discount) {
-      whereAND.push({ discount: { gte: query.discount } });
-    }
-    if (query.search) {
-      whereAND.push({ name: { mode: "insensitive", contains: query.search } });
-    }
-    if (query.brands.length) {
-      whereAND.push({ brand: { name: { in: query.brands } } });
-    }
-    if (query.filters.length) {
-      whereAND.push(
-        ...query.filters.map((f) => ({
-          features: { some: { id: f.id, value: { in: f.options } } },
-        }))
-      );
-    }
-
-    if (query.sortBy) {
-      switch (query.sortBy) {
-        case CatalogSortQueries.Hotdeals:
-          orderBy.push({ discount: "desc" });
-          break;
-        case CatalogSortQueries.Newest:
-          orderBy.push({ createdAt: "desc" });
-          break;
-        case CatalogSortQueries.Popular:
-          orderBy.push({ numSold: "desc" });
-          orderBy.push({ rating: "desc" });
-          break;
-        case CatalogSortQueries.PriceDesc:
-          orderBy.push({ price: "desc" });
-          break;
-        case CatalogSortQueries.Price_asc:
-          orderBy.push({ price: "asc" });
-          break;
-        case CatalogSortQueries.Rating:
-          orderBy.push({ rating: "desc" });
-          break;
-        default:
-          break;
+      if (data.priceMax && data.priceMin) {
+        whereAND.push({ price: { gte: data.priceMin, lte: data.priceMax } });
       }
-    }
+      if (data.rating) {
+        whereAND.push({ rating: data.rating });
+      }
+      if (data.discount) {
+        whereAND.push({ discount: { gte: data.discount } });
+      }
+      if (data.search) {
+        whereAND.push({
+          name: { mode: "insensitive", contains: data.search },
+        });
+      }
+      if (data.colours.length) {
+        whereAND.push({ colours: { hasSome: data.colours } });
+      }
+      if (data.brands.length) {
+        whereAND.push({ brand: { name: { in: data.brands } } });
+      }
+      if (data.filters.length) {
+        whereAND.push(
+          ...data.filters.map((f) => ({
+            features: { some: { id: f.id, value: { in: f.options } } },
+          }))
+        );
+      }
 
-    let categories: string[] = [];
-    const brands: string[] = [];
-    const filters: CategoryFeaturesMini[] = [];
-    if (query.isCategoryChanged) {
-      if (!query.category) {
+      if (data.sortBy) {
+        switch (data.sortBy) {
+          case CatalogSortQueries.Hotdeals:
+            orderBy.push({ discount: "desc" });
+            break;
+          case CatalogSortQueries.Newest:
+            orderBy.push({ createdAt: "desc" });
+            break;
+          case CatalogSortQueries.Popular:
+            orderBy.push({ numSold: "desc" });
+            orderBy.push({ rating: "desc" });
+            break;
+          case CatalogSortQueries.PriceDesc:
+            orderBy.push({ price: "desc" });
+            break;
+          case CatalogSortQueries.Price_asc:
+            orderBy.push({ price: "asc" });
+            break;
+          case CatalogSortQueries.Rating:
+            orderBy.push({ rating: "desc" });
+            break;
+          default:
+            break;
+        }
+      }
+
+      let categories: string[] = [];
+      const brands: string[] = [];
+      const filters: CategoryFeaturesMini[] = [];
+      if (!data.category) {
         categories = (
           await db.category.findMany({
             select: {
@@ -292,14 +289,14 @@ const resolvers = {
         });
       } else {
         await (async function getDeepCategory(parent: string) {
-          categories.push(query.category);
+          categories.push(parent);
 
           const children = await db.category.findMany({
             where: { parent: { name: parent } },
             select: {
               name: true,
               products: { select: { brand: { select: { name: true } } } },
-              features: parent !== query.category ? undefined : {},
+              features: parent !== data.category ? undefined : {},
             },
           });
 
@@ -313,12 +310,8 @@ const resolvers = {
               await getDeepCategory(child.name);
             })
           );
-        })(query.category);
-      }
+        })(data.category);
 
-      whereAND.push({ category: { name: { in: categories } } });
-
-      if (query.category) {
         await (async function filterUpCategoryTree(cName: string) {
           const category = await db.category.findUnique({
             where: { name: cName },
@@ -341,44 +334,68 @@ const resolvers = {
               await filterUpCategoryTree(category.parent?.name);
             }
           }
-        })(query.category);
+        })(data.category);
       }
+      whereAND.push({ category: { name: { in: categories } } });
+
+      const count =
+        data.count ||
+        (await db.product.count({
+          where: { AND: whereAND },
+          orderBy,
+        }));
+
+      const products = (
+        await db.product.findMany({
+          where: { AND: whereAND },
+          orderBy,
+          skip: data.skip,
+          take: data.take,
+          select: {
+            id: true,
+            name: true,
+            price: true,
+            cId: true,
+            brand: true,
+            discount: true,
+            rating: true,
+            numSold: true,
+            category: true,
+            images: true,
+            reviews: { select: { id: true } },
+          },
+        })
+      ).map((p) => ({
+        ...p,
+        brand: p.brand.name,
+        features: [],
+        numReviews: p.reviews.length,
+        reviews: undefined,
+        category: p.category?.name || "",
+      }));
+
+      let priceMin = 999999999;
+      let priceMax = 0;
+      products.forEach((p) => {
+        priceMin = p.price < priceMin ? p.price : priceMin;
+        priceMax = p.price > priceMax ? p.price : priceMax;
+      });
+
+      const paginate = helpers.paginate(count, data.take, data.skip);
+      return {
+        colours: colours,
+        offers,
+        price: `${priceMin}-${priceMax}`,
+        brands,
+        products: { ...paginate, list: products },
+        filters,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new GraphQLError(consts.errors.server, {
+        extensions: { statusCode: 500 },
+      });
     }
-
-    const products = (
-      await db.product.findMany({
-        where: { AND: whereAND },
-        orderBy,
-        select: {
-          id: true,
-          name: true,
-          price: true,
-          cId: true,
-          brand: true,
-          discount: true,
-          rating: true,
-          numSold: true,
-          category: true,
-          images: true,
-          reviews: { select: { id: true } },
-        },
-      })
-    ).map((p) => ({
-      ...p,
-      brand: p.brand.name,
-      features: [],
-      numReviews: p.reviews.length,
-      reviews: undefined,
-      category: p.category?.name || "",
-    }));
-
-    return {
-      offers,
-      price: `${priceMin}-${priceMax}`,
-      brands,
-      products,
-      filters,
-    };
   },
 };
 

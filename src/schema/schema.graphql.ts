@@ -1,7 +1,7 @@
 const typeDefs = `#graphql
 type Query {
   SearchCatalog(search:String!):[SearchRes!]!
-  QueryCatalog(query:CatalogInput):CatalogResponse!
+  QueryCatalog(data:CatalogInput!):CatalogResponse!
   LandingPageData:LandingPageData
   HeaderData:HeaderData
   GetBrand(name: String!): Brand
@@ -38,7 +38,7 @@ type Message {
 }
 
 type Pagination {
-  list: [[AnyExceptNull!]]!
+  list: [AnyExceptNull!]!
   take:Int!
   skip:Int!
   count:Int!
@@ -230,8 +230,11 @@ type CategoryFormData {
 
 #Product
 input CatalogInput {
-  isCategoryChanged:Boolean!
+  skip:Int!
+  take:Int!
+  count:Int!
   category: String
+  colours: [String!]!
   search:String
   offer:String
   brands: [String!]!
@@ -244,7 +247,7 @@ input CatalogInput {
 }
 
 input CatalogFilterInput {
-  id: String
+  id: String!
   options: [String!]!
 }
 
@@ -255,8 +258,8 @@ type CatalogFilter {
 }
 
 type CatalogResponse {
-  offers:[String!]!
-  products:[ProductMini!]!
+  offers:[CategoryOffer!]!
+  products:Pagination
   price:String!
   brands:[String!]!
   filters:[CatalogFilter!]!

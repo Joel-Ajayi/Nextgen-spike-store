@@ -164,6 +164,9 @@ const resolvers = {
         const bannerData = {
           ...data.banner,
           image: bannerFileName,
+          bannerColurs: data.banner.bannerColours.map((c) =>
+            helpers.getCloseClolour(c)
+          ),
           categoryId: newCategory.id,
         };
         await db.categoryBanner.create({ data: bannerData });
@@ -190,6 +193,9 @@ const resolvers = {
             const data = {
               ...offerInput,
               image: offersFileNames[i],
+              bannerColurs: offerInput.bannerColours.map((c) =>
+                helpers.getCloseClolour(c)
+              ),
               categoryId: newCategory.id,
             };
 
@@ -386,6 +392,9 @@ const resolvers = {
           const inputData = {
             ...offerInput,
             image: offersImages[index],
+            bannerColurs: offerInput.bannerColours.map((c) =>
+              helpers.getCloseClolour(c)
+            ),
             categoryId: category.id,
           };
 
@@ -416,6 +425,9 @@ const resolvers = {
           ...data.banner,
           image: bannerFileName,
           categoryId: category.id,
+          bannerColurs: data.banner.bannerColours.map((c) =>
+            helpers.getCloseClolour(c)
+          ),
         };
 
         const id = category.banner[0]?.id || new ObjectId().toString();

@@ -132,7 +132,7 @@ const resolvers = {
           warrCovered: data?.warrCovered,
           warrDuration: data?.warrDuration,
           paymentType: data.paymentType,
-          colours: data.colours,
+          colours: data.colours.map((c) => helpers.getCloseClolour(c)),
           mfgDate: data?.mfgDate,
         },
       });
@@ -310,7 +310,9 @@ const resolvers = {
           typeof data?.discount === "number" ? data?.discount : undefined,
         paymentType:
           typeof data.paymentType === "number" ? data.paymentType : undefined,
-        colours: data?.colours || undefined,
+        colours: data?.colours?.length
+          ? data.colours.map((c) => helpers.getCloseClolour(c))
+          : undefined,
         mfgDate: data?.mfgDate || undefined,
         warrCovered: data?.warrCovered || undefined,
         warrDuration: data?.warrDuration || undefined,
