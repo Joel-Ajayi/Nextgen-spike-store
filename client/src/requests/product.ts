@@ -92,9 +92,8 @@ class ProductReq {
       QueryCatalog(data:$data) { 
         offers {id type validUntil image tagline bannerColours discount audience}
         brands 
-        price 
         products { take count list skip page numPages } 
-        filters {id name options }
+        filters { id name options }
       }
     }`;
 

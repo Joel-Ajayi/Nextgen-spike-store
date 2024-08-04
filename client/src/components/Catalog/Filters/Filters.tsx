@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { CatalogQuery } from "../../../types";
 import { useLocation, useMatch, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
@@ -6,6 +6,9 @@ import Styles from "./styles.module.scss";
 import Dropdown, { DropdownProps } from "../../shared/Dropdown/Dropdown";
 import { CategoryMicro } from "../../../types/category";
 import { IoArrowBack } from "react-icons/io5";
+import catalogSlice from "../../../store/catalog";
+import { GiRoundStar } from "react-icons/gi";
+import uniqid from "uniqid";
 
 function Filters() {
   const dispatch = useAppDispatch();
@@ -13,44 +16,64 @@ function Filters() {
   const location = useLocation();
 
   const categories = useAppSelector((state) => state.app.headerData.categories);
+  const catalog = useAppSelector((state) => state.catalog);
+  const setIsParamsUpdated = catalogSlice.actions.setIsParamsUpdated;
 
   const searchParams = new URLSearchParams(location.search);
-  const category =
-    searchParams.get(CatalogQuery.Category)?.toLocaleLowerCase() || "";
+  const brands =
+    searchParams.get(CatalogQuery.Brand)?.toLowerCase()?.split("+") || [];
+  const category = searchParams.get(CatalogQuery.Category)?.toLowerCase() || "";
+  const rating = Number(searchParams.get(CatalogQuery.Rating)) || 0;
+  const price = searchParams.get(CatalogQuery.Price)?.split("+") || [];
 
   const onNavLinkChange = (
     params:
-      | { type: CatalogQuery; query: string; isMultiple?: boolean }
+      | {
+          type: CatalogQuery | string;
+          query: string;
+          isMultiple?: boolean;
+        }
       | undefined
   ) => {
     let newVal = "";
 
     if (params) {
+      const prevVal = searchParams.get(params.type) || "";
       if (params?.isMultiple) {
-        const prevVal = searchParams.get(params.type) || "";
         const splitString = prevVal.split("+");
         const queryIndex = splitString.indexOf(params.query);
         if (queryIndex !== -1) {
-          newVal = splitString.splice(queryIndex, 1).join("+");
+          newVal = [...splitString]
+            .filter((_, i) => i !== queryIndex)
+            .join("+");
         } else {
-          newVal = `${prevVal}+${params.query}`;
+          newVal = !prevVal
+            ? params.query.trim()
+            : `${prevVal}+${params.query.trim()}`;
         }
-
         if (newVal) {
-          searchParams.set(params.type, params.query);
+          searchParams.set(params.type, newVal);
         } else {
           searchParams.delete(params.type);
         }
       } else {
-        searchParams.set(params.type, params.query);
+        newVal = params.query.trim();
+        searchParams.set(params.type, params.query.trim());
       }
-      navigate(`${location.pathname}?${searchParams.toString()}`, {
-        replace: false,
-      });
+
+      if (prevVal !== newVal) {
+        dispatch(setIsParamsUpdated(true));
+        navigate(`${location.pathname}?${searchParams.toString()}`, {
+          replace: false,
+        });
+      }
       return;
     }
 
-    navigate(`${location.pathname}`, { replace: false });
+    if (searchParams.toString()) {
+      dispatch(setIsParamsUpdated(true));
+      navigate(`${location.pathname}`, { replace: false });
+    }
   };
 
   const categoryDropdown = useMemo(() => {
@@ -58,10 +81,10 @@ function Filters() {
 
     let mainCategory = category;
     let categoryObj = [...categories].find(
-      (c) => c.name.toLocaleLowerCase() === category
+      (c) => c.name.toLowerCase() === category
     ) as CategoryMicro;
     let categoryItems = [...categories].filter(
-      (c) => c.parent.toLocaleLowerCase() === category
+      (c) => c.parent.toLowerCase() === category
     );
     let parent = "";
     if (categoryObj) {
@@ -71,9 +94,7 @@ function Filters() {
         );
         mainCategory = categoryObj.parent;
         categoryObj = [...categories].find(
-          (c) =>
-            c.name.toLocaleLowerCase() ===
-            categoryObj.parent.toLocaleLowerCase()
+          (c) => c.name.toLowerCase() === categoryObj.parent.toLowerCase()
         ) as CategoryMicro;
       }
       parent = categoryObj.parent;
@@ -83,6 +104,7 @@ function Filters() {
       {
         title: "Browse Categories",
         pos: "m",
+        overflowY: true,
         isSelected: true,
         listOnLoad: true,
         isRadioList: true,
@@ -121,7 +143,7 @@ function Filters() {
                 ? []
                 : [
                     `${categoryItems.findIndex(
-                      (c) => c.name.toLocaleLowerCase() === category
+                      (c) => c.name.toLowerCase() === category
                     )}`,
                   ],
           },
@@ -143,9 +165,211 @@ function Filters() {
     );
   }, [category, categories.length]);
 
+  const brandsDropDown = useMemo(() => {
+    if (!catalog.brands.length) return;
+
+    const initSelectedItems: string[] = [];
+    const items = catalog.brands.map((brd, i) => {
+      if (brands.includes(brd.toLowerCase())) initSelectedItems.push(`${i}`);
+
+      return {
+        title: brd,
+        borderBottom: true,
+        onClick: () => {
+          onNavLinkChange({
+            type: CatalogQuery.Brand,
+            query: brd,
+            isMultiple: true,
+          });
+        },
+      };
+    });
+
+    return (
+      <Dropdown
+        pos="m"
+        listOnLoad
+        isRadioList
+        borderBottom
+        wrapperClassName={Styles.filter}
+        showListSelectionButton={false}
+        initSelectedItems={[`${0}`]}
+        items={[
+          {
+            title: "Brand",
+            pos: "m",
+            overflowY: true,
+            isSelected: true,
+            listOnLoad: true,
+            isCheckList: true,
+            showToolTip: false,
+            isSearch: true,
+            showCaret: false,
+            titleClassName: Styles.filter_header,
+            borderBottom: true,
+            initSelectedItems,
+            items,
+          },
+        ]}
+      />
+    );
+  }, [catalog.isParamsUpdated]);
+
+  const ratingDropdown = useMemo(() => {
+    return (
+      <Dropdown
+        pos="m"
+        listOnLoad
+        isRadioList
+        borderBottom
+        wrapperClassName={Styles.filter}
+        showListSelectionButton={false}
+        initSelectedItems={[`${0}`]}
+        items={[
+          {
+            title: "Rating",
+            pos: "m",
+            overflowY: true,
+            isSelected: true,
+            listOnLoad: true,
+            isRadioList: true,
+            showToolTip: false,
+            showCaret: false,
+            titleClassName: Styles.filter_header,
+            borderBottom: true,
+            initSelectedItems: [`${rating}`],
+            items: Array.from("12345").map((_, i, arr) => {
+              const rating = i;
+              return {
+                title: (
+                  <div className={Styles.rating}>
+                    {arr.map((_, i) => (
+                      <GiRoundStar
+                        key={uniqid()}
+                        className={i < rating ? Styles.star : Styles.star_less}
+                      />
+                    ))}
+                  </div>
+                ),
+                borderBottom: true,
+                onClick: () => {
+                  onNavLinkChange({
+                    type: CatalogQuery.Rating,
+                    query: `${rating}`,
+                  });
+                },
+              };
+            }),
+          },
+        ]}
+      />
+    );
+  }, [catalog.isParamsUpdated]);
+
+  const priceDrpdown = useMemo(() => {
+    const rangeMin = price[1] ? Number(price[0]) : undefined;
+    const rangeMax = price[1] ? Number(price[1]) : undefined;
+    return (
+      <Dropdown
+        pos="m"
+        listOnLoad
+        isRadioList
+        borderBottom
+        wrapperClassName={Styles.filter}
+        showListSelectionButton={false}
+        initSelectedItems={[`${0}`]}
+        items={[
+          {
+            title: "PRICE",
+            pos: "m",
+            overflowY: true,
+            isSelected: true,
+            listOnLoad: true,
+            isCheckList: true,
+            showToolTip: false,
+            maxRange: rangeMax,
+            minRange: rangeMin,
+            onClick: (price) => {
+              onNavLinkChange({
+                type: CatalogQuery.Price,
+                query: price.split("_")[0],
+              });
+            },
+
+            isRange: true,
+            showCaret: false,
+            titleClassName: Styles.filter_header,
+            borderBottom: true,
+          },
+        ]}
+      />
+    );
+  }, []);
+
+  const categoryFilters = useMemo(() => {
+    if (!catalog.filters.length) return null;
+
+    const items = catalog.filters.map((filter, i) => {
+      const queryType = `${CatalogQuery.Filters}_${filter.id}`;
+      const initSelectedItems: string[] = [];
+      const options = (searchParams.get(queryType) || "")
+        .toLowerCase()
+        .split("+");
+
+      const items = filter.options.map((option, i) => {
+        if (options?.length && options.includes(option.toLowerCase())) {
+          initSelectedItems.push(`${i}`);
+        }
+
+        return {
+          title: option,
+          borderBottom: true,
+          onClick: () => {
+            onNavLinkChange({
+              type: queryType,
+              query: option,
+              isMultiple: true,
+            });
+          },
+        };
+      });
+
+      return {
+        title: filter.name,
+        pos: "m",
+        borderBottom: true,
+        isSelected: true,
+        listOnLoad: true,
+        isCheckList: true,
+        showToolTip: false,
+        showCaret: false,
+        titleClassName: Styles.filter_header,
+        initSelectedItems,
+        items,
+      };
+    }) as DropdownProps[];
+
+    return (
+      <Dropdown
+        pos="m"
+        listOnLoad
+        isRadioList
+        borderBottom
+        wrapperClassName={Styles.filter}
+        showListSelectionButton={false}
+        initSelectedItems={catalog.filters.map((_, i) => `${i}`)}
+        items={items}
+      />
+    );
+  }, [catalog.isParamsUpdated]);
+
   return (
     <div className={Styles.filters}>
       <section>{categoryDropdown}</section>
+      <section>{priceDrpdown}</section>
+      <section>{brandsDropDown}</section>
+      <section>{ratingDropdown}</section>
+      <section>{categoryFilters}</section>
     </div>
   );
 }

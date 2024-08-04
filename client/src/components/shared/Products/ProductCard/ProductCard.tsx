@@ -32,62 +32,69 @@ function ProductCard({ product }: Props) {
   );
 
   return (
-    <Link to={`${Paths.Product}/${product?.id}`} className={Styles.product}>
-      <div className={Styles.image}>
-        {product && (
-          <div className={Styles.favorite_icon}>
-            <FavoriteIcon />
-          </div>
-        )}
-        {product && <img src={`/uploads/${product.images[0]}`} />}
-      </div>
-      <div className={Styles.name}>{product && product.name}</div>
-      <div className={Styles.rating}>
-        {[0, 1, 2, 3, 4].map((rating) => {
-          return rating < (product?.rating || 0) &&
-            (product?.rating || 0) < rating + 1 ? (
-            <FaStarHalfStroke key={uniqid()} className={Styles.star} />
-          ) : (
-            <GiRoundStar
-              key={uniqid()}
-              className={`${
-                rating < (product?.rating || 0) ? Styles.star : Styles.star_less
-              }`}
-            />
-          );
-        }, [])}
-        {`(${product?.numSold || 0})`}
-      </div>
-      <div className={Styles.priceanddiscount}>
-        <div
-          className={`${Styles.price} ${
-            !!product?.discount ? Styles.cancel_price : ""
-          }`}
-        >
+    <div className={Styles.product}>
+      <Link
+        className={Styles.product_link}
+        to={`${Paths.Product}/${product?.id}`}
+      >
+        <div className={Styles.image}>
           {product && (
-            <>
-              <TbCurrencyNaira className={Styles.naira} />
-              {helpers.reduceNumberLenth(product.price)}
-            </>
+            <div className={Styles.favorite_icon}>
+              <FavoriteIcon />
+            </div>
           )}
+          {product && <img src={`/uploads/${product.images[0]}`} />}
         </div>
-        {(isLoading || (product && !!product.discount)) && (
-          <div className={Styles.discount}>
+        <div className={Styles.name}>{product && product.name}</div>
+        <div className={Styles.rating}>
+          {[0, 1, 2, 3, 4].map((rating) => {
+            return rating < (product?.rating || 0) &&
+              (product?.rating || 0) < rating + 1 ? (
+              <FaStarHalfStroke key={uniqid()} className={Styles.star} />
+            ) : (
+              <GiRoundStar
+                key={uniqid()}
+                className={`${
+                  rating < (product?.rating || 0)
+                    ? Styles.star
+                    : Styles.star_less
+                }`}
+              />
+            );
+          }, [])}
+          {`(${product?.numSold || 0})`}
+        </div>
+        <div className={Styles.priceanddiscount}>
+          <div
+            className={`${Styles.price} ${
+              !!product?.discount ? Styles.cancel_price : ""
+            }`}
+          >
             {product && (
               <>
                 <TbCurrencyNaira className={Styles.naira} />
-                {discountPrice}
-                <div className={Styles.tag}>{`-${product.discount}%`}</div>
+                {helpers.reduceNumberLenth(product.price)}
               </>
             )}
           </div>
-        )}
-      </div>
+          {(isLoading || (product && !!product.discount)) && (
+            <div className={Styles.discount}>
+              {product && (
+                <>
+                  <TbCurrencyNaira className={Styles.naira} />
+                  {discountPrice}
+                  <div className={Styles.tag}>{`-${product.discount}%`}</div>
+                </>
+              )}
+            </div>
+          )}
+        </div>
+      </Link>
       <div className={Styles.add_to_cart}>
         <CartIcon className={Styles.cart_icon} />
         Add To Cart
       </div>
-    </Link>
+    </div>
   );
 }
 

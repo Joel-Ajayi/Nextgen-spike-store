@@ -126,6 +126,7 @@ export type CatalogFilter = {
   id: string;
   name: string;
   options: string[];
+  type: number;
 };
 
 export type CatalogStateAPI = {
@@ -138,7 +139,7 @@ export type CatalogStateAPI = {
 };
 
 export type CatalogStateType = {
-  price: string;
+  isParamsUpdated: boolean;
   offers: CategoryOffer[];
   products: Pagination<ProductMini | null>;
   brands: string[];

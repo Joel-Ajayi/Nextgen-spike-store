@@ -5,6 +5,7 @@ import Slider, { Settings } from "react-slick";
 import { Link } from "react-router-dom";
 import { BiSolidCategory as CategoryIcon } from "react-icons/bi";
 import uniqid from "uniqid";
+import { CatalogQuery, Paths } from "../../../types";
 
 const sliderSettings = {
   dots: false,
@@ -43,7 +44,11 @@ function Categories() {
       <div className={Styles.header}>Top Categories</div>
       <Slider {...sliderSettings} className={Styles.categories}>
         {categories.map((cat) => (
-          <Link to="" className={Styles.category} key={uniqid()}>
+          <Link
+            to={`${Paths.Catalog}/?${CatalogQuery.Category}=${cat?.name}`}
+            className={Styles.category}
+            key={uniqid()}
+          >
             <>
               <div className={Styles.icon}>
                 {cat && (

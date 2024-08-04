@@ -14,19 +14,11 @@
 }
 
 @mixin scrollbar {
-  scrollbar-width: thin;
-
   &::-webkit-scrollbar {
-    height: 10px;
-    width: 0px;
-    position: relative;
-  }
-  &::-webkit-scrollbar-track {
-    position: relative;
+    width: 5px !important;
   }
   &::-webkit-scrollbar-thumb {
-    background-color: white;
-    opacity: 0.5;
+    background: #888;
     border-radius: 5px;
   }
 }

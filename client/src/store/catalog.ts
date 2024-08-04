@@ -7,14 +7,14 @@ import {
 } from "../types/product";
 
 export const initialCatalogState: CatalogStateType = {
+  isParamsUpdated: true,
   offers: [],
-  price: "",
   products: {
     page: 1,
-    list: { 1: [null, null, null, null, null, null, null, null, null, null] },
-    count: 10,
+    list: { 0: [null, null, null, null, null, null, null, null] },
+    count: 16,
     skip: 0,
-    take: 2,
+    take: 3,
     numPages: 1,
   },
   brands: [],
@@ -25,16 +25,17 @@ const catalogSlice = createSlice({
   name: "Catalog",
   initialState: initialCatalogState,
   reducers: {
-    setCatalog: (_, action: PayloadAction<CatalogStateAPI>) => {
+    setCatalog: (state, action: PayloadAction<CatalogStateAPI>) => {
       return {
         ...action.payload,
         products: {
           ...action.payload.products,
           list: {
+            ...state.products.list,
             [action.payload.products.page]: action.payload.products.list,
           },
         },
-        isCategoryChanged: false,
+        isParamsUpdated: false,
       };
     },
     onPaginate: (state, action: PayloadAction<APIPagination<ProductMini>>) => {
@@ -43,6 +44,9 @@ const catalogSlice = createSlice({
         [action.payload.page]: action.payload.list,
       };
       return { ...state, products: { ...action.payload, list } };
+    },
+    setIsParamsUpdated: (state, action: PayloadAction<boolean>) => {
+      return { ...state, isParamsUpdated: action.payload };
     },
     setPage: (state, action: PayloadAction<{ skip: number; page: number }>) => {
       return {

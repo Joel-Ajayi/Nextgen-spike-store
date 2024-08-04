@@ -43,10 +43,10 @@ export const initialState: InitialProductController = {
   list: {
     skip: 0,
     list: { 1: [] },
-    count: 0,
+    count: 16,
     page: 1,
     numPages: 1,
-    take: 2,
+    take: 16,
   },
 };
 

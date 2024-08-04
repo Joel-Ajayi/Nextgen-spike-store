@@ -122,6 +122,7 @@ export const signOutItem = (logoutFunc?: () => void) =>
 export const notAuthItem = {
   title: "",
   items: [
+    ...(moreDropdown.items as DropdownProps[]),
     {
       title: "Already Signed Up? Log In!",
       link: () => "/signin",
@@ -131,7 +132,6 @@ export const notAuthItem = {
       title: "New Customer? Sign Up!",
       link: () => "/signin?signup=true",
     },
-    ...(moreDropdown.items as DropdownProps[]),
   ],
 } as DropdownProps;
 
@@ -186,7 +186,7 @@ export default function Header() {
           homeControllerItems(roles),
           signOutItem(handleSignOut),
         ]
-      : [notAuthItem, moreDropdown];
+      : [notAuthItem];
   }, [isAuthenticated, isLoading]);
 
   const categoryTree = useMemo(

@@ -23,6 +23,12 @@ function Pagination<T>({ specifiedMaxButtons = 5, path, ...props }: Props<T>) {
     helpers.getStateByPath<T>(state, path)
   );
 
+  useEffect(() => {
+    if (pagination.page !== page) {
+      setPage(pagination.page);
+    }
+  }, [pagination.page]);
+
   const onResize = () => {
     if (ref.current) {
       setWrapperWidth(
@@ -55,8 +61,7 @@ function Pagination<T>({ specifiedMaxButtons = 5, path, ...props }: Props<T>) {
         if (index + 1 !== arr.length && index !== 0) {
           if (isAtStart) {
             buttonPage = index + 1;
-          }
-          if (isMiddle) {
+          } else if (isMiddle) {
             switch (index + 1) {
               case 2:
                 buttonPage = page - 1;
@@ -68,8 +73,7 @@ function Pagination<T>({ specifiedMaxButtons = 5, path, ...props }: Props<T>) {
                 buttonPage = page + 1;
                 break;
             }
-          }
-          if (isAtEnd) {
+          } else {
             buttonPage = pagination.numPages - (arr.length - index - 1);
           }
         }

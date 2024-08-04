@@ -6,167 +6,163 @@
   display: flex;
   flex-direction: column;
   row-gap: 0.4rem;
-  padding: 0.6rem;
+  background-color: white;
+  border-radius: 4px;
+  box-shadow: 0 0 10px $color-gray;
+  -webkit-box-shadow: 0 0 10px $color-gray;
 
-  &:hover {
-    border-radius: 5px;
-    -webkit-box-shadow: 0 0 13px #f0f0f0;
-    box-shadow: 0 0 13px #f0f0f0;
-
-    & > .add_to_cart {
-      opacity: 1;
-      visibility: visible;
-    }
-  }
-
-  .image {
-    position: relative;
-    padding: 10%;
-    width: 100%;
-    max-height: 400px;
-    height: 100%;
+  .product_link {
     display: flex;
-    align-items: center;
-    border-radius: 5px;
-    justify-content: center;
-    margin-bottom: 0.25rem;
-    @include skeletalLoader;
+    flex-direction: column;
+    padding: 0.6rem;
+    flex: 1;
 
-    &:empty {
-      min-height: 260px;
-      background-color: #f3f3f3;
-    }
-
-    .favorite_icon {
-      cursor: pointer;
-      position: absolute;
+    .image {
+      position: relative;
+      padding: 7%;
+      width: 100%;
+      max-height: 400px;
+      min-height: 100px;
+      height: 100%;
       display: flex;
       align-items: center;
+      border-radius: 5px;
       justify-content: center;
-      top: 0.5rem;
-      left: 0.4rem;
-      height: 1.4rem;
-      width: 1.4rem;
-      border-radius: 50%;
-      background-color: white;
-      box-shadow: 1px 1px 3px $color-gray4;
-      padding: 0.1rem;
+      margin-bottom: 0.25rem;
+      @include skeletalLoader;
 
-      @media only screen and (min-width: 450px) {
-        height: 1.6rem;
-        width: 1.6rem;
-        padding: 0.2rem;
+      &:empty {
+        min-height: 260px;
+        background-color: #f3f3f3;
       }
 
-      svg {
-        height: 100%;
-        width: 100%;
-        margin-top: 1px;
-        color: $color-gray4;
+      .favorite_icon {
+        cursor: pointer;
+        position: absolute;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        top: 0.5rem;
+        left: 0.4rem;
+        height: 1.4rem;
+        width: 1.4rem;
+        border-radius: 50%;
+        background-color: white;
+        box-shadow: 1px 1px 3px $color-gray4;
+        padding: 0.1rem;
+
+        @media only screen and (min-width: 450px) {
+          height: 1.6rem;
+          width: 1.6rem;
+          padding: 0.2rem;
+        }
+
+        svg {
+          height: 100%;
+          width: 100%;
+          margin-top: 1px;
+          color: $color-gray4;
+        }
+      }
+
+      img {
+        max-width: 100%;
+        max-height: 100%;
       }
     }
 
-    img {
-      max-width: 100%;
-      max-height: 100%;
-    }
-  }
-
-  .name {
-    text-align: left;
-    color: $color-gray11;
-    font-size: 0.9rem;
-
-    @media only screen and (max-width: 599px) {
-      text-overflow: ellipsis;
+    .name {
+      text-align: left;
+      color: $color-gray11;
+      font-size: 0.9rem;
+      width: 100%;
       overflow: hidden;
       white-space: nowrap;
-      width: 100%;
-      min-height: 1.4rem;
-    }
+      min-height: 1.7rem;
+      text-overflow: ellipsis;
 
-    @include skeletalLoader;
-    &:empty {
-      width: 90% !important;
-      height: 1.1rem;
-    }
-  }
-
-  .rating {
-    display: flex;
-    align-items: center;
-    column-gap: 0.1rem;
-    font-size: 0.75rem;
-
-    .star {
-      color: #d4af37;
-    }
-
-    .star_less {
-      color: $color-gray3;
-    }
-
-    @media only screen and (min-width: 650px) {
-      font-size: 0.9rem;
-    }
-
-    .star_less,
-    .start {
-      width: 13px;
-      @media only screen and (min-width: 650px) {
-        width: 15px;
+      @include skeletalLoader;
+      &:empty {
+        width: 90% !important;
       }
     }
-  }
 
-  .priceanddiscount {
-    font-size: 0.8rem;
-    @media only screen and (min-width: 450px) {
-      font-size: 1rem;
-    }
-
-    .price,
-    .discount {
+    .rating {
       display: flex;
-      color: $brand-color;
       align-items: center;
-      font-weight: 700;
+      column-gap: 0.1rem;
+      font-size: 0.75rem;
 
-      .naira {
-        height: max-content;
-        width: max-content;
-        margin-bottom: -0.1rem;
-        color: $brand-color;
-        transform: scale(1.25);
+      .star {
+        color: #fba100;
       }
 
-      .tag {
-        margin-left: 10px;
-        padding: 0 0.5rem;
-        border-radius: 2px;
-        font-size: 0.7rem;
-        font-weight: 700;
-        color: $brand-color;
-        background-color: rgba(31, 0, 204, 0.418);
-        opacity: 0.5;
+      .star_less {
+        color: $color-gray3;
+      }
+
+      @media only screen and (min-width: 650px) {
+        font-size: 0.9rem;
+      }
+
+      .star_less,
+      .star {
+        width: 13px;
+        @media only screen and (min-width: 650px) {
+          width: 15px;
+        }
       }
     }
 
-    .price {
-      &.cancel_price {
-        text-decoration: line-through;
-        color: $color-gray4;
-        font-size: 0.75rem;
-        font-weight: 500;
+    .priceanddiscount {
+      font-size: 0.8rem;
+      @media only screen and (min-width: 450px) {
+        font-size: 1rem;
+      }
+
+      .price,
+      .discount {
+        display: flex;
+        color: $brand-color;
+        align-items: center;
+        font-weight: 700;
+
         .naira {
+          height: max-content;
+          width: max-content;
+          margin-bottom: -0.1rem;
+          color: $brand-color;
+          transform: scale(1.25);
+        }
+
+        .tag {
+          margin-left: 10px;
+          padding: 0 0.5rem;
+          border-radius: 2px;
+          font-size: 0.7rem;
+          font-weight: 700;
+          color: $brand-color;
+          background-color: rgba(31, 0, 204, 0.418);
+          opacity: 0.5;
+        }
+      }
+
+      .price {
+        &.cancel_price {
+          text-decoration: line-through;
           color: $color-gray4;
+          font-size: 0.75rem;
+          font-weight: 500;
+          .naira {
+            color: $color-gray4;
+          }
         }
       }
     }
   }
 
   .add_to_cart {
-    margin-top: auto;
+    margin: auto 0.6rem 0.6rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -174,12 +170,9 @@
     font-size: 0.8rem;
     column-gap: 0.3rem;
     border-radius: 0.3rem;
-    width: 100%;
-    min-height: 40px;
+    min-height: 33px;
     color: white;
     background-color: $brand-color;
-    visibility: hidden;
-    opacity: 0;
 
     &:hover {
       box-shadow: 0 0 5px #757575;

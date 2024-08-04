@@ -5,17 +5,39 @@
   height: 100%;
   flex-direction: column;
   row-gap: 1em;
+  width: 100%;
   overflow-y: auto;
   @include scrollbar();
-  // overflow: hidden;
+  padding: 0.2rem;
+  background-color: white;
+  overflow-x: hidden;
 
   .filter {
     font-size: 0.9em;
     .filter_header {
-      font-size: 1.1em;
+      font-size: 0.9em;
       * {
         text-transform: uppercase;
       }
+    }
+  }
+
+  .rating {
+    display: flex;
+    align-items: center;
+    column-gap: 0.2rem;
+
+    .star,
+    .star_less {
+      width: 1rem !important;
+    }
+
+    .star {
+      color: #fba100;
+    }
+
+    .star_less {
+      color: $color-gray3;
     }
   }
 }
