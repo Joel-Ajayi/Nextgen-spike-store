@@ -6,12 +6,17 @@ import React, {
   useLayoutEffect,
   useRef,
   ReactNode,
+  ChangeEvent,
 } from "react";
 import { Link } from "react-router-dom";
 import Styles from "./dropdown.module.scss";
 import { IoMdArrowDropdown as CaretIcon } from "react-icons/io";
 import { IoIosArrowBack } from "react-icons/io";
 import uniqId from "uniqid";
+import { IoClose } from "react-icons/io5";
+import Input from "../Input/Controller/Input";
+import { BsDashLg } from "react-icons/bs";
+import helpers from "../../../helpers";
 
 const childPad = 0.7;
 
@@ -37,7 +42,9 @@ export type DropdownProps = {
   childPos?: "m-r" | "m-l" | "r-m" | "m" | "t-m";
   spacebyLine?: boolean;
   initSelectedItems?: string[];
-  onSelect?: () => void;
+  onSelect?: (value: any) => void;
+  isSearch?: boolean;
+  isRange?: boolean;
   isSelected?: boolean;
   isCheckListItem?: boolean;
   isCheckList?: boolean;
@@ -46,6 +53,9 @@ export type DropdownProps = {
   showToolTip?: boolean;
   isSelection?: boolean;
   showSelectionButton?: boolean;
+  minRange?: number;
+  maxRange?: number;
+  overflowY?: boolean;
   showListSelectionButton?: boolean;
   borderTop?: boolean;
   borderBottom?: boolean;
@@ -76,8 +86,13 @@ export default function Dropdown({
   isCheckList = false,
   isRadioList = false,
   isSelected = false,
+  isSearch = false,
+  overflowY = false,
   showSelectionButton = true,
   showListSelectionButton = true,
+  isRange = false,
+  minRange = 100000,
+  maxRange = 8000000,
   borderTop = false,
   borderBottom = false,
   isSelection = false,
@@ -91,7 +106,20 @@ export default function Dropdown({
   const [itemsStyles, setItemsStyles] = useState<CSSProperties>({});
   const [myRefState, setMyRefState] = useState<CSSStyleDeclaration>();
   const [selectedItems, setSelected] = useState(initSelectedItems);
+  const [search, setSearch] = useState("");
+  const [range, setRange] = useState({
+    min:
+      (maxRange / 0.8) * 0.01 < minRange ? (maxRange / 0.8) * 0.01 : minRange,
+    max: maxRange / 0.8,
+  });
+  const rangeWidth = range.max - range.min;
+  const [selectedRange, setSelectedRange] = useState({
+    min: (minRange - range.min) / rangeWidth,
+    max: (maxRange - range.min) / rangeWidth,
+  });
+
   const myRef = useRef<HTMLDivElement | null>(null);
+  const rangeInterval = useRef<NodeJS.Timeout | null>(null);
   let myHeight = useRef<null | number>(0);
   const isRoot = lvl === 1;
   const isVerticalPos = pos === "m" || pos === "t-m";
@@ -202,12 +230,69 @@ export default function Dropdown({
     }
   };
 
+  const onSearch = (e: ChangeEvent<HTMLInputElement>) => {
+    setSearch(e.target.value);
+  };
+
+  const getRangeWidth = (num: number, comp = rangeWidth) => {
+    return num * comp + range.min;
+  };
+  const onRangeChange = (
+    value: number,
+    func: (
+      value: React.SetStateAction<{
+        min: number;
+        max: number;
+      }>
+    ) => void,
+    isSelectedRange = true,
+    isMin = true
+  ) => {
+    const comp = isSelectedRange ? rangeWidth : 1;
+    const min = isSelectedRange ? range.min : 0;
+    const limit = (isSelectedRange ? 0.085 : 0.05) * rangeWidth;
+    if (isMin) {
+      func((prev) => ({
+        ...prev,
+        min:
+          getRangeWidth(prev.max, comp) - value <= limit || value < 0
+            ? prev.min
+            : (value - min) / comp,
+      }));
+    } else {
+      func((prev) => ({
+        ...prev,
+        max:
+          value - getRangeWidth(prev.min, comp) <= limit || value > 100000000
+            ? prev.max
+            : (value - min) / comp,
+      }));
+    }
+    if (onClick && isSelectedRange) {
+      if (rangeInterval.current) {
+        clearTimeout(rangeInterval.current);
+        rangeInterval.current = null;
+      }
+      rangeInterval.current = setTimeout(() => {
+        onClick(
+          `${getRangeWidth(selectedRange.min)}+${getRangeWidth(
+            selectedRange.max
+          )}`
+        );
+        if (rangeInterval.current) {
+          clearTimeout(rangeInterval.current);
+        }
+        rangeInterval.current = null;
+      }, 500);
+    }
+  };
+
   const handleShowList = (show = !showList) => {
     if (items.length && !!title && !listOnLoad && showTitle && pos !== "m") {
       setPosStyles(show);
     }
-    if (onClick && typeof title === "string") onClick(title);
-    if (onSelect) onSelect();
+    if (onClick) onClick(typeof title === "string" ? title : "");
+    if (onSelect) onSelect(null);
   };
 
   const handleHover = (show: boolean) => {
@@ -222,64 +307,74 @@ export default function Dropdown({
     if (pos === "r-m") return 1;
     return isVerticalPos ? 0 : -1;
   }, [showList]);
+
   const listItems = useMemo(
     () =>
-      items?.map((item, i) => (
-        <li key={uniqId()}>
-          <Dropdown
-            id={`${i}`}
-            title={item?.title}
-            Icon={item?.Icon}
-            link={item?.link}
-            onClick={item?.onClick}
-            onSelect={() => onChildSelect(`${i}`)}
-            pos={item?.childPos || childPos}
-            childPos={item?.childPos || childPos}
-            items={item.items}
-            showTitle={item?.showTitle}
-            rootRef={isRoot ? myRefState : rootRef}
-            listOnHover={listOnHover}
-            isCheckList={item?.isCheckList}
-            isRadioList={item?.isRadioList}
-            isCheckListItem={isCheckList}
-            isSelection={isCheckList || isRadioList}
-            isSelected={selectedItems.includes(`${i}`)}
-            showListSelectionButton={item?.showListSelectionButton}
-            showSelectionButton={showListSelectionButton}
-            showCaret={item?.showCaret}
-            borderTop={item?.borderTop}
-            borderBottom={item?.borderBottom}
-            listOnLoad={item?.listOnLoad}
-            titleClassName={item?.titleClassName}
-            paddingLeft={
-              !!title && showTitle ? paddingLeft + childPad : paddingLeft
-            }
-            initSelectedItems={item?.initSelectedItems}
-            lvl={lvl + 1}
-          />
-        </li>
-      )),
+      items?.map((item, i) =>
+        !search ||
+        new RegExp(search, "ig").test(item?.title as string) ||
+        selectedItems.includes(`${i}`) ? (
+          <li key={uniqId()}>
+            <Dropdown
+              id={`${i}`}
+              title={item?.title}
+              Icon={item?.Icon}
+              link={item?.link}
+              onClick={item?.onClick}
+              onSelect={() => onChildSelect(`${i}`)}
+              pos={item?.childPos || childPos}
+              childPos={item?.childPos || childPos}
+              items={item.items}
+              showTitle={item?.showTitle}
+              rootRef={isRoot ? myRefState : rootRef}
+              listOnHover={listOnHover}
+              isRange={item?.isRange}
+              isSearch={item?.isSearch}
+              isCheckList={item?.isCheckList}
+              isRadioList={item?.isRadioList}
+              isCheckListItem={isCheckList}
+              isSelection={isCheckList || isRadioList}
+              overflowY={item?.overflowY}
+              isSelected={selectedItems.includes(`${i}`)}
+              showListSelectionButton={item?.showListSelectionButton}
+              showSelectionButton={showListSelectionButton}
+              showCaret={item?.showCaret}
+              minRange={item?.minRange}
+              maxRange={item?.maxRange}
+              borderTop={item?.borderTop}
+              borderBottom={item?.borderBottom}
+              listOnLoad={item?.listOnLoad}
+              titleClassName={item?.titleClassName}
+              paddingLeft={
+                !!title && showTitle ? paddingLeft + childPad : paddingLeft
+              }
+              initSelectedItems={item?.initSelectedItems}
+              lvl={lvl + 1}
+            />
+          </li>
+        ) : null
+      ),
     [items, showList, selectedItems, myRefState]
   );
 
   const titleContent = useMemo(() => {
     return (
-      !!title &&
-      showTitle && (
-        <>
-          {showToolTip && showList && showTitle && !!title && pos !== "r-m" && (
-            <div className={`${Styles.tooltip} ${tooltipClass}`}>
-              <div className={`${Styles.icon} `} />
-            </div>
-          )}
-          {link && link() ? (
-            <Link className={Styles.inner_title} to={link()}>
-              {Icon && <Icon />}
-              {title}
-              {borderTop ? <div className={Styles.border_top} /> : null}
-              {borderBottom ? <div className={Styles.border_bottom} /> : null}
-            </Link>
-          ) : (
+      <>
+        {showToolTip && showList && showTitle && !!title && pos !== "r-m" && (
+          <div className={`${Styles.tooltip} ${tooltipClass}`}>
+            <div className={`${Styles.icon} `} />
+          </div>
+        )}
+        {link && link() && !!title && showTitle ? (
+          <Link className={Styles.inner_title} to={link()}>
+            {Icon && <Icon />}
+            {title}
+            {borderTop ? <div className={Styles.border_top} /> : null}
+            {borderBottom ? <div className={Styles.border_bottom} /> : null}
+          </Link>
+        ) : (
+          !!title &&
+          showTitle && (
             <div
               className={`${Styles.inner_title} ${
                 isSelected && !showSelectionButton ? Styles.bold : ""
@@ -289,6 +384,7 @@ export default function Dropdown({
               {Icon && <Icon />}
               {isSelection && showSelectionButton ? (
                 <input
+                  aria-hidden={false}
                   type={isCheckListItem ? "checkbox" : "radio"}
                   onChange={() => {}}
                   checked={isSelected}
@@ -309,11 +405,88 @@ export default function Dropdown({
                 />
               ) : null}
             </div>
-          )}
-        </>
-      )
+          )
+        )}
+        {isSearch ? (
+          <div className={Styles.search}>
+            <input
+              type="text"
+              onChange={onSearch}
+              value={search}
+              aria-hidden={false}
+            />
+            {!!search && <IoClose onClick={() => setSearch("")} />}
+          </div>
+        ) : null}
+        {isRange ? (
+          <div className={Styles.range}>
+            <div className={Styles.slider_and_input}>
+              <div className={Styles.slider}>
+                <span
+                  style={{
+                    left: `${selectedRange.min * 100}%`,
+                    width: `${(selectedRange.max - selectedRange.min) * 100}%`,
+                  }}
+                  className={Styles.selected}
+                />
+                <span
+                  className={Styles.value}
+                  style={{ left: `${selectedRange.min * 100}%` }}
+                >
+                  {helpers.reduceNumberLenth(getRangeWidth(selectedRange.min))}
+                </span>
+                <span
+                  className={Styles.value}
+                  style={{ right: `${100 - selectedRange.max * 100}%` }}
+                >
+                  {helpers.reduceNumberLenth(getRangeWidth(selectedRange.max))}
+                </span>
+              </div>
+              <div className={Styles.input}>
+                <input
+                  type="range"
+                  min={range.min}
+                  max={range.max}
+                  value={getRangeWidth(selectedRange.min)}
+                  onChange={async ({ target: { value } }) => {
+                    onRangeChange(Number(value), setSelectedRange);
+                  }}
+                />
+                <input
+                  type="range"
+                  min={range.min}
+                  max={range.max}
+                  value={getRangeWidth(selectedRange.max)}
+                  onChange={async ({ target: { value } }) => {
+                    onRangeChange(Number(value), setSelectedRange, true, false);
+                  }}
+                />
+              </div>
+            </div>
+            <div className={Styles.setters}>
+              <Input
+                name="Min"
+                type="number"
+                onChange={async (min) =>
+                  onRangeChange(Number(min), setRange, false)
+                }
+                defaultValue={range.min}
+              />
+              <BsDashLg />
+              <Input
+                name="Max"
+                type="number"
+                onChange={async (max) =>
+                  onRangeChange(Number(max), setRange, false, false)
+                }
+                defaultValue={range.max}
+              />
+            </div>
+          </div>
+        ) : null}
+      </>
     );
-  }, [showList, tooltipClass, showCaret]);
+  }, [showList, tooltipClass, showCaret, search, range, selectedRange]);
 
   const titleClass = useMemo(() => {
     return `${Styles.title} ${titleClassName}  ${
@@ -331,7 +504,7 @@ export default function Dropdown({
   const itemsWrapperClassName = useMemo(
     () =>
       `${Styles.dropdown} ${!isRoot ? Styles.child : ""} ${alignments[align]} 
-     
+    ${pos === "m" && showList && overflowY ? Styles.overflow_y : ""}
        ${
          showTitle && !!title && !isRoot && isVerticalPos
            ? Styles.child_padding
