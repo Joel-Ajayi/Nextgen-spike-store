@@ -144,6 +144,7 @@ export enum CatalogQuery {
   Brand = "brand",
   Discount = "discount",
   Price = "price",
+  PriceRange = "price_range",
   Rating = "rating",
   Offer = "offer",
   Page = "page",

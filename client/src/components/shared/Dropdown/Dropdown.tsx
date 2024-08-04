@@ -55,6 +55,8 @@ export type DropdownProps = {
   showSelectionButton?: boolean;
   minRange?: number;
   maxRange?: number;
+  selectedMinRange?: number;
+  selectedMaxRange?: number;
   overflowY?: boolean;
   showListSelectionButton?: boolean;
   borderTop?: boolean;
@@ -91,8 +93,10 @@ export default function Dropdown({
   showSelectionButton = true,
   showListSelectionButton = true,
   isRange = false,
-  minRange = 100000,
-  maxRange = 8000000,
+  minRange = 1,
+  maxRange = 10000000,
+  selectedMaxRange = 8000000,
+  selectedMinRange = 1000,
   borderTop = false,
   borderBottom = false,
   isSelection = false,
@@ -108,14 +112,13 @@ export default function Dropdown({
   const [selectedItems, setSelected] = useState(initSelectedItems);
   const [search, setSearch] = useState("");
   const [range, setRange] = useState({
-    min:
-      (maxRange / 0.8) * 0.01 < minRange ? (maxRange / 0.8) * 0.01 : minRange,
-    max: maxRange / 0.8,
+    min: minRange,
+    max: maxRange,
   });
   const rangeWidth = range.max - range.min;
   const [selectedRange, setSelectedRange] = useState({
-    min: (minRange - range.min) / rangeWidth,
-    max: (maxRange - range.min) / rangeWidth,
+    min: (selectedMinRange - range.min) / rangeWidth,
+    max: (selectedMaxRange - range.min) / rangeWidth,
   });
 
   const myRef = useRef<HTMLDivElement | null>(null);
@@ -277,7 +280,7 @@ export default function Dropdown({
         onClick(
           `${getRangeWidth(selectedRange.min)}+${getRangeWidth(
             selectedRange.max
-          )}`
+          )}_ ${range.min}+${range.max}`
         );
         if (rangeInterval.current) {
           clearTimeout(rangeInterval.current);
@@ -340,6 +343,8 @@ export default function Dropdown({
               showSelectionButton={showListSelectionButton}
               showCaret={item?.showCaret}
               minRange={item?.minRange}
+              selectedMaxRange={item?.selectedMaxRange}
+              selectedMinRange={item?.selectedMinRange}
               maxRange={item?.maxRange}
               borderTop={item?.borderTop}
               borderBottom={item?.borderBottom}

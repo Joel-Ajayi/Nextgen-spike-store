@@ -18,13 +18,14 @@ function Filters() {
   const categories = useAppSelector((state) => state.app.headerData.categories);
   const catalog = useAppSelector((state) => state.catalog);
   const setIsParamsUpdated = catalogSlice.actions.setIsParamsUpdated;
-
   const searchParams = new URLSearchParams(location.search);
   const brands =
     searchParams.get(CatalogQuery.Brand)?.toLowerCase()?.split("+") || [];
   const category = searchParams.get(CatalogQuery.Category)?.toLowerCase() || "";
   const rating = Number(searchParams.get(CatalogQuery.Rating)) || 0;
   const price = searchParams.get(CatalogQuery.Price)?.split("+") || [];
+  const priceRange =
+    searchParams.get(CatalogQuery.PriceRange)?.split("+") || [];
 
   const onNavLinkChange = (
     params:
@@ -32,41 +33,44 @@ function Filters() {
           type: CatalogQuery | string;
           query: string;
           isMultiple?: boolean;
-        }
+        }[]
       | undefined
   ) => {
+    const searchParams = new URLSearchParams(location.search);
     let newVal = "";
 
-    if (params) {
-      const prevVal = searchParams.get(params.type) || "";
-      if (params?.isMultiple) {
-        const splitString = prevVal.split("+");
-        const queryIndex = splitString.indexOf(params.query);
-        if (queryIndex !== -1) {
-          newVal = [...splitString]
-            .filter((_, i) => i !== queryIndex)
-            .join("+");
+    if (params?.length) {
+      params.forEach((param) => {
+        const prevVal = searchParams.get(param.type) || "";
+        if (param?.isMultiple) {
+          const splitString = prevVal.split("+");
+          const queryIndex = splitString.indexOf(param.query);
+          if (queryIndex !== -1) {
+            newVal = [...splitString]
+              .filter((_, i) => i !== queryIndex)
+              .join("+");
+          } else {
+            newVal = !prevVal
+              ? param.query.trim()
+              : `${prevVal}+${param.query.trim()}`;
+          }
+          if (newVal) {
+            searchParams.set(param.type, newVal);
+          } else {
+            searchParams.delete(param.type);
+          }
         } else {
-          newVal = !prevVal
-            ? params.query.trim()
-            : `${prevVal}+${params.query.trim()}`;
+          newVal = param.query.trim();
+          searchParams.set(param.type, param.query.trim());
         }
-        if (newVal) {
-          searchParams.set(params.type, newVal);
-        } else {
-          searchParams.delete(params.type);
-        }
-      } else {
-        newVal = params.query.trim();
-        searchParams.set(params.type, params.query.trim());
-      }
+      });
 
-      if (prevVal !== newVal) {
+      navigate(`${location.pathname}?${searchParams.toString()}`, {
+        replace: false,
+      });
+      setTimeout(() => {
         dispatch(setIsParamsUpdated(true));
-        navigate(`${location.pathname}?${searchParams.toString()}`, {
-          replace: false,
-        });
-      }
+      }, 200);
       return;
     }
 
@@ -126,16 +130,20 @@ function Filters() {
             showListSelectionButton: false,
             borderBottom: true,
             onClick: () => {
-              onNavLinkChange({
-                type: CatalogQuery.Category,
-                query: category === mainCategory ? parent : mainCategory,
-              });
+              onNavLinkChange([
+                {
+                  type: CatalogQuery.Category,
+                  query: category === mainCategory ? parent : mainCategory,
+                },
+              ]);
             },
             items: categoryItems.map((c) => ({
               title: c.name,
               borderBottom: true,
               onClick: () => {
-                onNavLinkChange({ type: CatalogQuery.Category, query: c.name });
+                onNavLinkChange([
+                  { type: CatalogQuery.Category, query: c.name },
+                ]);
               },
             })),
             initSelectedItems:
@@ -176,11 +184,13 @@ function Filters() {
         title: brd,
         borderBottom: true,
         onClick: () => {
-          onNavLinkChange({
-            type: CatalogQuery.Brand,
-            query: brd,
-            isMultiple: true,
-          });
+          onNavLinkChange([
+            {
+              type: CatalogQuery.Brand,
+              query: brd,
+              isMultiple: true,
+            },
+          ]);
         },
       };
     });
@@ -253,10 +263,12 @@ function Filters() {
                 ),
                 borderBottom: true,
                 onClick: () => {
-                  onNavLinkChange({
-                    type: CatalogQuery.Rating,
-                    query: `${rating}`,
-                  });
+                  onNavLinkChange([
+                    {
+                      type: CatalogQuery.Rating,
+                      query: `${rating}`,
+                    },
+                  ]);
                 },
               };
             }),
@@ -267,8 +279,11 @@ function Filters() {
   }, [catalog.isParamsUpdated]);
 
   const priceDrpdown = useMemo(() => {
-    const rangeMin = price[1] ? Number(price[0]) : undefined;
-    const rangeMax = price[1] ? Number(price[1]) : undefined;
+    const rangeMin = priceRange[1] ? Number(priceRange[0]) : undefined;
+    const rangeMax = priceRange[1] ? Number(priceRange[1]) : undefined;
+    const selectedMinRange = price[1] ? Number(price[0]) : undefined;
+    const selectedMaxRange = price[1] ? Number(price[1]) : undefined;
+    console.log(price);
     return (
       <Dropdown
         pos="m"
@@ -289,11 +304,19 @@ function Filters() {
             showToolTip: false,
             maxRange: rangeMax,
             minRange: rangeMin,
+            selectedMaxRange,
+            selectedMinRange,
             onClick: (price) => {
-              onNavLinkChange({
-                type: CatalogQuery.Price,
-                query: price.split("_")[0],
-              });
+              onNavLinkChange([
+                {
+                  type: CatalogQuery.Price,
+                  query: price.split("_")[0],
+                },
+                {
+                  type: CatalogQuery.PriceRange,
+                  query: price.split("_")[1],
+                },
+              ]);
             },
 
             isRange: true,
@@ -304,7 +327,7 @@ function Filters() {
         ]}
       />
     );
-  }, []);
+  }, [catalog.isParamsUpdated]);
 
   const categoryFilters = useMemo(() => {
     if (!catalog.filters.length) return null;
@@ -325,11 +348,13 @@ function Filters() {
           title: option,
           borderBottom: true,
           onClick: () => {
-            onNavLinkChange({
-              type: queryType,
-              query: option,
-              isMultiple: true,
-            });
+            onNavLinkChange([
+              {
+                type: queryType,
+                query: option,
+                isMultiple: true,
+              },
+            ]);
           },
         };
       });

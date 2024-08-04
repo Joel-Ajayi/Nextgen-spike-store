@@ -14,7 +14,7 @@ export const initialCatalogState: CatalogStateType = {
     list: { 0: [null, null, null, null, null, null, null, null] },
     count: 16,
     skip: 0,
-    take: 3,
+    take: 16,
     numPages: 1,
   },
   brands: [],
