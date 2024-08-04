@@ -239,8 +239,8 @@ input CatalogInput {
   offer:String
   brands: [String!]!
   sortBy: CatalogSort
-  priceMax: Int
-  priceMin:Int
+  priceMax: Float
+  priceMin:Float
   discount: Int
   rating: Int
   filters: [CatalogFilterInput!]!
@@ -260,7 +260,6 @@ type CatalogFilter {
 type CatalogResponse {
   offers:[CategoryOffer!]!
   products:Pagination
-  price:String!
   brands:[String!]!
   filters:[CatalogFilter!]!
 }

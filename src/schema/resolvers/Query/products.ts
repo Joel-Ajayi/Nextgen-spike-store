@@ -199,26 +199,29 @@ const resolvers = {
       const whereAND: Prisma.ProductWhereInput[] = [];
       const orderBy: Prisma.ProductOrderByWithRelationInput[] = [];
       let offers: CategoryOffer[] = [];
-      if (data.offer && data.category) {
-        const offer = await db.categoryOffer.findFirst({
-          where: { id: data.offer, category: { name: data.category } },
-        });
-        if (offer) offers.push(offer);
-      } else {
-        if (data.category) {
-          const category = await db.category.findFirst({
-            where: { name: data.category },
-            select: { offers: true },
+
+      if (!data.skip) {
+        if (data.offer && data.category) {
+          const offer = await db.categoryOffer.findFirst({
+            where: { id: data.offer, category: { name: data.category } },
           });
-          if (category?.offers?.length) offers.push(...category.offers);
+          if (offer) offers.push(offer);
+        } else {
+          if (data.category) {
+            const category = await db.category.findFirst({
+              where: { name: data.category },
+              select: { offers: true },
+            });
+            if (category?.offers?.length) offers.push(...category.offers);
+          }
         }
       }
 
       if (data.priceMax && data.priceMin) {
         whereAND.push({ price: { gte: data.priceMin, lte: data.priceMax } });
       }
-      if (data.rating) {
-        whereAND.push({ rating: data.rating });
+      if (typeof data.rating === "number") {
+        whereAND.push({ rating: { gte: data.rating } });
       }
       if (data.discount) {
         whereAND.push({ discount: { gte: data.discount } });
@@ -232,14 +235,16 @@ const resolvers = {
         whereAND.push({ colours: { hasSome: data.colours } });
       }
       if (data.brands.length) {
-        whereAND.push({ brand: { name: { in: data.brands } } });
+        whereAND.push({
+          brand: { name: { in: data.brands, mode: "insensitive" } },
+        });
       }
       if (data.filters.length) {
-        whereAND.push(
-          ...data.filters.map((f) => ({
-            features: { some: { id: f.id, value: { in: f.options } } },
-          }))
-        );
+        data.filters.forEach((f) => {
+          whereAND.push({
+            features: { some: { featureId: f.id, value: { in: f.options } } },
+          });
+        });
       }
 
       if (data.sortBy) {
@@ -280,61 +285,74 @@ const resolvers = {
             },
           })
         ).map((c) => {
-          brands.push(
-            ...c.products
-              .filter((p) => !brands.includes(p.brand.name))
-              .map((p) => p.brand.name)
-          );
+          if (!data.skip) {
+            c.products.forEach((p) => {
+              const brand = p.brand.name.toLowerCase();
+              if (!brands.includes(brand)) brands.push(brand);
+            });
+          }
           return c.name;
         });
       } else {
+        const selection = {
+          name: true,
+          products: { select: { brand: { select: { name: true } } } },
+        };
+        const category = await db.category.findUnique({
+          where: { name: data.category },
+          select: selection,
+        });
+
+        category?.products.forEach((p) => {
+          const brand = p.brand.name.toLowerCase();
+          if (!brands.includes(brand)) brands.push(brand);
+        });
+
         await (async function getDeepCategory(parent: string) {
           categories.push(parent);
-
           const children = await db.category.findMany({
             where: { parent: { name: parent } },
-            select: {
-              name: true,
-              products: { select: { brand: { select: { name: true } } } },
-              features: parent !== data.category ? undefined : {},
-            },
+            select: selection,
           });
-
           await Promise.all(
             children.map(async (child) => {
-              brands.push(
-                ...child.products
-                  .filter((p) => !brands.includes(p.brand.name))
-                  .map((p) => p.brand.name)
-              );
+              if (!data.skip) {
+                child.products.forEach((p) => {
+                  const brand = p.brand.name.toLowerCase();
+                  if (!brands.includes(brand)) brands.push(brand);
+                });
+              }
               await getDeepCategory(child.name);
             })
           );
         })(data.category);
 
-        await (async function filterUpCategoryTree(cName: string) {
-          const category = await db.category.findUnique({
-            where: { name: cName },
-            select: {
-              parent: { select: { name: true } },
-              features: {
-                select: {
-                  id: true,
-                  options: true,
-                  name: true,
-                  useAsFilter: true,
+        if (!data.skip) {
+          await (async function filterUpCategoryTree(cName: string) {
+            const category = await db.category.findUnique({
+              where: { name: cName },
+              select: {
+                parent: { select: { name: true } },
+                features: {
+                  select: {
+                    id: true,
+                    options: true,
+                    name: true,
+                    type: true,
+                    useAsFilter: true,
+                  },
                 },
               },
-            },
-          });
+            });
 
-          if (category) {
-            filters.push(...category.features.filter((f) => f.useAsFilter));
-            if (category.parent?.name) {
-              await filterUpCategoryTree(category.parent?.name);
+            if (category) {
+              filters.push(...category.features.filter((f) => f.useAsFilter));
+              if (category.parent?.name) {
+                await filterUpCategoryTree(category.parent?.name);
+              }
             }
-          }
-        })(data.category);
+          })(data.category);
+        }
       }
       whereAND.push({ category: { name: { in: categories } } });
 
@@ -374,18 +392,10 @@ const resolvers = {
         category: p.category?.name || "",
       }));
 
-      let priceMin = 999999999;
-      let priceMax = 0;
-      products.forEach((p) => {
-        priceMin = p.price < priceMin ? p.price : priceMin;
-        priceMax = p.price > priceMax ? p.price : priceMax;
-      });
-
       const paginate = helpers.paginate(count, data.take, data.skip);
       return {
-        colours: colours,
+        colours,
         offers,
-        price: `${priceMin}-${priceMax}`,
         brands,
         products: { ...paginate, list: products },
         filters,

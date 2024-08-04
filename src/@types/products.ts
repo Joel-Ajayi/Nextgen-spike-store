@@ -129,6 +129,7 @@ export enum CatalogSortQueries {
 
 export type CatalogFilter = {
   id: string;
+  type: number;
   options: string[];
 };
 
