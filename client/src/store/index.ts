@@ -4,6 +4,7 @@ import { controller } from "./controller";
 import userSlice from "./userState";
 import brandSlice from "./controller/brands";
 import catalogSlice from "./catalog";
+import productSlice from "./product";
 
 const store = configureStore({
   reducer: {
@@ -12,6 +13,7 @@ const store = configureStore({
     brands: brandSlice.reducer,
     controller: controller,
     catalog: catalogSlice.reducer,
+    product: productSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({ serializableCheck: false }),

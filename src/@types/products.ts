@@ -15,6 +15,8 @@ export type ProductInfo = {
   warrCovered: string | null;
   warrDuration: number | null;
   mfgDate: string | null;
+  rating: number;
+  numReviews: number;
 };
 
 export interface Product extends ProductInfo {

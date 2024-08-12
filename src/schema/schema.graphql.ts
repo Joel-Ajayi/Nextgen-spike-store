@@ -277,6 +277,8 @@ type Product {
   id: String!
   name: String!
   price: Int!
+  numReviews:Int!
+  rating: Int!
   brand: String!
   cId: Int!
   count:Int!

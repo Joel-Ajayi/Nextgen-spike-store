@@ -91,7 +91,7 @@ function ProductsSearch({ className = "" }: SearchProps) {
               : `/${Paths.Catalog}/?${
                   isBrand ? CatalogQuery.Brand : CatalogQuery.Category
                 }=${res.name}`;
-            const regex = new RegExp(escapeRegExp(search), "i");
+            const regex = new RegExp(escapeRegExp(search), "ig");
             let text = res.name.replace(regex, ($1) => `<b>${$1}</b>`);
             text += `${isBrand ? "  Brand" : ""} ${
               !isProduct && !isBrand ? "  Category" : ""

@@ -39,8 +39,8 @@ class GlobalReq {
 
   public async Search(search: string) {
     const body = JSON.stringify({
-      query: `query SearchGlobal($search: String!) {
-        SearchGlobal(search: $search) { name type id }
+      query: `query SearchCatalog($search: String!) {
+       SearchCatalog(search: $search) { name type id }
       }`,
       variables: { search },
     });

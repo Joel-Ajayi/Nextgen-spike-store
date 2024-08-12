@@ -25,7 +25,7 @@
 
 @mixin skeletalLoader {
   &:empty {
-    background-color: $color-gray3;
+    background-color: $color-gray1;
     animation: shine 1.2s infinite ease-in-out;
   }
 

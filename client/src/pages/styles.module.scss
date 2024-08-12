@@ -1,0 +1,8 @@
+@import "./../styles/mixins.scss";
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background-color: $color-gray;
+  overflow-x: hidden;
+}

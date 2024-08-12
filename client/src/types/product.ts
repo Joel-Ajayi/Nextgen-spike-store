@@ -35,6 +35,9 @@ export type Product = {
   images: (IFile | string)[];
   sku?: string;
   mfgDate: "";
+  rating: number;
+  numReviews: number;
+  numSold: number;
   warrCovered: string;
   warrDuration: number;
   cId: number;
@@ -76,35 +79,6 @@ export type ProductFilterRange = {
   from: number;
   to: number;
 };
-
-export type ProductFilter = {
-  skip: number;
-  take: number;
-  category: string | null;
-  brands: string[];
-  colours: string[];
-  sortBy: ProductFilterSort | null;
-  price: ProductFilterRange | null;
-  offers: string[];
-  discount: ProductFilterRange;
-  rating: ProductFilterRange;
-  filters: {
-    featureId: string;
-    value: string | number;
-  }[];
-};
-
-export type productFilterReturn = {
-  offers: string[];
-  products: Pagination<ProductMini>;
-  filters: {
-    id: string;
-    name: string;
-    options: string[];
-  }[];
-  brands: string[];
-};
-
 export interface ProductInput extends Product {
   isValid: boolean[];
   initFeatures: ProductFeature[];

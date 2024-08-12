@@ -1,5 +1,5 @@
 import { PayloadAction, createSlice } from "@reduxjs/toolkit";
-import { APIPagination, Pagination } from "../types";
+import { APIPagination } from "../types";
 import {
   CatalogStateAPI,
   CatalogStateType,

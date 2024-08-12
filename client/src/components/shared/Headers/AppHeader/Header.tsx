@@ -22,7 +22,7 @@ import userSlice from "../../../../store/userState";
 import { Roles } from "../../../../types/user";
 import { PageSections, ControllerPaths } from "../../../../types/controller";
 import { UserPaths } from "../../../../types/user";
-import { Paths } from "../../../../types";
+import { CatalogQuery, Paths } from "../../../../types";
 import globalReq from "../../../../requests/global";
 import ProductsSearch from "../../Input/ProductsSearch/ProductsSearch";
 import controllerItems from "../ControllerHeader/data";
@@ -198,7 +198,8 @@ export default function Header() {
               .map((c) => ({
                 title: c.name,
                 items: getChildren(c.name, lvl + 1),
-                link: () => `/products/?cat=${c.name}`,
+                link: () =>
+                  `${Paths.Catalog}/?${CatalogQuery.Category}=${c.name}`,
               }));
           })()
         : [],
@@ -212,7 +213,7 @@ export default function Header() {
         title: c.name,
         items: getCategoryChildren(c.name),
         pos: "r-m",
-        link: () => `/products/?cat=${c?.name}`,
+        link: () => `${Paths.Catalog}/?${CatalogQuery.Category}=${c?.name}`,
       }));
   };
   const categoriesHomeDropDown = useMemo(
@@ -225,7 +226,8 @@ export default function Header() {
             .filter((c, i) => !!c && i < 5)
             .map((c) => ({
               title: c?.name,
-              link: () => `/products/?cat=${c?.name}`,
+              link: () =>
+                `${Paths.Catalog}/?${CatalogQuery.Category}=${c?.name}`,
             })),
           {
             title: "All Categories",

@@ -63,11 +63,15 @@ const resolvers = {
         description: true,
         discount: true,
         numSold: true,
+        rating: true,
         features: true,
         mfgCountry: true,
         mfgDate: true,
         warrDuration: true,
         warrCovered: true,
+        _count: {
+          select: { reviews: true },
+        },
       },
     });
 
@@ -76,7 +80,11 @@ const resolvers = {
         extensions: { statusCode: 404 },
       });
     }
-    return { ...product, brand: product.brand.name };
+    return {
+      ...product,
+      brand: product.brand.name,
+      numReviews: product._count.reviews,
+    };
   },
   GetProductMini: async (
     _: any,

@@ -1,14 +1,11 @@
 import request from ".";
-import { APIPagination, IFile, Message, Pagination } from "../types";
+import { APIPagination, IFile } from "../types";
 import {
   Product,
-  ProductFilter,
   ProductFormData,
   ProductInput,
-  ProductMini,
   ProductMini2,
   ProductUpdateReturn,
-  productFilterReturn as ProductFilterReturn,
   QueryCatalogParams,
   CatalogStateAPI,
 } from "../types/product";
@@ -67,7 +64,7 @@ class ProductReq {
     let query = `query GetProduct($id: String!) {
       GetProduct(id: $id) { 
         id name cId images discount brand colours sku paymentType price count description
-        mfgDate warrDuration warrCovered features { id value featureId }
+        mfgDate warrDuration warrCovered numSold numReviews rating features { id value featureId }
        }
     }`;
 
