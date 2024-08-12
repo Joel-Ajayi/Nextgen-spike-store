@@ -4,11 +4,17 @@ import { IoSearch as SearchIcon } from "react-icons/io5";
 import { IoIosArrowBack } from "react-icons/io";
 import { IoClose } from "react-icons/io5";
 import globalReq from "../../../../requests/global";
-import { SearchResponse, SearchResultType } from "../../../../types";
+import {
+  CatalogQuery,
+  Paths,
+  SearchResponse,
+  SearchResultType,
+} from "../../../../types";
 import { MdOutlineBrandingWatermark as BrandIcon } from "react-icons/md";
 import { BiSolidCategory as CategoryIcon } from "react-icons/bi";
 import { Link } from "react-router-dom";
 import { escapeRegExp } from "lodash";
+import unqId from "uniqid";
 
 type SearchProps = {
   className?: string;
@@ -28,7 +34,6 @@ function ProductsSearch({ className = "" }: SearchProps) {
     (async () => {
       if (search) {
         const res = await globalReq.Search(search);
-        console.log(search, res);
         setSearchRes(res);
       } else if (results.length) {
         setSearchRes([]);
@@ -81,11 +86,11 @@ function ProductsSearch({ className = "" }: SearchProps) {
           {results.map((res) => {
             const isBrand = res.type === SearchResultType.Brand;
             const isProduct = res.type === SearchResultType.Product;
-            const link = !isProduct
-              ? `/products/${!isBrand ? res.name : "all"}/${
-                  isBrand ? res.name : ""
-                }`
-              : `/product/${res.id}`;
+            const link = isProduct
+              ? `/${Paths.Product}/${res.id}`
+              : `/${Paths.Catalog}/?${
+                  isBrand ? CatalogQuery.Brand : CatalogQuery.Category
+                }=${res.name}`;
             const regex = new RegExp(escapeRegExp(search), "i");
             let text = res.name.replace(regex, ($1) => `<b>${$1}</b>`);
             text += `${isBrand ? "  Brand" : ""} ${
@@ -93,7 +98,7 @@ function ProductsSearch({ className = "" }: SearchProps) {
             }`;
 
             return (
-              <Link to={link}>
+              <Link to={link} key={unqId()}>
                 {res.type === SearchResultType.Category && <CategoryIcon />}
                 {res.type === SearchResultType.Brand && <BrandIcon />}
                 <span dangerouslySetInnerHTML={{ __html: text }} />

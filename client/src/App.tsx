@@ -9,7 +9,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import SignInPage from "./pages/SignIn";
-import HomePage from "./pages/Home/Home";
+import HomePage from "./pages/Home";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import userSlice from "./store/userState";
 import appSlice from "./store/appState";

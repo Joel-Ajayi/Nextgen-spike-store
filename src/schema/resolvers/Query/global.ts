@@ -179,27 +179,27 @@ export default {
     _: any,
     query: { search: string }
   ): Promise<SearchRes[]> => {
-    const categories = (
-      await db.category.findMany({
-        where: { name: { mode: "insensitive", contains: query.search } },
-        select: { name: true, id: true },
-      })
-    ).map((cat) => ({ ...cat, type: SearchResultType.Category }));
+    const [products, categories, brands] = await Promise.all([
+      (
+        await db.category.findMany({
+          where: { name: { mode: "insensitive", contains: query.search } },
+          select: { name: true, id: true },
+        })
+      ).map((cat) => ({ ...cat, type: SearchResultType.Category })),
+      (
+        await db.product.findMany({
+          where: { name: { mode: "insensitive", contains: query.search } },
+          select: { name: true, id: true },
+        })
+      ).map((cat) => ({ ...cat, type: SearchResultType.Product })),
+      (
+        await db.brand.findMany({
+          where: { name: { mode: "insensitive", contains: query.search } },
+          select: { name: true, id: true },
+        })
+      ).map((cat) => ({ ...cat, type: SearchResultType.Brand })),
+    ]);
 
-    const products = (
-      await db.product.findMany({
-        where: { name: { mode: "insensitive", contains: query.search } },
-        select: { name: true, id: true },
-      })
-    ).map((cat) => ({ ...cat, type: SearchResultType.Product }));
-
-    const brands = (
-      await db.brand.findMany({
-        where: { name: { mode: "insensitive", contains: query.search } },
-        select: { name: true, id: true },
-      })
-    ).map((cat) => ({ ...cat, type: SearchResultType.Brand }));
-
-    return [...categories, ...brands, ...products];
+    return [...categories.slice(0, 5), ...brands, ...products.slice(0, 10)];
   },
 };
