@@ -7,7 +7,7 @@ class ProductValidator {
       await string()
         .required("Name Field is empty")
         .min(5, "Name should have more than 5 characters")
-        .matches(/^[a-zA-Z0-9',()".\s-]*$/, "Special characters not allowed")
+        .matches(/^[a-zA-Z0-9',()+".\s-]*$/, "Special characters not allowed")
         .max(100, "Name should have not more than 50 characters")
         .validate(val);
       return "";

@@ -14,6 +14,8 @@ import { CategoryFeature } from "../../../@types/categories";
 import { upload } from "../../../helpers/uploads";
 import { db } from "../../../db/prisma/connect";
 
+const ObjectId = Types.ObjectId;
+
 const resolvers = {
   CreateProduct: async (
     _: any,
@@ -331,6 +333,8 @@ const resolvers = {
         data.features.map(async ({ id: inputFeatureId, ...inputFeature }) => {
           const randObjId = new Types.ObjectId().toString();
           const id = isNewCategory ? randObjId : inputFeatureId || randObjId;
+          const isIdValid =
+            ObjectId.isValid(id) && String(new ObjectId(id)) === id;
           const featureData = { ...inputFeature, productId: data.id };
 
           if (isNewCategory) {
@@ -338,7 +342,7 @@ const resolvers = {
           }
 
           return await db.productFeature.upsert({
-            where: { id },
+            where: { id: isIdValid ? id : randObjId },
             create: featureData,
             update: featureData,
           });

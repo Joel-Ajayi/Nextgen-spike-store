@@ -52,7 +52,6 @@ function ProductInfo() {
     setIsSaving(true);
     const data = await productReq.updateProduct(isUpdate, {
       ...product,
-      sku: undefined,
     });
 
     if (data) {

@@ -339,7 +339,7 @@ input UpdateProductInput {
   description: String
   price: Int
   discount: Int
-  colours: [String!]
+  colours: [String!]!
   count: Int
   paymentType: Int
   images: [Upload!]

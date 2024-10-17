@@ -34,13 +34,12 @@ class ProductReq {
     const apiReturn = "id sku features { id featureId value }";
     const newQuery = `mutation CreateProduct($data: ProductInput) { CreateProduct(data:$data) { ${apiReturn} } }`;
     const updateQuery = `mutation UpdateProduct($data: UpdateProductInput) { UpdateProduct(data:$data) { ${apiReturn} } }`;
-
     const query = isUpdate ? updateQuery : newQuery;
-    const { isValid, initFeatures, ...rest } = data;
+    const { isValid, initFeatures, numReviews, numSold, sku, rating, ...rest } =
+      data;
     const variables = {
       data: {
         ...rest,
-        features: rest.features.filter((f) => f !== null),
         images: data.images.map(() => null),
       },
     };

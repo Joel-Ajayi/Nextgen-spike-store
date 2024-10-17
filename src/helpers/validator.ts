@@ -33,7 +33,7 @@ class Validator {
     features: this.productFeatures,
     name: string()
       .required("Product name is required")
-      .matches(/^[a-zA-Z0-9',()".\s-]*$/, "Special characters not allowed")
+      .matches(/^[a-zA-Z0-9',()+".\s-]*$/, "Special characters not allowed")
       .min(5, "Product name should have more than 5 characters")
       .max(100, "Product name should not exceed 50 characters"),
     description: string()

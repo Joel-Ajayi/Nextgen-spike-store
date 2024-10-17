@@ -1,19 +1,22 @@
 import { User } from "@prisma/client";
 import { ExpressContext } from "apollo-server-express";
-import { Request, Response } from "express";
-import { db as db } from "../db/prisma/connect";
+import express from "express";
+import { db } from "../db/prisma/connect";
 import consts from "../@types/conts";
 
 export type Context = {
   user: User;
-  req: Request;
-  res: Response;
+  req: express.Request;
+  res: express.Response;
 };
 
 export async function appContext({
   req,
   res,
-}: ExpressContext): Promise<Context> {
+}: {
+  req: express.Request;
+  res: express.Response;
+}): Promise<Context> {
   // gets user from session
   const userId = req.session.user;
   let user: User = {} as any;

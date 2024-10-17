@@ -66,7 +66,8 @@ class Requests {
     } catch (error) {
       const err = error as ThrownError;
       let msg: IMessage | null = null;
-      console.log(err);
+      const t = (error as any)?.response?.request?.responseText;
+      console.error(t);
       //
       dispatch(appSlice.actions.setStatusCode(err.statusCode));
 

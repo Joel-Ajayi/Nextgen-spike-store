@@ -16,6 +16,7 @@ import { validator } from "../../../helpers/validator";
 import { ValidateFileProps, upload } from "../../../helpers/uploads";
 import helpers from "../../../helpers";
 import { db } from "../../../db/prisma/connect";
+import { Prisma } from "@prisma/client";
 
 const ObjectId = Types.ObjectId;
 
@@ -226,7 +227,6 @@ const resolvers = {
   ): Promise<CategoryMini> => {
     // check if logged_in
     middleware.checkSuperAdmin(ctx);
-
     if (!data) {
       throw new GraphQLError("No data provided", {
         extensions: { statusCode: 400 },
@@ -330,6 +330,8 @@ const resolvers = {
         bannerFileName = (
           await upload.files({ ...fileOptions, files, prevFiles, minNum: 1 })
         )[0];
+      } else {
+        bannerFileName = data.banner.image;
       }
     }
 
@@ -421,11 +423,12 @@ const resolvers = {
       }
 
       if (data.banner) {
-        const bannerData = {
+        const bannerData: Prisma.CategoryBannerUncheckedCreateInput = {
           ...data.banner,
-          image: bannerFileName,
+          id: undefined,
+          image: (bannerFileName as string) || "",
           categoryId: category.id,
-          bannerColurs: data.banner.bannerColours.map((c) =>
+          bannerColours: data.banner.bannerColours.map((c) =>
             helpers.getCloseClolour(c)
           ),
         };
@@ -433,7 +436,7 @@ const resolvers = {
         const id = category.banner[0]?.id || new ObjectId().toString();
         await db.categoryBanner.upsert({
           where: { id },
-          create: { ...bannerData, image: bannerFileName || "" },
+          create: bannerData,
           update: bannerData,
         });
       } else if (category.banner[0]) {
