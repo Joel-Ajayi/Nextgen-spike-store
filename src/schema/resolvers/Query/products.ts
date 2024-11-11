@@ -8,7 +8,6 @@ import {
   PaymentType,
   Product,
   ProductMini,
-  ProductMini2,
   QueryCatalog,
 } from "../../../@types/products";
 import {
@@ -21,7 +20,6 @@ import { db } from "../../../db/prisma/connect";
 import helpers from "../../../helpers";
 import { Prisma } from "@prisma/client";
 import colours from "../../../db/colours";
-import { query } from "express";
 
 const productMiniSelect = {
   id: true,
@@ -34,6 +32,7 @@ const productMiniSelect = {
   numSold: true,
   category: true,
   images: true,
+  count: true,
   _count: {
     select: {
       reviews: true,
@@ -47,7 +46,7 @@ const resolvers = {
     { id }: { id: string },
     ctx: Context
   ): Promise<Product> => {
-    const product = await db.product.findFirst({
+    const product = await ctx.db.product.findFirst({
       where: { id },
       select: {
         id: true,
@@ -64,7 +63,14 @@ const resolvers = {
         discount: true,
         numSold: true,
         rating: true,
-        features: true,
+        features: {
+          select: {
+            feature: true,
+            value: true,
+            id: true,
+            featureId: true,
+          },
+        },
         mfgCountry: true,
         mfgDate: true,
         warrDuration: true,
@@ -84,6 +90,10 @@ const resolvers = {
       ...product,
       brand: product.brand.name,
       numReviews: product._count.reviews,
+      features: product.features.map((f) => ({
+        ...f,
+        feature: f.feature.name,
+      })),
     };
   },
   GetProductMini: async (
@@ -92,7 +102,7 @@ const resolvers = {
     ctx: Context
   ): Promise<ProductMini> => {
     try {
-      const product = await db.product.findFirst({
+      const product = await ctx.db.product.findFirst({
         where: { id, category: { name: category } },
         select: { ...productMiniSelect, features: true },
       });
@@ -158,7 +168,7 @@ const resolvers = {
 
             if (category) {
               categoriesPath.unshift(category.name);
-              features.push(...category.features.filter((f) => f.useAsFilter));
+              features.push(...category.features);
               if (category.parent?.cId) await findPath(category.parent?.cId);
             }
           })(product.category.cId);
@@ -384,6 +394,7 @@ const resolvers = {
             cId: true,
             brand: true,
             discount: true,
+            count: true,
             rating: true,
             numSold: true,
             category: true,
@@ -414,6 +425,53 @@ const resolvers = {
         extensions: { statusCode: 500 },
       });
     }
+  },
+  QueryReviews: async (
+    _: any,
+    data: { prd_id: string; skip: number; take: number },
+    ctx: Context
+  ) => {
+    const product = await ctx.db.product.findFirst({
+      where: { id: data.prd_id },
+      select: { id: true, rating: true },
+    });
+
+    if (!product) {
+      throw new GraphQLError(consts.errors.product.prdNotFound, {
+        extensions: { statusCode: 404 },
+      });
+    }
+
+    const count = await ctx.db.reviews.count({
+      where: { productId: data.prd_id },
+    });
+    const reviews = await ctx.db.reviews.findMany({
+      where: { productId: data.prd_id },
+      // skip: data.skip,
+      take: data.take || count,
+      select: {
+        rating: true,
+        title: true,
+        userId: true,
+        user: {
+          select: { fName: true, lName: true },
+        },
+        updatedAt: true,
+        comment: true,
+      },
+    });
+    const paginate = helpers.paginate(count, data.take, data.skip);
+
+    return {
+      ...paginate,
+      list: reviews.map(({ user, updatedAt: date, userId, ...r }) => ({
+        ...r,
+        editAble: userId === ctx.user?.id,
+        user: `${user.fName} ${user.lName}`,
+        date: `${date.toDateString()}`,
+        updatedAt: undefined,
+      })),
+    };
   },
 };
 

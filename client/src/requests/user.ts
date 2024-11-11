@@ -34,9 +34,11 @@ class UserReq {
       },
     });
 
-    await request.makeRequest<string>(body);
-    const user = await this.getUser();
-    return user;
+    const res = await request.makeRequest<string>(body);
+    if (res) {
+      return await this.getUser();
+    }
+    return null;
   }
 
   public async signOut(): Promise<void> {

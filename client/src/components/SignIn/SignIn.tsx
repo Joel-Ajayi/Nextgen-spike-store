@@ -16,8 +16,8 @@ function SignIn() {
   const dispatch = useAppDispatch();
   const { pathname } = useLocation();
 
-  const { setShowModal, setBackgroundMsg } = appSlice.actions;
-  const { setUserState } = userSlice.actions;
+  const setShowModal = appSlice.actions.setShowModal;
+  const setUserState = userSlice.actions.setUserState;
   const isSignPage = pathname === "/signin";
 
   const isModalVisible = useAppSelector((state) => state.app.showModal);
@@ -50,7 +50,6 @@ function SignIn() {
 
   const onSubmit = async (e: React.FormEvent) => {
     if (isLoading) return;
-
     e.preventDefault();
     e.stopPropagation();
     setIsLoading(true);

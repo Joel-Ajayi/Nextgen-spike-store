@@ -39,12 +39,12 @@ model User {
   reviews       Reviews[]
   address       Address?
   orders        Order[]
-  couponId      String[]  @unique
+  couponId      String[]
   verified      Boolean   @default(false)
   roles         Int[]
   pwd           String
-  pwdToken      String?   @unique
-  vToken        String?   @unique
+  pwdToken      String?
+  vToken        String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }
@@ -156,10 +156,12 @@ model Reviews {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   userId    String   @db.ObjectId
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title     String?
   comment   String?
   rating    Int      @default(0)
   product   Product? @relation(fields: [productId], references: [id], onDelete: Cascade)
   productId String?  @db.ObjectId
+  updatedAt DateTime @updatedAt
 }
 
 model Address {

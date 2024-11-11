@@ -438,13 +438,13 @@ export default function Dropdown({
                   className={Styles.value}
                   style={{ left: `${selectedRange.min * 100}%` }}
                 >
-                  {helpers.reduceNumberLenth(getRangeWidth(selectedRange.min))}
+                  {helpers.reduceNumLength(getRangeWidth(selectedRange.min))}
                 </span>
                 <span
                   className={Styles.value}
                   style={{ right: `${100 - selectedRange.max * 100}%` }}
                 >
-                  {helpers.reduceNumberLenth(getRangeWidth(selectedRange.max))}
+                  {helpers.reduceNumLength(getRangeWidth(selectedRange.max))}
                 </span>
               </div>
               <div className={Styles.input}>

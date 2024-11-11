@@ -8,6 +8,7 @@ export type Context = {
   user: User;
   req: express.Request;
   res: express.Response;
+  db: typeof db;
 };
 
 export async function appContext({
@@ -40,5 +41,5 @@ export async function appContext({
     throw new Error(consts.errors.server);
   }
 
-  return { req, res, user };
+  return { req, res, user, db };
 }

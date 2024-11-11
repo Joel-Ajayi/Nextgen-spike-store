@@ -10,9 +10,9 @@ class GlobalReq {
           banners { id tagline bannerColours image category}
           offers { id type discount tagline bannerColours image category}
           topCategories { name icon }
-          hotDeals { brand category discount id images name price numSold numReviews rating }
-          newProducts { brand category discount id images name price numSold numReviews rating }
-          popularProducts { brand category discount id images name price numSold numReviews rating }
+          hotDeals { brand category discount id images name price numSold numReviews rating count }
+          newProducts { brand category discount id images name price numSold numReviews rating count }
+          popularProducts { brand category discount id images name price numSold numReviews rating count }
         }
       }
     `,

@@ -2,11 +2,13 @@ import React, { useEffect } from "react";
 import Styles from "./styles.module.scss";
 import productReq from "../../requests/product";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { useParams, useSearchParams } from "react-router-dom";
-import request from "../../requests";
-import productSlice from "../../store/product";
+import { useParams } from "react-router-dom";
+import productSlice, { initProduct } from "../../store/product";
 import Main from "./Main";
-import Tabs from "./Tabs";
+import Specs from "./Specs";
+import Details from "./Details";
+import Feedback from "./Feedback";
+import Delivery from "./Delivery";
 
 function Product() {
   const dispatch = useAppDispatch();
@@ -19,17 +21,22 @@ function Product() {
     (async () => {
       if (product.id !== prd_id && prd_id) {
         const data = await productReq.getProduct(prd_id);
-        if (data) {
-          dispatch(setProduct({ ...data }));
-        }
+        if (data) dispatch(setProduct({ ...data }));
       }
     })();
+
+    return () => {
+      dispatch(setProduct(initProduct));
+    };
   }, []);
 
   return (
     <div className={Styles.content}>
       <Main />
-      <Tabs />
+      <Specs />
+      <Details />
+      <Delivery />
+      <Feedback />
     </div>
   );
 }

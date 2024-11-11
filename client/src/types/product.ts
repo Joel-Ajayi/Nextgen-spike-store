@@ -52,6 +52,7 @@ export type ProductMini = {
   cId: number;
   brand: string;
   discount: number;
+  count: number;
   rating: number;
   numReviews: number;
   numSold: number;
@@ -93,6 +94,7 @@ export type InitialProductController = {
 export type ProductFeature = {
   id?: string;
   featureId: string;
+  feature: string;
   value: string | number;
 };
 
@@ -135,4 +137,21 @@ export type QueryCatalogParams = {
   priceMax: number;
   priceMin: number;
   filters: { id: string; options: string[] }[];
+};
+
+export type CartMiniItem = {
+  id: string;
+  qty: number;
+};
+
+export type ProductReview = {
+  user: string;
+  title: string;
+  comment: string;
+  rating: number;
+  date: string;
+  editAble: boolean;
+};
+export type ProductReviews = {
+  reviews: APIPagination<ProductReview>;
 };

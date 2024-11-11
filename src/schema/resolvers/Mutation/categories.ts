@@ -245,7 +245,7 @@ const resolvers = {
         icon: true,
         brand: { select: { name: true } },
         parent: { select: { hasWarrantyAndProduction: true } },
-        features: { select: { id: true, parentId: true } },
+        features: { select: { id: true } },
         banner: true,
         offers: true,
       },
@@ -366,11 +366,6 @@ const resolvers = {
               ObjectId.isValid(id) && String(new ObjectId(id)) === id;
             // save feature
             const featureData = { categoryId: category.id, ...rest };
-            const feature = await db.categoryFeature.upsert({
-              where: { id: isIdValid ? id : randObjId },
-              create: featureData,
-              update: featureData,
-            });
             prevFeaturesId = prevFeaturesId.filter((fId) => fId !== id);
           })
         );

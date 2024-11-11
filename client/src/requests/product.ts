@@ -8,6 +8,7 @@ import {
   ProductUpdateReturn,
   QueryCatalogParams,
   CatalogStateAPI,
+  ProductReview,
 } from "../types/product";
 
 class ProductReq {
@@ -40,6 +41,7 @@ class ProductReq {
     const variables = {
       data: {
         ...rest,
+        features: rest.features.map(({ feature, ...f }) => f),
         images: data.images.map(() => null),
       },
     };
@@ -63,7 +65,7 @@ class ProductReq {
     let query = `query GetProduct($id: String!) {
       GetProduct(id: $id) { 
         id name cId images discount brand colours sku paymentType price count description
-        mfgDate warrDuration warrCovered numSold numReviews rating features { id value featureId }
+        mfgDate warrDuration warrCovered numSold numReviews rating features { id value featureId feature }
        }
     }`;
 
@@ -81,6 +83,42 @@ class ProductReq {
     const body = JSON.stringify({ query, variables: { skip, take } });
     const res = await request.makeRequest<APIPagination<ProductMini2>>(body);
     return res;
+  }
+
+  public async getReviews(prd_id: string, skip: number, take: number) {
+    const query = `query QueryReviews($prd_id:String!, $skip:Int!, $take:Int!) {
+      QueryReviews(prd_id:$prd_id, skip:$skip, take:$take) { take count list skip page numPages }
+    }`;
+
+    const body = JSON.stringify({ query, variables: { prd_id, skip, take } });
+    return await request.makeRequest<APIPagination<ProductReview>>(body);
+  }
+
+  public async updateReview(
+    prd_id: string,
+    title: string,
+    rating: number,
+    comment: string
+  ) {
+    const query = `mutation UpdateReview($data:Review_I!) { 
+        UpdateReview(data:$data) { message }
+    }`;
+    const body = JSON.stringify({
+      query,
+      variables: { data: { prd_id, title, rating, comment } },
+    });
+    await request.makeRequest<string>(body);
+  }
+
+  public async deleteReview(prd_id: string) {
+    const query = `mutation DeleteReview($prd_id:String!) { 
+      DeleteReview(prd_id:$prd_id) { message }
+  }`;
+    const body = JSON.stringify({
+      query,
+      variables: { prd_id },
+    });
+    await request.makeRequest<string>(body);
   }
 
   public async queryCatalog(filters: QueryCatalogParams) {

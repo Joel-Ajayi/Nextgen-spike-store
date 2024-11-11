@@ -12,29 +12,48 @@
   color: $color-gray12;
 }
 
-.main {
+.main,
+.tab {
   background-color: white;
-  display: flex;
-  gap: 1rem 3rem;
   border-radius: 0.2rem;
   padding: 1rem;
+}
+
+.main {
+  gap: 1rem 3rem;
+  display: flex;
+  flex-direction: column;
+  @media screen and (min-width: 800px) {
+    flex-direction: row;
+  }
   .images {
     width: 100%;
-    max-width: 400px;
+    max-width: 100%;
     display: flex;
     flex-direction: column;
     row-gap: 1rem;
+
+    @media screen and (min-width: 800px) {
+      max-width: 300px;
+    }
+    @media screen and (min-width: 1000px) {
+      max-width: 400px;
+    }
     .selected_image {
       position: relative;
       width: 100%;
       max-height: 500px;
-      min-height: 400px;
+      min-height: auto;
       height: 100%;
       display: flex;
       align-items: flex-start;
       border-radius: 5px;
       justify-content: center;
       @include skeletalLoader;
+
+      @media screen and (min-width: 800px) {
+        min-height: 400px;
+      }
 
       img {
         max-width: 100%;
@@ -84,8 +103,16 @@
       }
 
       .name {
-        font-size: 1.7rem;
+        font-size: 1.4rem;
         width: 90%;
+
+        @media screen and (min-width: 1000px) {
+          font-size: 1.7rem;
+        }
+
+        @media screen and (min-width: 800px) {
+          font-size: 1.5rem;
+        }
 
         .loader {
           height: 1.5rem;
@@ -130,40 +157,50 @@
       & > .price {
         display: flex;
         column-gap: 1rem;
-        align-items: center;
+        flex-direction: column;
         @include skeletalLoader;
         &:empty {
           width: 40%;
           height: 2rem;
         }
         .price {
-          display: flex;
-          align-items: center;
-          font-size: 1.4rem;
-          color: $brand-color;
-          transform: scaleY(1.1);
-          .naira {
-            height: max-content;
-            width: max-content;
-            margin-bottom: -0.1rem;
-            color: $brand-color;
-            transform: scale(1.25);
-            stroke-width: 0.15rem;
-          }
-
           span {
+            color: $color-gray11;
+            font-size: 1.5rem;
+            margin-right: 0.2rem;
             font-weight: 700;
-            margin-left: 0.1rem;
-            letter-spacing: 0.1rem;
           }
+        }
 
-          &.discount {
+        .discount {
+          span {
+            margin-right: 0.1rem;
             text-decoration: line-through;
             color: $color-gray4;
-            font-size: 1.2rem;
-            .naira {
-              color: $color-gray4;
-            }
+            font-size: 1rem;
+          }
+        }
+
+        .discount_info {
+          margin-top: 1rem;
+          color: rgb(0, 170, 0);
+          font-size: 1rem;
+          display: flex;
+          align-items: center;
+          div {
+            margin-left: 0.3rem;
+          }
+          span {
+            margin-right: 0.1rem;
+          }
+          .discount {
+            color: rgb(0, 170, 0);
+            background-color: rgba(0, 170, 0, 0.267);
+            padding: 0.2rem 0.8rem;
+            font-weight: bold;
+            font-size: 0.7rem;
+            margin-left: 0.5rem;
+            border-radius: 0.3rem;
           }
         }
       }
@@ -193,11 +230,193 @@
           }
         }
       }
+
+      .cart_sec {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        row-gap: 0.5rem;
+
+        .qty_note {
+          @include skeletalLoader;
+          &:empty {
+            width: 175px;
+            height: 1.5rem;
+          }
+
+          display: flex;
+          column-gap: 0.4rem;
+          align-items: center;
+          font-size: 0.9rem;
+          color: #ff9966;
+          display: flex;
+
+          svg {
+            font-size: 1.2rem;
+          }
+        }
+      }
     }
   }
 }
 
-.tabs {
-  min-height: 100px;
-  background-color: white;
+.tab {
+  & > .header {
+    font-size: 1rem;
+    width: 100%;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid $color-gray2;
+    @media screen and (min-width: 850px) {
+      font-size: 1.1rem;
+    }
+  }
+  .tab_content {
+    padding-top: 1rem;
+    font-size: 0.9rem;
+    @media screen and (min-width: 850px) {
+      font-size: 1rem;
+    }
+
+    .details {
+      white-space: pre-wrap; /* This preserves the newlines */
+    }
+
+    .delivery {
+      display: flex;
+      justify-content: space-between;
+      flex-direction: column;
+      gap: 1.5rem 0.5rem;
+
+      @media screen and (min-width: 850px) {
+        flex-direction: row;
+      }
+
+      & > div {
+        display: flex;
+        column-gap: 0.5rem;
+        align-items: center;
+
+        .header {
+          font-size: 1rem;
+          @media screen and (min-width: 750px) {
+            font-size: 1.3rem;
+          }
+        }
+
+        .note {
+          color: $color-gray10;
+          font-size: 0.9rem;
+
+          b {
+            display: inline-block;
+          }
+
+          svg {
+            font-size: 1.1rem;
+            margin-bottom: 0.18rem;
+            margin-right: -0.1rem;
+          }
+        }
+
+        & > svg {
+          font-size: 2rem;
+          @media screen and (min-width: 750px) {
+            font-size: 2.5rem;
+          }
+        }
+      }
+    }
+
+    .colours {
+      display: flex;
+      column-gap: 0.5rem;
+      flex-wrap: wrap;
+      & > div {
+        height: 1.2rem;
+        border: 2px solid rgba(0, 0, 0, 0.623);
+        border-radius: 0.2rem;
+        width: 1.2rem;
+      }
+    }
+
+    .feedback {
+      max-height: 400px;
+      display: flex;
+      overflow: auto;
+      @include skeletalLoader;
+
+      .no_comments {
+        margin: 0 auto;
+        padding: 1rem 0;
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        .no_reviews,
+        .add_comment {
+          text-align: center;
+        }
+        .no_reviews {
+          font-size: 1.3rem;
+        }
+        .add_comment {
+          color: $brand-color;
+          cursor: pointer;
+        }
+        .comments_svg {
+          margin: 0 auto;
+          font-size: 5rem;
+        }
+      }
+
+      .reviews {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        row-gap: 1.5rem;
+
+        .review {
+          .r_content {
+            display: flex;
+            flex-direction: column;
+            row-gap: 0.75rem;
+            padding: 1.5rem 1rem 1rem 1rem;
+            border: 1px solid $color-gray2;
+            border-radius: 0.4rem;
+
+            .text_bold {
+              font-weight: bold;
+              font-size: 1.2rem;
+            }
+
+            .rating {
+              display: flex;
+              column-gap: 1.5rem;
+              align-items: center;
+              .clear {
+                color: red;
+                cursor: pointer;
+                font-size: 0.9rem;
+                .clear_svg {
+                  font-size: 1.5rem;
+                }
+              }
+            }
+          }
+
+          .sub_content {
+            display: flex;
+            flex-wrap: wrap;
+            column-gap: 1.5rem;
+            align-items: center;
+            margin-top: 1rem;
+
+            .name {
+              font-weight: bold;
+              font-size: large;
+            }
+          }
+        }
+      }
+    }
+  }
 }

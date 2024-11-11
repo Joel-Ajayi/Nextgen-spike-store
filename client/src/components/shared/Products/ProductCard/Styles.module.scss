@@ -93,10 +93,6 @@
       column-gap: 0.1rem;
       font-size: 0.75rem;
 
-      .star {
-        color: #fba100;
-      }
-
       .star_less {
         color: $color-gray3;
       }
@@ -107,6 +103,7 @@
 
       .star_less,
       .star {
+        color: #fba100;
         width: 13px;
         @media only screen and (min-width: 650px) {
           width: 15px;
@@ -158,30 +155,6 @@
           }
         }
       }
-    }
-  }
-
-  .add_to_cart {
-    margin: auto 0.6rem 0.6rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 0.8rem;
-    column-gap: 0.3rem;
-    border-radius: 0.3rem;
-    min-height: 33px;
-    color: white;
-    background-color: $brand-color;
-
-    &:hover {
-      box-shadow: 0 0 5px #757575;
-      -webkit-box-shadow: 0 0 5px #757575;
-    }
-
-    svg {
-      height: 1.2rem;
-      width: 1.2rem;
     }
   }
 }

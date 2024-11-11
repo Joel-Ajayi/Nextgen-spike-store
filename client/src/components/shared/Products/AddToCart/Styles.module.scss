@@ -1,0 +1,67 @@
+@import "../../../../styles/mixins.scss";
+
+.wrapper {
+  margin: auto 0.6rem 0.6rem;
+  justify-content: center;
+  .add_to_cart_qty {
+    display: flex;
+    column-gap: 1.3rem;
+    align-items: center;
+
+    .btn {
+      background-color: $brand-color;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 0 2px #757575;
+      -webkit-box-shadow: 0 0 2px #757575;
+      min-height: 35px;
+      width: 38px;
+      border-radius: 0.3rem;
+      cursor: pointer;
+
+      &:hover {
+        box-shadow: 0 0 5px #757575;
+        -webkit-box-shadow: 0 0 5px #757575;
+      }
+
+      svg {
+        color: white;
+      }
+
+      &.disabled {
+        pointer-events: none;
+        opacity: 0.5;
+      }
+    }
+
+    .qty {
+      color: $color-gray12;
+    }
+  }
+
+  .add_to_cart {
+    @include skeletalLoader;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1rem;
+    column-gap: 0.5rem;
+    border-radius: 0.3rem;
+    min-height: 40px;
+    color: white;
+    background-color: $brand-color;
+    box-shadow: 0 0 2px #757575;
+    -webkit-box-shadow: 0 0 2px #757575;
+
+    &:hover {
+      box-shadow: 0 0 5px #757575;
+      -webkit-box-shadow: 0 0 5px #757575;
+    }
+
+    svg {
+      font-size: 1.4rem;
+    }
+  }
+}

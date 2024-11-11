@@ -1,5 +1,5 @@
 import { array, number, string } from "yup";
-import { ProductFeature } from "../types/product";
+import { ProductFeature, ProductReview } from "../types/product";
 
 class ProductValidator {
   public async prdName(val: string) {
@@ -163,6 +163,42 @@ class ProductValidator {
       return (error as any).message;
     }
   }
+
+  public productReview = async (review: ProductReview, name: string) => {
+    switch (name) {
+      case "comment":
+        try {
+          await string()
+            .required("Comment Field is empty")
+            .matches(
+              /^[a-zA-Z0-9',.()+&":\s-]*$/,
+              "Special characters not allowed"
+            )
+            .max(250, "Comment should have not more than 250 characters")
+            .validate(review.comment);
+          return "";
+        } catch (error) {
+          return (error as any).message;
+        }
+      case "title":
+        try {
+          await string()
+            .required("Title Field is empty")
+            .matches(
+              /^[a-zA-Z0-9',()+":.\s-]*$/,
+              "Special characters not allowed"
+            )
+            .max(50, "Title should have not more than 50 characters")
+            .validate(review.title);
+          return "";
+        } catch (error) {
+          return (error as any).message;
+        }
+      default:
+        return "";
+    }
+  };
+
 }
 
 const productValidator = new ProductValidator();

@@ -93,6 +93,13 @@ export type Product_I_U = {
   warrDuration?: number;
 };
 
+export type Review_I = {
+  prd_id: string;
+  comment: string;
+  title: string;
+  rating: number;
+};
+
 export interface ProductFeature_I {
   id?: string;
   featureId: string;
@@ -101,6 +108,7 @@ export interface ProductFeature_I {
 
 export interface ProductFeature extends ProductFeature_I {
   id: string;
+  feature?: string;
 }
 
 export enum PaymentType {

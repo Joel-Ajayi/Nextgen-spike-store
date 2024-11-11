@@ -3,11 +3,13 @@ import Styles from "./styles.module.scss";
 import { Link, useParams } from "react-router-dom";
 import { useAppSelector } from "../../store/hooks";
 import helpers from "../../helpers";
-import { TbCurrencyNaira } from "react-icons/tb";
 import { CatalogQuery, Paths } from "../../types";
 import { FaStarHalfStroke } from "react-icons/fa6";
 import uniqid from "uniqid";
 import { GiRoundStar } from "react-icons/gi";
+import AddToCart from "../shared/Products/AddToCart/AddToCart";
+import { CiWarning } from "react-icons/ci";
+import Stars from "../shared/Products/Stars/Stars";
 
 function Main() {
   const { prd_id } = useParams();
@@ -15,21 +17,19 @@ function Main() {
   const [selectedImg, setSelectedImg] = useState("");
   const isLoading = product.id != prd_id;
 
-  const discountPrice = useMemo(
-    () =>
-      product.discount
-        ? helpers.reduceNumberLenth(
-            ((100 - product.discount) / 100) * product.price
-          )
-        : 0,
-    [product]
-  );
-
   useEffect(() => {
     if (!isLoading) {
       setSelectedImg(product.images[0] as string);
     }
   }, [isLoading]);
+
+  const discountPrice = useMemo(
+    () =>
+      product.discount
+        ? helpers.addComma(((100 - product.discount) / 100) * product.price)
+        : "",
+    [product]
+  );
 
   return (
     <div className={Styles.main}>
@@ -48,6 +48,7 @@ function Main() {
                   isSelected ? Styles.selected : ""
                 }`}
                 onClick={() => setSelectedImg(image)}
+                key={uniqid()}
               >
                 {!isLoading && <img src={`/uploads/${image}`} />}
               </div>
@@ -89,21 +90,7 @@ function Main() {
           <h5 className={Styles.rating}>
             {!isLoading && (
               <>
-                {[0, 1, 2, 3, 4].map((rating) => {
-                  return rating < (product.rating || 0) &&
-                    (product?.rating || 0) < rating + 1 ? (
-                    <FaStarHalfStroke key={uniqid()} className={Styles.star} />
-                  ) : (
-                    <GiRoundStar
-                      key={uniqid()}
-                      className={`${
-                        rating < (product?.rating || 0)
-                          ? Styles.star
-                          : Styles.star_less
-                      }`}
-                    />
-                  );
-                }, [])}
+                <Stars rating={product?.rating || 0} fontSize={1} />
                 {`(${product?.numReviews || 0} Reviews)`}
               </>
             )}
@@ -113,22 +100,56 @@ function Main() {
           <div className={Styles.price}>
             {!isLoading && (
               <>
-                <div className={`${Styles.price} ${Styles.discount}`}>
-                  <TbCurrencyNaira className={Styles.naira} />
-                  <span>{product.price}</span>
-                </div>
-                {discountPrice && (
+                {product.discount ? (
                   <div className={Styles.price}>
-                    {" "}
-                    <TbCurrencyNaira className={Styles.naira} />
+                    <span>₦</span>
                     <span>{discountPrice}</span>
                   </div>
+                ) : null}
+                <div
+                  className={product.discount ? Styles.discount : Styles.price}
+                >
+                  <span>₦</span>
+                  <span>{helpers.addComma(product.price)}</span>
+                </div>
+                {product.discount ? (
+                  <div className={Styles.discount_info}>
+                    <span>₦</span>
+                    <span>
+                      {helpers.addComma(
+                        (product.discount / 100) * product.price
+                      )}
+                    </span>
+                    <div>Saved</div>
+                    <span
+                      className={Styles.discount}
+                    >{`-${product.discount}%`}</span>
+                  </div>
+                ) : (
+                  0
                 )}
               </>
             )}
           </div>
         </section>
-        <section></section>
+        <section>
+          <div className={Styles.cart_sec}>
+            <div className={Styles.qty_note}>
+              {!isLoading && (
+                <>
+                  <CiWarning />
+                  {product.count} Products Left
+                </>
+              )}
+            </div>
+            <AddToCart
+              id={product.id || ""}
+              maxQty={product.count}
+              isLoading={isLoading}
+              isSmallCard={false}
+            />
+          </div>
+        </section>
       </section>
     </div>
   );

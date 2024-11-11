@@ -32,7 +32,7 @@ const resolvers = {
     // validates arguments
     await validator.signIn(data);
     // check if user already exist
-    await middleware.alreadySignedUp(data.email);
+    await middleware.alreadySignedUp(data.email.trim());
 
     // hash password
     const pwd = await bcrypt.hash(data.pwd, 12);
@@ -54,7 +54,9 @@ const resolvers = {
       ctx.req.session.user = user.id;
       return { message: consts.messages.signedUp };
     } catch (error) {
-      return { message: consts.errors.server };
+      throw new GraphQLError(consts.errors.server, {
+        extensions: { statusCode: 500 },
+      });
     }
   },
   SignIn: async (
@@ -116,8 +118,7 @@ const resolvers = {
   },
   VerifyToken: async (
     _: any,
-    { token }: { token: string },
-    ctx: Context
+    { token }: { token: string }
   ): Promise<Message> => {
     const vToken = await helpers.verifyJWT(token, EMAIL_VERIFICATION_SECRET);
     if (!vToken) {
@@ -128,7 +129,7 @@ const resolvers = {
       });
     }
 
-    const user = await db.user.findUnique({
+    const user = await db.user.findFirst({
       where: { vToken: vToken as string },
     });
     if (!user) {
@@ -199,7 +200,7 @@ const resolvers = {
       });
     }
 
-    const user = await db.user.findUnique({
+    const user = await db.user.findFirst({
       where: { pwdToken: pwdToken as string },
     });
     if (!user) {

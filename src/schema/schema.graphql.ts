@@ -13,6 +13,7 @@ type Query {
   GetProductsMini2(skip:Int!, take:Int!):Pagination
   GetProduct(id: String!): Product
   GetProductMini(category: String!, id: String!): ProductMini
+  QueryReviews(prd_id:String!, skip:Int!, take:Int!):Pagination!
   UserQuery: User
 }
 
@@ -30,6 +31,8 @@ type Mutation {
   VerifyAccount(email: String!): Message
   VerifyPasswordToken(token: String!): Message
   VerifyToken(token: String!): Message
+  UpdateReview(data:Review_I!):Message
+  DeleteReview(prd_id:String!):Message
 }
 
 #General
@@ -303,6 +306,7 @@ type ProductMini {
   images: [String!]!
   name: String!
   price: Int!
+  count: Int!
   numSold:Int!
   numReviews:Int!
   rating: Int!
@@ -353,6 +357,7 @@ type ProductFeature {
   id: String!
   featureId: String!
   value: String!
+  feature:String!
 }
 
 input ProductFeatureInput {
@@ -373,6 +378,13 @@ type CreateProductData {
 type PaymentType {
   val:Int!
   type:String!
+}
+
+input Review_I {
+  prd_id: String!
+  comment: String!
+  title:String!
+  rating: Int!
 }
 
 

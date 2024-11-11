@@ -61,25 +61,32 @@ class Requests {
         });
       }
 
-      const resData = res.data?.data as Object;
-      return Object.values(resData)[0] as T;
+      const resData = Object.values(res.data?.data as Object)[0] as T;
+      if ((resData as any)?.message) {
+        dispatch(
+          appSlice.actions.setBackgroundMsg({
+            msg: (resData as any)?.message,
+            type: MessageType.Success,
+            statusCode: StatusCodes.Ok,
+          })
+        );
+      }
+
+      return resData;
     } catch (error) {
       const err = error as ThrownError;
       let msg: IMessage | null = null;
       const t = (error as any)?.response?.request?.responseText;
-      console.error(t);
       //
       dispatch(appSlice.actions.setStatusCode(err.statusCode));
-
+      console.log(t);
       if (errFromServer) {
         msg = {
           msg: err.message,
           type: MessageType.Error,
           statusCode: err.statusCode,
         } as IMessage;
-      }
-
-      if (
+      } else if (
         err.code === CONSTS.errors.code.network ||
         err.code === CONSTS.errors.code.badResponse
       ) {
@@ -88,9 +95,7 @@ class Requests {
           type: MessageType.Error,
           statusCode: StatusCodes.ServerError,
         } as IMessage;
-      }
-
-      if (!msg) {
+      } else {
         msg = {
           msg: CONSTS.errors.errorOccured,
           type: MessageType.Error,

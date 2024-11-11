@@ -4,6 +4,7 @@ import { db } from "../db/prisma/connect";
 import { CategoryOfferType } from "../@types/categories";
 import { GraphQLError } from "graphql";
 import colours from "../db/colours";
+import { Types } from "mongoose";
 
 class Helpers {
   public verifyJWT = async (token: any, secret: any) => {
@@ -20,6 +21,12 @@ class Helpers {
     );
 
     return decoded;
+  };
+
+  public getValidId = (id: string) => {
+    const ObjectId = Types.ObjectId;
+    const isValidId = ObjectId.isValid(id) && String(new ObjectId(id)) === id;
+    return isValidId ? id : new ObjectId().toString();
   };
 
   public getObjKeys = <T>(enumObj: Object) =>

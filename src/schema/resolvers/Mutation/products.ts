@@ -6,15 +6,15 @@ import {
   Product_I_U,
   Product_I,
   ProductUpdateReturn,
+  Review_I,
 } from "../../../@types/products";
 import { validator } from "../../../helpers/validator";
 import helpers from "../../../helpers";
-import { Types } from "mongoose";
 import { CategoryFeature } from "../../../@types/categories";
 import { upload } from "../../../helpers/uploads";
 import { db } from "../../../db/prisma/connect";
-
-const ObjectId = Types.ObjectId;
+import { update } from "lodash";
+import { Prisma } from "@prisma/client";
 
 const resolvers = {
   CreateProduct: async (
@@ -330,23 +330,22 @@ const resolvers = {
 
       // create new features
       productFeatures = await Promise.all(
-        data.features.map(async ({ id: inputFeatureId, ...inputFeature }) => {
-          const randObjId = new Types.ObjectId().toString();
-          const id = isNewCategory ? randObjId : inputFeatureId || randObjId;
-          const isIdValid =
-            ObjectId.isValid(id) && String(new ObjectId(id)) === id;
-          const featureData = { ...inputFeature, productId: data.id };
+        data.features.map(
+          async ({ id: inputFeatureId, feature, ...inputFeature }) => {
+            const id = helpers.getValidId(inputFeatureId || "");
+            const featureData = { ...inputFeature, productId: data.id };
 
-          if (isNewCategory) {
-            prevFeaturesId = prevFeaturesId.filter((prevId) => prevId !== id);
+            if (isNewCategory) {
+              prevFeaturesId = prevFeaturesId.filter((prevId) => prevId !== id);
+            }
+
+            return await db.productFeature.upsert({
+              where: { id },
+              create: featureData,
+              update: featureData,
+            });
           }
-
-          return await db.productFeature.upsert({
-            where: { id: isIdValid ? id : randObjId },
-            create: featureData,
-            update: featureData,
-          });
-        })
+        )
       );
 
       if (isNewCategory) {
@@ -367,6 +366,86 @@ const resolvers = {
     await db.product.update({ where: { id: data.id }, data: { sku } });
 
     return { id: newPrd.id, sku, features: productFeatures };
+  },
+  UpdateReview: async (_: any, { data }: { data: Review_I }, ctx: Context) => {
+    middleware.checkUser(ctx);
+
+    let prd = await ctx.db.product.findFirst({
+      where: { id: data.prd_id },
+      select: { id: true, reviews: { select: { rating: true, userId: true } } },
+    });
+
+    if (!prd?.id) {
+      throw new GraphQLError(consts.errors.product.prdNotFound, {
+        extensions: { statusCode: 404 },
+      });
+    }
+    try {
+      let review = await ctx.db.reviews.findFirst({
+        where: { userId: ctx.user.id, productId: data.prd_id },
+        select: { id: true },
+      });
+
+      const id = helpers.getValidId(review?.id || "");
+
+      const newReview: Prisma.ReviewsUncheckedCreateInput = {
+        userId: ctx.user.id,
+        productId: data.prd_id,
+        title: data.title,
+        comment: data.comment,
+        rating: data.rating,
+      };
+
+      await ctx.db.reviews.upsert({
+        where: { id },
+        create: newReview,
+        update: newReview,
+      });
+
+      let totalRating = data.rating;
+      const reviews = prd.reviews.filter((r) => r.userId !== ctx.user.id);
+      reviews.forEach((r) => {
+        totalRating += r.rating;
+      });
+
+      await ctx.db.product.update({
+        where: { id: data.prd_id },
+        data: {
+          rating: Number((totalRating / (reviews.length + 1)).toFixed(1)),
+        },
+      });
+      return { message: "Review Updated" };
+    } catch (error) {
+      throw new GraphQLError(consts.errors.server, {
+        extensions: { statusCode: 500 },
+      });
+    }
+  },
+  DeleteReview: async (
+    _: any,
+    { prd_id }: { prd_id: string },
+    ctx: Context
+  ) => {
+    middleware.checkUser(ctx);
+    let review = await ctx.db.reviews.findFirst({
+      where: { userId: ctx.user.id, productId: prd_id },
+      select: { id: true },
+    });
+
+    if (!review) {
+      throw new GraphQLError("Review not found", {
+        extensions: { statusCode: 400 },
+      });
+    }
+
+    try {
+      await ctx.db.reviews.delete({ where: { id: review.id } });
+      return { message: "Review Deleted" };
+    } catch (error) {
+      throw new GraphQLError("Internal Server Error", {
+        extensions: { statusCode: 500 },
+      });
+    }
   },
 };
 export default resolvers;

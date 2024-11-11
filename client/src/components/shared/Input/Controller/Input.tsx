@@ -39,6 +39,7 @@ type InputProps = {
     | "textarea"
     | "checkbox";
   labelClassName?: string;
+  inputClass?: string;
   rows?: number;
   cols?: number;
   isMultipleFiles?: boolean;
@@ -56,8 +57,9 @@ function Input({
   label,
   type = "text",
   labelClassName = "",
+  inputClass = "",
   defaultValue = type === "number" ? "0" : "",
-  rows = 3,
+  rows = 2,
   defaultValues = [],
   options = [],
   span = false,
@@ -253,7 +255,7 @@ function Input({
     const className = type !== "checkbox" ? Styles.input_box : Styles.check_box;
     return !asInfo || type === "checkbox"
       ? className
-      : `${className} ${Styles.box_as_info}`;
+      : `${className} ${inputClass} ${Styles.box_as_info}`;
   };
 
   return (
@@ -265,7 +267,7 @@ function Input({
     >
       <div className={`${labelClassName} ${Styles.label}`}>
         {label}
-        {asInfo && ":"}
+        {asInfo && !!label && ":   "}
       </div>
       {!(asInfo && isMultiInput) && (
         <div className={Styles.input}>

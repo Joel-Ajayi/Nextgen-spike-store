@@ -68,6 +68,7 @@ export default {
       brand: true,
       discount: true,
       rating: true,
+      count: true,
       numSold: true,
       category: true,
       images: true,

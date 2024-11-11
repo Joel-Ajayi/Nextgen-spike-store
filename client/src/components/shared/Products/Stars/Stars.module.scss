@@ -1,0 +1,13 @@
+@import "./../../../../styles/vars.scss";
+
+.rating {
+  display: flex;
+  align-items: center;
+  .star {
+    color: #fba100;
+  }
+
+  .star_less {
+    color: $color-gray3;
+  }
+}

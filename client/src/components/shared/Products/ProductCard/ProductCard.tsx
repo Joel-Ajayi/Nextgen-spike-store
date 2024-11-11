@@ -1,32 +1,26 @@
 import React, { useMemo } from "react";
 import { ProductMini } from "../../../../types/product";
 import Styles from "./Styles.module.scss";
-import { useAppSelector } from "../../../../store/hooks";
 import { TbCurrencyNaira } from "react-icons/tb";
 import { GiRoundStar } from "react-icons/gi";
 import { FaStarHalfStroke } from "react-icons/fa6";
 import { MdFavoriteBorder as FavoriteIcon } from "react-icons/md";
 import uniqid from "uniqid";
 import helpers from "../../../../helpers";
-import { MdOutlineShoppingCart as CartIcon } from "react-icons/md";
 import { Link } from "react-router-dom";
 import { Paths } from "../../../../types";
+import AddToCart from "../AddToCart/AddToCart";
+import Stars from "../Stars/Stars";
 
 type Props = {
   product: null | ProductMini;
 };
 
 function ProductCard({ product }: Props) {
-  const isLoading = useAppSelector(
-    (state) => state.app.isLoading || state.app.isPageLoading
-  );
-
   const discountPrice = useMemo(
     () =>
       product?.price
-        ? helpers.reduceNumberLenth(
-            ((100 - product.discount) / 100) * product.price
-          )
+        ? helpers.addComma(((100 - product.discount) / 100) * product.price)
         : 0,
     []
   );
@@ -47,21 +41,7 @@ function ProductCard({ product }: Props) {
         </div>
         <div className={Styles.name}>{product && product.name}</div>
         <div className={Styles.rating}>
-          {[0, 1, 2, 3, 4].map((rating) => {
-            return rating < (product?.rating || 0) &&
-              (product?.rating || 0) < rating + 1 ? (
-              <FaStarHalfStroke key={uniqid()} className={Styles.star} />
-            ) : (
-              <GiRoundStar
-                key={uniqid()}
-                className={`${
-                  rating < (product?.rating || 0)
-                    ? Styles.star
-                    : Styles.star_less
-                }`}
-              />
-            );
-          }, [])}
+          <Stars rating={product?.rating || 0} />
           {`(${product?.numSold || 0})`}
         </div>
         <div className={Styles.priceanddiscount}>
@@ -73,11 +53,11 @@ function ProductCard({ product }: Props) {
             {product && (
               <>
                 <TbCurrencyNaira className={Styles.naira} />
-                {helpers.reduceNumberLenth(product.price)}
+                {helpers.addComma(product.price)}
               </>
             )}
           </div>
-          {(isLoading || (product && !!product.discount)) && (
+          {product && !!product.discount && (
             <div className={Styles.discount}>
               {product && (
                 <>
@@ -90,10 +70,11 @@ function ProductCard({ product }: Props) {
           )}
         </div>
       </Link>
-      <div className={Styles.add_to_cart}>
-        <CartIcon className={Styles.cart_icon} />
-        Add To Cart
-      </div>
+      <AddToCart
+        id={product?.id || ""}
+        maxQty={product?.count || 0}
+        isLoading={!product}
+      />
     </div>
   );
 }

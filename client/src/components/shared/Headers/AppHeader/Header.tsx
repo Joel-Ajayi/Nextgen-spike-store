@@ -25,7 +25,6 @@ import { UserPaths } from "../../../../types/user";
 import { CatalogQuery, Paths } from "../../../../types";
 import globalReq from "../../../../requests/global";
 import ProductsSearch from "../../Input/ProductsSearch/ProductsSearch";
-import controllerItems from "../ControllerHeader/data";
 
 export const authItems = {
   title: "",
@@ -50,7 +49,7 @@ export const authItems = {
 
 export const homeControllerItems = (roles: Roles[]) =>
   ({
-    title: "Controller",
+    title: roles.length > 1 ? "Controller" : "",
     borderTop: true,
     items: [
       (roles.includes(Roles.SuperAdmin) || roles.includes(Roles.Global)) && {

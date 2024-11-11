@@ -13,9 +13,6 @@ type FeatureProps = {
 };
 
 function Feature({ onChange, id }: FeatureProps) {
-  const features = useAppSelector(
-    (state) => state.controller.products.formData.features
-  );
   const featureTypes = useAppSelector(
     (state) => state.controller.products.formData.featureTypes
   );
@@ -51,8 +48,13 @@ function Feature({ onChange, id }: FeatureProps) {
   const defaultValue =
     getType(productFeature?.value) || getType(initialFeature?.value);
   const onInputChange = async (value: string): Promise<string> => {
-    const id = productFeature?.id || initialFeature?.id;
-    const newFeature = { id, value, featureId: feature.id as string };
+    const id = productFeature?.id || initialFeature?.id || uniqId();
+    const newFeature = {
+      id,
+      value,
+      featureId: feature.id as string,
+      feature: feature.name,
+    };
     const isIndex = index !== -1;
     let newProductFeatures = isIndex
       ? [...productFeatures]
@@ -72,7 +74,7 @@ function Feature({ onChange, id }: FeatureProps) {
       <Input
         name="options"
         label={feature.name}
-        type={type as any}
+        type={type === "text" ? "textarea" : (type as any)}
         labelClassName={Styles.feature_label}
         defaultValue={defaultValue}
         rows={3}
