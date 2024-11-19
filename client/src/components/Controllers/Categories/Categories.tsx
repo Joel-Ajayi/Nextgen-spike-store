@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
-import { PageSections } from "../../../types/controller";
+import { Navigate, useParams, useSearchParams } from "react-router-dom";
+import { ControllerPaths, PageSections } from "../../../types/controller";
 import Page404 from "../../shared/Page404/Page404";
 import CategoryListing from "./CategoryListing/CategoryListing";
 import CreateCategory from "./CreateCategory/CreateCategory";
@@ -21,7 +21,12 @@ function Categories() {
       case PageSections.CatListing:
         return <CategoryListing />;
       default:
-        return <Page404 />;
+        return (
+          <Navigate
+            to={`/controller/${ControllerPaths.Categories}/${PageSections.CatListing}`}
+            replace
+          />
+        );
     }
   }, [sec]);
 

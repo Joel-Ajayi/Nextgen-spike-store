@@ -8,6 +8,8 @@ import {
 } from "../@types/categories";
 import { PaymentType, Product_I } from "../@types/products";
 import helpers from ".";
+import { Address } from "../@types/users";
+import consts from "../@types/conts";
 class Validator {
   private productFeatures = array(
     object({
@@ -52,7 +54,7 @@ class Validator {
       .min(2, "You must have at least 2 of the product in stock")
       .required("Product count in stock is required"),
     paymentType: number()
-      .oneOf(helpers.getObjValues<number>(PaymentType), "Invalid payment type")
+      .oneOf(helpers.getObjIndexes<number>(PaymentType), "Invalid payment type")
       .required("Payment method is required"),
     discount: number(),
     colours: array()
@@ -102,7 +104,7 @@ class Validator {
   }
 
   public async category(val: Category_I | Category_I_U, isUpdate = false) {
-    const offersIndexes = helpers.getObjValues<number>(CategoryOfferType);
+    const offersIndexes = helpers.getObjIndexes<number>(CategoryOfferType);
     const obj = {
       name: string()
         .required("Name Field is empty")
@@ -255,6 +257,42 @@ class Validator {
   public async valProduct(data: Product_I) {
     try {
       await object({ ...this.productInfo }).validate(data);
+    } catch (error) {
+      throw new GraphQLError((error as any).message, {
+        extensions: { statusCode: 400 },
+      });
+    }
+  }
+
+  public async address(data: Address) {
+    try {
+      await object({
+        id: string().required("No Id required"),
+        name: string()
+          .required("Name Field is empty")
+          .min(2, "Name should have more than 1 characters")
+          .matches(/^[a-zA-Z0-9'\s]*$/, "Special characters not allowed")
+          .max(20, "Name should have not more than 20 characters"),
+        state: string()
+          .oneOf(
+            consts.users.states.map((s) => s.name),
+            "Invalid State"
+          )
+          .required("State is required"),
+        city: string().required("City is required"),
+        locality: string().required("Locality is required"),
+        address: string()
+          .max(100, "Address should not be more than 100 chars")
+          .required("Address is required"),
+        addressType: number().oneOf(
+          helpers.getObjIndexes<number>(PaymentType),
+          "Invalid Address Type"
+        ),
+        tel: string().test({
+          message: "Invalid Phone Number",
+          test: (val) => /^\d{4}\s\d{3}\s\d{4}$/.test(val as string),
+        }),
+      }).validate(data);
     } catch (error) {
       throw new GraphQLError((error as any).message, {
         extensions: { statusCode: 400 },

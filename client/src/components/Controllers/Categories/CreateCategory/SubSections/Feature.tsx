@@ -103,7 +103,6 @@ const Feature = ({ featureId, onChange }: FeatureProps) => {
         label="Use As Filter"
         type="checkbox"
         defaultChecked={input.useAsFilter}
-        span
         asInfo={!isEditing}
         onChange={onInputChange}
       />

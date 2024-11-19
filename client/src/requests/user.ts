@@ -1,11 +1,20 @@
 import axios from "axios";
 import request from ".";
-import { IUserInitailState, SignInFieds, SignInForm } from "../types/user";
+import {
+  Address,
+  IUserInitailState,
+  SignInFieds,
+  SignInForm,
+} from "../types/user";
 
 class UserReq {
   public async getUser() {
     const body = JSON.stringify({
-      query: `query { UserQuery { contactNumber avatar email roles fName lName id }}`,
+      query: `query { UserQuery 
+      { contactNumber avatar email roles fName lName id addressTypes
+        addresses { tel address id name state city locality addressType}
+        states { name cities { name localities } }
+      }}`,
     });
     const res = await request.makeRequest<IUserInitailState>(body);
     return res;
@@ -45,6 +54,17 @@ class UserReq {
     const query = `mutation { SignOut { message }}`;
     const body = JSON.stringify({ query });
     await request.makeRequest(body);
+  }
+
+  public async updateAddress(address_i: Address) {
+    const { isNew, ...address } = address_i;
+    let query = `mutation UpdateAddress($data:Address_I!) {
+      UpdateAddress(data:$data) 
+    }`;
+
+    const body = JSON.stringify({ query, variables: { data: address } });
+    const res = await request.makeRequest<string>(body);
+    return res;
   }
 }
 

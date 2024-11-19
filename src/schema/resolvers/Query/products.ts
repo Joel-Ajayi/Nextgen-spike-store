@@ -189,10 +189,75 @@ const resolvers = {
         paymentTypes: payments.map((type, val) => ({ val, type })),
       };
     } catch (error) {
-      console.log((error as any).message);
       throw new GraphQLError(consts.errors.server, {
         extensions: { statusCode: 500 },
       });
+    }
+  },
+  GetCartItems: async (
+    _: any,
+    { ids, qtys }: { ids: string[]; qtys: number[] }
+  ) => {
+    if (ids.length !== qtys.length) {
+      throw new GraphQLError("Invalid Cart Items", {
+        extensions: { statusCode: 400 },
+      });
+    }
+    try {
+      const data: { [key in string]: number } = {};
+      ids.forEach((id, i) => {
+        data[id] = qtys[i];
+      });
+
+      const products = await db.product.findMany({
+        where: { id: { in: ids } },
+        select: {
+          id: true,
+          name: true,
+          rating: true,
+          price: true,
+          count: true,
+          discount: true,
+          images: true,
+          paymentType: true,
+        },
+      });
+
+      let shippingAmount = consts.product.shippingAmount;
+      let subTotalAmount = 0;
+
+      const paymentMethods = helpers.getObjKeys<string>(PaymentType);
+
+      const items = products.map(({ images, paymentType, ...prd }) => {
+        const discountPrice = Number(
+          (((100 - prd.discount) / 100) * prd.price).toFixed(0)
+        );
+        // if (paymentType === PaymentType.CARD_OR_BANK) {
+        //   paymentMethods.splice(PaymentType.CASH_ON_DELIVERY, 1);
+        // }
+        subTotalAmount += discountPrice * data[prd.id];
+        return {
+          ...prd,
+          qty: data[prd.id],
+          discountPrice,
+          image: images[0],
+        };
+      });
+
+      return {
+        items,
+        shippingAmount,
+        subTotalAmount,
+        paymentMethods,
+        totalAmount: subTotalAmount + shippingAmount,
+      };
+    } catch (error) {
+      throw new GraphQLError(
+        "Internal Server Error or Incorrect Cart Item Id",
+        {
+          extensions: { statusCode: 500 },
+        }
+      );
     }
   },
   GetProductsMini2: async (_: any, query: { skip: number; take: number }) => {
@@ -420,7 +485,6 @@ const resolvers = {
         filters,
       };
     } catch (error) {
-      console.log(error);
       throw new GraphQLError(consts.errors.server, {
         extensions: { statusCode: 500 },
       });

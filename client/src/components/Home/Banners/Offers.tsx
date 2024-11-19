@@ -24,7 +24,7 @@ function Offers() {
   };
 
   return !!offers.length ? (
-    <div className={Styles.offers_wrapper}>
+    <div className={Styles.offers_wrapper} id="special">
       <div className={Styles.header}>Special Offers</div>
       <Slider {...sliderSettings} className={Styles.offers}>
         {offers.map((banner, i) => (

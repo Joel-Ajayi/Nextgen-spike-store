@@ -9,6 +9,7 @@ $mobile_width: 700px;
   display: flex;
   flex-direction: column;
   background-color: $color-gray;
+  z-index: 0;
 
   & > .header {
     display: flex;

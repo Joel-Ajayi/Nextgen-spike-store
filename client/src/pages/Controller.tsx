@@ -6,10 +6,10 @@ import Orders from "../components/Controllers/Orders/Orders";
 import Products from "../components/Controllers/Products/Products";
 import BackgroundMsg from "../components/shared/BackgroundMsg/BackgroundMsg";
 import { ControllerPaths } from "../types/controller";
-import Dashboard from "../components/Controllers/Dashboard/Dashboard";
 import { useAppSelector } from "../store/hooks";
 import { Roles } from "../types/user";
 import ControllerHeader from "../components/shared/Headers/ControllerHeader/ControllerHeader";
+import Users from "../components/Controllers/Users/Users";
 
 function ControllerPage() {
   let { pg: page } = useParams();
@@ -32,16 +32,19 @@ function ControllerPage() {
       case ControllerPaths.Orders:
         if (!isAuthorized(Roles.Order)) break;
         return <Orders />;
-      case ControllerPaths.DashBoard:
-        return <Dashboard />;
+      case ControllerPaths.Users:
+        if (!isAuthorized(Roles.User)) break;
+        return <Users />;
       default:
         return !page ? (
-          <Navigate to={`/controller/${ControllerPaths.DashBoard}`} replace />
+          <Navigate to={`/controller/${ControllerPaths.Categories}`} replace />
         ) : (
           <Navigate to="*" replace />
         );
     }
-    return <Navigate to={`/controller/${ControllerPaths.DashBoard}`} replace />;
+    return (
+      <Navigate to={`/controller/${ControllerPaths.Categories}`} replace />
+    );
   }, [page]);
 
   return (

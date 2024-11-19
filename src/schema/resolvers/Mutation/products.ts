@@ -2,19 +2,23 @@ import { GraphQLError } from "graphql";
 import { Context } from "../../context";
 import consts from "../../../@types/conts";
 import middleware from "../../../middlewares/middlewares";
+import productsQuery from "../Query/products";
 import {
   Product_I_U,
   Product_I,
   ProductUpdateReturn,
   Review_I,
+  Order_I,
+  PaymentType,
 } from "../../../@types/products";
 import { validator } from "../../../helpers/validator";
 import helpers from "../../../helpers";
 import { CategoryFeature } from "../../../@types/categories";
 import { upload } from "../../../helpers/uploads";
 import { db } from "../../../db/prisma/connect";
-import { update } from "lodash";
 import { Prisma } from "@prisma/client";
+import { customAlphabet } from "nanoid";
+const nanoid = customAlphabet("1234567890abcdef", 10);
 
 const resolvers = {
   CreateProduct: async (

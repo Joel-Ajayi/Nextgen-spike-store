@@ -19,11 +19,6 @@ const getParam = (param: string) => {
 
 const data: DropdownProps[] = [
   {
-    title: "Dashboard",
-    id: ControllerPaths.DashBoard,
-    link: () => `/controller/${ControllerPaths.DashBoard}`,
-  },
-  {
     title: "Users",
     id: ControllerPaths.Users,
     link: () => `/controller/${ControllerPaths.Users}`,

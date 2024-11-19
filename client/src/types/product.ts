@@ -139,8 +139,48 @@ export type QueryCatalogParams = {
   filters: { id: string; options: string[] }[];
 };
 
+// export interface Order extends Cart {
+//   id: string;
+//   shippingAddress: string;
+//   paymentStatus: string;
+//   paymentMethod: string;
+//   status: string;
+//   createdAt: string;
+// }
+
+export type Cart = {
+  items: (CartItem | null)[];
+  shippingAmount: number;
+  subTotalAmount: number;
+  totalAmount: number;
+  paymentMethod: number;
+  paymentMethods: string[];
+  isCheckout: boolean;
+  shippingAddress: string;
+};
+
+export type CartPageData = {
+  items: CartItem[];
+  shippingAmount: number;
+  subTotalAmount: number;
+  totalAmount: number;
+  paymentMethods: string[];
+};
+
 export type CartMiniItem = {
   id: string;
+  qty: number;
+};
+
+export type CartItem = {
+  id: string;
+  name: string;
+  price: number;
+  discountPrice: number;
+  discount: number;
+  count: number;
+  rating: number;
+  image: string;
   qty: number;
 };
 

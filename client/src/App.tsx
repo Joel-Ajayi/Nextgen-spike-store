@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import {
   createBrowserRouter,
   createRoutesFromElements,
@@ -18,14 +18,15 @@ import ControllerPage from "./pages/Controller";
 import LogoLoader from "./components/shared/Loader/LogoLoader/LogoLoader";
 import ProfilePage from "./pages/Profile";
 import Page404 from "./components/shared/Page404/Page404";
-import { ControllerRoles, IUserInitailState, Roles } from "./types/user";
+import { ControllerRoles, IUserInitailState } from "./types/user";
 import userReq from "./requests/user";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import Catalog from "./pages/Catalog";
 import Product from "./pages/Product";
-import Checkout from "./pages/Checkout";
+import Cart from "./pages/Cart";
+import cartSlice from "./store/cart";
 
 function ProtectedRoute() {
   const { pathname } = useLocation();
@@ -56,23 +57,29 @@ function GetUser() {
 
   const { resetUserState, setUserState } = userSlice.actions;
   const { setAppLoading, setNetworkError } = appSlice.actions;
+  const isRendered = useRef(false);
 
   useEffect(() => {
-    (async () => {
-      const user = await userReq.getUser();
-      if (user) {
-        dispatch(
-          setUserState({
-            ...(user as IUserInitailState),
-            isAuthenticated: true,
-          })
-        );
-        dispatch(setNetworkError(false));
-      } else {
-        dispatch(resetUserState());
-      }
-      dispatch(setAppLoading(false));
-    })();
+    if (!isRendered.current) {
+      isRendered.current = true;
+      (async () => {
+        dispatch(cartSlice.actions.setIsLoadingCart());
+
+        const user = await userReq.getUser();
+        if (user) {
+          dispatch(
+            setUserState({
+              ...(user as IUserInitailState),
+              isAuthenticated: true,
+            })
+          );
+          dispatch(setNetworkError(false));
+        } else {
+          dispatch(resetUserState());
+        }
+        dispatch(setAppLoading(false));
+      })();
+    }
 
     return () => {
       dispatch(setAppLoading(true));
@@ -99,10 +106,9 @@ function Routes() {
           <Route path={Paths.SignIn} element={<SignInPage />} />
           <Route path={`${Paths.Catalog}/`} element={<Catalog />} />
           <Route path={`${Paths.Product}/:prd_id`} element={<Product />} />
-          <Route path={Paths.Cart} element={<Product />} />
+          <Route path={Paths.Cart} element={<Cart />} />
           <Route element={<ProtectedRoute />}>
             <Route path={`${Paths.Profile}/:pg`} element={<ProfilePage />} />
-            <Route path={Paths.Checkout} element={<Checkout />} />
           </Route>
           <Route element={<AdminProtectedRoute />}>
             <Route

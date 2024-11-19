@@ -38,6 +38,41 @@ class UserValidator {
       return { error: (error as any).message };
     }
   }
+
+  public async address(name: string, value: any) {
+    try {
+      switch (name) {
+        case "name":
+          await string()
+            .required("Name Field is empty")
+            .min(2, "Name should have more than 1 characters")
+            .matches(/^[a-zA-Z0-9'\s]*$/, "Special characters not allowed")
+            .max(20, "Name should have not more than 20 characters")
+            .validate(value);
+          break;
+        case "address":
+          await string()
+            .max(100, "Address should not be more than 100 chars")
+            .required("Address is required")
+            .validate(value);
+          break;
+        case "tel":
+          await string()
+            .test({
+              message: "Invalid Phone Number",
+              test: (val) => /^\d{4}\s\d{3}\s\d{4}$/.test(val as string),
+            })
+            .required("Input Phone Number")
+            .validate(value);
+          break;
+        default:
+          break;
+      }
+      return "";
+    } catch (error) {
+      return (error as any).message;
+    }
+  }
 }
 
 const userValidator = new UserValidator();

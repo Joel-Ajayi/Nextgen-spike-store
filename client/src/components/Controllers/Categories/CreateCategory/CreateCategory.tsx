@@ -326,7 +326,6 @@ function CreateCategory({
                       defaultChecked={input.hasWarrantyAndProduction}
                       onChange={onInputChange}
                       changeOnMount={!isLoading}
-                      span
                       asInfo={parentHasWarrantyAndProduction}
                     />
                     {icon}

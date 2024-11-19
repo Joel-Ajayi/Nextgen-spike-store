@@ -1,0 +1,56 @@
+@import "./../../styles//vars.scss";
+@import "./../../styles/mixins.scss";
+
+.wrapper {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  z-index: 0;
+
+  .sec_header {
+    background-color: $color-gray;
+    border-bottom: 1px solid $color-gray2;
+
+    .header_content {
+      @include desktop-wrapper;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px 20px;
+      width: 100%;
+      padding-top: 0.5rem;
+      padding-bottom: 0.5rem;
+      align-items: center;
+    }
+
+    .title {
+      display: flex;
+      font-size: large;
+      font-weight: 600;
+      color: $color-gray13;
+
+      @media screen and (min-width: 500px) {
+        font-size: x-large;
+      }
+    }
+  }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    position: relative;
+    padding-top: 1.6rem;
+    padding-bottom: 1.6rem;
+    flex: 1;
+    background-color: white;
+    @include scrollbar();
+
+    .inner_content {
+      flex: 1;
+      @include desktop-wrapper;
+    }
+  }
+}

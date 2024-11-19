@@ -10,25 +10,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum PAYMENTSTATUS {
-  PENDING
-  CANCELLED
-  REFUND
-  COMPLETED
-}
-
-enum ORDERSTATUS {
-  ORDERED
-  PACKED
-  SHIPPED
-  DELIVERED
-}
-
-enum ADDRESSTYPE {
-  HOME
-  WORK
-}
-
 model User {
   id            String    @id @default(auto()) @map("_id") @db.ObjectId
   email         String    @unique
@@ -37,7 +18,7 @@ model User {
   avatar        String?
   contactNumber Int?
   reviews       Reviews[]
-  address       Address?
+  address       Address[]
   orders        Order[]
   couponId      String[]
   verified      Boolean   @default(false)
@@ -129,8 +110,7 @@ model Product {
   warrCovered  String?
   features     ProductFeature[]
   reviews      Reviews[]
-  OrderItemIds String[]         @db.ObjectId
-  OrderItems   OrderItem[]      @relation(fields: [OrderItemIds], references: [id])
+  OrderItems   OrderItem[]
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 }
@@ -165,48 +145,40 @@ model Reviews {
 }
 
 model Address {
-  id             String      @id @default(auto()) @map("_id") @db.ObjectId
-  userId         String?     @unique @db.ObjectId
-  user           User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  address        String
-  address2       String?
-  pinCode        String?
-  city           String
-  state          String
-  addressType    ADDRESSTYPE
-  contactNumber  String
-  contactNumber2 String?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String @db.ObjectId
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name        String
+  state       String
+  city        String
+  locality    String
+  address     String
+  addressType Int //0-HOME 1-WORK
+  tel         Int
 }
 
 model Order {
-  id            String        @id @default(auto()) @map("_id") @db.ObjectId
-  userId        String        @db.ObjectId
-  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  addressId     String        @db.ObjectId
-  paymentStatus PAYMENTSTATUS
-  paymentMethod Int //0- card, 1-cod - 2-all
-  orderStatus   OrderStatus[]
-  totalAmount   Float
-  items         OrderItem[]
+  id              String      @id @default(auto()) @map("_id") @db.ObjectId
+  userId          String      @db.ObjectId
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shippingAddress String      @db.ObjectId
+  paymentStatus   Int         @default(0) // 0-PENDING 1-CANCELLED 2-REFUNDED 3-COMPLETED
+  paymentMethod   Int //0- card, 1-cod - 2-all
+  status          Int         @default(0) //0-ORDERED 1-PACKED 2-SHIPPED 3-DELIVERED
+  shippingAmount  Int
+  subTotalAmount  Int
+  pId             String
+  totalAmount     Int
+  items           OrderItem[]
+  createdAt       DateTime    @default(now())
 }
 
 model OrderItem {
-  id         String    @id @default(auto()) @map("_id") @db.ObjectId
-  qty        Int
-  amount     Float
-  orderId    String    @db.ObjectId
-  order      Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  products   Product[] @relation(fields: [productIds], references: [id])
-  productIds String[]  @unique @db.ObjectId
-}
-
-model OrderStatus {
-  id          String      @id @default(auto()) @map("_id") @db.ObjectId
-  isCompleted Boolean     @default(false)
-  date        DateTime    @default(now())
-  status      ORDERSTATUS
-  order       Order?      @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  orderId     String?     @db.ObjectId
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  qty       Int
+  price     Int
+  orderId   String  @db.ObjectId
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String  @db.ObjectId
+  product   Product @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }

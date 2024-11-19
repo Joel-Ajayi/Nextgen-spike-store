@@ -10,6 +10,8 @@
   border-radius: 4px;
   box-shadow: 0 0 10px $color-gray;
   -webkit-box-shadow: 0 0 10px $color-gray;
+  padding-bottom: 0.8rem;
+  position: relative;
 
   .product_link {
     display: flex;
@@ -34,35 +36,6 @@
       &:empty {
         min-height: 260px;
         background-color: #f3f3f3;
-      }
-
-      .favorite_icon {
-        cursor: pointer;
-        position: absolute;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        top: 0.5rem;
-        left: 0.4rem;
-        height: 1.4rem;
-        width: 1.4rem;
-        border-radius: 50%;
-        background-color: white;
-        box-shadow: 1px 1px 3px $color-gray4;
-        padding: 0.1rem;
-
-        @media only screen and (min-width: 450px) {
-          height: 1.6rem;
-          width: 1.6rem;
-          padding: 0.2rem;
-        }
-
-        svg {
-          height: 100%;
-          width: 100%;
-          margin-top: 1px;
-          color: $color-gray4;
-        }
       }
 
       img {
@@ -155,6 +128,36 @@
           }
         }
       }
+    }
+  }
+
+  .favorite_icon {
+    cursor: pointer;
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    top: 0.8rem;
+    left: 0.8rem;
+    height: 1.4rem;
+    width: 1.4rem;
+    border-radius: 50%;
+    background-color: white;
+    box-shadow: 1px 1px 3px $color-gray4;
+    padding: 0.1rem;
+    z-index: 1;
+
+    @media only screen and (min-width: 450px) {
+      height: 1.6rem;
+      width: 1.6rem;
+      padding: 0.2rem;
+    }
+
+    svg {
+      height: 100%;
+      width: 100%;
+      margin-top: 1px;
+      color: $color-gray4;
     }
   }
 }

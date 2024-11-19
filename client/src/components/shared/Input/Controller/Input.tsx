@@ -27,7 +27,6 @@ type InputProps = {
     name: string
   ) => Promise<string | void>;
   label?: string;
-  span?: boolean;
   bgColor?: string;
   type?:
     | "colour"
@@ -37,9 +36,12 @@ type InputProps = {
     | "select"
     | "svg"
     | "textarea"
-    | "checkbox";
+    | "tel"
+    | "checkbox"
+    | "radio";
   labelClassName?: string;
   inputClass?: string;
+  placeholder?: string;
   rows?: number;
   cols?: number;
   isMultipleFiles?: boolean;
@@ -58,11 +60,11 @@ function Input({
   type = "text",
   labelClassName = "",
   inputClass = "",
+  placeholder = "",
   defaultValue = type === "number" ? "0" : "",
   rows = 2,
   defaultValues = [],
   options = [],
-  span = false,
   isMultiInput = false,
   isMultipleFiles = false,
   defaultChecked = false,
@@ -72,8 +74,9 @@ function Input({
   const isSelect = type === "select";
   const isImage = type === "image" || type === "svg";
   const isSvg = type === "svg";
-  const isCheckbox = type === "checkbox";
+  const isCheckbox = type === "checkbox" || type === "radio";
   const isTextArea = type === "textarea";
+  const isTel = type === "tel";
   const isColour = type === "colour";
 
   const [error, setError] = useState("");
@@ -133,11 +136,23 @@ function Input({
     const isNumber = type === "number";
     if (onChange) {
       let error: string | void = "";
-      if (!isMultiInput)
+      if (!isMultiInput) {
+        if (typeof value === "string" && isTel) {
+          // Remove all non-digit characters
+          // Format the number to "0123 456 7890"
+          value = value
+            .replace(/\D/g, "")
+            .replace(/^(\d{4})(\d{0,3})(\d{0,4})/, "$1 $2 $3")
+            .trim();
+
+          // Update the input field
+          if (inputRef.current) inputRef.current.value = value;
+        }
         error = await onChange(
           isNumber ? Number(value) : value,
           name as string
         );
+      }
       setError(error || "");
     }
   };
@@ -252,8 +267,10 @@ function Input({
   };
 
   const inputClassName = () => {
-    const className = type !== "checkbox" ? Styles.input_box : Styles.check_box;
-    return !asInfo || type === "checkbox"
+    const className = !isCheckbox
+      ? `${Styles.input_box} `
+      : `${Styles.check_box} ${type === "radio" ? Styles.radio : ""}`;
+    return !asInfo || isCheckbox
       ? className
       : `${className} ${inputClass} ${Styles.box_as_info}`;
   };
@@ -261,28 +278,30 @@ function Input({
   return (
     <div
       className={Styles.input_wrapper}
-      style={
-        span || asInfo ? { alignItems: "center" } : { flexDirection: "column" }
-      }
+      style={asInfo ? { alignItems: "center" } : { flexDirection: "column" }}
     >
-      <div className={`${labelClassName} ${Styles.label}`}>
-        {label}
-        {asInfo && !!label && ":   "}
-      </div>
+      {!isCheckbox && (
+        <div className={`${labelClassName} ${Styles.label}`}>
+          {label}
+          {asInfo && !!label && ":   "}
+        </div>
+      )}
       {!(asInfo && isMultiInput) && (
         <div className={Styles.input}>
-          <div style={isCheckbox ? { display: "flex" } : {}}>
+          <div
+            style={isCheckbox ? { display: "flex", alignItems: "center" } : {}}
+          >
             {/* // text/boolean/color input */}
-            {!isTextArea && !isImage && (
+            {!isTextArea && !isImage && !isCheckbox && (
               <input
                 ref={inputRef}
                 name={name}
                 type={type}
+                placeholder={placeholder}
                 className={inputClassName()}
                 defaultValue={
                   defaultValue === "" && isSelect ? "None" : defaultValue
                 }
-                checked={defaultChecked}
                 onChange={handleTextBoxChange}
                 onFocus={handleFocus}
                 style={{
@@ -290,8 +309,29 @@ function Input({
                   minHeight: asInfo ? "min-content" : 33,
                   margin: asInfo && isCheckbox ? "3px 0" : 0,
                 }}
+                pattern={isTel ? "[0-9]{4} [0-9]{3} [0-9]{4}" : undefined}
                 disabled={asInfo}
+                maxLength={isTel ? 13 : undefined}
               />
+            )}
+
+            {isCheckbox && (
+              <>
+                <input
+                  ref={inputRef}
+                  name={name}
+                  type={type}
+                  className={inputClassName()}
+                  checked={defaultChecked}
+                  onChange={handleTextBoxChange}
+                  onFocus={handleFocus}
+                  disabled={asInfo}
+                  maxLength={isTel ? 13 : undefined}
+                />
+                <div className={`${labelClassName} ${Styles.label}`}>
+                  {label}
+                </div>
+              </>
             )}
 
             {/* // textarea input */}

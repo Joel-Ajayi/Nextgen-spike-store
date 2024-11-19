@@ -1,24 +1,32 @@
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, { useLayoutEffect, useState } from "react";
 import Styles from "./Styles.module.scss";
 import { MdAddShoppingCart as CartIcon } from "react-icons/md";
 import helpers from "../../../../helpers";
 import { CartMiniItem } from "../../../../types/product";
 import { IoMdAdd } from "react-icons/io";
 import { RiSubtractFill } from "react-icons/ri";
+import { useDispatch } from "react-redux";
+import cartSlice from "../../../../store/cart";
+import productReq from "../../../../requests/product";
 
 type Props = {
   id: string;
   isLoading?: boolean;
   maxQty: number;
+  minQty?: number;
   isSmallCard?: boolean;
+  btnSize?: number;
 };
 
 function AddToCart({
   id,
   maxQty,
+  minQty = 0,
   isSmallCard = true,
   isLoading = false,
+  btnSize = 35,
 }: Props) {
+  const dispatch = useDispatch();
   const [cartItem, setCartItem] = useState<CartMiniItem>(
     helpers.getCartItem(id)
   );
@@ -28,8 +36,12 @@ function AddToCart({
     if (item.id) setCartItem(item);
   }, [id]);
 
-  const addToCart = (type: -1 | 1) => {
+  const addToCart = async (type: -1 | 1) => {
     const newItem = helpers.addToCart(id, type);
+    const cartItems = await productReq.getCart();
+    if (cartItems) {
+      dispatch(cartSlice.actions.setCart(cartItems));
+    }
     setCartItem(newItem);
   };
 
@@ -42,7 +54,13 @@ function AddToCart({
             justifyContent: isSmallCard ? "space-between" : "flex-start",
           }}
         >
-          <div className={Styles.btn} onClick={() => addToCart(-1)}>
+          <div
+            className={`${Styles.btn} ${
+              cartItem.qty === minQty ? Styles.disabled : ""
+            }`}
+            style={{ height: `${btnSize}px`, width: `${btnSize}px` }}
+            onClick={() => !(cartItem.qty === minQty) && addToCart(-1)}
+          >
             <RiSubtractFill />
           </div>
           <div className={Styles.qty}>{cartItem.qty}</div>
@@ -50,7 +68,8 @@ function AddToCart({
             className={`${Styles.btn} ${
               cartItem.qty >= maxQty ? Styles.disabled : ""
             }`}
-            onClick={() => addToCart(1)}
+            style={{ height: `${btnSize}px`, width: `${btnSize}px` }}
+            onClick={() => !(cartItem.qty >= maxQty) && addToCart(1)}
           >
             <IoMdAdd />
           </div>

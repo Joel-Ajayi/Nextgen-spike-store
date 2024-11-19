@@ -7,7 +7,9 @@
   gap: 5px;
 
   .label {
-    font-size: 14px;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
     color: $color-gray12;
 
     span {
@@ -86,7 +88,13 @@
       }
 
       .check_box {
-        height: 30px;
+        height: 1.1rem;
+        width: 1.1rem;
+        margin-right: 0.5rem;
+        // &.radio {
+        //   height: 1rem;
+        //   width: 1rem;
+        // }
       }
 
       .color_wrapper {

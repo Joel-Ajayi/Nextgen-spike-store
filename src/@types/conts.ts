@@ -26,8 +26,25 @@ const consts = {
       catNotFound: "Category not found",
     },
   },
-  sku: {
-    price: 50,
+  users: {
+    maxAddresses: 3,
+    states: [
+      {
+        name: "Ondo",
+        cities: [
+          {
+            name: "Akure",
+            localities: ["Alagbaka", "Oba-ILe", "Ijapo Estate", "Isikan"],
+          },
+        ],
+      },
+    ],
+  },
+  product: {
+    shippingAmount: 1000,
+    sku: {
+      price: 50,
+    },
   },
   files: {
     mimeType: {

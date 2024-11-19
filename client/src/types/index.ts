@@ -119,6 +119,10 @@ export type HeaderData = {
   searchResultTypes: number[];
 };
 
+export enum ID {
+  new = "new",
+}
+
 export enum SearchResultType {
   Brand,
   Category,
@@ -130,8 +134,9 @@ export enum Paths {
   Catalog = "/catalog",
   Product = "product",
   Profile = "/profile",
-  Cart = "cart",
-  Checkout = "checkout",
+  WishList = "/WishList",
+  Cart = "/cart",
+  Checkout = "/checkout",
   SignIn = "/signIn",
   Controller = "/controller",
 }

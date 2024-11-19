@@ -7,6 +7,11 @@ export enum Roles {
   Global = 5,
 }
 
+enum AddressType {
+  HOME,
+  WORK,
+}
+
 export type User = {
   avatar: String;
   contactNumber: number | null;
@@ -16,6 +21,23 @@ export type User = {
   lName: String;
   roles: number[];
 };
+
+export type Address = {
+  id: string;
+  name: string;
+  state: string;
+  city: string;
+  locality: string;
+  address: string;
+  addressType: number;
+  tel: String;
+  isNew: boolean;
+};
+
+export enum AddressTypes {
+  Home_9am_8pm,
+  Work_9am_4pm,
+}
 
 export type SignIn_I = {
   email: string;

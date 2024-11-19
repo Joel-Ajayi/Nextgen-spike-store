@@ -172,7 +172,7 @@ export default {
       })
     ).map((c) => ({ ...c, parent: c.parent?.name || "" }));
 
-    const searchResultTypes = helpers.getObjValues<number>(SearchResultType);
+    const searchResultTypes = helpers.getObjIndexes<number>(SearchResultType);
 
     return { topCategories, categories, searchResultTypes };
   },

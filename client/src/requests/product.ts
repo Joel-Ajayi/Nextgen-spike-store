@@ -1,4 +1,5 @@
 import request from ".";
+import helpers from "../helpers";
 import { APIPagination, IFile } from "../types";
 import {
   Product,
@@ -9,6 +10,7 @@ import {
   QueryCatalogParams,
   CatalogStateAPI,
   ProductReview,
+  CartPageData,
 } from "../types/product";
 
 class ProductReq {
@@ -133,6 +135,22 @@ class ProductReq {
 
     const body = JSON.stringify({ query, variables: { data: filters } });
     const res = await request.makeRequest<CatalogStateAPI>(body);
+    return res;
+  }
+
+  public async getCart() {
+    const items = helpers.getCart();
+    let query = `query GetCartItems($ids:[String!]!, $qtys:[Int!]!) {
+      GetCartItems(ids:$ids, qtys:$qtys) { 
+       shippingAmount subTotalAmount totalAmount paymentMethods
+       items { id name price discountPrice rating count discount image qty }
+      }
+    }`;
+    const body = JSON.stringify({
+      query,
+      variables: { ids: items.map((i) => i.id), qtys: items.map((i) => i.qty) },
+    });
+    const res = await request.makeRequest<CartPageData>(body);
     return res;
   }
 }

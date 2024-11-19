@@ -32,7 +32,20 @@ class Helpers {
   public getObjKeys = <T>(enumObj: Object) =>
     Object.values(enumObj).filter((_, i, arr) => i < arr.length / 2) as T[];
 
-  public getObjValues = <T>(enumObj: Object) =>
+  public valIndexInObj = (
+    enumObj: Object,
+    index: number,
+    errorSuffix: string
+  ) => {
+    const includesIndex = this.getObjIndexes<number>(enumObj).includes(index);
+    if (!includesIndex) {
+      throw new GraphQLError(`Invalid  ${errorSuffix}`, {
+        extensions: { statusCode: 500 },
+      });
+    }
+  };
+
+  public getObjIndexes = <T>(enumObj: Object) =>
     Object.values(enumObj).filter((_, i, arr) => i >= arr.length / 2) as T[];
 
   public getSKU = (
@@ -44,7 +57,7 @@ class Helpers {
   ) => {
     const nameId = name.substring(0, 3);
     const cat = `C${catId}`;
-    const priceId = `PR${Math.round(price / consts.sku.price)}`;
+    const priceId = `PR${Math.round(price / consts.product.sku.price)}`;
     const brandId = brand.substring(0, 3);
     const colourId = `${colors.map((c) => c.charAt(0)).join("")}`;
     return `${nameId}-${cat}-${brandId}-${priceId}-${colourId}`;
@@ -56,7 +69,7 @@ class Helpers {
   ) => {
     const categories: string[] = [];
 
-    const offerTypes = helpers.getObjValues<string>(CategoryOfferType);
+    const offerTypes = helpers.getObjIndexes<string>(CategoryOfferType);
     const isOfferNotFound = !offers.every((o) => offerTypes.includes(o));
     if (isOfferNotFound) {
       throw new GraphQLError("Offer Not Found", {

@@ -1,6 +1,7 @@
 export enum UserPaths {
   Account = "account",
   Orders = "Orders",
+  Addresses = "Addresses",
   Notifications = "mail",
 }
 
@@ -32,6 +33,28 @@ export const ControllerRoles = [
   Roles.SuperAdmin,
 ];
 
+export type Address = {
+  id: string;
+  name: string;
+  state: string;
+  city: string;
+  locality: string;
+  address: string;
+  addressType: number;
+  tel: string;
+  isNew: boolean;
+};
+
+export type State = {
+  name: string;
+  cities: [
+    {
+      name: string;
+      localities: string[];
+    }
+  ];
+};
+
 export interface IUserInitailState {
   isAuthenticated?: boolean;
   email: string;
@@ -40,4 +63,7 @@ export interface IUserInitailState {
   lName: string;
   avatar: string | null;
   contactNumber?: string | null;
+  addresses: Address[];
+  states: State[];
+  addressTypes: string[];
 }

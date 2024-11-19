@@ -1,0 +1,190 @@
+@import "../../styles/mixins.scss";
+@import "../../styles/vars.scss";
+
+.cart_page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+
+  .page_content {
+    flex: 1;
+    display: flex;
+    @include scrollbar();
+    overflow-y: auto;
+    overflow-x: hidden;
+    margin-bottom: 1rem;
+
+    .main {
+      flex: 1;
+      display: flex;
+      @include desktop-wrapper;
+      padding-top: 1.2rem;
+      padding-bottom: 1.2rem;
+      gap: 1.2rem;
+      flex-direction: column;
+
+      @media screen and (min-width: 1000px) {
+        flex-direction: row;
+        gap: 0.5rem;
+      }
+
+      .sections > div,
+      .summary > div {
+        display: flex;
+        flex-direction: column;
+        row-gap: 1.1rem;
+        padding: 1rem;
+        background-color: white;
+        border-radius: 0.2rem;
+        .header {
+          padding-bottom: 0.6rem;
+          color: $color-gray9;
+          border-bottom: 1px solid $color-gray3;
+        }
+        .header_main {
+          color: $color-gray11;
+          font-size: 1.4rem;
+          border-bottom: 1px solid $color-gray3;
+          padding: 0.5rem 0 1rem;
+          font-weight: bold;
+
+          @media screen and (min-width: 1000px) {
+            padding: 1rem 1rem 2rem;
+          }
+        }
+        .info {
+          display: flex;
+          color: $color-gray10;
+          align-items: center;
+          justify-content: space-between;
+        }
+        .content {
+          display: flex;
+          flex-direction: column;
+          row-gap: 1rem;
+
+          .items {
+            display: flex;
+            flex-direction: column;
+            row-gap: 1rem;
+
+            @media screen and (min-width: 700px) {
+              row-gap: 2rem;
+            }
+          }
+        }
+      }
+
+      .sections {
+        display: flex;
+        flex-direction: column;
+        row-gap: 1.2rem;
+        @media screen and (min-width: 1000px) {
+          padding-right: 0.5rem;
+          @include scrollbar();
+          overflow-y: auto;
+          overflow-x: hidden;
+          flex: 1;
+        }
+      }
+
+      .summary {
+        width: 100%;
+        height: min-content;
+        display: flex;
+        flex-direction: column;
+        gap: 1.2rem;
+
+        .price {
+          color: $color-gray10;
+          .content {
+            row-gap: 1.2rem;
+            .subtotal,
+            .del,
+            .total,
+            .saved {
+              display: flex;
+              justify-content: space-between;
+              @include skeletalLoader;
+            }
+
+            .subtotal,
+            .del {
+              font-size: 0.8rem;
+
+              &:empty {
+                min-height: 1rem;
+                width: 80%;
+              }
+
+              @media screen and (min-width: 700px) {
+                font-size: 0.95rem;
+              }
+            }
+
+            .total {
+              border-top: 1px solid $color-gray2;
+              border-bottom: 1px solid $color-gray2;
+              padding: 1rem 0rem;
+              font-size: 1rem;
+
+              @media screen and (min-width: 700px) {
+                font-size: 1.1rem;
+              }
+
+              &:empty {
+                min-height: 1.5rem;
+                width: 90%;
+              }
+
+              span {
+                font-weight: bold;
+              }
+            }
+
+            .saved {
+              color: green;
+              font-size: 0.8rem;
+              font-weight: bold;
+              &:empty {
+                min-height: 1rem;
+              }
+            }
+          }
+        }
+
+        @media screen and (min-width: 1000px) {
+          max-width: 340px;
+        }
+      }
+    }
+
+    @media screen and (min-width: 1000px) {
+      overflow: hidden;
+      margin-bottom: 0;
+    }
+
+    .no_items {
+      flex: 1;
+      overflow: hidden;
+      background-color: white;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: $color-gray9;
+      font-size: 1.3rem;
+
+      img {
+        width: auto;
+        max-width: 75%;
+        height: auto;
+        @media screen and (min-width: 650px) {
+          max-width: 500px;
+        }
+        margin: -1rem 0;
+      }
+    }
+  }
+}

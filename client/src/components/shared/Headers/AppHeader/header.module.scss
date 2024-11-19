@@ -71,6 +71,7 @@
       display: flex;
       justify-content: space-between;
       gap: 20px;
+      align-items: center;
 
       @media screen and (min-width: 500px) {
         gap: 35px;
@@ -98,11 +99,31 @@
         align-items: center;
         justify-content: center;
         column-gap: 7px;
+        height: min-content;
 
         &:nth-child(2),
         &:nth-child(3) {
           display: none;
           width: 0px;
+        }
+
+        &.cart {
+          position: relative;
+          .cart_count {
+            position: absolute;
+            top: -0.5rem;
+            left: 0.5rem;
+            z-index: 1;
+            font-size: 0.5rem;
+            color: white;
+            height: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 1rem;
+            border-radius: 50%;
+            background-color: red;
+          }
         }
 
         .icon {

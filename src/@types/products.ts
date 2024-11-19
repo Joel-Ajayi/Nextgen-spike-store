@@ -112,9 +112,22 @@ export interface ProductFeature extends ProductFeature_I {
 }
 
 export enum PaymentType {
-  ALL,
-  CARD,
-  COD,
+  Card,
+  Cash_On_Delivery,
+}
+
+export enum PaymentStatus {
+  PENDING,
+  REFUNDED,
+  PAID,
+}
+
+export enum OrderStatus {
+  ORDERED,
+  PACKED,
+  SHIPPED,
+  RETURNED,
+  DELIVERED,
 }
 
 export enum CatalogQuery {
@@ -158,4 +171,11 @@ export type QueryCatalog = {
   priceMax: number;
   priceMin: number;
   filters: CatalogFilter[];
+};
+
+export type Order_I = {
+  shippingAddress: string;
+  paymentMethod: number;
+  itemIds: string[];
+  itemQtys: number[];
 };

@@ -1,11 +1,12 @@
 @import "../../../../styles/mixins.scss";
 
 .wrapper {
-  margin: auto 0.6rem 0.6rem;
+  margin: auto 0.6rem;
   justify-content: center;
+  height: min-content;
   .add_to_cart_qty {
     display: flex;
-    column-gap: 1.3rem;
+    column-gap: 0.5rem;
     align-items: center;
 
     .btn {
@@ -13,16 +14,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 0 2px #757575;
-      -webkit-box-shadow: 0 0 2px #757575;
-      min-height: 35px;
-      width: 38px;
-      border-radius: 0.3rem;
+      box-shadow: 0 3px 6px $color-gray4;
+      border: 1px solid $brand-color-light1;
+      -webkit-box-shadow: 0 3px 6px $color-gray4;
+      border-radius: 50%;
       cursor: pointer;
 
       &:hover {
-        box-shadow: 0 0 5px #757575;
-        -webkit-box-shadow: 0 0 5px #757575;
+        box-shadow: 0 3px 6px $color-gray6;
+        -webkit-box-shadow: 0 3px 6px $color-gray6;
       }
 
       svg {
@@ -30,7 +30,7 @@
       }
 
       &.disabled {
-        pointer-events: none;
+        cursor: not-allowed;
         opacity: 0.5;
       }
     }

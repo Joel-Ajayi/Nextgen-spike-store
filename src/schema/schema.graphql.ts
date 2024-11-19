@@ -15,6 +15,7 @@ type Query {
   GetProductMini(category: String!, id: String!): ProductMini
   QueryReviews(prd_id:String!, skip:Int!, take:Int!):Pagination!
   UserQuery: User
+  GetCartItems(ids:[String!]!, qtys:[Int!]!):CartPageData!
 }
 
 type Mutation {
@@ -25,6 +26,7 @@ type Mutation {
   SignIn(data: SignInInput): Message
   SignOut: Message
   SignUp(data: SignUpInput): Message
+  UpdateAddress(data:Address_I!): String!
   UpdateCategory(data: CategoryInput_U): CategoryMini
   UpdateCategoryParent(name: String!, parent: String!): CategoryMini
   UpdateProduct(data: UpdateProductInput): ProductUpdateReturn
@@ -387,6 +389,26 @@ input Review_I {
   rating: Int!
 }
 
+type CartPageData {
+  items:[CartItem!]!
+  shippingAmount: Int!
+  subTotalAmount: Int!
+  totalAmount: Int!
+  paymentMethods:[String!]!
+}
+
+type CartItem {
+  id: String!
+  name: String!
+  price: Int!
+  discountPrice:Int!
+  rating: Int!
+  count:Int!
+  discount: Int!
+  image: String!
+  qty:Int!
+}
+
 
 #User
 type User {
@@ -397,6 +419,19 @@ type User {
   id: ID!
   lName: String
   roles: [Int!]!
+  addresses:[Address!]!
+  addressTypes:[String!]!
+  states:[State!]!
+}
+
+type State {
+  name:String!
+  cities:[City!]!
+}
+
+type City {
+  name:String!
+  localities:[String!]!
 }
 
 input SignInInput {
@@ -409,6 +444,29 @@ input SignUpInput {
   fName: String!
   lName: String!
   pwd: String!
+}
+
+type Address {
+  id: String!
+  name: String!
+  state: String!
+  city: String!
+  locality: String!
+  address: String!
+  addressType: Int!
+  isNew:Boolean!
+  tel: String!
+}
+
+input Address_I {
+    id: String!
+    name: String!
+    state: String!
+    city: String!
+    locality: String!
+    address: String!
+    addressType: Int!
+    tel: String!
 }
 `;
 

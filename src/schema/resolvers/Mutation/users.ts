@@ -1,5 +1,11 @@
 import consts from "../../../@types/conts";
-import { Roles, SignIn_I, SignUp_I, User } from "../../../@types/users";
+import {
+  Address,
+  Roles,
+  SignIn_I,
+  SignUp_I,
+  User,
+} from "../../../@types/users";
 import { validator } from "../../../helpers/validator";
 import middleware from "../../../middlewares/middlewares";
 import jwt from "jsonwebtoken";
@@ -216,6 +222,44 @@ const resolvers = {
       data: { pwdToken: null },
     });
     return { message: consts.messages.emailVerified };
+  },
+  UpdateAddress: async (_: any, { data }: { data: Address }, ctx: Context) => {
+    // check if logged_in
+    middleware.checkUser(ctx);
+
+    // check max
+    const validId = helpers.getValidId(data.id);
+    const isCreate = validId !== data.id;
+    const count = await ctx.db.address.count({
+      where: { userId: ctx.user.id },
+    });
+    if (count >= consts.users.maxAddresses && !isCreate) {
+      throw new GraphQLError("Max Addresses Exceeded", {
+        extensions: { statusCode: 400 },
+      });
+    }
+
+    // validate data
+    await validator.address(data);
+
+    const { id, isNew, ...address } = data;
+    const tel = Number(data.tel.replace(/\s/g, ""));
+    const addressData = { ...address, userId: ctx.user.id, tel };
+
+    try {
+      const newAddress = await ctx.db.address.upsert({
+        where: { id: validId },
+        create: addressData,
+        update: addressData,
+      });
+
+      return newAddress.id;
+    } catch (error) {
+      console.log(error);
+      throw new GraphQLError(consts.errors.server, {
+        extensions: { statusCode: 500 },
+      });
+    }
   },
 };
 export default resolvers;

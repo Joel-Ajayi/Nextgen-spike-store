@@ -2,10 +2,7 @@ import React, { useMemo } from "react";
 import { ProductMini } from "../../../../types/product";
 import Styles from "./Styles.module.scss";
 import { TbCurrencyNaira } from "react-icons/tb";
-import { GiRoundStar } from "react-icons/gi";
-import { FaStarHalfStroke } from "react-icons/fa6";
 import { MdFavoriteBorder as FavoriteIcon } from "react-icons/md";
-import uniqid from "uniqid";
 import helpers from "../../../../helpers";
 import { Link } from "react-router-dom";
 import { Paths } from "../../../../types";
@@ -27,16 +24,16 @@ function ProductCard({ product }: Props) {
 
   return (
     <div className={Styles.product}>
+      {product && (
+        <div className={Styles.favorite_icon}>
+          <FavoriteIcon />
+        </div>
+      )}
       <Link
         className={Styles.product_link}
         to={`/${Paths.Product}/${product?.id}`}
       >
         <div className={Styles.image}>
-          {product && (
-            <div className={Styles.favorite_icon}>
-              <FavoriteIcon />
-            </div>
-          )}
           {product && <img src={`/uploads/${product.images[0]}`} />}
         </div>
         <div className={Styles.name}>{product && product.name}</div>

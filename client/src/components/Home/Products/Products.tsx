@@ -47,7 +47,7 @@ function Products() {
           ))}
         </div>
       </div>
-      <div className={Styles.wrapper_section}>
+      <div className={Styles.wrapper_section} id="trend">
         <div className={Styles.header}>
           <div className={Styles.section_name}>Popular Products</div>
           <Button

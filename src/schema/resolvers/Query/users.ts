@@ -1,14 +1,45 @@
-import { User } from "../../../@types/users";
+import { GraphQLError } from "graphql";
+import { AddressTypes, User } from "../../../@types/users";
 import middleware from "../../../middlewares/middlewares";
 import { Context } from "../../context";
+import consts from "../../../@types/conts";
+import helpers from "../../../helpers";
 
 const resolvers = {
-  UserQuery: (_: any, a: any, ctx: Context): User => {
+  UserQuery: async (_: any, a: any, ctx: Context) => {
     middleware.checkUser(ctx);
-    return {
-      ...ctx.user,
-      avatar: ctx.user.avatar || "",
-    };
+
+    try {
+      const addresses = await ctx.db.address.findMany({
+        where: { userId: ctx.user.id },
+        select: {
+          id: true,
+          name: true,
+          state: true,
+          city: true,
+          locality: true,
+          address: true,
+          addressType: true,
+          tel: true,
+        },
+      });
+
+      return {
+        ...ctx.user,
+        addresses: addresses.map((a) => ({
+          ...a,
+          isNew: false,
+          tel: a.tel.toString().replace(/(\d{4})(\d{3})(\d{4})/, "$1 $2 $3"),
+        })),
+        addressTypes: helpers.getObjKeys<string>(AddressTypes),
+        avatar: ctx.user.avatar || "",
+        states: consts.users.states,
+      };
+    } catch (error) {
+      throw new GraphQLError(consts.errors.server, {
+        extensions: { statusCode: 500 },
+      });
+    }
   },
 };
 export default resolvers;
