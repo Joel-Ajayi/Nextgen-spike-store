@@ -58,7 +58,11 @@ declare module "express-session" {
     })
   );
 
-  const httpServer = https.createServer({}, app);
+  // const options = {
+  //   key: fs.readFileSync(join(__dirname, "../../../key.pem")),
+  //   cert: fs.readFileSync(join(__dirname, "../../../cert.pem")),
+  // };
+  // const httpServer = https.createServer(options, app);
 
   // graphql servers
   await graphql(app);
@@ -81,7 +85,7 @@ declare module "express-session" {
   app.get("*", (_, res) =>
     res.sendFile(path.join(__dirname, "../client/build/index.html"))
   );
-  httpServer.listen(PORT, () =>
+  app.listen(PORT, () =>
     console.log(`Server started at PORT ${process.env.PORT}`)
   );
 })();

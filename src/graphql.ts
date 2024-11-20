@@ -19,6 +19,7 @@ export default async (app: any) => {
     typeDefs,
     resolvers,
     context,
+    cache: "bounded",
     csrfPrevention: true,
   });
   await server.start();
