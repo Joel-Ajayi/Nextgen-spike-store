@@ -18,7 +18,8 @@ import { upload } from "../../../helpers/uploads";
 import { db } from "../../../db/prisma/connect";
 import { Prisma } from "@prisma/client";
 import { customAlphabet } from "nanoid";
-const nanoid = customAlphabet("1234567890abcdef", 10);
+const nanoid = customAlphabet("1234567890abcdef", 8);
+import axios from "axios";
 
 const resolvers = {
   CreateProduct: async (
@@ -451,5 +452,93 @@ const resolvers = {
       });
     }
   },
+  // CreateOrder: async (_: any, { data }: { data: Order_I }, ctx: Context) => {
+  //   middleware.checkUser(ctx);
+
+  //   const paymentMethods = helpers.getObjIndexes<number>(PaymentType);
+
+  //   // check payment
+  //   if (!paymentMethods.includes(data.paymentMethod)) {
+  //     throw new GraphQLError("Invalid Payment Type", {
+  //       extensions: { statusCode: 400 },
+  //     });
+  //   }
+
+  //   // check address
+  //   const shippingAddress = await ctx.db.address.findUnique({
+  //     where: { id: data.shippingAddress },
+  //   });
+  //   if (!shippingAddress) {
+  //     throw new GraphQLError("Shipping address not found", {
+  //       extensions: { statusCode: 400 },
+  //     });
+  //   }
+
+  //   const {
+  //     items,
+  //     paymentMethods: p,
+  //     ...sumary
+  //   } = await productsQuery.GetCartItems(null, {
+  //     ids: data.itemIds,
+  //     qtys: data.itemQtys,
+  //   });
+
+  //   let newOrderId = "";
+  //   try {
+  //     const ordersCount = await ctx.db.order.count({
+  //       where: { userId: ctx.user.id },
+  //     });
+  //     const order = await ctx.db.order.create({
+  //       data: {
+  //         ...sumary,
+  //         shippingAddress: data.shippingAddress,
+  //         paymentMethod: data.paymentMethod,
+  //         userId: ctx.user.id,
+  //         pId: `${nanoid()}${ordersCount}`,
+  //       },
+  //     });
+  //     newOrderId = order.id;
+
+  //     await ctx.db.orderItem.createMany({
+  //       data: items.map((i) => ({
+  //         orderId: order.id,
+  //         productId: i.id,
+  //         price: i.discountPrice,
+  //         qty: i.qty,
+  //       })),
+  //     });
+
+  //     if (data.paymentMethod === PaymentType.Card) {
+  //       const response = await axios.post(
+  //         consts.product.payment.init,
+  //         {
+  //           email: ctx.user.email,
+  //           amount: sumary.totalAmount,
+  //           channel: consts.product.payment.channels,
+  //           // callback_url:`${ctx.req["origin"]}`,
+  //           metadata: {
+  //             cancel_action: `${ctx.req.baseUrl}`,
+  //           },
+  //         },
+  //         {
+  //           headers: {
+  //             "Content-Type": "application/json",
+  //             Authorization: `Bearer ${process.env.PAYMENT_SECRET}`,
+  //           },
+  //         }
+  //       );
+  //     }
+
+  //     return { orderId: newOrderId };
+  //   } catch (error) {
+  //     if (newOrderId) {
+  //       await ctx.db.order.delete({ where: { id: newOrderId } });
+  //     }
+  //     throw new GraphQLError(consts.errors.server, {
+  //       extensions: { statusCode: 500 },
+  //     });
+  //   }
+  // },
+  // UpdateOrder: async () => {},
 };
 export default resolvers;

@@ -1,5 +1,5 @@
 import MongoStore from "connect-mongo";
-import { CONST } from "../../@types/conts";
+import consts from "../../@types/conts";
 
 export default async (): Promise<MongoStore> => {
   try {
@@ -8,6 +8,6 @@ export default async (): Promise<MongoStore> => {
       touchAfter: parseInt(process.env.SESSION_TOUCH as string),
     });
   } catch (error) {
-    throw new Error(CONST.errors.server);
+    throw new Error(consts.errors.server);
   }
 };

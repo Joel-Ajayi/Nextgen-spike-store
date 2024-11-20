@@ -13,7 +13,8 @@ import { Link, useNavigate } from "react-router-dom";
 import { Paths } from "../../types";
 import { MdOutlineKeyboardBackspace } from "react-icons/md";
 import uniqId from "uniqid";
-console.log(uniqId());
+import PaystackPop from "@paystack/inline-js";
+
 function Cart() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -46,6 +47,7 @@ function Cart() {
         replace: false,
       });
       return;
+    } else {
     }
   };
 

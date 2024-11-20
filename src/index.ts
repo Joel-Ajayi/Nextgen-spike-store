@@ -58,11 +58,7 @@ declare module "express-session" {
     })
   );
 
-  const options = {
-    key: fs.readFileSync(join(__dirname, "../../../key.pem")),
-    cert: fs.readFileSync(join(__dirname, "../../../cert.pem")),
-  };
-  const httpServer = https.createServer(options, app);
+  const httpServer = https.createServer({}, app);
 
   // graphql servers
   await graphql(app);

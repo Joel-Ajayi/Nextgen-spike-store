@@ -45,6 +45,10 @@ const consts = {
     sku: {
       price: 50,
     },
+    payment: {
+      init: "https://api.paystack.co/transaction/initialize",
+      channels: ["card"],
+    },
   },
   files: {
     mimeType: {
