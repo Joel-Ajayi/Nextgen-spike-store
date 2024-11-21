@@ -83,6 +83,11 @@ declare module "express-session" {
       res.sendStatus(404);
     }
   });
+
+  app.get("*", (req, res) => {
+    res.sendFile(path.join(__dirname, "../client/build/index.html"));
+  });
+
   app.listen(PORT, () =>
     console.log(`Server started at PORT ${process.env.PORT}`)
   );
