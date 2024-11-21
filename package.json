@@ -4,8 +4,6 @@
   "description": "backend of flipkart project by Ayotunde",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "clean": "rm -rf dist",
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "ts-node-dev --no-notify --respawn --transpile-only src/index.ts",
