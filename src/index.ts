@@ -67,6 +67,7 @@ declare module "express-session" {
   // graphql servers
   await graphql(app);
   app.use(express.static(path.join(__dirname, "../client/build")));
+
   app.use("/uploads/:folder/:filename?", async (req, res) => {
     const { folder, filename } = req.params;
     let baseUrl = `https://res.cloudinary.com/${process.env.IMG_NAME}/image/upload/v1708502714/Profile_Store/${folder}`;
@@ -82,9 +83,6 @@ declare module "express-session" {
       res.sendStatus(404);
     }
   });
-  app.get("*", (_, res) =>
-    res.sendFile(path.join(__dirname, "../client/build/index.html"))
-  );
   app.listen(PORT, () =>
     console.log(`Server started at PORT ${process.env.PORT}`)
   );
