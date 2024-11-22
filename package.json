@@ -4,13 +4,14 @@
   "description": "backend of flipkart project by Ayotunde",
   "main": "index.js",
   "scripts": {
-    "build": "tsc && npm run build --prefix client",
+    "build": "npm run client-build && cd ../ && tsc",
+    "heroku-postbuild": "npm run client-build && cd ../ && npm run build",
     "start": "node dist/index.js",
     "dev": "ts-node-dev --no-notify --respawn --transpile-only src/index.ts",
     "dev:typecheck": "tsc --noEmit --watch",
     "postinstall": "npm -s run generate",
     "generate": "prisma generate --schema=src/db/prisma/schema.prisma && prisma db push --schema=src/db/prisma/schema.prisma",
-    "heroku-postbuild": "npm run build && npm run heroku-postbuild --prefix client"
+    "client-build": "cd client && npm install && npm run build"
   },
   "author": "",
   "license": "ISC",

@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@imgly/background-removal": "^1.4.4",
     "@paystack/inline-js": "^2.22.1",
     "@reduxjs/toolkit": "^1.9.1",
@@ -62,12 +63,11 @@
     ]
   },
   "devDependencies": {
-    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/paystack__inline-js": "^1.0.0",
     "@types/react-color": "^3.0.11",
     "@types/react-redux": "^7.1.24",
     "@types/react-slick": "^0.23.13",
     "sass": "^1.57.0"
   },
-  "proxy": "https://localhost:5000"
+  "proxy": "http://localhost:5000"
 }
