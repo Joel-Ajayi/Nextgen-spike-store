@@ -39,21 +39,6 @@
   column-gap: 4px;
   height: 15px;
 
-  .move_icon {
-    height: 10px;
-    transform: scale(0.9);
-  }
-
-  .edit_icon,
-  .add_icon {
-    height: 100%;
-    margin-top: -2px;
-  }
-
-  .add_icon {
-    transform: scale(1.15);
-  }
-
   input {
     height: 11px;
     margin: 0;
@@ -62,8 +47,8 @@
 
   svg {
     cursor: pointer;
-    path {
-      stroke: gray;
-    }
+    color: rgb(68, 68, 68);
+    font-size: 1rem;
+    margin-top: -0.1rem;
   }
 }

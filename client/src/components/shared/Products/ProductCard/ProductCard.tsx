@@ -31,7 +31,7 @@ function ProductCard({ product }: Props) {
       )}
       <Link
         className={Styles.product_link}
-        to={`/${Paths.Product}/${product?.id}`}
+        to={`${Paths.Product}/${product?.id}`}
       >
         <div className={Styles.image}>
           {product && <img alt="" src={`/uploads/${product.images[0]}`} />}

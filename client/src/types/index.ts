@@ -132,7 +132,7 @@ export enum SearchResultType {
 export enum Paths {
   Home = "/",
   Catalog = "/catalog",
-  Product = "product",
+  Product = "/product",
   Profile = "/profile",
   WishList = "/WishList",
   Cart = "/cart",

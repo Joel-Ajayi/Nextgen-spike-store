@@ -15,10 +15,8 @@
     z-index: 1;
 
     svg {
-      transform: scale(1.1);
-      width: 17px;
-      stroke: $color-gray5;
-      fill: $color-gray5;
+      font-size: 1rem;
+      color: $color-gray5;
       cursor: pointer;
     }
 

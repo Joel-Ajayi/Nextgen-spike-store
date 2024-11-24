@@ -87,8 +87,8 @@ function ProductsSearch({ className = "" }: SearchProps) {
             const isBrand = res.type === SearchResultType.Brand;
             const isProduct = res.type === SearchResultType.Product;
             const link = isProduct
-              ? `/${Paths.Product}/${res.id}`
-              : `/${Paths.Catalog}/?${
+              ? `${Paths.Product}/${res.id}`
+              : `${Paths.Catalog}/?${
                   isBrand ? CatalogQuery.Brand : CatalogQuery.Category
                 }=${res.name}`;
             const regex = new RegExp(escapeRegExp(search), "ig");

@@ -126,12 +126,12 @@
         font-size: 14px;
 
         svg {
-          width: 35px;
+          font-size: 2rem;
           margin-bottom: 10px;
-          fill: $color-gray5;
+          color: $color-gray5;
 
           @media screen and (min-width: 800px) {
-            width: 50px;
+            font-size: 2.5rem;
           }
         }
 

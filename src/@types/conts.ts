@@ -48,6 +48,7 @@ const consts = {
     payment: {
       init: "https://api.paystack.co/transaction/initialize",
       channels: ["card"],
+      callback: "https://nextgen-store-5f0bea566c44.herokuapp.com/",
     },
   },
   files: {

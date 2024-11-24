@@ -27,6 +27,8 @@ import ProductsSearch from "../../Input/ProductsSearch/ProductsSearch";
 import cartSlice from "../../../../store/cart";
 import productReq from "../../../../requests/product";
 import helpers from "../../../../helpers";
+import { MdQuestionMark as QuestionIcon } from "react-icons/md";
+import { FiLogOut as LogoutIcon } from "react-icons/fi";
 
 export const authItems = {
   title: "",
@@ -135,7 +137,7 @@ export const signOutItem = (logoutFunc?: () => void) =>
     items: [
       ...(moreDropdown(true).items as DropdownProps[]),
       {
-        // Icon: LogoutIcon,
+        Icon: LogoutIcon,
         title: "Logout",
         onClick: logoutFunc,
       },
@@ -151,7 +153,7 @@ export const notAuthItem = {
       link: () => "/signin",
     },
     {
-      // Icon: QuestionIcon,
+      Icon: QuestionIcon,
       title: "New Customer? Sign Up!",
       link: () => "/signin?signup=true",
     },

@@ -18,8 +18,8 @@ class Validator {
     }
 
     const types = (format ? format : CONSTS.files.mimeType.supportedImg)
-      .split(/,.|./g)
-      .map((type) => `image/${type}`);
+      .split(",")
+      .map((type) => `image/${type.replace(".", "")}`);
 
     if (!types.includes(img.type)) {
       throw Error(CONSTS.errors.files.inCorrectImageFormat);

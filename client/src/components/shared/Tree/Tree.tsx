@@ -3,9 +3,9 @@ import { ITreeNode } from "../../../types";
 import { Tree as ReactTree, hierarchy } from "@visx/hierarchy";
 import { LinkHorizontal } from "@visx/shape";
 import { Group } from "@visx/group";
-// import { ReactComponent as MoveIcon } from "../../../images/icons/redo.svg";
-// import { ReactComponent as AddIcon } from "../../../images/icons/add.svg";
-// import { ReactComponent as EditIcon } from "../../../images/icons/edit.svg";
+import { IoAddOutline as AddIcon } from "react-icons/io5";
+import { FiEdit3 as EditIcon } from "react-icons/fi";
+import { IoMdRedo as MoveIcon } from "react-icons/io";
 import uniqid from "uniqid";
 import styles from "./tree.module.scss";
 import SpinLoader from "../Loader/SpinLoader/SpinLoader";
@@ -98,12 +98,12 @@ function Tree({
                     style={{ position: "relative" }}
                   >
                     <div className={styles.action_buttons}>
-                      {/* {node.depth === 0 && (
+                      {node.depth === 0 && (
                         <AddIcon
                           onClick={() => appendToNode(node.data.id)}
                           className={styles.add_icon}
                         />
-                      )} */}
+                      )}
                       {!!moveNode &&
                         moveNode?.id !== node.data.id &&
                         node.data.appendable &&
@@ -115,25 +115,24 @@ function Tree({
                         )}
                       {node.depth !== 0 && (
                         <>
-                          {/* {node.data.appendable && !moveNode && (
+                          {node.data.appendable && !moveNode && (
                             <AddIcon
                               onClick={() => appendToNode(node.data.id)}
                               className={styles.add_icon}
                             />
-                          )} */}
-                          {/* {!moveNode && (
+                          )}
+                          {!moveNode && (
                             <EditIcon
                               onClick={() => editNode(node.data.id)}
                               className={styles.edit_icon}
                             />
                           )}
-
                           {node.data.moveable && !moveNode && (
                             <MoveIcon
                               onClick={() => initMove(node.data)}
                               className={styles.move_icon}
                             />
-                          )} */}
+                          )}
                         </>
                       )}
                     </div>

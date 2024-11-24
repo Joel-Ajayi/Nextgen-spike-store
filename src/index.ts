@@ -80,11 +80,12 @@ declare module "express-session" {
       res.writeHead(200, { "content-type": response.headers["content-type"] });
       res.end(imageBuffer);
     } catch (error) {
-      res.sendStatus(404);
+      console.log(error);
+      res.sendStatus(400);
     }
   });
 
-  app.get("/*", (req, res) => {
+  app.get("*", (req, res) => {
     res.sendFile(path.join(__dirname, "../client/build/index.html"));
   });
 

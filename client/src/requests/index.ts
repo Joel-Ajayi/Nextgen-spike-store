@@ -74,7 +74,6 @@ class Requests {
       const t = (error as any)?.response?.request?.responseText;
       //
       dispatch(appSlice.actions.setStatusCode(err.statusCode));
-      console.log(t);
       if (errFromServer) {
         msg = {
           msg: err.message,
