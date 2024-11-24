@@ -9,10 +9,8 @@ import { BiSolidCategory as CategoryIcon } from "react-icons/bi";
 import { FaBoxOpen as ProductIcon } from "react-icons/fa";
 import { FaRegAddressCard } from "react-icons/fa";
 import { MdOutlineBrandingWatermark } from "react-icons/md";
-import { ReactComponent as LogoutIcon } from "../../../../images/icons/logout.svg";
 import { FiSettings as SettingsIcon } from "react-icons/fi";
 import { IoMdTrendingUp as Trending } from "react-icons/io";
-import { ReactComponent as QuestionIcon } from "../../../../images/icons/question-mark.svg";
 import { MdOutlineLocalOffer as OfferIcon } from "react-icons/md";
 import appSlice from "../../../../store/appState";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
@@ -58,35 +56,42 @@ export const authItems = {
 
 export const homeControllerItems = (roles: Roles[]) => {
   const items = [
-    (roles.includes(Roles.SuperAdmin) || roles.includes(Roles.Global)) && {
-      Icon: MdOutlineBrandingWatermark,
-      title: "Brands",
-      link: () =>
-        `${Paths.Controller}/${ControllerPaths.Brand}/${PageSections.BrdListing}`,
-    },
-    (roles.includes(Roles.CategoryAndBrand) ||
-      roles.includes(Roles.Global)) && {
-      Icon: CategoryIcon,
-      title: "Categories",
-      link: () =>
-        `${Paths.Controller}/${ControllerPaths.Categories}/${PageSections.CatListing}`,
-    },
-    (roles.includes(Roles.Order) || roles.includes(Roles.Global)) && {
-      Icon: CartIcon,
-      title: "Orders",
-      link: () => `${Paths.Controller}/${ControllerPaths.Orders}`,
-    },
-    (roles.includes(Roles.Product) || roles.includes(Roles.Global)) && {
-      Icon: ProductIcon,
-      title: "Products",
-      link: () =>
-        `${Paths.Controller}/${ControllerPaths.Products}/${PageSections.PrdListing}`,
-    },
+    roles.includes(Roles.SuperAdmin) || roles.includes(Roles.Global)
+      ? {
+          Icon: MdOutlineBrandingWatermark,
+          title: "Brands",
+          link: () =>
+            `${Paths.Controller}/${ControllerPaths.Brand}/${PageSections.BrdListing}`,
+        }
+      : null,
+    roles.includes(Roles.CategoryAndBrand) || roles.includes(Roles.Global)
+      ? {
+          Icon: CategoryIcon,
+          title: "Categories",
+          link: () =>
+            `${Paths.Controller}/${ControllerPaths.Categories}/${PageSections.CatListing}`,
+        }
+      : null,
+    roles.includes(Roles.Order) || roles.includes(Roles.Global)
+      ? {
+          Icon: CartIcon,
+          title: "Orders",
+          link: () => `${Paths.Controller}/${ControllerPaths.Orders}`,
+        }
+      : null,
+    roles.includes(Roles.Product) || roles.includes(Roles.Global)
+      ? {
+          Icon: ProductIcon,
+          title: "Products",
+          link: () =>
+            `${Paths.Controller}/${ControllerPaths.Products}/${PageSections.PrdListing}`,
+        }
+      : null,
     ,
   ];
 
   return {
-    title: items.includes(false) ? "" : "Controller",
+    title: items.includes(null) ? "" : "Controller",
     borderTop: true,
     items,
   } as DropdownProps;
@@ -130,7 +135,7 @@ export const signOutItem = (logoutFunc?: () => void) =>
     items: [
       ...(moreDropdown(true).items as DropdownProps[]),
       {
-        Icon: LogoutIcon,
+        // Icon: LogoutIcon,
         title: "Logout",
         onClick: logoutFunc,
       },
@@ -146,7 +151,7 @@ export const notAuthItem = {
       link: () => "/signin",
     },
     {
-      Icon: QuestionIcon,
+      // Icon: QuestionIcon,
       title: "New Customer? Sign Up!",
       link: () => "/signin?signup=true",
     },

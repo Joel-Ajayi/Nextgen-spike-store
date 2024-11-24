@@ -4,9 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { useAppSelector } from "../../store/hooks";
 import helpers from "../../helpers";
 import { CatalogQuery, Paths } from "../../types";
-import { FaStarHalfStroke } from "react-icons/fa6";
 import uniqid from "uniqid";
-import { GiRoundStar } from "react-icons/gi";
 import AddToCart from "../shared/Products/AddToCart/AddToCart";
 import { CiWarning } from "react-icons/ci";
 import Stars from "../shared/Products/Stars/Stars";
@@ -15,7 +13,7 @@ function Main() {
   const { prd_id } = useParams();
   const product = useAppSelector((state) => state.product);
   const [selectedImg, setSelectedImg] = useState("");
-  const isLoading = product.id != prd_id;
+  const isLoading = product.id !== prd_id;
 
   useEffect(() => {
     if (!isLoading) {

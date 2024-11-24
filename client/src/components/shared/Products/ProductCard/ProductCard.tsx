@@ -19,7 +19,7 @@ function ProductCard({ product }: Props) {
       product?.price
         ? helpers.addComma(((100 - product.discount) / 100) * product.price)
         : 0,
-    []
+    [product?.price, product?.discount]
   );
 
   return (
@@ -34,7 +34,7 @@ function ProductCard({ product }: Props) {
         to={`/${Paths.Product}/${product?.id}`}
       >
         <div className={Styles.image}>
-          {product && <img src={`/uploads/${product.images[0]}`} />}
+          {product && <img alt="" src={`/uploads/${product.images[0]}`} />}
         </div>
         <div className={Styles.name}>{product && product.name}</div>
         <div className={Styles.rating}>

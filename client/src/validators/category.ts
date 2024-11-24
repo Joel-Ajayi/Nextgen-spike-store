@@ -1,4 +1,4 @@
-import { string, array, number, mixed, object, Schema } from "yup";
+import { string, array, number, object, Schema } from "yup";
 import {
   CategoryBanner,
   CategoryFeature,

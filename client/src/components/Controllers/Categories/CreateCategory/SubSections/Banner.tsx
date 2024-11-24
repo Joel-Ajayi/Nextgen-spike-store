@@ -1,12 +1,12 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useAppSelector } from "../../../../../store/hooks";
 import { CategoryBanner } from "../../../../../types/category";
 import Input from "../../../../shared/Input/Controller/Input";
 import { IFile } from "../../../../../types";
 import categoryValidator from "../../../../../validators/category";
-import { ReactComponent as DeleteIcon } from "../../../../../images/icons/delete.svg";
-import { ReactComponent as EditIcon } from "../../../../../images/icons/edit.svg";
-import { ReactComponent as SaveIcon } from "../../../../../images/icons/save.svg";
+// import { ReactComponent as DeleteIcon } from "../../../../../images/icons/delete.svg";
+// import { ReactComponent as EditIcon } from "../../../../../images/icons/edit.svg";
+// import { ReactComponent as SaveIcon } from "../../../../../images/icons/save.svg";
 import Styles from "./styles.module.scss";
 
 type Props = {
@@ -85,14 +85,14 @@ function Banner({ onChange }: Props) {
       style={!isEditing ? { gap: 0 } : { gap: 15 }}
     >
       <div className={Styles.sub_section_actions}>
-        {isEditing && (
+        {/* {isEditing && (
           <SaveIcon
             onClick={() => setIsEditing(!isValid)}
             className={`${!isValid ? Styles.disabled : ""} ${Styles.save_icon}`}
           />
         )}
         {!isEditing && <EditIcon onClick={() => setIsEditing(true)} />}
-        <DeleteIcon onClick={deleteBanner} />
+        <DeleteIcon onClick={deleteBanner} /> */}
       </div>
       <Input
         name="tagline"

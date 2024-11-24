@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useMemo, useRef } from "react";
 import helpers from "../../helpers";
 import Styles from "./Styles.module.scss";
 import { useAppSelector } from "../../store/hooks";
@@ -13,14 +13,13 @@ import { Link, useNavigate } from "react-router-dom";
 import { Paths } from "../../types";
 import { MdOutlineKeyboardBackspace } from "react-icons/md";
 import uniqId from "uniqid";
-import PaystackPop from "@paystack/inline-js";
 
 function Cart() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const miniItems = helpers.getCart();
   const cart = useAppSelector((state) => state.cart);
-  const { isAuthenticated, email } = useAppSelector((state) => state.user);
+  const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
   const isLoading = !cart.items[0];
   const scrollRef1 = useRef<HTMLDivElement>(null);
   const scrollRef2 = useRef<HTMLDivElement>(null);

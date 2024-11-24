@@ -1,11 +1,6 @@
 import axios from "axios";
 import { CONSTS } from "../const";
-import {
-  IMessage,
-  MessageType,
-  RedirectStatusCodes,
-  StatusCodes,
-} from "../types";
+import { IMessage, MessageType, StatusCodes } from "../types";
 import { dispatch } from "../store";
 import appSlice from "../store/appState";
 interface ApiErrorOptions extends ErrorOptions {

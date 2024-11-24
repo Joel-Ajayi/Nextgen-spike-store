@@ -32,9 +32,6 @@ const sliderSettings = {
 } as Settings;
 
 function Categories() {
-  const isLoading = useAppSelector(
-    (state) => state.app.isLoading || state.app.isPageLoading
-  );
   const categories = useAppSelector(
     (state) => state.app.landingPageData.topCategories
   );

@@ -23,7 +23,6 @@ import controllerCatSlice, {
   defaultOffer,
 } from "../../../../store/controller/categories";
 import Feature from "./SubSections/Feature";
-import appSlice from "../../../../store/appState";
 import Page404 from "../../../shared/Page404/Page404";
 import SpinLoader from "../../../shared/Loader/SpinLoader/SpinLoader";
 import request from "../../../../requests";

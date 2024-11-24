@@ -30,7 +30,7 @@ import cartSlice from "./store/cart";
 
 function ProtectedRoute() {
   const { pathname } = useLocation();
-  const { isAuthenticated, roles } = useAppSelector((state) => state.user);
+  const { isAuthenticated } = useAppSelector((state) => state.user);
   return isAuthenticated ? (
     <Outlet />
   ) : (

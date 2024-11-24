@@ -28,7 +28,7 @@ function Product() {
     return () => {
       dispatch(setProduct(initProduct));
     };
-  }, []);
+  }, [prd_id]);
 
   return (
     <div className={Styles.content}>

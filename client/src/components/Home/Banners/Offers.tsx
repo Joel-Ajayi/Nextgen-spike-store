@@ -1,17 +1,13 @@
-import React, { useMemo } from "react";
+import React from "react";
 import Styles from "./Styles.module.scss";
 import { useAppSelector } from "../../../store/hooks";
 import Slider from "react-slick";
-import { Link } from "react-router-dom";
 import Button from "../../shared/Button/Button";
 import uniqid from "uniqid";
 import { CatalogQuery, Paths } from "../../../types";
 
 function Offers() {
   const offers = useAppSelector((state) => state.app.landingPageData.offers);
-  const isLoading = useAppSelector(
-    (state) => state.app.isLoading || state.app.isPageLoading
-  );
 
   const sliderSettings = {
     dots: offers.length > 2,

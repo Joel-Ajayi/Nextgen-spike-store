@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { Navigate, useParams, useSearchParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import Brands from "../components/Controllers/Brands/Brands";
 import Categories from "../components/Controllers/Categories/Categories";
 import Orders from "../components/Controllers/Orders/Orders";
@@ -15,10 +15,10 @@ function ControllerPage() {
   let { pg: page } = useParams();
   const roles = useAppSelector((state) => state.user.roles);
 
-  const isAuthorized = (role: Roles) =>
-    roles.includes(role) || roles.includes(Roles.Global);
-
   const currentPage = useMemo(() => {
+    const isAuthorized = (role: Roles) =>
+      roles.includes(role) || roles.includes(Roles.Global);
+
     switch (page) {
       case ControllerPaths.Categories:
         if (!isAuthorized(Roles.CategoryAndBrand)) break;
@@ -45,7 +45,7 @@ function ControllerPage() {
     return (
       <Navigate to={`/controller/${ControllerPaths.Categories}`} replace />
     );
-  }, [page]);
+  }, [page, roles]);
 
   return (
     <>

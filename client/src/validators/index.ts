@@ -1,5 +1,5 @@
 import { string } from "yup";
-import { CONSTS } from "../const";
+import { CONSTS } from "./../const";
 
 class Validator {
   public email() {
@@ -18,7 +18,7 @@ class Validator {
     }
 
     const types = (format ? format : CONSTS.files.mimeType.supportedImg)
-      .split(/\,.|\./g)
+      .split(/,.|./g)
       .map((type) => `image/${type}`);
 
     if (!types.includes(img.type)) {
@@ -53,7 +53,7 @@ class Validator {
     }
 
     const types = CONSTS.files.mimeType.supportedVd
-      .split(/\,.|\./g)
+      .split(/,.|./g)
       .map((type) => `video/${type}`);
 
     if (!types.includes(vd.type)) {

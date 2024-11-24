@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from "react";
-import { ReactComponent as DeleteIcon } from "../../../../../images/icons/delete.svg";
-import { ReactComponent as EditIcon } from "../../../../../images/icons/edit.svg";
-import { ReactComponent as SaveIcon } from "../../../../../images/icons/save.svg";
+// import { ReactComponent as DeleteIcon } from "../../../../../images/icons/delete.svg";
+// import { ReactComponent as EditIcon } from "../../../../../images/icons/edit.svg";
+// import { ReactComponent as SaveIcon } from "../../../../../images/icons/save.svg";
 import { CategoryFeature } from "../../../../../types/category";
 import Input from "../../../../shared/Input/Controller/Input";
 import Styles from "./styles.module.scss";
@@ -60,14 +60,14 @@ const Feature = ({ featureId, onChange }: FeatureProps) => {
       style={!isEditing ? { gap: 0 } : { gap: 15 }}
     >
       <div className={Styles.sub_section_actions}>
-        {isEditing && (
+        {/* {isEditing && (
           <SaveIcon
             onClick={() => setIsEditing(!isValid)}
             className={`${!isValid ? Styles.disabled : ""} ${Styles.save_icon}`}
           />
         )}
         {!isEditing && <EditIcon onClick={() => setIsEditing(true)} />}
-        <DeleteIcon onClick={() => deleteFeature([featureId])} />
+        <DeleteIcon onClick={() => deleteFeature([featureId])} /> */}
       </div>
       <Input
         name="name"

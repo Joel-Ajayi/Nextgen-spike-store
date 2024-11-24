@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import Styles from "./Stars.module.scss";
 import uniqid from "uniqid";
 import { FaStarHalfStroke } from "react-icons/fa6";

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { Navigate, useParams, useSearchParams } from "react-router-dom";
 import { ControllerPaths, PageSections } from "../../../types/controller";
 import Page404 from "../../shared/Page404/Page404";

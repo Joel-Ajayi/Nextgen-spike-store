@@ -15,16 +15,14 @@ import Products from "../components/Home/Products/Products";
 
 function HomePage() {
   const dispatch = useDispatch();
-  const isLoaded = useAppSelector(
-    (state) => state.app.landingPageData.topCategories[0] !== null
-  );
+  const isLoading = useAppSelector((state) => state.app.isPageLoading);
 
   const setLandingPageData = appSlice.actions.setLandingPageData;
   const setPageLoading = appSlice.actions.setPageLoading;
 
   useEffect(() => {
     (async () => {
-      if (!isLoaded) {
+      if (isLoading) {
         const res = await globalReq.getLandingPageData();
         if (res) {
           dispatch(setLandingPageData(res));
@@ -32,7 +30,7 @@ function HomePage() {
       }
       dispatch(setPageLoading(false));
     })();
-  }, []);
+  }, [isLoading]);
 
   return (
     <>

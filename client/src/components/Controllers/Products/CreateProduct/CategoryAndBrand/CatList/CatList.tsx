@@ -1,12 +1,10 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import Styles from "./styles.module.scss";
 import { useAppSelector } from "../../../../../../store/hooks";
 import uniqId from "uniqid";
 import { useDispatch } from "react-redux";
 import controllerPrdSlice from "../../../../../../store/controller/products";
 import { FaCaretRight as CaretIcon } from "react-icons/fa";
-import categoryReq from "../../../../../../requests/category";
-import Spinner from "../../../../../shared/Loader/SpinLoader/SpinLoader";
 import { CategoryFeature } from "../../../../../../types/category";
 
 type Props = {

@@ -16,7 +16,7 @@ function UserAvatar({
   size = 32,
   isLink = true,
 }: AvatarProps) {
-  const { email, fName, lName, avatar, isAuthenticated } = useAppSelector(
+  const { fName, lName, isAuthenticated } = useAppSelector(
     (state) => state.user
   );
   const isLoading = useAppSelector((state) => state.app.isLoading);

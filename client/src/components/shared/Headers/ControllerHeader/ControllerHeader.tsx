@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../../../../store/hooks";
 import UserAvatar from "../UserAvatar/UserAvatar";
 import Styles from "./styles.module.scss";
@@ -20,7 +20,7 @@ function ControllerHeader() {
   const { resetUserState } = userSlice.actions;
   const { setShowModal } = appSlice.actions;
 
-  const { isAuthenticated, roles } = useAppSelector((state) => state.user);
+  const { isAuthenticated } = useAppSelector((state) => state.user);
 
   const handleSignOut = async () => {
     await userReq.signOut();

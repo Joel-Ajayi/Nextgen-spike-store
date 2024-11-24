@@ -1,8 +1,7 @@
-import React, { useMemo } from "react";
+import React from "react";
 import Styles from "./Styles.module.scss";
 import { useAppSelector } from "../../../store/hooks";
 import Slider, { Settings } from "react-slick";
-import { Link } from "react-router-dom";
 import Button from "../../shared/Button/Button";
 import { MdOutlineShoppingCart as CartIcon } from "react-icons/md";
 import uniqid from "uniqid";

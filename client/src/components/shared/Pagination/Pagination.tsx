@@ -6,13 +6,13 @@ import uniqId from "uniqid";
 import { useAppSelector } from "../../../store/hooks";
 import helpers from "../../../helpers";
 
-type Props<T> = {
+type Props = {
   specifiedMaxButtons?: number;
   callBack: (page: number, skip: number, isLoaded: boolean) => void;
   path: string;
 };
 
-function Pagination<T>({ specifiedMaxButtons = 5, path, ...props }: Props<T>) {
+function Pagination<T>({ specifiedMaxButtons = 5, path, ...props }: Props) {
   const [pageLoading, setPageLoading] = useState(0);
   const [wrapperWidth, setWrapperWidth] = useState(1);
   const [page, setPage] = useState(1);

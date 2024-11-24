@@ -3,9 +3,9 @@ import { ITreeNode } from "../../../types";
 import { Tree as ReactTree, hierarchy } from "@visx/hierarchy";
 import { LinkHorizontal } from "@visx/shape";
 import { Group } from "@visx/group";
-import { ReactComponent as MoveIcon } from "../../../images/icons/redo.svg";
-import { ReactComponent as AddIcon } from "../../../images/icons/add.svg";
-import { ReactComponent as EditIcon } from "../../../images/icons/edit.svg";
+// import { ReactComponent as MoveIcon } from "../../../images/icons/redo.svg";
+// import { ReactComponent as AddIcon } from "../../../images/icons/add.svg";
+// import { ReactComponent as EditIcon } from "../../../images/icons/edit.svg";
 import uniqid from "uniqid";
 import styles from "./tree.module.scss";
 import SpinLoader from "../Loader/SpinLoader/SpinLoader";
@@ -98,12 +98,12 @@ function Tree({
                     style={{ position: "relative" }}
                   >
                     <div className={styles.action_buttons}>
-                      {node.depth === 0 && (
+                      {/* {node.depth === 0 && (
                         <AddIcon
                           onClick={() => appendToNode(node.data.id)}
                           className={styles.add_icon}
                         />
-                      )}
+                      )} */}
                       {!!moveNode &&
                         moveNode?.id !== node.data.id &&
                         node.data.appendable &&
@@ -115,13 +115,13 @@ function Tree({
                         )}
                       {node.depth !== 0 && (
                         <>
-                          {node.data.appendable && !moveNode && (
+                          {/* {node.data.appendable && !moveNode && (
                             <AddIcon
                               onClick={() => appendToNode(node.data.id)}
                               className={styles.add_icon}
                             />
-                          )}
-                          {!moveNode && (
+                          )} */}
+                          {/* {!moveNode && (
                             <EditIcon
                               onClick={() => editNode(node.data.id)}
                               className={styles.edit_icon}
@@ -133,7 +133,7 @@ function Tree({
                               onClick={() => initMove(node.data)}
                               className={styles.move_icon}
                             />
-                          )}
+                          )} */}
                         </>
                       )}
                     </div>

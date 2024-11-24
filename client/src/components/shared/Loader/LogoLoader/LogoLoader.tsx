@@ -14,7 +14,7 @@ function LogoLoader({ isLocal = false }: LoaderProps) {
       loaderStyles.position = "fixed";
     }
     return loaderStyles;
-  }, []);
+  }, [isLocal]);
 
   return (
     <div style={style} className={Styles.loader_wrapper}>

@@ -27,8 +27,8 @@ function Address({ index, isSelection = false }: Props) {
 
   const updateAddress = userSlice.actions.updateAddress;
   const deleteAddress = userSlice.actions.deleteAddress;
-  const [stateIndex, setStateIndex] = useState(0);
-  const [cityIndex, setcityIndex] = useState(0);
+  const [stateIndex] = useState(0);
+  const [cityIndex] = useState(0);
   const [isEditing, setIsEditing] = useState(address.isNew);
   const [isSaving, setIsSaving] = useState(false);
 

@@ -10,7 +10,6 @@ import ControllerStyles from "../../controller.module.scss";
 import Styles from "./catListing.module.scss";
 import categoryReq from "../../../../requests/category";
 import { CategoryMini } from "../../../../types/category";
-import appSlice from "../../../../store/appState";
 import SpinLoader from "../../../shared/Loader/SpinLoader/SpinLoader";
 
 function CategoryListing() {

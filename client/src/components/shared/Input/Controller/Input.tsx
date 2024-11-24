@@ -8,9 +8,9 @@ import React, {
 } from "react";
 import Styles from "./input.module.scss";
 import { AiFillCloseCircle as CloseIcon } from "react-icons/ai";
-import { ReactComponent as CaretIcon } from "./../../../../images/icons/caret.svg";
-import { ReactComponent as AddIcon } from "./../../../../images/icons/add.svg";
-import { ReactComponent as DownloadIcon } from "./../../../../images/icons/download.svg";
+// import { ReactComponent as CaretIcon } from "./../../../../images/icons/caret.svg";
+// import { ReactComponent as AddIcon } from "./../../../../images/icons/add.svg";
+// import { ReactComponent as DownloadIcon } from "./../../../../images/icons/download.svg";
 import { ColorResult, SketchPicker } from "react-color";
 import uniqid from "uniqid";
 import { CONSTS } from "../../../../const";
@@ -351,21 +351,21 @@ function Input({
             {/* //selections display caret and Addition button for multiInputs */}
             {!asInfo && !isImage && (
               <div className={Styles.actions}>
-                {isSelect && (
-                  <CaretIcon
-                    className={Styles.caret}
-                    style={caretStyle}
-                    onClick={handleFocus}
-                  />
-                )}
-                {isMultiInput && <AddIcon onClick={onClickMultiAddIcon} />}
+                {/* {isSelect && (
+                  // <CaretIcon
+                  //   className={Styles.caret}
+                  //   style={caretStyle}
+                  //   onClick={handleFocus}
+                  // />
+                )} */}
+                {/* {isMultiInput && <AddIcon onClick={onClickMultiAddIcon} />} */}
               </div>
             )}
 
             {/* // files input */}
             {isImage && (
               <div className={Styles.files_area}>
-                <DownloadIcon className={Styles.download_icon} />
+                {/* <DownloadIcon className={Styles.download_icon} /> */}
                 <div>
                   <b>Choose a file </b>or drag it here
                 </div>

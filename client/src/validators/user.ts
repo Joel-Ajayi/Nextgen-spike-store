@@ -1,4 +1,4 @@
-import { StringSchema, object, string } from "yup";
+import { StringSchema, string } from "yup";
 import { SignInFieds } from "../types/user";
 
 class UserValidator {

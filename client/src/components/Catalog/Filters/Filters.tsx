@@ -1,6 +1,6 @@
-import React, { useMemo, useState } from "react";
+import React, { useMemo } from "react";
 import { CatalogQuery } from "../../../types";
-import { useLocation, useMatch, useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import Styles from "./styles.module.scss";
 import Dropdown, { DropdownProps } from "../../shared/Dropdown/Dropdown";

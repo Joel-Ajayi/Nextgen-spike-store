@@ -7,7 +7,7 @@ import {
   ProductMini2,
   ProductInput,
 } from "../../types/product";
-import { APIPagination, IFile, Pagination } from "../../types";
+import { APIPagination, IFile } from "../../types";
 import { CategoryFeature, CategoryMini } from "../../types/category";
 
 export const initControllerProduct: ProductInput = {
