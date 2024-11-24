@@ -5,11 +5,9 @@
   "main": "index.js",
   "scripts": {
     "start": "node dist/index.js",
-    "build": "tsc && npm run build --prefix client",
+    "build": "tsc",
     "dev": "ts-node-dev --no-notify --respawn --transpile-only src/index.ts",
     "dev:typecheck": "tsc --noEmit --watch",
-    "prebuild": "npm install --prefix client",
-    "client-build": "npm run build --prefix client",
     "generate": "prisma generate --schema=src/db/prisma/schema.prisma && prisma db push --schema=src/db/prisma/schema.prisma",
     "postinstall": "npm -s run generate",
     "heroku-postbuild": "npm run build"
