@@ -337,17 +337,17 @@ export default function Header() {
             {isAuthenticated && (
               <Link
                 to={`/${Paths.Profile}?pg=${UserPaths.Notifications}`}
-                className={Styles.tab}
+                className={Styles.mail}
               >
                 <MailsIcon className={Styles.icon} />
                 <span>Mails</span>
               </Link>
             )}
-            <Link to={Paths.WishList} className={Styles.tab}>
+            <Link to={Paths.WishList} className={Styles.whish}>
               <FavoriteIcon className={Styles.icon} />
               <span>Whishlist</span>
             </Link>
-            <Link to={Paths.Cart} className={`${Styles.tab} ${Styles.cart}`}>
+            <Link to={Paths.Cart} className={Styles.cart}>
               {!!cartCount && (
                 <div className={Styles.cart_count}>{cartCount}</div>
               )}

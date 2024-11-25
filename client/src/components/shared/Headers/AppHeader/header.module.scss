@@ -94,15 +94,17 @@
         }
       }
 
-      .tab {
+      .mail,
+      .whish,
+      .cart {
         display: flex;
         align-items: center;
         justify-content: center;
         column-gap: 7px;
         height: min-content;
 
-        &:nth-child(2),
-        &:nth-child(3) {
+        &.whish,
+        &.mail {
           display: none;
           width: 0px;
         }
@@ -136,8 +138,8 @@
         }
 
         @media screen and (min-width: 850px) {
-          &:nth-child(2),
-          &:nth-child(3) {
+          &.whish,
+          &.mail {
             display: flex;
             width: auto;
           }
