@@ -1,4 +1,4 @@
-import React, { useMemo, useRef } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import helpers from "../../helpers";
 import Styles from "./Styles.module.scss";
 import { useAppSelector } from "../../store/hooks";
@@ -12,17 +12,23 @@ import CartProductCard from "../shared/Products/CartProductCard/CartProductCard"
 import { Link, useNavigate } from "react-router-dom";
 import { Paths } from "../../types";
 import { MdOutlineKeyboardBackspace } from "react-icons/md";
+import PaystackPop from "@paystack/inline-js";
 import uniqId from "uniqid";
+import productReq from "../../requests/product";
 
 function Cart() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const miniItems = helpers.getCart();
   const cart = useAppSelector((state) => state.cart);
+  const addressId = useAppSelector((state) => state.user.selectedAddress);
   const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
   const isLoading = !cart.items[0];
   const scrollRef1 = useRef<HTMLDivElement>(null);
   const scrollRef2 = useRef<HTMLDivElement>(null);
+  const [isOrdering, setIsOrdering] = useState(false);
+
+  let popup: PaystackPop = new PaystackPop();
 
   const onCheckout = () => {
     dispatch(cartSlice.actions.setIsCheckout());
@@ -40,13 +46,32 @@ function Cart() {
     }, 100);
   };
 
-  const placeOrder = () => {
+  const placeOrder = async () => {
     if (!isAuthenticated) {
       navigate(`${Paths.SignIn}?redirect=cart`, {
         replace: false,
       });
       return;
     } else {
+      setIsOrdering(true);
+      const res = await productReq.createOrder(
+        addressId,
+        cart.paymentMethod,
+        (cart.items as CartItem[]).map((i) => i.id),
+        (cart.items as CartItem[]).map((i) => i.qty)
+      );
+
+      if (res) {
+        if (res.access_code) {
+          try {
+          } catch (error) {}
+          const payRes = popup.resumeTransaction({
+            accessCode: res.access_code,
+          });
+          console.log(payRes);
+        }
+      }
+      setIsOrdering(false);
     }
   };
 
@@ -168,7 +193,8 @@ function Cart() {
                           value={"PLACE ORDER"}
                           padSide={2}
                           onClick={placeOrder}
-                          disabled={isLoading}
+                          disabled={!addressId || isOrdering}
+                          isLoading={isOrdering}
                           width="100%"
                         />
                       </div>

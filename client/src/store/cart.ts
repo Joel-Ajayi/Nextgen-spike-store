@@ -7,7 +7,6 @@ export const cartInitialState: Cart = {
   shippingAmount: 0,
   subTotalAmount: 0,
   totalAmount: 0,
-  shippingAddress: "",
   paymentMethods: [],
   paymentMethod: 0,
   isCheckout: false,
@@ -43,9 +42,6 @@ const cartSlice = createSlice({
         totalAmount: subTotalAmount + state.shippingAmount,
         items,
       };
-    },
-    setShippingAddress: (state, action: PayloadAction<string>) => {
-      return { ...state, shippingAddress: action.payload };
     },
     setPaymentMethod: (state, action: PayloadAction<number>) => {
       return { ...state, paymentMethod: action.payload };

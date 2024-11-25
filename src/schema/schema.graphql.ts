@@ -35,6 +35,7 @@ type Mutation {
   VerifyToken(token: String!): Message
   UpdateReview(data:Review_I!):Message
   DeleteReview(prd_id:String!):Message
+  CreateOrder(data:Order_I!):OnCreateOrder!
 }
 
 #General
@@ -468,6 +469,18 @@ input Address_I {
     addressType: Int!
     tel: String!
 }
+
+  type OnCreateOrder {
+    orderId:String!
+    access_code:String!
+  }
+
+  input Order_I {
+    shippingAddress:String!
+    paymentMethod:Int!
+    itemIds:[String!]!
+    itemQtys:[Int!]!
+  }
 `;
 
 export default typeDefs;

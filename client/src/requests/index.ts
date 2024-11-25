@@ -38,7 +38,11 @@ class Requests {
     return files;
   }
 
-  public async makeRequest<T>(data: string | FormData, isUpload = false) {
+  public async makeRequest<T>(
+    data: string | FormData,
+    isUpload = false,
+    showMsg = true
+  ) {
     const headers: { [key in string]: string } = {};
     if (isUpload) {
       headers["Apollo-Require-Preflight"] = "true";
@@ -72,32 +76,36 @@ class Requests {
       const err = error as ThrownError;
       let msg: IMessage | null = null;
       const t = (error as any)?.response?.request?.responseText;
-      //
+      console.log(t);
+
       dispatch(appSlice.actions.setStatusCode(err.statusCode));
-      if (errFromServer) {
-        msg = {
-          msg: err.message,
-          type: MessageType.Error,
-          statusCode: err.statusCode,
-        } as IMessage;
-      } else if (
-        err.code === CONSTS.errors.code.network ||
-        err.code === CONSTS.errors.code.badResponse
-      ) {
-        msg = {
-          msg: CONSTS.errors.badResponse,
-          type: MessageType.Error,
-          statusCode: StatusCodes.ServerError,
-        } as IMessage;
-      } else {
-        msg = {
-          msg: CONSTS.errors.errorOccured,
-          type: MessageType.Error,
-          statusCode: StatusCodes.ServerError,
-        } as IMessage;
+
+      if (showMsg) {
+        if (errFromServer) {
+          msg = {
+            msg: err.message,
+            type: MessageType.Error,
+            statusCode: err.statusCode,
+          } as IMessage;
+        } else if (
+          err.code === CONSTS.errors.code.network ||
+          err.code === CONSTS.errors.code.badResponse
+        ) {
+          msg = {
+            msg: CONSTS.errors.badResponse,
+            type: MessageType.Error,
+            statusCode: StatusCodes.ServerError,
+          } as IMessage;
+        } else {
+          msg = {
+            msg: CONSTS.errors.errorOccured,
+            type: MessageType.Error,
+            statusCode: StatusCodes.ServerError,
+          } as IMessage;
+        }
+        dispatch(appSlice.actions.setBackgroundMsg(msg));
       }
 
-      dispatch(appSlice.actions.setBackgroundMsg(msg));
       return null as T;
     }
   }

@@ -156,7 +156,6 @@ export type Cart = {
   paymentMethod: number;
   paymentMethods: string[];
   isCheckout: boolean;
-  shippingAddress: string;
 };
 
 export type CartPageData = {

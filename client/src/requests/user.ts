@@ -15,7 +15,11 @@ class UserReq {
         states { name cities { name localities } }
       }}`,
     });
-    const res = await request.makeRequest<IUserInitailState>(body);
+    const res = await request.makeRequest<IUserInitailState>(
+      body,
+      false,
+      false
+    );
     return res;
   }
 
