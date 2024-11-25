@@ -497,9 +497,10 @@ const resolvers = {
         const response = await axios.post<InitPayment>(
           consts.product.payment.init,
           {
-            email: ctx.user.email,
+            email: "yott4y@gmail.com",
             amount: sumary.totalAmount,
-            channel: consts.product.payment.channels,
+            channels: consts.product.payment.channels,
+            callback_url: `${ctx.req.protocol}://${ctx.req.get("host")}`,
           },
           {
             headers: {
@@ -512,30 +513,28 @@ const resolvers = {
         access_code = response.data.data.access_code;
       }
 
-      // const order = await ctx.db.order.create({
-      //   data: {
-      //     ...sumary,
-      //     shippingAddress: data.shippingAddress,
-      //     paymentMethod: data.paymentMethod,
-      //     userId: ctx.user.id,
-      //     pId,
-      //   },
-      // });
-      // newOrderId = order.id;
-      newOrderId = pId;
+      const order = await ctx.db.order.create({
+        data: {
+          ...sumary,
+          shippingAddress: data.shippingAddress,
+          paymentMethod: data.paymentMethod,
+          userId: ctx.user.id,
+          pId,
+        },
+      });
+      newOrderId = order.id;
 
-      // await ctx.db.orderItem.createMany({
-      //   data: items.map((i) => ({
-      //     orderId: order.id,
-      //     productId: i.id,
-      //     price: i.discountPrice,
-      //     qty: i.qty,
-      //   })),
-      // });
+      await ctx.db.orderItem.createMany({
+        data: items.map((i) => ({
+          orderId: order.id,
+          productId: i.id,
+          price: i.discountPrice,
+          qty: i.qty,
+        })),
+      });
 
       return { orderId: newOrderId, access_code };
     } catch (error) {
-      console.log(error);
       if (newOrderId) {
         await ctx.db.order.delete({ where: { id: newOrderId } });
       }

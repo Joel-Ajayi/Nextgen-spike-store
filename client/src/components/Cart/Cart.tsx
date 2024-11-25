@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import helpers from "../../helpers";
 import Styles from "./Styles.module.scss";
 import { useAppSelector } from "../../store/hooks";
@@ -7,7 +7,7 @@ import Addresses from "../Profile/Addresses/Addresses";
 import Button from "../shared/Button/Button";
 import { CartItem } from "../../types/product";
 import { useDispatch } from "react-redux";
-import cartSlice from "../../store/cart";
+import cartSlice, { cartInitialState } from "../../store/cart";
 import CartProductCard from "../shared/Products/CartProductCard/CartProductCard";
 import { Link, useNavigate } from "react-router-dom";
 import { Paths } from "../../types";
@@ -15,6 +15,7 @@ import { MdOutlineKeyboardBackspace } from "react-icons/md";
 import PaystackPop from "@paystack/inline-js";
 import uniqId from "uniqid";
 import productReq from "../../requests/product";
+import { UserPaths } from "../../types/user";
 
 function Cart() {
   const dispatch = useDispatch();
@@ -28,7 +29,16 @@ function Cart() {
   const scrollRef2 = useRef<HTMLDivElement>(null);
   const [isOrdering, setIsOrdering] = useState(false);
 
-  let popup: PaystackPop = new PaystackPop();
+  let payInterval: NodeJS.Timer | null = null;
+
+  useEffect(() => {
+    return () => {
+      if (payInterval) {
+        console.log("closed");
+        clearInterval(payInterval);
+      }
+    };
+  }, []);
 
   const onCheckout = () => {
     dispatch(cartSlice.actions.setIsCheckout());
@@ -62,13 +72,23 @@ function Cart() {
       );
 
       if (res) {
+        dispatch(cartSlice.actions.setCart({ ...cartInitialState, items: [] }));
+        helpers.deleteCart();
+        const redirect = `${Paths.Profile}/${UserPaths.Orders}/${res.orderId}`;
+
+        // paystack
         if (res.access_code) {
-          try {
-          } catch (error) {}
-          const payRes = popup.resumeTransaction({
-            accessCode: res.access_code,
-          });
-          console.log(payRes);
+          const popup = new PaystackPop();
+          popup.resumeTransaction(res.access_code as any);
+          payInterval = setInterval(() => {
+            const isOpened = (popup as any).isOpen;
+            if (!isOpened && (popup as any).isLoaded) {
+              clearInterval(payInterval as NodeJS.Timeout);
+              navigate(redirect, { replace: false });
+            }
+          }, 500);
+        } else {
+          navigate(redirect, { replace: false });
         }
       }
       setIsOrdering(false);

@@ -38,6 +38,10 @@ class Helpers {
     return items;
   }
 
+  public deleteCart() {
+    localStorage.setItem("cart_items", JSON.stringify([]));
+  }
+
   public getCart() {
     return JSON.parse(
       localStorage.getItem("cart_items") ?? "[]"

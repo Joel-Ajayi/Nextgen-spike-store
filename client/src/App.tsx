@@ -108,7 +108,10 @@ function Routes() {
           <Route path={`${Paths.Product}/:prd_id`} element={<Product />} />
           <Route path={Paths.Cart} element={<Cart />} />
           <Route element={<ProtectedRoute />}>
-            <Route path={`${Paths.Profile}/:pg`} element={<ProfilePage />} />
+            <Route
+              path={`${Paths.Profile}/:pg/:sec?`}
+              element={<ProfilePage />}
+            />
           </Route>
           <Route element={<AdminProtectedRoute />}>
             <Route

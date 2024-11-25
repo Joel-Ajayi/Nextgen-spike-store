@@ -162,7 +162,7 @@ model Order {
   userId          String      @db.ObjectId
   user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   shippingAddress String      @db.ObjectId
-  paymentStatus   Int         @default(0) // 0-PENDING 1-CANCELLED 2-REFUNDED 3-COMPLETED
+  paymentStatus   Int         @default(0) // 0-PENDING 2-REFUNDED 3-COMPLETED
   paymentMethod   Int //0- card, 1-cod - 2-all
   status          Int         @default(0) //0-ORDERED 1-PACKED 2-SHIPPED 3-DELIVERED
   shippingAmount  Int
