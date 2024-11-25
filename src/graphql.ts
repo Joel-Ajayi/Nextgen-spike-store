@@ -9,7 +9,7 @@ import resolvers from "./schema/resolvers";
 export default async (app: any) => {
   const isProduction = process.env.NODE_ENV === "production";
   const cors = {
-    origin: isProduction ? undefined : consts.request.origins,
+    origin: consts.request.origins,
     credentials: true,
     methods: consts.request.methods,
   };
