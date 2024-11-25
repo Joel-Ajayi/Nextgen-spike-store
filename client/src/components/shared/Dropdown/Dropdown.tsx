@@ -326,7 +326,7 @@ export default function Dropdown({
               onSelect={() => onChildSelect(`${i}`)}
               pos={item?.childPos || childPos}
               childPos={item?.childPos || childPos}
-              items={item.items}
+              items={item?.items}
               showTitle={item?.showTitle}
               rootRef={isRoot ? myRefState : rootRef}
               listOnHover={listOnHover}

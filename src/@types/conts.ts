@@ -73,11 +73,7 @@ const consts = {
   request: {
     paginationTake: 30,
     methods: ["POST", "GET"],
-    origins: [
-      "http://localhost:3000",
-      "https://nextgen-store-5f0bea566c44.herokuapp.com",
-      "https://studio.apollographql.com",
-    ],
+    origins: ["http://localhost:3000", "https://studio.apollographql.com"],
   },
   messages: {
     signedIn: "Signed in",

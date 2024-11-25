@@ -1,4 +1,3 @@
-import { Application } from "express";
 import { ApolloServer } from "apollo-server-express";
 import "dotenv/config";
 import { appContext as context } from "./schema/context";
@@ -9,7 +8,7 @@ import resolvers from "./schema/resolvers";
 export default async (app: any) => {
   const isProduction = process.env.NODE_ENV === "production";
   const cors = {
-    origin: consts.request.origins,
+    origin: isProduction ? undefined : consts.request.origins,
     credentials: true,
     methods: consts.request.methods,
   };

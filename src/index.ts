@@ -29,6 +29,7 @@ declare module "express-session" {
 }
 
 (async () => {
+  const isProduction = NODE_ENV === "production";
   // init session store
   const sessionStore = await initSessionStore();
 
@@ -37,6 +38,9 @@ declare module "express-session" {
   app.use(express.urlencoded({ extended: true }));
   app.use(express.json());
   app.use(cookieParser());
+  if (isProduction) {
+    app.set("trust proxy", 1);
+  }
   app.use(graphqlUpload({ maxFileSize: consts.files.vdSize, maxFiles: 4 }));
   if (NODE_ENV !== "production") app.use(morgan("dev"));
 
@@ -52,22 +56,15 @@ declare module "express-session" {
       cookie: {
         httpOnly: true,
         maxAge: 1000 * parseInt(SESSION_LIFETIME as string),
-        sameSite: NODE_ENV === "production",
+        sameSite: isProduction,
         secure: true,
       },
     })
   );
 
-  // const options = {
-  //   key: fs.readFileSync(join(__dirname, "../../../key.pem")),
-  //   cert: fs.readFileSync(join(__dirname, "../../../cert.pem")),
-  // };
-  // const httpServer = https.createServer(options, app);
-
   // graphql servers
   await graphql(app);
   app.use(express.static(path.join(__dirname, "../client/build")));
-
   app.use("/uploads/:folder/:filename?", async (req, res) => {
     const { folder, filename } = req.params;
     let baseUrl = `https://res.cloudinary.com/${process.env.IMG_NAME}/image/upload/v1708502714/Profile_Store/${folder}`;
@@ -89,7 +86,18 @@ declare module "express-session" {
     res.sendFile(path.join(__dirname, "../client/build/index.html"));
   });
 
-  app.listen(PORT, () =>
-    console.log(`Server started at PORT ${process.env.PORT}`)
-  );
+  if (!isProduction) {
+    const options = {
+      key: fs.readFileSync(join(__dirname, "../../../key.pem")),
+      cert: fs.readFileSync(join(__dirname, "../../../cert.pem")),
+    };
+    const httpServer = https.createServer(options, app);
+    httpServer.listen(PORT, () =>
+      console.log(`Server started at PORT ${process.env.PORT}`)
+    );
+  } else {
+    app.listen(PORT, () =>
+      console.log(`Server started at PORT ${process.env.PORT}`)
+    );
+  }
 })();
