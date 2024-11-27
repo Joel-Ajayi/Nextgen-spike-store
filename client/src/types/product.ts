@@ -1,5 +1,6 @@
 import { APIPagination, Brand, IFile, Pagination } from ".";
 import { CategoryFeature, CategoryMini, CategoryOffer } from "./category";
+import { Address } from "./user";
 
 export enum ProductsPageParams {
   SortBy = "",
@@ -139,15 +140,6 @@ export type QueryCatalogParams = {
   filters: { id: string; options: string[] }[];
 };
 
-// export interface Order extends Cart {
-//   id: string;
-//   shippingAddress: string;
-//   paymentStatus: string;
-//   paymentMethod: string;
-//   status: string;
-//   createdAt: string;
-// }
-
 export type Cart = {
   items: (CartItem | null)[];
   shippingAmount: number;
@@ -191,6 +183,59 @@ export type ProductReview = {
   date: string;
   editAble: boolean;
 };
+
 export type ProductReviews = {
   reviews: APIPagination<ProductReview>;
+};
+
+export type OrderItem = {
+  id: string;
+  image: string;
+  qty: number;
+  price: number;
+  name: string;
+  rating: number;
+};
+
+export type OrderUser = {
+  email: string;
+  name: string;
+};
+export type OrderStatus = {
+  status: string;
+  createdAt: string;
+  ok: boolean;
+  msg: string;
+};
+
+export interface OrderMini {
+  id: string;
+  createdAt: string;
+  pId: string;
+  user: OrderUser;
+  payStatus: OrderStatus;
+  status: OrderStatus;
+  payMethod: string;
+  items: {
+    image: string;
+    id: string;
+    name: string;
+    qty: number;
+  }[];
+  totalAmount: number;
+}
+
+export type Order = {
+  id: string;
+  pId: string;
+  user: OrderUser;
+  payMethod: string;
+  statuses: OrderStatus[];
+  payStatuses: OrderStatus[];
+  address: Address;
+  items: OrderItem[];
+  shippingAmount: number;
+  subTotalAmount: number;
+  totalAmount: number;
+  createdAt: string;
 };

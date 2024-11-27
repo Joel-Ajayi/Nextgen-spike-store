@@ -12,7 +12,7 @@ export const initialCatalogState: CatalogStateType = {
   products: {
     page: 1,
     list: { 0: [null, null, null, null, null, null, null, null] },
-    count: 16,
+    count: 0,
     skip: 0,
     take: 16,
     numPages: 1,

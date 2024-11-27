@@ -5,6 +5,7 @@ import { CategoryOfferType } from "../@types/categories";
 import { GraphQLError } from "graphql";
 import colours from "../db/colours";
 import { Types } from "mongoose";
+import { OrderStatus, PaymentStatus } from "../@types/products";
 
 class Helpers {
   public verifyJWT = async (token: any, secret: any) => {
@@ -166,6 +167,48 @@ class Helpers {
     const page = Math.ceil((skip + take) / take);
     const numPages = Math.ceil(count / take);
     return { skip, page, numPages, take, count };
+  };
+
+  public getOrderPayMsg = (status: number) => {
+    switch (status) {
+      case PaymentStatus.PENDING:
+        return "Payment not yet confirmed from bank";
+      case PaymentStatus.PAID:
+        return "Payment has been Confirmed";
+      case PaymentStatus.REFUNDED:
+        return "Payment has been Refunded";
+      default:
+        return "";
+    }
+  };
+
+  public getOrderMsg = (status: number) => {
+    switch (status) {
+      case OrderStatus.ORDERED:
+        return "Ordered is Pending";
+      case OrderStatus.DELIVERED:
+        return "Order has been Delivered on";
+      case OrderStatus.SHIPPED:
+        return "Order has been Shipped on";
+      case OrderStatus.PACKED:
+        return "Order has been Packed on";
+      case OrderStatus.CANCELED:
+        return "Order has been Canceled on";
+      default:
+        return "";
+    }
+  };
+
+  public error = (error: unknown) => {
+    if (error instanceof GraphQLError) {
+      throw new GraphQLError(error.message, {
+        extensions: { statusCode: error.extensions.statusCode },
+      });
+    } else {
+      throw new GraphQLError(consts.errors.server, {
+        extensions: { statusCode: 500 },
+      });
+    }
   };
 }
 

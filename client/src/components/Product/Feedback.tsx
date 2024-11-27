@@ -30,7 +30,7 @@ function FeedbackForm({ index }: { index: number }) {
     if (!review.editAble) return;
     const newReview = {
       ...review,
-      date: new Date().toLocaleDateString(),
+      date: new Date().toDateString(),
       [name]: value,
     };
     dispatch(

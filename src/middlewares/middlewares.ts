@@ -17,6 +17,23 @@ class MiddleWare {
     }
   }
 
+  public checkOrderUser(ctx: Context) {
+    this.checkUser(ctx);
+    if (
+      !(
+        ctx.user.roles.includes(Roles.Order) ||
+        ctx.user.roles.includes(Roles.Global) ||
+        ctx.user.roles.includes(Roles.SuperAdmin)
+      )
+    ) {
+      throw new GraphQLError(consts.errors.unAuthorized, {
+        extensions: {
+          statusCode: 403,
+        },
+      });
+    }
+  }
+
   public checkSuperAdmin(ctx: Context) {
     this.checkUser(ctx);
     const roles = ctx.user?.roles;

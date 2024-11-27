@@ -145,9 +145,9 @@ model Reviews {
 }
 
 model Address {
-  id          String @id @default(auto()) @map("_id") @db.ObjectId
-  userId      String @db.ObjectId
-  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id          String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId      String  @db.ObjectId
+  user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   name        String
   state       String
   city        String
@@ -155,22 +155,40 @@ model Address {
   address     String
   addressType Int //0-HOME 1-WORK
   tel         Int
+  Order       Order[]
 }
 
 model Order {
-  id              String      @id @default(auto()) @map("_id") @db.ObjectId
-  userId          String      @db.ObjectId
-  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  shippingAddress String      @db.ObjectId
-  paymentStatus   Int         @default(0) // 0-PENDING 2-REFUNDED 3-COMPLETED
-  paymentMethod   Int //0- card, 1-cod - 2-all
-  status          Int         @default(0) //0-ORDERED 1-PACKED 2-SHIPPED 3-DELIVERED
-  shippingAmount  Int
-  subTotalAmount  Int
-  pId             String
-  totalAmount     Int
-  items           OrderItem[]
-  createdAt       DateTime    @default(now())
+  id             String        @id @default(auto()) @map("_id") @db.ObjectId
+  userId         String        @db.ObjectId
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  addressId      String        @db.ObjectId
+  address        Address       @relation(fields: [addressId], references: [id])
+  payStatuses    PayStatus[] // 0-PENDING 2-REFUNDED 3-COMPLETED
+  payMethod      Int //0- card, 1-cod - 2-all
+  statuses       OrderStatus[] //0-ORDERED 1-PACKED 2-SHIPPED 3-DELIVERED
+  shippingAmount Int
+  subTotalAmount Int
+  pId            String
+  totalAmount    Int
+  items          OrderItem[]
+  createdAt      DateTime      @default(now())
+}
+
+model PayStatus {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  status    Int      @default(0) //0-PENDING 2-REFUNDED 3-COMPLETED
+  orderId   String   @db.ObjectId
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model OrderStatus {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  status    Int      @default(0) //0-ORDERED 1-PACKED 2-SHIPPED 3-DELIVERED
+  orderId   String   @db.ObjectId
+  order     Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
 }
 
 model OrderItem {
@@ -180,5 +198,5 @@ model OrderItem {
   orderId   String  @db.ObjectId
   order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId String  @db.ObjectId
-  product   Product @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 }

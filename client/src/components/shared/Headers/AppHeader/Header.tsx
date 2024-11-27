@@ -48,11 +48,6 @@ export const authItems = {
       title: "Orders",
       link: () => `${Paths.Profile}/${UserPaths.Orders}`,
     },
-    {
-      Icon: MailsIcon,
-      title: "Notifications",
-      link: () => `${Paths.Profile}/${UserPaths.Notifications}`,
-    },
   ],
 } as DropdownProps;
 
@@ -334,15 +329,6 @@ export default function Header() {
               align="c"
               showCaret={false}
             />
-            {isAuthenticated && (
-              <Link
-                to={`/${Paths.Profile}?pg=${UserPaths.Notifications}`}
-                className={Styles.mail}
-              >
-                <MailsIcon className={Styles.icon} />
-                <span>Mails</span>
-              </Link>
-            )}
             <Link to={Paths.WishList} className={Styles.whish}>
               <FavoriteIcon className={Styles.icon} />
               <span>Whishlist</span>

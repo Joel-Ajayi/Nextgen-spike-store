@@ -11,6 +11,7 @@ import uniqId from "uniqid";
 function Addresses({ isSelection = false }: { isSelection?: boolean }) {
   const dispatch = useDispatch();
   const addresses = useAppSelector((state) => state.user.addresses);
+  const isAuthenticated = useAppSelector((state) => state.user.isAuthenticated);
   const addAddress = userSlice.actions.addAddress;
   const isRendered = useRef(false);
 
@@ -28,8 +29,9 @@ function Addresses({ isSelection = false }: { isSelection?: boolean }) {
   }, [addresses.length]);
 
   useEffect(() => {
-    if (!addresses.length && !isRendered.current) addDummyAddress();
-  }, []);
+    if (!addresses.length && !isRendered.current && isAuthenticated)
+      addDummyAddress();
+  }, [isAuthenticated]);
 
   return (
     <div className={ProfileStyles.wrapper}>

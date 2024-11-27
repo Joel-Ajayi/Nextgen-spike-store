@@ -11,6 +11,7 @@ import {
   Order_I,
   PaymentType,
   InitPayment,
+  OrderStatus,
 } from "../../../@types/products";
 import { validator } from "../../../helpers/validator";
 import helpers from "../../../helpers";
@@ -497,10 +498,9 @@ const resolvers = {
         const response = await axios.post<InitPayment>(
           consts.product.payment.init,
           {
-            email: "yott4y@gmail.com",
+            email: ctx.user.email,
             amount: sumary.totalAmount,
             channels: consts.product.payment.channels,
-            callback_url: `${ctx.req.protocol}://${ctx.req.get("host")}`,
           },
           {
             headers: {
@@ -516,8 +516,8 @@ const resolvers = {
       const order = await ctx.db.order.create({
         data: {
           ...sumary,
-          shippingAddress: data.shippingAddress,
-          paymentMethod: data.paymentMethod,
+          addressId: data.shippingAddress,
+          payMethod: data.paymentMethod,
           userId: ctx.user.id,
           pId,
         },

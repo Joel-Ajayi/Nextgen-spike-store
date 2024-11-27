@@ -16,6 +16,8 @@ type Query {
   QueryReviews(prd_id:String!, skip:Int!, take:Int!):Pagination!
   UserQuery: User
   GetCartItems(ids:[String!]!, qtys:[Int!]!):CartPageData!
+  QueryOrders(skip:Int!, search:String!, take:Int!, isAll:Boolean!, count:Int!):Pagination!
+  QueryOrder(id:String!, isAll:Boolean!):Order!
 }
 
 type Mutation {
@@ -470,6 +472,32 @@ input Address_I {
     tel: String!
 }
 
+
+  type Order {
+    id:String!
+    pId:String!
+    user:OrderUser!
+    payMethod:String!
+    statuses:[OrderStatus!]!
+    payStatuses:[OrderStatus!]!
+    items:[OrderItem!]!
+    address:Address!
+    subTotalAmount: Int!
+    shippingAmount:Int!
+    totalAmount: Int!
+    createdAt:String!
+  }
+
+  type OrderItem {
+    id:String!
+    image:String!
+    qty:Int!
+    price:Int!
+    name:String!
+    rating:Int!
+  }
+
+
   type OnCreateOrder {
     orderId:String!
     access_code:String!
@@ -480,6 +508,18 @@ input Address_I {
     paymentMethod:Int!
     itemIds:[String!]!
     itemQtys:[Int!]!
+  }
+
+  type OrderUser {
+    email:String!
+    name:String!
+  }
+
+  type OrderStatus {
+    status:String!
+    createdAt:String!
+    ok:Boolean!
+    msg:String!
   }
 `;
 

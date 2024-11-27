@@ -2,7 +2,6 @@ export enum UserPaths {
   Account = "account",
   Orders = "Orders",
   Addresses = "Addresses",
-  Notifications = "mail",
 }
 
 export enum SignInFieds {

@@ -126,8 +126,8 @@ export enum OrderStatus {
   ORDERED,
   PACKED,
   SHIPPED,
-  RETURNED,
   DELIVERED,
+  CANCELED,
 }
 
 export enum CatalogQuery {

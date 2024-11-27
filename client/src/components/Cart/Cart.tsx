@@ -10,12 +10,14 @@ import { useDispatch } from "react-redux";
 import cartSlice, { cartInitialState } from "../../store/cart";
 import CartProductCard from "../shared/Products/CartProductCard/CartProductCard";
 import { Link, useNavigate } from "react-router-dom";
-import { Paths } from "../../types";
+import { MessageType, Paths, StatusCodes } from "../../types";
 import { MdOutlineKeyboardBackspace } from "react-icons/md";
 import PaystackPop from "@paystack/inline-js";
 import uniqId from "uniqid";
 import productReq from "../../requests/product";
 import { UserPaths } from "../../types/user";
+import appSlice from "../../store/appState";
+import ordersReq from "../../requests/order";
 
 function Cart() {
   const dispatch = useDispatch();
@@ -41,58 +43,75 @@ function Cart() {
   }, []);
 
   const onCheckout = () => {
-    dispatch(cartSlice.actions.setIsCheckout());
-    setTimeout(() => {
-      if (scrollRef1.current && scrollRef2.current) {
-        scrollRef1.current.scrollTo({
-          top: scrollRef1.current.scrollHeight,
-          behavior: "smooth",
-        });
-        scrollRef2.current.scrollTo({
-          top: scrollRef1.current.scrollHeight,
-          behavior: "smooth",
-        });
-      }
-    }, 100);
-  };
-
-  const placeOrder = async () => {
     if (!isAuthenticated) {
       navigate(`${Paths.SignIn}?redirect=cart`, {
         replace: false,
       });
       return;
     } else {
-      setIsOrdering(true);
-      const res = await productReq.createOrder(
-        addressId,
-        cart.paymentMethod,
-        (cart.items as CartItem[]).map((i) => i.id),
-        (cart.items as CartItem[]).map((i) => i.qty)
-      );
-
-      if (res) {
-        dispatch(cartSlice.actions.setCart({ ...cartInitialState, items: [] }));
-        helpers.deleteCart();
-        const redirect = `${Paths.Profile}/${UserPaths.Orders}/${res.orderId}`;
-
-        // paystack
-        if (res.access_code) {
-          const popup = new PaystackPop();
-          popup.resumeTransaction(res.access_code as any);
-          payInterval = setInterval(() => {
-            const isOpened = (popup as any).isOpen;
-            if (!isOpened && (popup as any).isLoaded) {
-              clearInterval(payInterval as NodeJS.Timeout);
-              navigate(redirect, { replace: false });
-            }
-          }, 500);
-        } else {
-          navigate(redirect, { replace: false });
+      dispatch(cartSlice.actions.setIsCheckout());
+      setTimeout(() => {
+        if (scrollRef1.current && scrollRef2.current) {
+          scrollRef1.current.scrollTo({
+            top: scrollRef1.current.scrollHeight,
+            behavior: "smooth",
+          });
+          scrollRef2.current.scrollTo({
+            top: scrollRef1.current.scrollHeight,
+            behavior: "smooth",
+          });
         }
-      }
-      setIsOrdering(false);
+      }, 100);
     }
+  };
+
+  const placeOrder = async () => {
+    setIsOrdering(true);
+    const res = await ordersReq.createOrder(
+      addressId,
+      cart.paymentMethod,
+      (cart.items as CartItem[]).map((i) => i.id),
+      (cart.items as CartItem[]).map((i) => i.qty)
+    );
+
+    if (res) {
+      dispatch(cartSlice.actions.setCart({ ...cartInitialState, items: [] }));
+      helpers.deleteCart();
+      const redirect = `${Paths.Profile}/${UserPaths.Orders}/${res.orderId}`;
+
+      // paystack
+      if (res.access_code) {
+        const popup = new PaystackPop();
+        const popupRes = popup.resumeTransaction(res.access_code as any);
+        payInterval = setInterval(() => {
+          const isOpened = (popup as any).isOpen;
+          const isSuccess = !!(popupRes as any).status;
+          if (!isOpened && (popup as any).isLoaded) {
+            clearInterval(payInterval as NodeJS.Timeout);
+            dispatch(
+              appSlice.actions.setBackgroundMsg({
+                msg: `New Order Created Successfully! ${
+                  !isSuccess ? `\nPayment is Pending` : ""
+                }`,
+                statusCode: StatusCodes.Ok,
+                type: isSuccess ? MessageType.Success : MessageType.Error,
+              })
+            );
+            navigate(redirect, { replace: false });
+          }
+        }, 500);
+      } else {
+        navigate(redirect, { replace: false });
+        dispatch(
+          appSlice.actions.setBackgroundMsg({
+            msg: "New Order Created Successfully!",
+            statusCode: StatusCodes.Ok,
+            type: MessageType.Success,
+          })
+        );
+      }
+    }
+    setIsOrdering(false);
   };
 
   const jsxItems = useMemo(

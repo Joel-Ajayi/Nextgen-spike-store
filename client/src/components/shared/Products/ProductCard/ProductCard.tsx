@@ -68,6 +68,7 @@ function ProductCard({ product }: Props) {
         </div>
       </Link>
       <AddToCart
+        btnSize={30}
         id={product?.id || ""}
         maxQty={product?.count || 0}
         isLoading={!product}

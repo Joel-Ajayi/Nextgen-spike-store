@@ -153,35 +153,6 @@ class ProductReq {
     const res = await request.makeRequest<CartPageData>(body);
     return res;
   }
-
-  public async createOrder(
-    address: string,
-    payment: number,
-    ids: string[],
-    qtys: number[]
-  ) {
-    const items = helpers.getCart();
-    let query = `mutation CreateOrder($data:Order_I!) {
-      CreateOrder(data:$data) { orderId access_code }
-    }`;
-    const body = JSON.stringify({
-      query,
-      variables: {
-        data: {
-          shippingAddress: address,
-          paymentMethod: payment,
-          itemIds: ids,
-          itemQtys: qtys,
-        },
-      },
-    });
-
-    const res = await request.makeRequest<{
-      access_code: string;
-      orderId: string;
-    }>(body);
-    return res;
-  }
 }
 
 const productReq = new ProductReq();

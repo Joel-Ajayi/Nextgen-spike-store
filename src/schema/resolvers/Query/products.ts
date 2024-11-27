@@ -5,7 +5,9 @@ import middleware from "../../../middlewares/middlewares";
 
 import {
   CatalogSortQueries,
-  PaymentType,
+  OrderStatus,
+  PaymentStatus as PayStatus,
+  PaymentType as PaymentTypes,
   Product,
   ProductMini,
   QueryCatalog,
@@ -151,7 +153,7 @@ const resolvers = {
         select: { name: true, image: true },
       });
 
-      const payments = helpers.getObjKeys<string>(PaymentType);
+      const payments = helpers.getObjKeys<string>(PaymentTypes);
       const featureTypes = helpers.getObjKeys<string>(CategoryFeatureType);
 
       let categoriesPath: string[] = [];
@@ -226,15 +228,15 @@ const resolvers = {
       let shippingAmount = consts.product.shippingAmount;
       let subTotalAmount = 0;
 
-      const paymentMethods = helpers.getObjKeys<string>(PaymentType);
+      const paymentMethods = helpers.getObjKeys<string>(PaymentTypes);
 
       const items = products.map(({ images, paymentType, ...prd }) => {
         const discountPrice = Number(
           (((100 - prd.discount) / 100) * prd.price).toFixed(0)
         );
-        // if (paymentType === PaymentType.CARD_OR_BANK) {
-        //   paymentMethods.splice(PaymentType.CASH_ON_DELIVERY, 1);
-        // }
+        if (paymentType === PaymentTypes.Cash_On_Delivery) {
+          paymentMethods.splice(PaymentTypes.Cash_On_Delivery, 1);
+        }
         subTotalAmount += discountPrice * data[prd.id];
         return {
           ...prd,
@@ -536,6 +538,236 @@ const resolvers = {
         updatedAt: undefined,
       })),
     };
+  },
+  QueryOrders: async (
+    _: any,
+    data: {
+      skip: number;
+      search: "";
+      take: number;
+      isAll: boolean;
+      count: number;
+    },
+    ctx: Context
+  ) => {
+    if (data.isAll) {
+      middleware.checkOrderUser(ctx);
+    } else {
+      middleware.checkUser(ctx);
+    }
+
+    try {
+      const dbQuery: Prisma.OrderWhereInput = {
+        OR: data.search
+          ? [
+              {
+                pId: { mode: "insensitive", contains: data.search },
+              },
+              {
+                user: {
+                  email: { mode: "insensitive", contains: data.search },
+                },
+              },
+            ]
+          : undefined,
+        userId: !data.isAll ? ctx.user.id : undefined,
+      };
+
+      const count =
+        data.count ||
+        (await ctx.db.order.count({
+          where: dbQuery,
+          orderBy: { createdAt: "desc" },
+        }));
+
+      const orders = await ctx.db.order.findMany({
+        where: dbQuery,
+        skip: data.skip,
+        take: data.take,
+        select: {
+          id: true,
+          pId: true,
+          user: { select: { fName: true, lName: true, email: true } },
+          items: {
+            select: {
+              qty: true,
+              product: {
+                select: {
+                  id: true,
+                  name: true,
+                  images: true,
+                },
+              },
+            },
+          },
+          payMethod: true,
+          payStatuses: { select: { createdAt: true, status: true } },
+          statuses: { select: { createdAt: true, status: true } },
+          totalAmount: true,
+          createdAt: true,
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      const payStatus = helpers.getObjKeys<string>(PayStatus);
+      const orderStatus = helpers.getObjKeys<string>(OrderStatus);
+      const payMethods = helpers.getObjKeys<string>(PaymentTypes);
+
+      const mapedOrders = orders.map(
+        ({ user, payStatuses, statuses, items, ...o }) => {
+          const currStatus = !statuses.length
+            ? { createdAt: o.createdAt, status: PayStatus.PENDING }
+            : statuses.sort((a, b) => b.status - a.status)[0];
+          const currPayStatus = !payStatuses.length
+            ? { createdAt: o.createdAt, status: PayStatus.PENDING }
+            : payStatuses.sort((a, b) => b.status - a.status)[0];
+
+          return {
+            ...o,
+            createdAt: o.createdAt.toDateString(),
+            user: { name: `${user.fName} ${user.lName}` },
+            payMethod: payMethods[o.payMethod],
+            payStatus: {
+              status: payStatus[currPayStatus.status],
+              createdAt: currPayStatus.createdAt.toDateString(),
+              ok: PayStatus.PAID === currPayStatus.status,
+              msg: helpers.getOrderPayMsg(currPayStatus.status),
+            },
+            status: {
+              status: orderStatus[currStatus.status],
+              createdAt: currStatus.createdAt.toDateString(),
+              ok: OrderStatus.DELIVERED === currStatus.status,
+              msg: helpers.getOrderMsg(currStatus.status),
+            },
+            items: items.map(({ product: { images, ...prd }, ...i }) => ({
+              ...i,
+              ...prd,
+              image: images[0],
+            })),
+          };
+        }
+      );
+
+      return {
+        list: mapedOrders,
+        ...helpers.paginate(count, data.take, data.skip),
+      };
+    } catch (error) {
+      console.log(error);
+      helpers.error(error);
+    }
+  },
+  QueryOrder: async (
+    _: any,
+    data: { id: string; isAll: boolean },
+    ctx: Context
+  ) => {
+    if (data.isAll) {
+      middleware.checkOrderUser(ctx);
+    } else {
+      middleware.checkUser(ctx);
+    }
+
+    try {
+      const order = await ctx.db.order.findUnique({
+        where: {
+          id: helpers.getValidId(data.id),
+          userId: data.isAll ? undefined : ctx.user.id,
+        },
+        select: {
+          id: true,
+          pId: true,
+          user: { select: { email: true, fName: true, lName: true } },
+          items: {
+            select: {
+              price: true,
+              qty: true,
+              product: {
+                select: { name: true, id: true, rating: true, images: true },
+              },
+            },
+          },
+          statuses: { select: { createdAt: true, status: true } },
+          payMethod: true,
+          payStatuses: true,
+          totalAmount: true,
+          subTotalAmount: true,
+          shippingAmount: true,
+          address: {
+            select: {
+              id: true,
+              name: true,
+              state: true,
+              city: true,
+              locality: true,
+              address: true,
+              addressType: true,
+              tel: true,
+            },
+          },
+          createdAt: true,
+        },
+      });
+
+      if (!order) {
+        throw new GraphQLError("Order Does not Exist", {
+          extensions: { statusCode: 400 },
+        });
+      }
+
+      const payMethods = helpers.getObjKeys<string>(PaymentTypes);
+      const payStatuses = helpers.getObjKeys<string>(PayStatus);
+      const orderStatuses = helpers.getObjKeys<string>(OrderStatus);
+
+      return {
+        ...order,
+        createdAt: order.createdAt.toDateString(),
+        user: {
+          email: order.user.email,
+          name: `${order.user.fName} ${order.user.lName}`,
+        },
+        payMethod: payMethods[order.payMethod],
+        address: {
+          ...order.address,
+          isNew: false,
+          tel: order.address.tel
+            .toString()
+            .replace(/(\d{4})(\d{3})(\d{4})/, "$1 $2 $3"),
+        },
+        payStatuses: payStatuses.map((status, index) => {
+          const savedStatus =
+            index === PayStatus.PENDING
+              ? order.createdAt
+              : order.payStatuses.find((s) => s.status === index)?.createdAt;
+          return {
+            status,
+            createdAt: savedStatus?.toDateString() || "",
+            msg: "",
+            ok: !!savedStatus,
+          };
+        }),
+        statuses: orderStatuses.map((status, index) => {
+          const savedStatus =
+            index === OrderStatus.ORDERED
+              ? order.createdAt
+              : order.statuses.find((s) => s.status === index)?.createdAt;
+          return {
+            status,
+            createdAt: savedStatus?.toDateString() || "",
+            msg: "",
+            ok: !!savedStatus,
+          };
+        }),
+        items: order.items.map(({ product: { images, ...prd }, ...i }) => ({
+          ...i,
+          ...prd,
+          image: images[0],
+        })),
+      };
+    } catch (error) {
+      console.log(error);
+      helpers.error(error);
+    }
   },
 };
 

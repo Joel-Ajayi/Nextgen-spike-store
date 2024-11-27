@@ -6,6 +6,7 @@ import brandSlice from "./controller/brands";
 import catalogSlice from "./catalog";
 import productSlice from "./product";
 import cartSlice from "./cart";
+import ordersSlice from "./order";
 
 const store = configureStore({
   reducer: {
@@ -15,6 +16,7 @@ const store = configureStore({
     controller: controller,
     catalog: catalogSlice.reducer,
     product: productSlice.reducer,
+    orders: ordersSlice.reducer,
     cart: cartSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
