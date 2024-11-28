@@ -550,6 +550,7 @@ const resolvers = {
     },
     ctx: Context
   ) => {
+    console.log(data.search);
     if (data.isAll) {
       middleware.checkOrderUser(ctx);
     } else {
@@ -625,7 +626,7 @@ const resolvers = {
           return {
             ...o,
             createdAt: o.createdAt.toDateString(),
-            user: { name: `${user.fName} ${user.lName}` },
+            user: { name: `${user.fName} ${user.lName}`, email: user.email },
             payMethod: payMethods[o.payMethod],
             payStatus: {
               status: payStatus[currPayStatus.status],
@@ -711,7 +712,7 @@ const resolvers = {
 
       if (!order) {
         throw new GraphQLError("Order Does not Exist", {
-          extensions: { statusCode: 400 },
+          extensions: { statusCode: 404 },
         });
       }
 

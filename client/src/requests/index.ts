@@ -5,21 +5,18 @@ import { dispatch } from "../store";
 import appSlice from "../store/appState";
 interface ApiErrorOptions extends ErrorOptions {
   statusCode: number;
+  code: string;
 }
 
 export class ApiError extends Error {
   public statusCode: number;
+  public code: string;
   constructor(message: string, options: ApiErrorOptions) {
     super(message, { cause: options?.cause });
-    this.statusCode = options?.statusCode;
+    this.statusCode = options.statusCode;
+    this.code = options.code;
   }
 }
-
-export type ThrownError = {
-  statusCode: StatusCodes;
-  message: string;
-  code: string;
-};
 
 class Requests {
   public async getImageFiles(paths: string[]) {
@@ -56,11 +53,15 @@ class Requests {
       if (res.data?.errors?.length) {
         errFromServer = true;
         throw new ApiError(res.data.errors[0].message, {
-          statusCode: res.data.errors[0].statusCode,
+          statusCode: res.data.errors[0].extensions.statusCode,
+          code: res.data.errors[0].extensions.code,
         });
       }
 
       const resData = Object.values(res.data?.data as Object)[0] as T;
+
+      dispatch(appSlice.actions.setStatusCode(StatusCodes.Ok));
+
       if ((resData as any)?.message) {
         dispatch(
           appSlice.actions.setBackgroundMsg({
@@ -73,14 +74,13 @@ class Requests {
 
       return resData;
     } catch (error) {
-      const err = error as ThrownError;
-      let msg: IMessage | null = null;
-      const t = (error as any)?.response?.request?.responseText;
-      console.log(t);
+      const err = error as ApiError;
+      console.log((error as any)?.response?.request?.responseText);
 
       dispatch(appSlice.actions.setStatusCode(err.statusCode));
 
       if (showMsg) {
+        let msg: IMessage | null = null;
         if (errFromServer) {
           msg = {
             msg: err.message,

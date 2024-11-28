@@ -1,15 +1,21 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  ChangeEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import ordersReq from "../../../requests/order";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
-import ordersSlice from "../../../store/order";
+import ordersSlice from "../../../store/controller/orders";
 import Styles from "./Styles.module.scss";
-import ProfileStyles from "./../Styles.module.scss";
 import Pagination from "../../shared/Pagination/Pagination";
 import uniqId from "uniqid";
+import ControllerStyles from "./../controller.module.scss";
 import OrderCard from "../../shared/Products/OrderCard/OrderCard";
 import OrderSearch from "../../shared/Input/OrderSearch/OrderSearch";
 
-function Orders() {
+function OrderListing() {
   const dispatch = useAppDispatch();
   const orders = useAppSelector((state) => state.orders.orders);
 
@@ -29,8 +35,8 @@ function Orders() {
         skip,
         orders.search,
         orders.take,
-        false,
-        paginate ? orders.count : 0
+        true,
+        orders.count
       );
       if (data) {
         if (paginate) {
@@ -59,27 +65,25 @@ function Orders() {
   const memoizedOrders = useMemo(
     () =>
       orders.list[isLoading ? 0 : orders.page].map((o, i) => (
-        <OrderCard key={uniqId()} order={o} />
+        <OrderCard key={uniqId()} order={o} isController />
       )),
     [isLoading, orders.page]
   );
 
   return (
-    <div className={ProfileStyles.wrapper}>
-      <div className={ProfileStyles.sec_header}>
-        <div className={ProfileStyles.header_content}>
-          <div className={ProfileStyles.title}>My Orders</div>
+    <div className={ControllerStyles.wrapper}>
+      <div className={ControllerStyles.sec_header}>
+        <div className={ControllerStyles.header_content}>
+          <div className={ControllerStyles.title}>Orders</div>
         </div>
       </div>
-      <div className={ProfileStyles.content}>
-        <div className={ProfileStyles.inner_content}>
-          <OrderSearch />
-          <div className={Styles.my_orders}>{memoizedOrders}</div>
-          <Pagination path="orders.orders" callBack={getOrders} />
-        </div>
+      <div className={Styles.content}>
+        <OrderSearch isController />
+        <div className={Styles.my_orders}>{memoizedOrders}</div>
+        <Pagination path="controller.orders.orders" callBack={getOrders} />
       </div>
     </div>
   );
 }
 
-export default Orders;
+export default OrderListing;

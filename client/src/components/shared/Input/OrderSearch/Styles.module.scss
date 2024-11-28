@@ -1,0 +1,30 @@
+@import "../../../../styles/vars.scss";
+@import "../../../../styles/mixins.scss";
+
+.wrapper {
+  @include desktop-wrapper;
+  .input_wrapper {
+    display: flex;
+    align-items: center;
+    position: relative;
+    column-gap: 0.6rem;
+    height: 36px;
+    border-bottom: 1px solid $color-gray8;
+
+    .input {
+      outline: none;
+      border: none;
+      background-color: transparent;
+      flex: 1;
+      font-size: 0.9rem !important;
+      font-weight: 500;
+    }
+
+    .cancel_search {
+      cursor: pointer;
+      font-size: 1.2rem;
+      stroke: $brand-color;
+      margin-left: auto;
+    }
+  }
+}

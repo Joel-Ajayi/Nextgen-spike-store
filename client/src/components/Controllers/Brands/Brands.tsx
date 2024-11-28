@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
-import { PageSections } from "../../../types/controller";
+import { Navigate, useParams, useSearchParams } from "react-router-dom";
+import { ControllerPaths, PageSections } from "../../../types/controller";
 import CreateBrand from "./CreateBrand/CreateBrand";
 import Page404 from "../../shared/Page404/Page404";
 import BrandListing from "./BrandListing/BrandListing";
@@ -20,7 +20,12 @@ function Brands() {
       case PageSections.BrdListing:
         return <BrandListing />;
       default:
-        return <Page404 />;
+        return (
+          <Navigate
+            to={`/controller/${ControllerPaths.Brand}/${PageSections.BrdListing}`}
+            replace
+          />
+        );
     }
   }, [sec]);
 

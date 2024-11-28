@@ -1,7 +1,16 @@
-import React from "react";
+import React, { useMemo } from "react";
+import OrderListing from "./OrderListing";
+import { useParams } from "react-router-dom";
+import Order from "../../shared/Order/Order";
 
 function Orders() {
-  return <div>Orders</div>;
+  let { sec } = useParams();
+
+  const currentPage = useMemo(
+    () => (sec ? <Order isController /> : <OrderListing />),
+    [sec]
+  );
+  return currentPage;
 }
 
 export default Orders;

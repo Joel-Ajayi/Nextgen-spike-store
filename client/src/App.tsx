@@ -115,7 +115,7 @@ function Routes() {
           </Route>
           <Route element={<AdminProtectedRoute />}>
             <Route
-              path={`${Paths.Controller}/:pg?/:sec?`}
+              path={`${Paths.Controller}/:pg/:sec?`}
               element={<ControllerPage />}
             />
           </Route>

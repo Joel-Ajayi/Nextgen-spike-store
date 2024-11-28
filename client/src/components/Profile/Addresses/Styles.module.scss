@@ -1,21 +1,21 @@
 @import "../../../styles/vars.scss";
+@import "../../../styles/mixins.scss";
+
 .cover {
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  @include scrollbar;
+  @include desktop-wrapper;
+
   & > div {
     &.addresses,
     &.add_address {
       width: 100%;
       border-radius: 0.4rem;
       background-color: $brand-color-light1;
-
-      box-shadow: 0 4px 4px $color-gray;
-      -webkit-box-shadow: 0 4px 4px $color-gray;
-
-      &:hover {
-        box-shadow: 0 4px 4px $color-gray2;
-        -webkit-box-shadow: 0 4px 4px $color-gray2;
-      }
+      box-shadow: 0 4px 4px $color-gray2;
+      -webkit-box-shadow: 0 4px 4px $color-gray2;
     }
 
     &.add_address {

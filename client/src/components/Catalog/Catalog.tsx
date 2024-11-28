@@ -12,7 +12,7 @@ import AppSideBar from "../shared/Headers/AppSideBar/AppSideBar";
 import { TbArrowsSort } from "react-icons/tb";
 import { RiFilter2Fill } from "react-icons/ri";
 import productReq from "../../requests/product";
-import { CatalogStateAPI, QueryCatalogParams } from "../../types/product";
+import { QueryCatalogParams } from "../../types/product";
 import uniqId from "uniqid";
 
 function Cataglog() {
@@ -93,10 +93,10 @@ function Cataglog() {
   const getProducts = async (
     page = 1,
     skip = 0,
-    isLoaded = false,
+    isPageLoaded = false,
     paginate = true
   ) => {
-    if (!isLoaded) {
+    if (!isPageLoaded) {
       const queries: QueryCatalogParams = {
         skip: 0,
         count: catalog.products.count,

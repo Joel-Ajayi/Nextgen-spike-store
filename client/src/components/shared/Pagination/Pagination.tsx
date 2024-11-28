@@ -8,7 +8,7 @@ import helpers from "../../../helpers";
 
 type Props = {
   specifiedMaxButtons?: number;
-  callBack: (page: number, skip: number, isLoaded: boolean) => void;
+  callBack: (page: number, skip: number, isPageLoaded: boolean) => void;
   path: string;
 };
 

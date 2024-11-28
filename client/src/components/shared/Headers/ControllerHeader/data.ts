@@ -120,8 +120,7 @@ const data: DropdownProps[] = [
       {
         title: "Order Items",
         id: PageSections.OrdListings,
-        link: () =>
-          `/controller/${ControllerPaths.Orders}/${PageSections.OrdListings}`,
+        link: () => `/controller/${ControllerPaths.Orders}`,
       },
     ],
   },

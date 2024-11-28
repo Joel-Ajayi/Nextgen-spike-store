@@ -1,0 +1,11 @@
+@import "./../../../styles/mixins.scss";
+.my_orders {
+  padding: 1rem 0;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  row-gap: 1rem;
+  @include scrollbar;
+  @include desktop-wrapper;
+}

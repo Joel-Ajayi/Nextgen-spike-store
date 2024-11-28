@@ -1,0 +1,176 @@
+@import "../../../../styles/mixins.scss";
+@import "../../../../styles/vars.scss";
+
+.wrapper {
+  width: 100%;
+  .inner_wrapper {
+    height: 200px;
+    width: 100%;
+    background-color: white;
+    box-shadow: 0 4px 4px $color-gray2;
+    -webkit-box-shadow: 0 4px 4px $color-gray2;
+    padding: 2rem;
+    border-radius: 0.3rem;
+    display: grid;
+    grid-template-columns: 120px 1fr 100px 300px;
+    gap: 1rem 2rem;
+
+    .images {
+      display: grid;
+      width: 120px; /* Set the desired width */
+      gap: 0.2rem; /* Spacing between images */
+      overflow: hidden; /* Ensure images don’t overflow */
+
+      &:empty {
+        background-color: $color-gray;
+      }
+      .img {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        img {
+          width: auto;
+          max-height: 100%;
+          max-width: 100%;
+          height: auto;
+          object-fit: contain; /* Ensure images cover their space without distortion */
+          border-radius: 0.3rem;
+        }
+      }
+    }
+
+    .names_wrapper {
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      row-gap: 0.3rem;
+
+      .names {
+        flex: 1;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow-x: hidden;
+        overflow-y: auto;
+        @include scrollbar;
+        color: $color-gray12;
+        font-weight: bold;
+        row-gap: 0.3rem;
+
+        .name {
+          font-size: 0.95rem;
+          white-space: nowrap; /* Prevents the text from wrapping */
+          overflow: hidden; /* Hides overflowing content */
+          text-overflow: ellipsis;
+        }
+
+        .dummy {
+          background-color: $color-gray;
+          height: 17px;
+        }
+      }
+
+      .items_count {
+        margin-top: 0.5rem;
+        &:empty {
+          background-color: $color-gray;
+          width: 30%;
+        }
+      }
+
+      .buyer {
+        white-space: nowrap; /* Prevents the text from wrapping */
+        overflow: hidden; /* Hides overflowing content */
+        text-overflow: ellipsis;
+
+        &:empty {
+          background-color: $color-gray;
+          width: 70%;
+        }
+      }
+
+      .buyer,
+      .items_count {
+        &:empty {
+          height: 17px;
+        }
+
+        font-size: 0.9rem;
+        color: $color-gray8;
+        color: $color-gray8;
+      }
+    }
+
+    .total_amount {
+      color: $color-gray12;
+      font-weight: bold;
+      &:empty {
+        height: 17px;
+        background-color: $color-gray;
+        width: 100%;
+      }
+    }
+
+    .details {
+      display: flex;
+      flex-direction: column;
+      row-gap: 0.5rem;
+
+      .order_id,
+      .pay,
+      .order_status {
+        font-size: 0.8rem;
+        color: $color-gray8;
+
+        & > div,
+        & {
+          &:empty {
+            height: 19px;
+            width: 100%;
+            background-color: $color-gray;
+            &:nth-child(even) {
+              width: 70%;
+            }
+          }
+        }
+      }
+
+      .status,
+      .order_id span {
+        font-size: 0.9rem;
+        color: $color-gray11;
+        font-weight: bold;
+      }
+
+      .status {
+        position: relative;
+        &::before {
+          content: ""; /* Empty content for the ball */
+          position: absolute; /* Position relative to the parent */
+          left: -20px; /* Align to the left */
+          top: 50%; /* Center vertically */
+          transform: translateY(-50%); /* Adjust for centering */
+          width: 11px; /* Ball width */
+          height: 11px; /* Ball height */
+          border-radius: 50%; /* Make it a circle */
+          background-color: red;
+          box-shadow: 0 4px 4px $color-gray2;
+          -webkit-box-shadow: 0 4px 4px $color-gray2;
+        }
+
+        &.ok {
+          &::before {
+            background-color: green;
+          }
+        }
+
+        &:empty {
+          &::before {
+            background-color: $color-gray;
+          }
+        }
+      }
+    }
+  }
+}

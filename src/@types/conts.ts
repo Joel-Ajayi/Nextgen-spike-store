@@ -5,7 +5,7 @@ const consts = {
     alreadySignedIn: "Already loggedin",
     signup: "Please sign up for an account",
     invalidSignIn: "Invalid username or password",
-    unAuthorized: "unAuthorized",
+    unAuthorized: "You are not Authorized to View this Page",
     unAuthenticated: "unAuthenticated",
     userAlreadyExist: "User already exist",
     server: "An error occured",

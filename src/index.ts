@@ -77,7 +77,6 @@ declare module "express-session" {
       res.writeHead(200, { "content-type": response.headers["content-type"] });
       res.end(imageBuffer);
     } catch (error) {
-      console.log(error);
       res.sendStatus(400);
     }
   });

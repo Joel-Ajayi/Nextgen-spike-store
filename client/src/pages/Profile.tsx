@@ -7,22 +7,24 @@ import Account from "../components/Profile/Account/Account";
 import Orders from "../components/Profile/Orders/Orders";
 import Styles from "./styles.module.scss";
 import Addresses from "../components/Profile/Addresses/Addresses";
+import Order from "../components/shared/Order/Order";
 
 function ProfilePage() {
   let { pg: page } = useParams();
+  const { sec } = useParams();
 
   const currentPage = useMemo(() => {
     switch (page) {
       case UserPaths.Account:
         return <Account />;
       case UserPaths.Orders:
-        return <Orders />;
+        return sec ? <Order /> : <Orders />;
       case UserPaths.Addresses:
         return <Addresses />;
       default:
         <Navigate to="*" replace />;
     }
-  }, [page]);
+  }, [page, sec]);
 
   return (
     <>

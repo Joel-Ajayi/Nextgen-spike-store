@@ -35,7 +35,7 @@
   border-radius: 4px;
   min-height: 50px;
   min-width: 200px;
-  max-width: 300px;
+  max-width: max-content;
 
   .msg {
     flex: 1;
@@ -50,10 +50,9 @@
       width: 100%;
       margin-top: 3px;
       text-align: left;
-      word-break: break-all;
+      overflow: hidden;
       font-weight: bold;
       color: $color-gray8;
-      white-space: pre-wrap;
     }
 
     .header {
