@@ -10,7 +10,6 @@ import uniqId from "uniqid";
 import helpers from "../../../helpers";
 import { Steps } from "antd";
 import PaystackPop from "@paystack/inline-js";
-import "rc-steps/assets/index.css";
 import Input from "../Input/Controller/Input";
 import Button from "../Button/Button";
 
