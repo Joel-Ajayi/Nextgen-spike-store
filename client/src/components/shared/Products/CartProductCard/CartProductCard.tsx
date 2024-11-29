@@ -7,7 +7,13 @@ import productReq from "../../../../requests/product";
 import { useDispatch } from "react-redux";
 import cartSlice from "../../../../store/cart";
 
-function CartProductCard({ item }: { item: CartItem | null }) {
+function CartProductCard({
+  item,
+  isOrderItem = false,
+}: {
+  item: CartItem | null;
+  isOrderItem?: boolean;
+}) {
   const isLoading = !item;
   const dispatch = useDispatch();
   const [isDeleting, setIsDeleting] = useState(false);
@@ -60,26 +66,33 @@ function CartProductCard({ item }: { item: CartItem | null }) {
           </div>
         </div>
       </div>
-      <div className={Styles.actions}>
-        <div className={Styles.add}>
-          {!isLoading && item && (
-            <AddToCart
-              id={item.id}
-              maxQty={item.count}
-              minQty={1}
-              btnSize={30}
-              isLoading={isLoading}
-            />
-          )}
+      {!isOrderItem && (
+        <div className={Styles.actions}>
+          <div className={Styles.add}>
+            {!isLoading && item && (
+              <AddToCart
+                id={item.id}
+                maxQty={item.count}
+                minQty={1}
+                btnSize={30}
+                isLoading={isLoading}
+              />
+            )}
+          </div>
+          <div className={Styles.remove}>
+            {!isLoading && (
+              <>
+                <span onClick={removeItem}>REMOVE</span>
+              </>
+            )}
+          </div>
         </div>
-        <div className={Styles.remove}>
-          {!isLoading && (
-            <>
-              <span onClick={removeItem}>REMOVE</span>
-            </>
-          )}
+      )}
+      {isOrderItem && (
+        <div className={Styles.order_qty}>
+          {!isLoading && `${item.count} Ordered Items`}
         </div>
-      </div>
+      )}
     </div>
   );
 }

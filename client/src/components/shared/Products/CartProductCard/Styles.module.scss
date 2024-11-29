@@ -139,6 +139,17 @@
     }
   }
 
+  .order_qty {
+    font-size: 0.8rem;
+    color: $color-gray10;
+
+    &:empty {
+      @include skeletalLoader;
+      width: 80%;
+      height: 1rem;
+    }
+  }
+
   .actions {
     display: flex;
     font-size: 0.8rem;

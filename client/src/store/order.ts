@@ -73,26 +73,35 @@ const ordersSlice = createSlice({
     setOrder: (state, action: PayloadAction<Order | null>) => {
       return { ...state, order: action.payload };
     },
-    setOrderPayStatus: (state, action: PayloadAction<number>) => {
+    setOrderStatus: (state, action: PayloadAction<number>) => {
       if (state.order) {
         return {
           ...state,
           order: {
             ...state.order,
-            payStatuses: {
-              ...state.order.payStatuses.map((s, index) =>
+            statuses: [
+              ...state.order.statuses.map((s, index) =>
                 index <= action.payload
                   ? {
                       ...s,
                       ok: true,
-                      createdAt:
-                        index === action.payload
-                          ? new Date().toDateString()
-                          : s.createdAt,
+                      createdAt: s.createdAt || new Date().toDateString(),
                     }
                   : s
               ),
-            },
+            ],
+          },
+        };
+      }
+      return state;
+    },
+    setOrderIsPaid: (state, action: PayloadAction<boolean>) => {
+      if (state.order) {
+        return {
+          ...state,
+          order: {
+            ...state.order,
+            isPaid: action.payload,
           },
         };
       }

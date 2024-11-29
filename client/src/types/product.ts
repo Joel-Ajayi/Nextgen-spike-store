@@ -230,6 +230,8 @@ export type Order = {
   pId: string;
   user: OrderUser;
   payMethod: string;
+  isOnlinePay: boolean;
+  isPaid: boolean;
   statuses: OrderStatus[];
   payStatuses: OrderStatus[];
   address: Address;

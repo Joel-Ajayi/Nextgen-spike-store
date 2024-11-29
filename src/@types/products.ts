@@ -117,17 +117,17 @@ export enum PaymentType {
 }
 
 export enum PaymentStatus {
-  PENDING,
-  REFUNDED,
-  PAID,
+  Pending,
+  Paid,
+  Refunded,
 }
 
 export enum OrderStatus {
-  ORDERED,
-  PACKED,
-  SHIPPED,
-  DELIVERED,
-  CANCELED,
+  Ordered,
+  Packed,
+  Shipped,
+  Delivered,
+  Canceled,
 }
 
 export enum CatalogQuery {

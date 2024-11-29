@@ -22,6 +22,7 @@ import { db } from "../../../db/prisma/connect";
 import helpers from "../../../helpers";
 import { Prisma } from "@prisma/client";
 import colours from "../../../db/colours";
+import { AddressTypes } from "../../../@types/users";
 
 const productMiniSelect = {
   id: true,
@@ -550,7 +551,6 @@ const resolvers = {
     },
     ctx: Context
   ) => {
-    console.log(data.search);
     if (data.isAll) {
       middleware.checkOrderUser(ctx);
     } else {
@@ -617,10 +617,10 @@ const resolvers = {
       const mapedOrders = orders.map(
         ({ user, payStatuses, statuses, items, ...o }) => {
           const currStatus = !statuses.length
-            ? { createdAt: o.createdAt, status: PayStatus.PENDING }
+            ? { createdAt: o.createdAt, status: PayStatus.Pending }
             : statuses.sort((a, b) => b.status - a.status)[0];
           const currPayStatus = !payStatuses.length
-            ? { createdAt: o.createdAt, status: PayStatus.PENDING }
+            ? { createdAt: o.createdAt, status: PayStatus.Pending }
             : payStatuses.sort((a, b) => b.status - a.status)[0];
 
           return {
@@ -631,13 +631,13 @@ const resolvers = {
             payStatus: {
               status: payStatus[currPayStatus.status],
               createdAt: currPayStatus.createdAt.toDateString(),
-              ok: PayStatus.PAID === currPayStatus.status,
+              ok: PayStatus.Paid === currPayStatus.status,
               msg: helpers.getOrderPayMsg(currPayStatus.status),
             },
             status: {
               status: orderStatus[currStatus.status],
               createdAt: currStatus.createdAt.toDateString(),
-              ok: OrderStatus.DELIVERED === currStatus.status,
+              ok: OrderStatus.Delivered === currStatus.status,
               msg: helpers.getOrderMsg(currStatus.status),
             },
             items: items.map(({ product: { images, ...prd }, ...i }) => ({
@@ -654,7 +654,6 @@ const resolvers = {
         ...helpers.paginate(count, data.take, data.skip),
       };
     } catch (error) {
-      console.log(error);
       helpers.error(error);
     }
   },
@@ -719,9 +718,11 @@ const resolvers = {
       const payMethods = helpers.getObjKeys<string>(PaymentTypes);
       const payStatuses = helpers.getObjKeys<string>(PayStatus);
       const orderStatuses = helpers.getObjKeys<string>(OrderStatus);
-
+      const addressTypes = helpers.getObjKeys<string>(AddressTypes);
       return {
         ...order,
+        isOnlinePay: order.payMethod === PaymentTypes.Card,
+        isPaid: !!order.payStatuses.find((s) => s.status === PayStatus.Paid),
         createdAt: order.createdAt.toDateString(),
         user: {
           email: order.user.email,
@@ -730,6 +731,7 @@ const resolvers = {
         payMethod: payMethods[order.payMethod],
         address: {
           ...order.address,
+          addressType: addressTypes[order.address.addressType],
           isNew: false,
           tel: order.address.tel
             .toString()
@@ -737,19 +739,19 @@ const resolvers = {
         },
         payStatuses: payStatuses.map((status, index) => {
           const savedStatus =
-            index === PayStatus.PENDING
+            index === PayStatus.Pending
               ? order.createdAt
               : order.payStatuses.find((s) => s.status === index)?.createdAt;
           return {
             status,
             createdAt: savedStatus?.toDateString() || "",
             msg: "",
-            ok: !!savedStatus,
+            ok: index === PayStatus.Paid,
           };
         }),
         statuses: orderStatuses.map((status, index) => {
           const savedStatus =
-            index === OrderStatus.ORDERED
+            index === OrderStatus.Ordered
               ? order.createdAt
               : order.statuses.find((s) => s.status === index)?.createdAt;
           return {
@@ -766,7 +768,6 @@ const resolvers = {
         })),
       };
     } catch (error) {
-      console.log(error);
       helpers.error(error);
     }
   },

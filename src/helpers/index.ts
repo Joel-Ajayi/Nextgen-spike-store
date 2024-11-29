@@ -171,11 +171,11 @@ class Helpers {
 
   public getOrderPayMsg = (status: number) => {
     switch (status) {
-      case PaymentStatus.PENDING:
+      case PaymentStatus.Pending:
         return "Payment not yet confirmed from bank";
-      case PaymentStatus.PAID:
+      case PaymentStatus.Paid:
         return "Payment has been Confirmed";
-      case PaymentStatus.REFUNDED:
+      case PaymentStatus.Refunded:
         return "Payment has been Refunded";
       default:
         return "";
@@ -184,16 +184,16 @@ class Helpers {
 
   public getOrderMsg = (status: number) => {
     switch (status) {
-      case OrderStatus.ORDERED:
+      case OrderStatus.Ordered:
         return "Ordered is Pending";
-      case OrderStatus.DELIVERED:
-        return "Order has been Delivered on";
-      case OrderStatus.SHIPPED:
-        return "Order has been Shipped on";
-      case OrderStatus.PACKED:
-        return "Order has been Packed on";
-      case OrderStatus.CANCELED:
-        return "Order has been Canceled on";
+      case OrderStatus.Delivered:
+        return "Order has been Delivered";
+      case OrderStatus.Shipped:
+        return "Order has been Shipped";
+      case OrderStatus.Packed:
+        return "Order has been Packed";
+      case OrderStatus.Canceled:
+        return "Order has been Canceled";
       default:
         return "";
     }

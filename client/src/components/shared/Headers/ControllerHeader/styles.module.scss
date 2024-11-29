@@ -6,7 +6,7 @@
   justify-content: center;
   box-shadow: 1px 0 4px black;
   border-bottom: 1px solid $color-gray2;
-
+  background-color: white;
   .content {
     @include desktop-wrapper;
     display: flex;

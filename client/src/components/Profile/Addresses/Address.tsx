@@ -82,7 +82,7 @@ function Address({ index, isSelection = false }: Props) {
               <div className={Styles.header}>
                 <span>{address.name}</span>
                 <span className={Styles.tag}>
-                  {addressTypes[address.addressType].split("_")[0]}
+                  {addressTypes[address.addressType as number].split("_")[0]}
                 </span>
                 <span>{`+234 ${address.tel.replace(/\s/g, "")}`}</span>
               </div>

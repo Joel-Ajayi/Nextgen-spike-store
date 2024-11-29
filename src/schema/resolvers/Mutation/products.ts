@@ -12,6 +12,7 @@ import {
   PaymentType,
   InitPayment,
   OrderStatus,
+  PaymentStatus,
 } from "../../../@types/products";
 import { validator } from "../../../helpers/validator";
 import helpers from "../../../helpers";
@@ -543,6 +544,282 @@ const resolvers = {
       });
     }
   },
-  // UpdateOrder: async () => {},
+  CancelOrder: async (_: any, { id }: { id: string }, ctx: Context) => {
+    middleware.checkUser(ctx);
+
+    try {
+      const order = await ctx.db.order.findUnique({
+        where: {
+          id: helpers.getValidId(id),
+          userId: ctx.user.id,
+        },
+        select: { statuses: { select: { status: true } } },
+      });
+
+      if (!order) {
+        throw new GraphQLError("Order Does not Exist", {
+          extensions: { statusCode: 404 },
+        });
+      }
+
+      const isCancelled = order.statuses
+        .map((s) => s.status)
+        .includes(OrderStatus.Canceled);
+
+      if (isCancelled) {
+        throw new GraphQLError("Order Is Already Canceled", {
+          extensions: { statusCode: 400 },
+        });
+      }
+
+      const isDelivered = order.statuses
+        .map((s) => s.status)
+        .includes(OrderStatus.Delivered);
+      if (isDelivered) {
+        throw new GraphQLError("Order Is Already Delivered", {
+          extensions: { statusCode: 400 },
+        });
+      }
+
+      await ctx.db.orderStatus.create({
+        data: { status: OrderStatus.Canceled, orderId: id },
+      });
+
+      return { message: "Order has been Cancelled" };
+    } catch (error) {
+      helpers.error(error);
+    }
+  },
+  SaveOrderChanges: async (
+    _: any,
+    {
+      id,
+      payStatus,
+      status,
+    }: { payStatus: number; status: number; id: string },
+    ctx: Context
+  ) => {
+    middleware.checkOrderUser(ctx);
+
+    try {
+      const order = await ctx.db.order.findUnique({
+        where: {
+          id: helpers.getValidId(id),
+        },
+        select: {
+          pId: true,
+          payMethod: true,
+          statuses: { select: { status: true } },
+          payStatuses: { select: { status: true } },
+        },
+      });
+
+      if (!order) {
+        throw new GraphQLError("Order Does not Exist", {
+          extensions: { statusCode: 404 },
+        });
+      }
+
+      const payStatusesString = helpers.getObjKeys<string>(PaymentStatus);
+      const orderStatusesString = helpers.getObjKeys<string>(OrderStatus);
+      if (!orderStatusesString[status] || !payStatusesString[payStatus]) {
+        throw new GraphQLError("Invalid Payment or Order Status", {
+          extensions: { statusCode: 400 },
+        });
+      }
+
+      const statuses = order.statuses.map((s) => s.status);
+      const payStatuses = order.payStatuses.map((s) => s.status);
+
+      const isStatusSet =
+        status === OrderStatus.Ordered ? true : statuses.includes(status);
+
+      const isPayStatusSet =
+        payStatus === PaymentStatus.Pending
+          ? true
+          : payStatuses.includes(payStatus);
+      if (!isPayStatusSet) {
+        if (payStatus === PaymentStatus.Paid) {
+          if (order.payMethod === PaymentType.Card) {
+            //confirm bank card payment
+            const response = await axios.get<{
+              data: { status: string };
+            }>(`${consts.product.payment.validate}/${order.pId}`, {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${process.env.PAYMENT_SECRET}`,
+              },
+            });
+
+            if (response.data.data.status !== "success") {
+              throw new GraphQLError(
+                helpers.getOrderPayMsg(PaymentStatus.Pending),
+                {
+                  extensions: { statusCode: 400 },
+                }
+              );
+            }
+          }
+          await ctx.db.payStatus.create({
+            data: { status: PaymentStatus.Paid, orderId: id },
+          });
+        } else {
+          if (payStatuses.includes(PaymentStatus.Paid)) {
+            await ctx.db.payStatus.create({
+              data: { status: PaymentStatus.Refunded, orderId: id },
+            });
+          } else {
+            throw new GraphQLError("Order has not been Paid for", {
+              extensions: { statusCode: 400 },
+            });
+          }
+        }
+      }
+
+      if (!isStatusSet) {
+        const newStatuses = helpers
+          .getObjIndexes<number>(OrderStatus)
+          .filter(
+            (s) =>
+              !statuses.includes(s) && s <= status && s !== OrderStatus.Ordered
+          )
+          .map((s) => ({ status: s, orderId: id }));
+
+        if (newStatuses.length) {
+          await ctx.db.orderStatus.createMany({
+            data: newStatuses,
+          });
+        }
+      }
+
+      return { message: "Order Updated" };
+    } catch (error) {
+      console.log(error);
+      helpers.error(error);
+    }
+  },
+  VerifyOrderPay: async (_: any, { id }: { id: string }, ctx: Context) => {
+    try {
+      const order = await ctx.db.order.findUnique({
+        where: {
+          id: helpers.getValidId(id),
+        },
+        select: {
+          payMethod: true,
+          pId: true,
+          payStatuses: { select: { status: true } },
+        },
+      });
+
+      if (!order) {
+        throw new GraphQLError("Order Does not Exist", {
+          extensions: { statusCode: 404 },
+        });
+      }
+
+      const payStatuses = order.payStatuses.map((s) => s.status);
+      if (!payStatuses.includes(PaymentStatus.Paid)) {
+        if (order.payMethod === PaymentType.Card) {
+          const response = await axios.get<{
+            data: { status: string };
+          }>(`${consts.product.payment.validate}/${order.pId}`, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${process.env.PAYMENT_SECRET}`,
+            },
+          });
+
+          if (response.data.data.status !== "success") {
+            throw new GraphQLError(
+              helpers.getOrderPayMsg(PaymentStatus.Pending),
+              {
+                extensions: { statusCode: 400 },
+              }
+            );
+          }
+          await ctx.db.payStatus.create({
+            data: { status: PaymentStatus.Paid, orderId: id },
+          });
+        } else {
+          throw new GraphQLError(
+            helpers.getOrderPayMsg(PaymentStatus.Pending),
+            {
+              extensions: { statusCode: 400 },
+            }
+          );
+        }
+      }
+
+      return { message: helpers.getOrderPayMsg(PaymentStatus.Paid) };
+    } catch (error) {
+      helpers.error(error);
+    }
+  },
+  InitializeOrderPay: async (_: any, { id }: { id: string }, ctx: Context) => {
+    try {
+      const order = await ctx.db.order.findUnique({
+        where: {
+          id: helpers.getValidId(id),
+        },
+        select: {
+          payMethod: true,
+          pId: true,
+          totalAmount: true,
+          user: { select: { email: true } },
+          payStatuses: { select: { status: true } },
+        },
+      });
+
+      if (!order) {
+        throw new GraphQLError("Order Does not Exist", {
+          extensions: { statusCode: 404 },
+        });
+      }
+
+      const payStatuses = order.payStatuses.map((s) => s.status);
+      const paymentTypes = helpers.getObjKeys<string>(PaymentType);
+
+      if (order.payMethod !== PaymentType.Card) {
+        throw new GraphQLError(
+          `${paymentTypes[order.payMethod]
+            .split("_")
+            .join(" ")} payment method`,
+          {
+            extensions: { statusCode: 400 },
+          }
+        );
+      }
+
+      if (payStatuses.includes(PaymentStatus.Paid)) {
+        throw new GraphQLError("Order has been paid for", {
+          extensions: { statusCode: 400 },
+        });
+      }
+
+      const response = await axios.post<InitPayment>(
+        consts.product.payment.init,
+        {
+          email: order.user.email,
+          amount: order.totalAmount,
+          channels: consts.product.payment.channels,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.PAYMENT_SECRET}`,
+          },
+        }
+      );
+
+      await ctx.db.order.update({
+        where: { id },
+        data: { pId: response.data.data.reference },
+      });
+
+      return { orderId: id, access_code: response.data.data.access_code };
+    } catch (error) {
+      helpers.error(error);
+    }
+  },
 };
 export default resolvers;

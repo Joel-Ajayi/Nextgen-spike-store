@@ -14,7 +14,6 @@ import { MessageType, Paths, StatusCodes } from "../../types";
 import { MdOutlineKeyboardBackspace } from "react-icons/md";
 import PaystackPop from "@paystack/inline-js";
 import uniqId from "uniqid";
-import productReq from "../../requests/product";
 import { UserPaths } from "../../types/user";
 import appSlice from "../../store/appState";
 import ordersReq from "../../requests/order";

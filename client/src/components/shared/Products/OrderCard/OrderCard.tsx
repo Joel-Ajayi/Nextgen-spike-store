@@ -17,7 +17,7 @@ function OrderCard({
 }) {
   const link = isController
     ? `${Paths.Controller}/${ControllerPaths.Orders}/${order?.id}`
-    : `${Paths.Controller}/${UserPaths.Orders}/${order?.id}`;
+    : `${Paths.Profile}/${UserPaths.Orders}/${order?.id}`;
 
   const isLoaded = !!order;
   const imgLength = order?.items?.length || 1;
@@ -84,7 +84,7 @@ function OrderCard({
             <>
               <div
                 className={`${Styles.status} ${
-                  order?.status.ok ? Styles.ok : ""
+                  order?.payStatus.ok ? Styles.ok : ""
                 }`}
               >
                 {isLoaded && order.payStatus.msg}

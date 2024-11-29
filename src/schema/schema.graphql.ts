@@ -38,6 +38,10 @@ type Mutation {
   UpdateReview(data:Review_I!):Message
   DeleteReview(prd_id:String!):Message
   CreateOrder(data:Order_I!):OnCreateOrder!
+  SaveOrderChanges(id:String!,payStatus:Int!,status:Int!):Message!
+  CancelOrder(id:String!):Message!
+  VerifyOrderPay(id:String!):Message!
+  InitializeOrderPay(id:String!):OnCreateOrder!
 }
 
 #General
@@ -472,6 +476,18 @@ input Address_I {
     tel: String!
 }
 
+type OrderAddress {
+  id: String!
+  name: String!
+  state: String!
+  city: String!
+  locality: String!
+  address: String!
+  addressType: String!
+  isNew:Boolean!
+  tel: String!
+}
+
 
   type Order {
     id:String!
@@ -481,11 +497,13 @@ input Address_I {
     statuses:[OrderStatus!]!
     payStatuses:[OrderStatus!]!
     items:[OrderItem!]!
-    address:Address!
+    address:OrderAddress!
     subTotalAmount: Int!
     shippingAmount:Int!
     totalAmount: Int!
     createdAt:String!
+    isPaid:Boolean!
+    isOnlinePay:Boolean!
   }
 
   type OrderItem {

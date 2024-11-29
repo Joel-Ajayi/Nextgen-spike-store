@@ -35,7 +35,7 @@ class OrdersReq {
   public async getOrder(id: string, isAll = false) {
     let query = `query QueryOrder($id:String!, $isAll:Boolean!) {
             QueryOrder(id:$id, isAll:$isAll) { 
-                id pId payMethod payMethod subTotalAmount shippingAmount totalAmount createdAt
+                id pId payMethod payMethod isPaid isOnlinePay subTotalAmount shippingAmount totalAmount createdAt
                 user { email name }
                 payStatuses { status createdAt ok msg } 
                 statuses { status createdAt ok msg }
@@ -72,6 +72,64 @@ class OrdersReq {
     });
 
     const res = await request.makeRequest<APIPagination<OrderMini>>(body);
+    return res;
+  }
+
+  public async cancelOrder(id: string) {
+    let query = `mutation CancelOrder($id:String!) {
+      CancelOrder(id:$id) { message }
+    }`;
+
+    const body = JSON.stringify({
+      query,
+      variables: { id },
+    });
+
+    return await request.makeRequest<string>(body);
+  }
+
+  public async saveOrderChanges(id: string, payStatus: number, status: number) {
+    let query = `mutation SaveOrderChanges($id:String!,$payStatus:Int!,$status:Int!) {
+      SaveOrderChanges(id:$id,payStatus:$payStatus,status:$status) { message }
+    }`;
+
+    const body = JSON.stringify({
+      query,
+      variables: { id, payStatus, status },
+    });
+
+    const res = await request.makeRequest(body);
+    return res;
+  }
+
+  public async veifyOrderPayment(id: string) {
+    let query = `mutation VerifyOrderPay($id:String!) {
+      VerifyOrderPay(id:$id) { message }
+    }`;
+
+    const body = JSON.stringify({
+      query,
+      variables: { id },
+    });
+
+    const res = await request.makeRequest<string>(body);
+    return res;
+  }
+
+  public async initializeOrderPay(id: string) {
+    let query = `mutation InitializeOrderPay($id:String!) {
+      InitializeOrderPay(id:$id) { orderId access_code }
+    }`;
+
+    const body = JSON.stringify({
+      query,
+      variables: { id },
+    });
+
+    const res = await request.makeRequest<{
+      access_code: string;
+      orderId: string;
+    }>(body);
     return res;
   }
 }

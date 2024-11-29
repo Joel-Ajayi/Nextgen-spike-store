@@ -39,7 +39,7 @@ export type Address = {
   city: string;
   locality: string;
   address: string;
-  addressType: number;
+  addressType: number | string;
   tel: string;
   isNew: boolean;
 };

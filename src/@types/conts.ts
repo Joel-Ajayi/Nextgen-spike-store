@@ -47,6 +47,7 @@ const consts = {
     },
     payment: {
       init: "https://api.paystack.co/transaction/initialize",
+      validate: "https://api.paystack.co/transaction/verify",
       channels: ["card"],
       callback: "https://nextgen-store-5f0bea566c44.herokuapp.com/",
     },
