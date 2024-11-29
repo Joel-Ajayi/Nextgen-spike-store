@@ -18,11 +18,11 @@ const getParam = (param: string) => {
 };
 
 const data: DropdownProps[] = [
-  {
-    title: "Users",
-    id: ControllerPaths.Users,
-    link: () => `/controller/${ControllerPaths.Users}`,
-  },
+  // {
+  //   title: "Users",
+  //   id: ControllerPaths.Users,
+  //   link: () => `/controller/${ControllerPaths.Users}`,
+  // },
   {
     title: "Categories",
     id: ControllerPaths.Categories,

@@ -9,7 +9,7 @@ import { ControllerPaths } from "../types/controller";
 import { useAppSelector } from "../store/hooks";
 import { Roles } from "../types/user";
 import ControllerHeader from "../components/shared/Headers/ControllerHeader/ControllerHeader";
-import Users from "../components/Controllers/Users/Users";
+// import Users from "../components/Controllers/Users/Users";
 
 function ControllerPage() {
   let { pg: page } = useParams();
@@ -32,9 +32,9 @@ function ControllerPage() {
       case ControllerPaths.Orders:
         if (!isAuthorized(Roles.Order)) break;
         return <Orders />;
-      case ControllerPaths.Users:
-        if (!isAuthorized(Roles.User)) break;
-        return <Users />;
+      // case ControllerPaths.Users:
+      //   if (!isAuthorized(Roles.User)) break;
+      //   return <Users />;
       default:
         return !page ? (
           <Navigate to={`/controller/${ControllerPaths.Categories}`} replace />

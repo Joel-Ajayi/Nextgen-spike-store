@@ -1,5 +1,4 @@
 export enum UserPaths {
-  Account = "account",
   Orders = "Orders",
   Addresses = "Addresses",
 }

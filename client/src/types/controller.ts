@@ -3,7 +3,6 @@ export enum ControllerPaths {
   Products = "products",
   Brand = "brand",
   Orders = "orders",
-  Users = "Users",
 }
 
 export enum PageSections {

@@ -33,11 +33,11 @@ import { FiLogOut as LogoutIcon } from "react-icons/fi";
 export const authItems = {
   title: "",
   items: [
-    {
-      Icon: SettingsIcon,
-      title: "Account Settings",
-      link: () => `${Paths.Profile}/${UserPaths.Account}`,
-    },
+    // {
+    //   Icon: SettingsIcon,
+    //   title: "Account Settings",
+    //   link: () => `${Paths.Profile}/${UserPaths.Account}`,
+    // },
     {
       Icon: FaRegAddressCard,
       title: "Addresses",
