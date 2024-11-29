@@ -19,7 +19,7 @@ export const initialState: {
 };
 
 const ordersSlice = createSlice({
-  name: "OrdersSlice",
+  name: "ControllerOrdersSlice",
   initialState,
   reducers: {
     setOrders: (state, action: PayloadAction<APIPagination<OrderMini>>) => {

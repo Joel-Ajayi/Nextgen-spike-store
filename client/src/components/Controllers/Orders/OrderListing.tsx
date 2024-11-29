@@ -17,7 +17,7 @@ import OrderSearch from "../../shared/Input/OrderSearch/OrderSearch";
 
 function OrderListing() {
   const dispatch = useAppDispatch();
-  const orders = useAppSelector((state) => state.orders.orders);
+  const orders = useAppSelector((state) => state.controller.orders.orders);
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -54,11 +54,19 @@ function OrderListing() {
   };
 
   useEffect(() => {
-    if (!isRendered.current) {
+    if (!isRendered.current && !orders.count) {
       isRendered.current = true;
       (async () => {
         await getOrders(1, 0, false, false);
       })();
+    } else {
+      setIsLoading(false);
+      dispatch(
+        ordersSlice.actions.setOrdersPage({
+          skip: 0,
+          page: orders.count ? 1 : 0,
+        })
+      );
     }
   }, [orders.search]);
 

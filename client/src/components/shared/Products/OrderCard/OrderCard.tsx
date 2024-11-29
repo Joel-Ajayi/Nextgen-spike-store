@@ -1,12 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useAppSelector } from "../../../../store/hooks";
 import Styles from "./Styles.module.scss";
 import { ControllerPaths } from "../../../../types/controller";
 import { Paths } from "../../../../types";
 import { UserPaths } from "../../../../types/user";
 import helpers from "../../../../helpers";
 import { OrderMini } from "../../../../types/product";
+import uniqId from "uniqid";
 
 function OrderCard({
   order,
@@ -41,6 +41,7 @@ function OrderCard({
           {!!order &&
             order.items.map((i, index) => (
               <div
+                key={uniqId()}
                 className={Styles.img}
                 style={
                   isOdd && index + 1 === imgLength
@@ -73,11 +74,11 @@ function OrderCard({
           <div className={Styles.buyer}>
             {isLoaded && `Buyer: ${order.user.name} - ${order.user.email}`}
           </div>
+          <div className={Styles.total_amount}>
+            {isLoaded && `₦${helpers.addComma(order.totalAmount)}`}
+          </div>
         </div>
 
-        <div className={Styles.total_amount}>
-          {isLoaded && `₦${helpers.addComma(order.totalAmount)}`}
-        </div>
         <div className={Styles.details}>
           <div className={Styles.pay}>
             <>

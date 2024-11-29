@@ -4,20 +4,43 @@
 .wrapper {
   width: 100%;
   .inner_wrapper {
-    height: 200px;
     width: 100%;
     background-color: white;
     box-shadow: 0 4px 4px $color-gray2;
     -webkit-box-shadow: 0 4px 4px $color-gray2;
-    padding: 2rem;
+    padding: 1rem;
     border-radius: 0.3rem;
     display: grid;
-    grid-template-columns: 120px 1fr 100px 300px;
-    gap: 1rem 2rem;
+    gap: 1rem;
+    grid-template-columns: 50px 1fr;
+    grid-template-rows: 160px min-content min-content;
+    overflow: hidden;
+    .details {
+      grid-column: span 2;
+    }
+
+    @media screen and (min-width: 500px) {
+      grid-template-columns: 70px 1fr;
+    }
+
+    @media screen and (min-width: 700px) {
+      grid-template-columns: 120px 1fr;
+      gap: 1rem 2rem;
+      padding: 2rem;
+    }
+
+    @media screen and (min-width: 900px) {
+      grid-template-columns: 120px 1fr 300px;
+      grid-template-rows: 160px;
+
+      .details {
+        padding-left: 0rem !important;
+        grid-column: span 1;
+      }
+    }
 
     .images {
       display: grid;
-      width: 120px; /* Set the desired width */
       gap: 0.2rem; /* Spacing between images */
       overflow: hidden; /* Ensure images don’t overflow */
 
@@ -44,7 +67,6 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      row-gap: 0.3rem;
 
       .names {
         flex: 1;
@@ -59,7 +81,6 @@
         row-gap: 0.3rem;
 
         .name {
-          font-size: 0.95rem;
           white-space: nowrap; /* Prevents the text from wrapping */
           overflow: hidden; /* Hides overflowing content */
           text-overflow: ellipsis;
@@ -90,25 +111,37 @@
         }
       }
 
+      .total_amount {
+        color: $color-gray12;
+        font-weight: bold;
+        &:empty {
+          height: 17px;
+          background-color: $color-gray;
+          width: 100%;
+        }
+      }
+
       .buyer,
       .items_count {
         &:empty {
           height: 17px;
         }
-
-        font-size: 0.9rem;
         color: $color-gray8;
         color: $color-gray8;
       }
-    }
 
-    .total_amount {
-      color: $color-gray12;
-      font-weight: bold;
-      &:empty {
-        height: 17px;
-        background-color: $color-gray;
-        width: 100%;
+      .names .name,
+      .buyer,
+      .items_count {
+        font-size: 0.8rem;
+      }
+
+      @media screen and (min-width: 700px) {
+        .names .name,
+        .buyer,
+        .items_count {
+          font-size: 0.9rem;
+        }
       }
     }
 
@@ -116,12 +149,15 @@
       display: flex;
       flex-direction: column;
       row-gap: 0.5rem;
+      padding-left: 1rem;
 
       .order_id,
       .pay,
       .order_status {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         color: $color-gray8;
+
+        row-gap: 0.1rem;
 
         & > div,
         & {
@@ -138,13 +174,15 @@
 
       .status,
       .order_id span {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
         color: $color-gray11;
         font-weight: bold;
       }
 
       .status {
         position: relative;
+        display: flex;
+        flex-direction: column;
         &::before {
           content: ""; /* Empty content for the ball */
           position: absolute; /* Position relative to the parent */
@@ -169,6 +207,18 @@
           &::before {
             background-color: $color-gray;
           }
+        }
+      }
+
+      @media screen and (min-width: 700px) {
+        .order_id,
+        .pay,
+        .order_status {
+          font-size: 0.8rem;
+        }
+        .status,
+        .order_id span {
+          font-size: 0.9rem;
         }
       }
     }

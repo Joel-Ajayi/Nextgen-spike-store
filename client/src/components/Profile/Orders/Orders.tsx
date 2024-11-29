@@ -48,11 +48,19 @@ function Orders() {
   };
 
   useEffect(() => {
-    if (!isRendered.current) {
+    if (!isRendered.current && !orders.count) {
       isRendered.current = true;
       (async () => {
         await getOrders(1, 0, false, false);
       })();
+    } else {
+      setIsLoading(false);
+      dispatch(
+        ordersSlice.actions.setOrdersPage({
+          skip: 0,
+          page: orders.count ? 1 : 0,
+        })
+      );
     }
   }, [orders.search]);
 
