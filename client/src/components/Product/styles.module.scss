@@ -340,10 +340,15 @@
     }
 
     .feedback {
-      max-height: 400px;
       display: flex;
-      overflow: auto;
+      padding-bottom: 0.5rem;
       @include skeletalLoader;
+      min-height: 20px;
+      gap: 1.5rem;
+      flex-direction: column;
+      @media screen and (min-width: 800px) {
+        flex-direction: row;
+      }
 
       .no_comments {
         margin: 0 auto;
@@ -368,24 +373,78 @@
         }
       }
 
+      .summary {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        @media screen and (min-width: 800px) {
+          width: 300px;
+          flex-direction: column;
+        }
+
+        .ratings {
+          display: flex;
+          flex: 1;
+          justify-content: center;
+          flex-direction: column;
+          align-items: center;
+          row-gap: 0.5rem;
+          .rating {
+            color: #fba100;
+            font-size: 1.2rem;
+          }
+        }
+
+        .details {
+          flex: 1;
+          min-width: 300px;
+          row-gap: 1rem;
+          padding-left: 1rem;
+          .row {
+            display: flex;
+            column-gap: 0.2rem;
+            width: 100%;
+          }
+        }
+      }
+
       .reviews {
-        width: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+        width: calc(100% + 2rem);
+        margin-left: -1rem;
+        padding: 0 1rem;
         display: flex;
         flex-direction: column;
-        row-gap: 1.5rem;
+        row-gap: 1rem;
+        max-height: 350px;
+        @include scrollbar();
 
         .review {
+          &:not(:last-child) {
+            border-bottom: 1px solid $color-gray2;
+            padding-bottom: 1rem;
+          }
+
           .r_content {
+            overflow: hidden;
+            .date {
+              font-size: 0.8rem;
+              color: $color-gray8;
+            }
             display: flex;
             flex-direction: column;
             row-gap: 0.75rem;
-            padding: 1.5rem 1rem 1rem 1rem;
-            border: 1px solid $color-gray2;
-            border-radius: 0.4rem;
+            padding: 0.5rem 0.5rem;
 
             .text_bold {
               font-weight: bold;
-              font-size: 1.2rem;
+              font-size: 0.9rem;
+            }
+
+            .comment {
+              overflow-wrap: break-word; /* Break long words */
+              word-wrap: break-word;
             }
 
             .rating {
@@ -408,11 +467,11 @@
             flex-wrap: wrap;
             column-gap: 1.5rem;
             align-items: center;
-            margin-top: 1rem;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
 
             .name {
               font-weight: bold;
-              font-size: large;
             }
           }
         }

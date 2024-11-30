@@ -13,6 +13,8 @@ import Stars from "../shared/Products/Stars/Stars";
 import Button from "../shared/Button/Button";
 import productValidator from "../../validators/product";
 import { MdOutlineClear } from "react-icons/md";
+import { Col, Progress, Row } from "antd";
+import { GiRoundStar } from "react-icons/gi";
 
 function FeedbackForm({ index }: { index: number }) {
   const review = useAppSelector((state) => state.product.reviews.list[index]);
@@ -87,7 +89,7 @@ function FeedbackForm({ index }: { index: number }) {
   return (
     <div className={Styles.review} style={{ order: 1 }}>
       <div className={Styles.r_content}>
-        <span>{review.date}</span>
+        <span className={Styles.date}>{review.date}</span>
         <div className={Styles.rating}>
           {isEditing && review.rating >= 1 && (
             <div
@@ -104,33 +106,41 @@ function FeedbackForm({ index }: { index: number }) {
             asinfo={!isEditing}
             rating={review.rating}
             colGap={!isEditing ? 0.4 : 0.2}
-            fontSize={!isEditing ? 1.5 : 1.2}
+            fontSize={!isEditing ? 1.2 : 1}
             callback={(rating) => {
               onInputChange(rating, "rating");
             }}
           />
         </div>
 
-        <Input
-          name="title"
-          asInfo={!isEditing}
-          label={!isEditing ? "" : "Subject"}
-          inputClass={Styles.text_bold}
-          defaultValue={review.title}
-          onChange={onInputChange}
-        />
-        <Input
-          name="comment"
-          type="textarea"
-          asInfo={!isEditing}
-          label={
-            !isEditing
-              ? ""
-              : `Comment: Max 250 Characters(${review.comment.length})`
-          }
-          defaultValue={review.comment}
-          onChange={onInputChange}
-        />
+        {!isEditing ? (
+          <span className={Styles.text_bold}>{review.title}</span>
+        ) : (
+          <Input
+            name="title"
+            asInfo={!isEditing}
+            label={!isEditing ? "" : "Subject"}
+            inputClass={Styles.text_bold}
+            defaultValue={review.title}
+            onChange={onInputChange}
+          />
+        )}
+        {!isEditing ? (
+          <span className={Styles.comment}>{review.comment}</span>
+        ) : (
+          <Input
+            name="comment"
+            type="textarea"
+            rows={4}
+            label={
+              !isEditing
+                ? ""
+                : `Comment: Max 250 Characters(${review.comment.length})`
+            }
+            defaultValue={review.comment}
+            onChange={onInputChange}
+          />
+        )}
       </div>
 
       <div className={Styles.sub_content}>
@@ -141,6 +151,8 @@ function FeedbackForm({ index }: { index: number }) {
               disabled={
                 (isEditing && isValid.includes(false)) || isSaving || isDeleting
               }
+              padTop={0.2}
+              padSide={0.8}
               onClick={saveEdit}
               isLoading={isSaving}
             />
@@ -152,6 +164,8 @@ function FeedbackForm({ index }: { index: number }) {
                   isSaving ||
                   isDeleting
                 }
+                padTop={0.2}
+                padSide={0.8}
                 onClick={deleteEdit}
                 isLoading={isDeleting}
               />
@@ -226,6 +240,23 @@ function Feedback() {
     [reviews.list.length]
   );
 
+  const { rating, ratingCountPerRate, ratersCount } = useMemo(() => {
+    const ratingCountPerRate = [0, 0, 0, 0, 0];
+    let ratersCount = 0;
+    const ratingsSum = reviews.list.reduce((curr, review) => {
+      if (review.rating) {
+        ratingCountPerRate[5 - review.rating] += 1;
+        ratersCount += 1;
+      }
+      return curr + review.rating;
+    }, 0);
+    return {
+      rating: parseFloat((ratingsSum / ratersCount).toFixed(1)),
+      ratingCountPerRate,
+      ratersCount,
+    };
+  }, [reviews.list]);
+
   return (
     <div className={Styles.tab}>
       <div className={Styles.header}>Reviews</div>
@@ -245,7 +276,44 @@ function Feedback() {
               )}
             </div>
           ) : null}
-
+          {formIsVisible && !!rating && (
+            <div className={Styles.summary}>
+              <div className={Styles.ratings}>
+                <div className={Styles.rating}>{`${rating} / 5`}</div>
+                <Stars asinfo rating={rating} colGap={0.3} fontSize={1.1} />
+                {
+                  <div className={Styles.total}>
+                    {ratersCount}
+                    {ratersCount > 1 ? " Ratings" : " Rating"}
+                  </div>
+                }
+              </div>
+              <div className={Styles.details}>
+                {ratingCountPerRate.map((count, i, arr) => (
+                  <div className={Styles.row}>
+                    <Col>
+                      <span>{arr.length - i}</span>
+                    </Col>
+                    <Col>
+                      <GiRoundStar
+                        style={{ fontSize: "0.9rem", color: "#fba100" }}
+                      />
+                    </Col>
+                    <Row>
+                      <span>{`( ${count} ) `}</span>
+                    </Row>
+                    <Col span={16} style={{ marginLeft: "0.3rem" }}>
+                      <Progress
+                        percent={(count / ratersCount) * 100} // Percentage of total ratings
+                        showInfo={false} // Hide percentage text
+                        strokeColor={"#fba100"}
+                      />
+                    </Col>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
           {formIsVisible && <div className={Styles.reviews}>{uiReviews}</div>}
         </div>
       </div>
