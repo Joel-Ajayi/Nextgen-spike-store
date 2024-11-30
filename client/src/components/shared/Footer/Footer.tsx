@@ -17,8 +17,8 @@ function Footer() {
             <div>About Us</div>
           </div>
           <div className={Styles.spec_info}>
-            <div>www.example.com</div>
-            <div>example@website.com</div>
+            <div>{window.location.hostname}</div>
+            <div>yotstack@gmail.com</div>
             <div>Akure, Nigeria</div>
           </div>
         </section>

@@ -21,7 +21,7 @@ import userSlice from "../../../../store/userState";
 import { Roles } from "../../../../types/user";
 import { PageSections, ControllerPaths } from "../../../../types/controller";
 import { UserPaths } from "../../../../types/user";
-import { CatalogQuery, Paths } from "../../../../types";
+import { CatalogQuery, CatalogSortQueries, Paths } from "../../../../types";
 import globalReq from "../../../../requests/global";
 import ProductsSearch from "../../Input/ProductsSearch/ProductsSearch";
 import cartSlice from "../../../../store/cart";
@@ -375,9 +375,12 @@ export default function Header() {
               />
 
               <div className={Styles.others}>
-                <a href="#trend">Trending Products</a>
-                <a href="#special">Special Offers</a>
-                <Link to="">Customer Services</Link>
+                <Link
+                  to={`${Paths.Catalog}/?${CatalogQuery.SortBy}=${CatalogSortQueries.Popularity}`}
+                >
+                  Trending Products
+                </Link>
+                <Link to="#special">Special Offers</Link>
               </div>
             </div>
           </div>
