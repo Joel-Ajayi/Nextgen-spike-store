@@ -1,5 +1,4 @@
-import { GraphQLError } from "graphql";
-import { AddressTypes, User } from "../../../@types/users";
+import { AddressTypes } from "../../../@types/users";
 import middleware from "../../../middlewares/middlewares";
 import { Context } from "../../context";
 import consts from "../../../@types/conts";
@@ -36,9 +35,7 @@ const resolvers = {
         states: consts.users.states,
       };
     } catch (error) {
-      throw new GraphQLError(consts.errors.server, {
-        extensions: { statusCode: 500 },
-      });
+      helpers.error(error);
     }
   },
 };

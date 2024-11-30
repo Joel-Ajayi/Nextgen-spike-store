@@ -187,3 +187,23 @@ export type InitPayment = {
     reference: string;
   };
 };
+
+type CartItem = {
+  id: string;
+  name: string;
+  price: number;
+  discountPrice: number;
+  discount: number;
+  count: number;
+  rating: number;
+  image: string;
+  qty: number;
+};
+
+export type Cart = {
+  items: CartItem[];
+  shippingAmount: number;
+  subTotalAmount: number;
+  totalAmount: number;
+  paymentMethods: string[];
+};

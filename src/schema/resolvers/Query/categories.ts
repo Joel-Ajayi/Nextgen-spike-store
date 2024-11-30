@@ -15,9 +15,8 @@ import { db } from "../../../db/prisma/connect";
 const resolvers = {
   GetCategories: async (
     _: any,
-    { parent }: { parent: string },
-    ctx: Context
-  ): Promise<CategoryMini[]> => {
+    { parent }: { parent: string }
+  ): Promise<CategoryMini[] | any> => {
     try {
       let query = {};
       if (parent) query = { parent: { name: parent } };
@@ -46,17 +45,14 @@ const resolvers = {
         parent: cat.parent?.name || "",
       }));
     } catch (error) {
-      console.log(error);
-      throw new GraphQLError(consts.errors.server, {
-        extensions: { statusCode: 500 },
-      });
+      helpers.error(error);
     }
   },
   GetCategory: async (
     _: any,
     { name }: { name: string },
     ctx: Context
-  ): Promise<Category> => {
+  ): Promise<Category | any> => {
     // check if logged_in
     middleware.checkSuperAdmin(ctx);
     try {
@@ -93,24 +89,27 @@ const resolvers = {
         description: category.description || "",
       };
     } catch (error) {
-      throw new GraphQLError(consts.errors.server, {
-        extensions: { statusCode: 500 },
-      });
+      helpers.error(error);
     }
   },
   CategoryFormData: async (_: any, {}: any, ctx: Context) => {
     // check if logged_in
     middleware.checkSuperAdmin(ctx);
-    const brands = await db.brand.findMany({
-      select: { name: true, image: true },
-    });
 
-    const featureTypes = helpers.getObjKeys<string>(CategoryFeatureType);
-    const offerTypes = helpers.getObjKeys<string>(CategoryOfferType);
-    const offerAudiences = helpers.getObjKeys<string>(
-      CategoryOfferTargetAudience
-    );
-    return { brands, offerTypes, featureTypes, offerAudiences };
+    try {
+      const brands = await db.brand.findMany({
+        select: { name: true, image: true },
+      });
+
+      const featureTypes = helpers.getObjKeys<string>(CategoryFeatureType);
+      const offerTypes = helpers.getObjKeys<string>(CategoryOfferType);
+      const offerAudiences = helpers.getObjKeys<string>(
+        CategoryOfferTargetAudience
+      );
+      return { brands, offerTypes, featureTypes, offerAudiences };
+    } catch (error) {
+      helpers.error(error);
+    }
   },
 };
 

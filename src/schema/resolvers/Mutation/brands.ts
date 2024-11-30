@@ -1,18 +1,17 @@
-import { GraphQLError } from "graphql";
 import { Brand, Brand_I } from "../../../@types/brand";
-import consts from "../../../@types/conts";
 import { validator } from "../../../helpers/validator";
 import middleware from "../../../middlewares/middlewares";
 import { Context } from "../../context";
 import { upload } from "../../../helpers/uploads";
 import { db } from "../../../db/prisma/connect";
+import helpers from "../../../helpers";
 
 const resolvers = {
   CreateBrand: async (
     _: any,
     { data }: { data: Brand_I },
     ctx: Context
-  ): Promise<Brand> => {
+  ): Promise<Brand | any> => {
     // check if logged_in
     middleware.checkSuperAdmin(ctx);
     // validate data
@@ -48,9 +47,7 @@ const resolvers = {
 
       return { ...newBrd, image: newBrd.image };
     } catch (error) {
-      throw new GraphQLError(consts.errors.server, {
-        extensions: { statusCode: 500 },
-      });
+      helpers.error(error);
     }
   },
 };

@@ -13,6 +13,7 @@ import {
   InitPayment,
   OrderStatus,
   PaymentStatus,
+  Cart,
 } from "../../../@types/products";
 import { validator } from "../../../helpers/validator";
 import helpers from "../../../helpers";
@@ -29,104 +30,104 @@ const resolvers = {
     _: any,
     { data }: { data: Product_I },
     ctx: Context
-  ): Promise<ProductUpdateReturn> => {
+  ): Promise<ProductUpdateReturn | any> => {
     // check if logged_in
     middleware.checkSuperAdmin(ctx);
 
     // validate data
     await validator.valProduct(data);
 
-    // check if product category exist
-    const productCategory = await db.category.findUnique({
-      where: { cId: data.cId },
-      select: {
-        hasWarrantyAndProduction: true,
-        parent: { select: { name: true } },
-        features: true,
-        brand: { select: { name: true } },
-      },
-    });
-
-    if (!productCategory) {
-      throw new GraphQLError("Product Category not found", {
-        extensions: { statusCode: 404 },
+    try {
+      // check if product category exist
+      const productCategory = await db.category.findUnique({
+        where: { cId: data.cId },
+        select: {
+          hasWarrantyAndProduction: true,
+          parent: { select: { name: true } },
+          features: true,
+          brand: { select: { name: true } },
+        },
       });
-    }
 
-    // check if product brand exist
-    const productBrd = await db.brand.findUnique({
-      where: { name: data.brand },
-    });
-
-    if (!productBrd) {
-      throw new GraphQLError("Product Brand not found", {
-        extensions: { statusCode: 404 },
-      });
-    }
-
-    // add warranty if required in category
-    if (productCategory.hasWarrantyAndProduction) {
-      if (!data?.warrCovered || !data?.warrDuration || !data?.mfgDate) {
-        throw new GraphQLError(
-          "Product warranty and manufacturing details is required",
-          {
-            extensions: { statusCode: 404 },
-          }
-        );
-      }
-    }
-
-    // Category features
-    let features = [
-      ...productCategory.features,
-      // get features of parent category
-      ...(await (async function getFeatures(
-        parentCatName = ""
-      ): Promise<CategoryFeature[]> {
-        if (parentCatName) {
-          const parentCategory = await db.category.findUnique({
-            where: { name: parentCatName },
-            select: { features: true, parent: { select: { name: true } } },
-          });
-          if (parentCategory) {
-            return [
-              ...parentCategory.features,
-              ...(await getFeatures(parentCategory.parent?.name)),
-            ];
-          }
-        }
-        return [];
-      })(productCategory.parent?.name)),
-    ];
-
-    const inputFeatureIds = data.features.map(({ featureId }) => featureId);
-    features.forEach(({ id, name }) => {
-      if (!inputFeatureIds.includes(id)) {
-        throw new GraphQLError(`${name} feature is required`, {
+      if (!productCategory) {
+        throw new GraphQLError("Product Category not found", {
           extensions: { statusCode: 404 },
         });
       }
-    });
 
-    // validate image/
-    const images = await upload.files({
-      folder: "prd",
-      files: data.images,
-      maxNum: consts.files.product.max,
-      minNum: consts.files.product.min,
-      prevFiles: [],
-    });
+      // check if product brand exist
+      const productBrd = await db.brand.findUnique({
+        where: { name: data.brand },
+      });
 
-    // create sku
-    const sku = helpers.getSKU(
-      data.name,
-      data.brand,
-      data.price,
-      data.colours,
-      data.cId
-    );
+      if (!productBrd) {
+        throw new GraphQLError("Product Brand not found", {
+          extensions: { statusCode: 404 },
+        });
+      }
 
-    try {
+      // add warranty if required in category
+      if (productCategory.hasWarrantyAndProduction) {
+        if (!data?.warrCovered || !data?.warrDuration || !data?.mfgDate) {
+          throw new GraphQLError(
+            "Product warranty and manufacturing details is required",
+            {
+              extensions: { statusCode: 404 },
+            }
+          );
+        }
+      }
+
+      // Category features
+      let features = [
+        ...productCategory.features,
+        // get features of parent category
+        ...(await (async function getFeatures(
+          parentCatName = ""
+        ): Promise<CategoryFeature[]> {
+          if (parentCatName) {
+            const parentCategory = await db.category.findUnique({
+              where: { name: parentCatName },
+              select: { features: true, parent: { select: { name: true } } },
+            });
+            if (parentCategory) {
+              return [
+                ...parentCategory.features,
+                ...(await getFeatures(parentCategory.parent?.name)),
+              ];
+            }
+          }
+          return [];
+        })(productCategory.parent?.name)),
+      ];
+
+      const inputFeatureIds = data.features.map(({ featureId }) => featureId);
+      features.forEach(({ id, name }) => {
+        if (!inputFeatureIds.includes(id)) {
+          throw new GraphQLError(`${name} feature is required`, {
+            extensions: { statusCode: 404 },
+          });
+        }
+      });
+
+      // validate image/
+      const images = await upload.files({
+        folder: "prd",
+        files: data.images,
+        maxNum: consts.files.product.max,
+        minNum: consts.files.product.min,
+        prevFiles: [],
+      });
+
+      // create sku
+      const sku = helpers.getSKU(
+        data.name,
+        data.brand,
+        data.price,
+        data.colours,
+        data.cId
+      );
+
       // add category
       const newProduct = await db.product.create({
         data: {
@@ -165,230 +166,239 @@ const resolvers = {
         features: productFeatures,
       };
     } catch (error) {
-      console.log((error as any).message);
-      throw new GraphQLError(consts.errors.server, {
-        extensions: { statusCode: 500 },
-      });
+      helpers.error(error);
     }
   },
   UpdateProduct: async (
     _: any,
-    { data }: { data: Product_I_U },
-    ctx: Context
-  ): Promise<ProductUpdateReturn> => {
-    const product = await db.product.findUnique({
-      where: { id: data.id },
-      select: {
-        id: true,
-        images: true,
-        category: {
-          select: {
-            name: true,
-            cId: true,
-            parent: { select: { name: true, id: true } },
-            hasWarrantyAndProduction: true,
-            brand: { select: { name: true } },
-          },
-        },
-        warrCovered: true,
-        warrDuration: true,
-        mfgDate: true,
-        mfgCountry: true,
-        brand: { select: { name: true, id: true } },
-        features: true,
-      },
-    });
-
-    if (!product) {
-      throw new GraphQLError("Product not found", {
-        extensions: { statusCode: 400 },
-      });
-    }
-
-    // if new category
-    const isNewCategory =
-      typeof data?.cId === "number" && data.cId !== product.category.cId;
-    // get category
-    const category = !isNewCategory
-      ? product.category
-      : await db.category.findUnique({
-          where: { cId: isNewCategory ? data.cId : product.category.cId },
-          select: {
-            name: true,
-            cId: true,
-            parent: { select: { name: true, id: true } },
-            hasWarrantyAndProduction: true,
-            brand: { select: { name: true } },
-          },
-        });
-
-    if (!category) {
-      throw new GraphQLError("Product Category not found", {
-        extensions: { statusCode: 404 },
-      });
-    }
-
-    if (data.features?.length) {
-      // Category features
-      const inputFeatureIds = data.features.map(({ featureId }) => featureId);
-
-      // check if features up in the tree are inputed
-      await (async function getFeatures(
-        parentCatName = ""
-      ): Promise<CategoryFeature[]> {
-        if (parentCatName) {
-          const parentCategory = await db.category.findUnique({
-            where: { name: parentCatName },
+    { data }: { data: Product_I_U }
+  ): Promise<ProductUpdateReturn | any> => {
+    try {
+      const product = await db.product.findUnique({
+        where: { id: data.id },
+        select: {
+          id: true,
+          images: true,
+          category: {
             select: {
-              id: true,
-              features: true,
-              parent: { select: { name: true } },
+              name: true,
+              cId: true,
+              parent: { select: { name: true, id: true } },
+              hasWarrantyAndProduction: true,
+              brand: { select: { name: true } },
             },
-          });
-          if (parentCategory) {
-            parentCategory.features.forEach((feature) => {
-              if (!inputFeatureIds.includes(feature.id)) {
-                throw new GraphQLError(`${feature.name} feature is required`, {
-                  extensions: { statusCode: 400 },
-                });
-              }
-            });
-            await getFeatures(parentCategory.parent?.name);
-          }
-        }
-        return [];
-      })(category.name);
-    }
-
-    // update product brand
-    let brdId: string | undefined = undefined;
-    if (data?.brand && data?.brand !== product.brand.name) {
-      const brand = await db.brand.findUnique({
-        where: { name: data.brand },
+          },
+          warrCovered: true,
+          warrDuration: true,
+          mfgDate: true,
+          mfgCountry: true,
+          brand: { select: { name: true, id: true } },
+          features: true,
+        },
       });
 
-      if (!brand) {
-        throw new GraphQLError("Invalid brand name", {
+      if (!product) {
+        throw new GraphQLError("Product not found", {
           extensions: { statusCode: 400 },
         });
       }
-      brdId = brand.id;
-    }
 
-    // check Manufacturing and Production Details
-    if (
-      (!product.warrCovered ||
-        !product.mfgDate ||
-        typeof product.warrDuration !== "number") &&
-      category.hasWarrantyAndProduction
-    ) {
-      if (
-        !data?.warrCovered ||
-        !data?.mfgDate ||
-        typeof data?.warrDuration !== "number"
-      ) {
-        throw new GraphQLError(
-          "Manufacturing and Production details is required for New Category",
-          {
-            extensions: { statusCode: 400 },
-          }
-        );
-      }
-    }
+      // if new category
+      const isNewCategory =
+        typeof data?.cId === "number" && data.cId !== product.category.cId;
+      // get category
+      const category = !isNewCategory
+        ? product.category
+        : await db.category.findUnique({
+            where: { cId: isNewCategory ? data.cId : product.category.cId },
+            select: {
+              name: true,
+              cId: true,
+              parent: { select: { name: true, id: true } },
+              hasWarrantyAndProduction: true,
+              brand: { select: { name: true } },
+            },
+          });
 
-    // check images
-    let images: undefined | string[] = undefined;
-    if (data?.images) {
-      images = await upload.files({
-        folder: "prd",
-        files: data.images,
-        maxNum: consts.files.product.max,
-        minNum: consts.files.product.min,
-        prevFiles: product.images,
-      });
-    }
-
-    const newPrd = await db.product.update({
-      where: { id: data.id },
-      data: {
-        name: data?.name || undefined,
-        cId: typeof data?.cId === "number" ? data?.cId : undefined,
-        description: data?.description || undefined,
-        price: typeof data?.price === "number" ? data?.price : undefined,
-        count: typeof data?.count === "number" ? data.count : undefined,
-        discount:
-          typeof data?.discount === "number" ? data?.discount : undefined,
-        paymentType:
-          typeof data.paymentType === "number" ? data.paymentType : undefined,
-        colours: data?.colours?.length
-          ? data.colours.map((c) => helpers.getCloseClolour(c))
-          : undefined,
-        mfgDate: data?.mfgDate || undefined,
-        warrCovered: data?.warrCovered || undefined,
-        warrDuration: data?.warrDuration || undefined,
-        brdId,
-        images,
-      },
-    });
-
-    let productFeatures = product.features;
-    if (data?.features?.length) {
-      // delete previous features if new category
-      let prevFeaturesId = product.features.map((f) => f.id);
-
-      // create new features
-      productFeatures = await Promise.all(
-        data.features.map(
-          async ({ id: inputFeatureId, feature, ...inputFeature }) => {
-            const id = helpers.getValidId(inputFeatureId || "");
-            const featureData = { ...inputFeature, productId: data.id };
-
-            if (isNewCategory) {
-              prevFeaturesId = prevFeaturesId.filter((prevId) => prevId !== id);
-            }
-
-            return await db.productFeature.upsert({
-              where: { id },
-              create: featureData,
-              update: featureData,
-            });
-          }
-        )
-      );
-
-      if (isNewCategory) {
-        await db.productFeature.deleteMany({
-          where: { id: { in: prevFeaturesId } },
+      if (!category) {
+        throw new GraphQLError("Product Category not found", {
+          extensions: { statusCode: 404 },
         });
       }
+
+      if (data.features?.length) {
+        // Category features
+        const inputFeatureIds = data.features.map(({ featureId }) => featureId);
+
+        // check if features up in the tree are inputed
+        await (async function getFeatures(
+          parentCatName = ""
+        ): Promise<CategoryFeature[]> {
+          if (parentCatName) {
+            const parentCategory = await db.category.findUnique({
+              where: { name: parentCatName },
+              select: {
+                id: true,
+                features: true,
+                parent: { select: { name: true } },
+              },
+            });
+            if (parentCategory) {
+              parentCategory.features.forEach((feature) => {
+                if (!inputFeatureIds.includes(feature.id)) {
+                  throw new GraphQLError(
+                    `${feature.name} feature is required`,
+                    {
+                      extensions: { statusCode: 400 },
+                    }
+                  );
+                }
+              });
+              await getFeatures(parentCategory.parent?.name);
+            }
+          }
+          return [];
+        })(category.name);
+      }
+
+      // update product brand
+      let brdId: string | undefined = undefined;
+      if (data?.brand && data?.brand !== product.brand.name) {
+        const brand = await db.brand.findUnique({
+          where: { name: data.brand },
+        });
+
+        if (!brand) {
+          throw new GraphQLError("Invalid brand name", {
+            extensions: { statusCode: 400 },
+          });
+        }
+        brdId = brand.id;
+      }
+
+      // check Manufacturing and Production Details
+      if (
+        (!product.warrCovered ||
+          !product.mfgDate ||
+          typeof product.warrDuration !== "number") &&
+        category.hasWarrantyAndProduction
+      ) {
+        if (
+          !data?.warrCovered ||
+          !data?.mfgDate ||
+          typeof data?.warrDuration !== "number"
+        ) {
+          throw new GraphQLError(
+            "Manufacturing and Production details is required for New Category",
+            {
+              extensions: { statusCode: 400 },
+            }
+          );
+        }
+      }
+
+      // check images
+      let images: undefined | string[] = undefined;
+      if (data?.images) {
+        images = await upload.files({
+          folder: "prd",
+          files: data.images,
+          maxNum: consts.files.product.max,
+          minNum: consts.files.product.min,
+          prevFiles: product.images,
+        });
+      }
+
+      const newPrd = await db.product.update({
+        where: { id: data.id },
+        data: {
+          name: data?.name || undefined,
+          cId: typeof data?.cId === "number" ? data?.cId : undefined,
+          description: data?.description || undefined,
+          price: typeof data?.price === "number" ? data?.price : undefined,
+          count: typeof data?.count === "number" ? data.count : undefined,
+          discount:
+            typeof data?.discount === "number" ? data?.discount : undefined,
+          paymentType:
+            typeof data.paymentType === "number" ? data.paymentType : undefined,
+          colours: data?.colours?.length
+            ? data.colours.map((c) => helpers.getCloseClolour(c))
+            : undefined,
+          mfgDate: data?.mfgDate || undefined,
+          warrCovered: data?.warrCovered || undefined,
+          warrDuration: data?.warrDuration || undefined,
+          brdId,
+          images,
+        },
+      });
+
+      let productFeatures = product.features;
+      if (data?.features?.length) {
+        // delete previous features if new category
+        let prevFeaturesId = product.features.map((f) => f.id);
+
+        // create new features
+        productFeatures = await Promise.all(
+          data.features.map(
+            async ({ id: inputFeatureId, feature, ...inputFeature }) => {
+              const id = helpers.getValidId(inputFeatureId || "");
+              const featureData = { ...inputFeature, productId: data.id };
+
+              if (isNewCategory) {
+                prevFeaturesId = prevFeaturesId.filter(
+                  (prevId) => prevId !== id
+                );
+              }
+
+              return await db.productFeature.upsert({
+                where: { id },
+                create: featureData,
+                update: featureData,
+              });
+            }
+          )
+        );
+
+        if (isNewCategory) {
+          await db.productFeature.deleteMany({
+            where: { id: { in: prevFeaturesId } },
+          });
+        }
+      }
+
+      // create sku
+      const sku = helpers.getSKU(
+        newPrd.name,
+        data.brand || product.brand.name,
+        newPrd.price,
+        newPrd.colours,
+        newPrd.cId
+      );
+      await db.product.update({ where: { id: data.id }, data: { sku } });
+
+      return { id: newPrd.id, sku, features: productFeatures };
+    } catch (error) {
+      helpers.error(error);
     }
-
-    // create sku
-    const sku = helpers.getSKU(
-      newPrd.name,
-      data.brand || product.brand.name,
-      newPrd.price,
-      newPrd.colours,
-      newPrd.cId
-    );
-    await db.product.update({ where: { id: data.id }, data: { sku } });
-
-    return { id: newPrd.id, sku, features: productFeatures };
   },
   UpdateReview: async (_: any, { data }: { data: Review_I }, ctx: Context) => {
     middleware.checkUser(ctx);
 
-    let prd = await ctx.db.product.findFirst({
-      where: { id: data.prd_id },
-      select: { id: true, reviews: { select: { rating: true, userId: true } } },
-    });
-
-    if (!prd?.id) {
-      throw new GraphQLError(consts.errors.product.prdNotFound, {
-        extensions: { statusCode: 404 },
-      });
-    }
     try {
+      let prd = await ctx.db.product.findFirst({
+        where: { id: data.prd_id },
+        select: {
+          id: true,
+          reviews: { select: { rating: true, userId: true } },
+        },
+      });
+
+      if (!prd?.id) {
+        throw new GraphQLError(consts.errors.product.prdNotFound, {
+          extensions: { statusCode: 404 },
+        });
+      }
+
       let review = await ctx.db.reviews.findFirst({
         where: { userId: ctx.user.id, productId: data.prd_id },
         select: { id: true },
@@ -424,9 +434,7 @@ const resolvers = {
       });
       return { message: "Review Updated" };
     } catch (error) {
-      throw new GraphQLError(consts.errors.server, {
-        extensions: { statusCode: 500 },
-      });
+      helpers.error(error);
     }
   },
   DeleteReview: async (
@@ -435,59 +443,58 @@ const resolvers = {
     ctx: Context
   ) => {
     middleware.checkUser(ctx);
-    let review = await ctx.db.reviews.findFirst({
-      where: { userId: ctx.user.id, productId: prd_id },
-      select: { id: true },
-    });
-
-    if (!review) {
-      throw new GraphQLError("Review not found", {
-        extensions: { statusCode: 400 },
-      });
-    }
 
     try {
+      let review = await ctx.db.reviews.findFirst({
+        where: { userId: ctx.user.id, productId: prd_id },
+        select: { id: true },
+      });
+
+      if (!review) {
+        throw new GraphQLError("Review not found", {
+          extensions: { statusCode: 400 },
+        });
+      }
+
       await ctx.db.reviews.delete({ where: { id: review.id } });
       return { message: "Review Deleted" };
     } catch (error) {
-      throw new GraphQLError("Internal Server Error", {
-        extensions: { statusCode: 500 },
-      });
+      helpers.error(error);
     }
   },
   CreateOrder: async (_: any, { data }: { data: Order_I }, ctx: Context) => {
     middleware.checkUser(ctx);
 
-    const paymentMethods = helpers.getObjIndexes<number>(PaymentType);
-
-    // check payment
-    if (!paymentMethods.includes(data.paymentMethod)) {
-      throw new GraphQLError("Invalid Payment Type", {
-        extensions: { statusCode: 400 },
-      });
-    }
-
-    // check address
-    const shippingAddress = await ctx.db.address.findUnique({
-      where: { id: data.shippingAddress },
-    });
-    if (!shippingAddress) {
-      throw new GraphQLError("Shipping address not found", {
-        extensions: { statusCode: 400 },
-      });
-    }
-
-    const {
-      items,
-      paymentMethods: p,
-      ...sumary
-    } = await productsQuery.GetCartItems(null, {
-      ids: data.itemIds,
-      qtys: data.itemQtys,
-    });
-
     let newOrderId = "";
     try {
+      const paymentMethods = helpers.getObjIndexes<number>(PaymentType);
+
+      // check payment
+      if (!paymentMethods.includes(data.paymentMethod)) {
+        throw new GraphQLError("Invalid Payment Type", {
+          extensions: { statusCode: 400 },
+        });
+      }
+
+      // check address
+      const shippingAddress = await ctx.db.address.findUnique({
+        where: { id: data.shippingAddress },
+      });
+      if (!shippingAddress) {
+        throw new GraphQLError("Shipping address not found", {
+          extensions: { statusCode: 400 },
+        });
+      }
+
+      const {
+        items,
+        paymentMethods: p,
+        ...sumary
+      } = (await productsQuery.GetCartItems(null, {
+        ids: data.itemIds,
+        qtys: data.itemQtys,
+      })) as Cart;
+
       const ordersCount = await ctx.db.order.count({
         where: { userId: ctx.user.id },
       });
@@ -536,12 +543,10 @@ const resolvers = {
 
       return { orderId: newOrderId, access_code };
     } catch (error) {
+      helpers.error(error);
       if (newOrderId) {
         await ctx.db.order.delete({ where: { id: newOrderId } });
       }
-      throw new GraphQLError("An error Occured while creating order", {
-        extensions: { statusCode: 500 },
-      });
     }
   },
   CancelOrder: async (_: any, { id }: { id: string }, ctx: Context) => {
@@ -694,7 +699,6 @@ const resolvers = {
 
       return { message: "Order Updated" };
     } catch (error) {
-      console.log(error);
       helpers.error(error);
     }
   },

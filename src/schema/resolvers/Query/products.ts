@@ -4,6 +4,7 @@ import consts from "../../../@types/conts";
 import middleware from "../../../middlewares/middlewares";
 
 import {
+  Cart,
   CatalogSortQueries,
   OrderStatus,
   PaymentStatus as PayStatus,
@@ -48,62 +49,66 @@ const resolvers = {
     _: any,
     { id }: { id: string },
     ctx: Context
-  ): Promise<Product> => {
-    const product = await ctx.db.product.findFirst({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        cId: true,
-        images: true,
-        brand: true,
-        colours: true,
-        sku: true,
-        paymentType: true,
-        price: true,
-        count: true,
-        description: true,
-        discount: true,
-        numSold: true,
-        rating: true,
-        features: {
-          select: {
-            feature: true,
-            value: true,
-            id: true,
-            featureId: true,
+  ): Promise<Product | any> => {
+    try {
+      const product = await ctx.db.product.findFirst({
+        where: { id },
+        select: {
+          id: true,
+          name: true,
+          cId: true,
+          images: true,
+          brand: true,
+          colours: true,
+          sku: true,
+          paymentType: true,
+          price: true,
+          count: true,
+          description: true,
+          discount: true,
+          numSold: true,
+          rating: true,
+          features: {
+            select: {
+              feature: true,
+              value: true,
+              id: true,
+              featureId: true,
+            },
+          },
+          mfgCountry: true,
+          mfgDate: true,
+          warrDuration: true,
+          warrCovered: true,
+          _count: {
+            select: { reviews: true },
           },
         },
-        mfgCountry: true,
-        mfgDate: true,
-        warrDuration: true,
-        warrCovered: true,
-        _count: {
-          select: { reviews: true },
-        },
-      },
-    });
-
-    if (!product) {
-      throw new GraphQLError(consts.errors.product.prdNotFound, {
-        extensions: { statusCode: 404 },
       });
+
+      if (!product) {
+        throw new GraphQLError(consts.errors.product.prdNotFound, {
+          extensions: { statusCode: 404 },
+        });
+      }
+      return {
+        ...product,
+        brand: product.brand.name,
+        numReviews: product._count.reviews,
+        features: product.features.map((f) => ({
+          ...f,
+          feature: f.feature.name,
+        })),
+      };
+    } catch (error) {
+      helpers.error(error);
     }
-    return {
-      ...product,
-      brand: product.brand.name,
-      numReviews: product._count.reviews,
-      features: product.features.map((f) => ({
-        ...f,
-        feature: f.feature.name,
-      })),
-    };
   },
   GetProductMini: async (
     _: any,
     { id, category }: { id: string; category: string },
     ctx: Context
-  ): Promise<ProductMini> => {
+  ): Promise<ProductMini | any> => {
     try {
       const product = await ctx.db.product.findFirst({
         where: { id, category: { name: category } },
@@ -119,9 +124,7 @@ const resolvers = {
       const { _count, ...rest } = product;
       return { ...rest, numReviews: _count.reviews, brand: rest.brand.name };
     } catch (error) {
-      throw new GraphQLError(consts.errors.server, {
-        extensions: { statusCode: 500 },
-      });
+      helpers.error(error);
     }
   },
   ProductFormData: async (_: any, { id }: { id?: string }, ctx: Context) => {
@@ -192,21 +195,20 @@ const resolvers = {
         paymentTypes: payments.map((type, val) => ({ val, type })),
       };
     } catch (error) {
-      throw new GraphQLError(consts.errors.server, {
-        extensions: { statusCode: 500 },
-      });
+      helpers.error(error);
     }
   },
   GetCartItems: async (
     _: any,
     { ids, qtys }: { ids: string[]; qtys: number[] }
-  ) => {
-    if (ids.length !== qtys.length) {
-      throw new GraphQLError("Invalid Cart Items", {
-        extensions: { statusCode: 400 },
-      });
-    }
+  ): Promise<Cart | any> => {
     try {
+      if (ids.length !== qtys.length) {
+        throw new GraphQLError("Invalid Cart Items", {
+          extensions: { statusCode: 400 },
+        });
+      }
+
       const data: { [key in string]: number } = {};
       ids.forEach((id, i) => {
         data[id] = qtys[i];
@@ -255,30 +257,29 @@ const resolvers = {
         totalAmount: subTotalAmount + shippingAmount,
       };
     } catch (error) {
-      throw new GraphQLError(
-        "Internal Server Error or Incorrect Cart Item Id",
-        {
-          extensions: { statusCode: 500 },
-        }
-      );
+      helpers.error(error);
     }
   },
   GetProductsMini2: async (_: any, query: { skip: number; take: number }) => {
-    const count = await db.product.count();
-    const products = await db.product.findMany({
-      take: query.take,
-      skip: query.skip,
-      select: {
-        id: true,
-        name: true,
-        category: { select: { name: true } },
-        rating: true,
-        price: true,
-        count: true,
-      },
-    });
-    const list = products.map((f) => ({ ...f, category: f.category.name }));
-    return { list, ...helpers.paginate(count, query.take, query.skip) };
+    try {
+      const count = await db.product.count();
+      const products = await db.product.findMany({
+        take: query.take,
+        skip: query.skip,
+        select: {
+          id: true,
+          name: true,
+          category: { select: { name: true } },
+          rating: true,
+          price: true,
+          count: true,
+        },
+      });
+      const list = products.map((f) => ({ ...f, category: f.category.name }));
+      return { list, ...helpers.paginate(count, query.take, query.skip) };
+    } catch (error) {
+      helpers.error(error);
+    }
   },
   QueryCatalog: async (_: any, { data }: { data: QueryCatalog }) => {
     try {
@@ -488,9 +489,7 @@ const resolvers = {
         filters,
       };
     } catch (error) {
-      throw new GraphQLError(consts.errors.server, {
-        extensions: { statusCode: 500 },
-      });
+      helpers.error(error);
     }
   },
   QueryReviews: async (
@@ -498,47 +497,51 @@ const resolvers = {
     data: { prd_id: string; skip: number; take: number },
     ctx: Context
   ) => {
-    const product = await ctx.db.product.findFirst({
-      where: { id: data.prd_id },
-      select: { id: true, rating: true },
-    });
-
-    if (!product) {
-      throw new GraphQLError(consts.errors.product.prdNotFound, {
-        extensions: { statusCode: 404 },
+    try {
+      const product = await ctx.db.product.findFirst({
+        where: { id: data.prd_id },
+        select: { id: true, rating: true },
       });
-    }
 
-    const count = await ctx.db.reviews.count({
-      where: { productId: data.prd_id },
-    });
-    const reviews = await ctx.db.reviews.findMany({
-      where: { productId: data.prd_id },
-      // skip: data.skip,
-      take: data.take || count,
-      select: {
-        rating: true,
-        title: true,
-        userId: true,
-        user: {
-          select: { fName: true, lName: true },
+      if (!product) {
+        throw new GraphQLError(consts.errors.product.prdNotFound, {
+          extensions: { statusCode: 404 },
+        });
+      }
+
+      const count = await ctx.db.reviews.count({
+        where: { productId: data.prd_id },
+      });
+      const reviews = await ctx.db.reviews.findMany({
+        where: { productId: data.prd_id },
+        // skip: data.skip,
+        take: data.take || count,
+        select: {
+          rating: true,
+          title: true,
+          userId: true,
+          user: {
+            select: { fName: true, lName: true },
+          },
+          updatedAt: true,
+          comment: true,
         },
-        updatedAt: true,
-        comment: true,
-      },
-    });
-    const paginate = helpers.paginate(count, data.take, data.skip);
+      });
+      const paginate = helpers.paginate(count, data.take, data.skip);
 
-    return {
-      ...paginate,
-      list: reviews.map(({ user, updatedAt: date, userId, ...r }) => ({
-        ...r,
-        editAble: userId === ctx.user?.id,
-        user: `${user.fName} ${user.lName}`,
-        date: `${date.toDateString()}`,
-        updatedAt: undefined,
-      })),
-    };
+      return {
+        ...paginate,
+        list: reviews.map(({ user, updatedAt: date, userId, ...r }) => ({
+          ...r,
+          editAble: userId === ctx.user?.id,
+          user: `${user.fName} ${user.lName}`,
+          date: `${date.toDateString()}`,
+          updatedAt: undefined,
+        })),
+      };
+    } catch (error) {
+      helpers.error(error);
+    }
   },
   QueryOrders: async (
     _: any,

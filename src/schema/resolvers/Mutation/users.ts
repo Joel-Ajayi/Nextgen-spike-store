@@ -69,184 +69,64 @@ const resolvers = {
     _: any,
     { data }: { data: SignIn_I },
     ctx: Context
-  ): Promise<Message> => {
+  ): Promise<Message | any> => {
     await middleware.alreadySignedIn(ctx);
     // validates arguments
     await validator.signIn(data);
     // check user credentials
-    const user = await middleware.checkLoginCredentials(
-      data?.email as string,
-      data?.pwd as string
-    );
-    // set session cookie
-    ctx.req.session.user = user.id;
-    return { message: consts.messages.signedIn };
+
+    try {
+      const user = await middleware.checkLoginCredentials(
+        data?.email as string,
+        data?.pwd as string
+      );
+      // set session cookie
+      ctx.req.session.user = user.id;
+      return { message: consts.messages.signedIn };
+    } catch (error) {
+      helpers.error(error);
+    }
   },
   SignOut: async (_: any, args: any, ctx: Context) => {
-    if (ctx.user) {
-      ctx.res.clearCookie(
-        (NODE_ENV === "production" ? SESSION_NAME : SESSION_NAME_DEV) as string
-      );
-      ctx.req.session.destroy((err: any) => {
-        if (err) throw new Error(consts.errors.server);
-      });
+    try {
+      if (ctx.user) {
+        ctx.res.clearCookie(
+          (NODE_ENV === "production"
+            ? SESSION_NAME
+            : SESSION_NAME_DEV) as string
+        );
+        ctx.req.session.destroy((err: any) => {
+          if (err) throw new Error(consts.errors.server);
+        });
+      }
+      return { message: consts.messages.signedOut };
+    } catch (error) {
+      helpers.error(error);
     }
-    return { message: consts.messages.signedOut };
-  },
-  VerifyAccount: async (
-    _: any,
-    { email }: { email: string },
-    ctx: Context
-  ): Promise<Message> => {
-    await middleware.checkUser(ctx);
-
-    const user = await db.user.findUnique({ where: { email } });
-
-    if (!!user) {
-      //save token to db
-      const vToken = `${user.id}${Math.floor(1000 + Math.random() * 9000)}`;
-      db.user.update({ where: { id: user.id }, data: { vToken } });
-
-      // send token to email
-      const token = await jwt.sign(
-        vToken,
-        EMAIL_VERIFICATION_SECRET as string,
-        {
-          expiresIn: "24h",
-        }
-      );
-      await userVerificationEmail(
-        user.email,
-        `${ctx.req.headers.host}/verify_account?token=${token}`
-      );
-    }
-    return { message: consts.messages.forgotPwdEmail };
-  },
-  VerifyToken: async (
-    _: any,
-    { token }: { token: string }
-  ): Promise<Message> => {
-    const vToken = await helpers.verifyJWT(token, EMAIL_VERIFICATION_SECRET);
-    if (!vToken) {
-      throw new GraphQLError(consts.errors.invalidToken, {
-        extensions: {
-          statusCode: 400,
-        },
-      });
-    }
-
-    const user = await db.user.findFirst({
-      where: { vToken: vToken as string },
-    });
-    if (!user) {
-      throw new GraphQLError(consts.errors.invalidToken, {
-        extensions: {
-          statusCode: 400,
-        },
-      });
-    }
-
-    if (user.verified) {
-      throw new GraphQLError(consts.errors.invalidToken, {
-        extensions: {
-          statusCode: 400,
-        },
-      });
-    }
-
-    db.user.update({
-      where: { id: user.id },
-      data: { vToken: null, verified: true },
-    });
-    return { message: consts.messages.emailVerified };
-  },
-  ForgotPassword: async (
-    _: any,
-    { email }: { email: string },
-    ctx: Context
-  ): Promise<Message> => {
-    await middleware.alreadySignedIn(ctx);
-
-    const user = await db.user.findUnique({
-      where: { email: email },
-    });
-    if (!!user) {
-      //save token to db
-      const pwdToken = `${user.id}${Math.floor(1000 + Math.random() * 9000)}`;
-      db.user.update({ where: { id: user.id }, data: { pwdToken } });
-      // send token to email
-      const token = await jwt.sign(
-        pwdToken,
-        PASSWORD_VERIFICATION_SECRET as string,
-        {
-          expiresIn: "24h",
-        }
-      );
-      await forgotPasswordEmail(
-        email as string,
-        `${ctx.req.headers.host}/forgot_pwd?token=${token}`
-      );
-    }
-    return { message: consts.messages.forgotPwdEmail };
-  },
-  VerifyPasswordToken: async (
-    _: any,
-    { token }: { token: string },
-    ctx: Context
-  ) => {
-    const pwdToken = await helpers.verifyJWT(
-      token,
-      PASSWORD_VERIFICATION_SECRET
-    );
-    if (!pwdToken) {
-      throw new GraphQLError(consts.errors.invalidToken, {
-        extensions: {
-          statusCode: 400,
-        },
-      });
-    }
-
-    const user = await db.user.findFirst({
-      where: { pwdToken: pwdToken as string },
-    });
-    if (!user) {
-      throw new GraphQLError(consts.errors.invalidToken, {
-        extensions: {
-          statusCode: 400,
-        },
-      });
-    }
-
-    db.user.update({
-      where: { id: user.id },
-      data: { pwdToken: null },
-    });
-    return { message: consts.messages.emailVerified };
   },
   UpdateAddress: async (_: any, { data }: { data: Address }, ctx: Context) => {
     // check if logged_in
     middleware.checkUser(ctx);
-
-    // check max
-    const validId = helpers.getValidId(data.id);
-    const isCreate = validId !== data.id;
-    const count = await ctx.db.address.count({
-      where: { userId: ctx.user.id },
-    });
-    if (count >= consts.users.maxAddresses && !isCreate) {
-      throw new GraphQLError("Max Addresses Exceeded", {
-        extensions: { statusCode: 400 },
-      });
-    }
-
-    // validate data
-    await validator.address(data);
-
-    const { id, isNew, ...address } = data;
-    const tel = Number(data.tel.replace(/\s/g, ""));
-    const addressData = { ...address, userId: ctx.user.id, tel };
-
     try {
+      // check max
+      const validId = helpers.getValidId(data.id);
+      const isCreate = validId !== data.id;
+      const count = await ctx.db.address.count({
+        where: { userId: ctx.user.id },
+      });
+      if (count >= consts.users.maxAddresses && !isCreate) {
+        throw new GraphQLError("Max Addresses Exceeded", {
+          extensions: { statusCode: 400 },
+        });
+      }
+
+      // validate data
+      await validator.address(data);
+
+      const { id, isNew, ...address } = data;
+      const tel = Number(data.tel.replace(/\s/g, ""));
+      const addressData = { ...address, userId: ctx.user.id, tel };
+
       const newAddress = await ctx.db.address.upsert({
         where: { id: validId },
         create: addressData,
@@ -255,10 +135,7 @@ const resolvers = {
 
       return newAddress.id;
     } catch (error) {
-      console.log(error);
-      throw new GraphQLError(consts.errors.server, {
-        extensions: { statusCode: 500 },
-      });
+      helpers.error(error);
     }
   },
 };

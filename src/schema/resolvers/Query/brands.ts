@@ -4,13 +4,10 @@ import { Context } from "../../context";
 import consts from "../../../@types/conts";
 import { Brand } from "../../../@types/brand";
 import { db } from "../../../db/prisma/connect";
+import helpers from "../../../helpers";
 
 const resolvers = {
-  GetBrand: async (
-    _: any,
-    { name }: { name: string },
-    ctx: Context
-  ): Promise<Brand> => {
+  GetBrand: async (_: any, { name }: { name: string }, ctx: Context) => {
     // check if logged_in
     middleware.checkSuperAdmin(ctx);
 
@@ -28,12 +25,10 @@ const resolvers = {
 
       return { ...brand, image: brand.image };
     } catch (error) {
-      throw new GraphQLError(consts.errors.server, {
-        extensions: { statusCode: 500 },
-      });
+      helpers.error(error);
     }
   },
-  GetBrands: async (_: any, a: any, ctx: Context): Promise<Brand[]> => {
+  GetBrands: async (_: any, a: any, ctx: Context) => {
     // check if logged_in
     middleware.checkSuperAdmin(ctx);
     try {
@@ -43,9 +38,7 @@ const resolvers = {
 
       return brands.map((brd) => ({ ...brd, image: brd.image }));
     } catch (error) {
-      throw new GraphQLError(consts.errors.server, {
-        extensions: { statusCode: 500 },
-      });
+      helpers.error(error);
     }
   },
 };
