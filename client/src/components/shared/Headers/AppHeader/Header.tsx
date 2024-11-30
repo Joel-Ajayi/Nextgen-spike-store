@@ -305,7 +305,7 @@ export default function Header() {
             showSubHeader ? Styles.show_sub_header : ""
           }`}
         >
-          <Link to="#" className={Styles.flipkartpluswrapper_tab}>
+          <Link to={Paths.Home} className={Styles.flipkartpluswrapper_tab}>
             <div className={Styles.logoname}>
               <i>
                 <span>
