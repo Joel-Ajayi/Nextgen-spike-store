@@ -79,6 +79,12 @@
         }
       }
 
+      .forgot_pass {
+        display: flex;
+        font-size: 0.8rem;
+        justify-content: end;
+      }
+
       .form_wrapper {
         flex: 1;
         display: flex;

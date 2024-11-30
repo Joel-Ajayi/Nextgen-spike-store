@@ -21,7 +21,7 @@ class Validator {
 
   private email = string().required("Invalid email").email("Invalid email");
 
-  private pwd = string()
+  public pwd = string()
     .required("Password is required")
     .min(8, "Password should be 8 chars minimum")
     .matches(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$/, {

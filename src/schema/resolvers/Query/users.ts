@@ -4,9 +4,17 @@ import middleware from "../../../middlewares/middlewares";
 import { Context } from "../../context";
 import consts from "../../../@types/conts";
 import helpers from "../../../helpers";
+import { forgotPasswordEmail } from "../../../emails/verification";
 
 const resolvers = {
   UserQuery: async (_: any, a: any, ctx: Context) => {
+    try {
+      console.log("endte");
+      await forgotPasswordEmail("yotstack@gmail.com", "here");
+    } catch (error) {
+      console.log(error);
+    }
+
     middleware.checkUser(ctx);
 
     try {
@@ -36,9 +44,8 @@ const resolvers = {
         states: consts.users.states,
       };
     } catch (error) {
-      throw new GraphQLError(consts.errors.server, {
-        extensions: { statusCode: 500 },
-      });
+      helpers.error(error);
+      console.log(error);
     }
   },
 };

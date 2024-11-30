@@ -59,6 +59,22 @@ class UserReq {
     await request.makeRequest(body);
   }
 
+  public async forgotPass(email: string) {
+    const query = `mutation ForgotPassword($email:String!) { 
+    UpdateAddress(email:$email) { message }}`;
+    const body = JSON.stringify({ query, variables: { email } });
+    const res = await request.makeRequest<string>(body);
+    return res;
+  }
+
+  public async verifyPass(token: string, password: string) {
+    const query = `mutation VerifyPasswordToken($token:String!, $password:String!) { 
+      VerifyPasswordToken(token:$token,password:$password) { message }}`;
+    const body = JSON.stringify({ query, variables: { token, password } });
+    const res = await request.makeRequest<string>(body);
+    return res;
+  }
+
   public async updateAddress(address_i: Address) {
     const { isNew, ...address } = address_i;
     let query = `mutation UpdateAddress($data:Address_I!) {

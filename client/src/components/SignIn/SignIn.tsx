@@ -1,6 +1,11 @@
 import React, { useLayoutEffect, useState } from "react";
 import Styles from "./signIn.module.scss";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import {
+  Link,
+  useLocation,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import Input from "../shared/Input/Input";
 import appSlice from "../../store/appState";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
@@ -9,6 +14,7 @@ import { SignInFieds, SignInForm } from "../../types/user";
 import userSlice from "../../store/userState";
 import userValidator from "../../validators/user";
 import Button from "../shared/Button/Button";
+import { Paths } from "../../types";
 
 function SignIn() {
   let [params] = useSearchParams();
@@ -112,6 +118,11 @@ function SignIn() {
                 autoComplete="off"
                 type="password"
               />
+              {isSignIn && (
+                <div className={Styles.forgot_pass}>
+                  <Link to={Paths.ForgotPass}>Forgot Password ?</Link>
+                </div>
+              )}
               <div className={Styles.info}>
                 <p>
                   By continuing, you agree to NextgenSpike's Terms of Use and

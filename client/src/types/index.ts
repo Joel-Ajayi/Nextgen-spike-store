@@ -135,6 +135,7 @@ export enum Paths {
   Product = "/product",
   Profile = "/profile",
   WishList = "/WishList",
+  ForgotPass = "/forgot_pass",
   Cart = "/cart",
   Checkout = "/checkout",
   SignIn = "/signIn",

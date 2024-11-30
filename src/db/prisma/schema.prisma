@@ -21,11 +21,9 @@ model User {
   address       Address[]
   orders        Order[]
   couponId      String[]
-  verified      Boolean   @default(false)
   roles         Int[]
   pwd           String
   pwdToken      String?
-  vToken        String?
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
 }

@@ -11,10 +11,7 @@ import middleware from "../../../middlewares/middlewares";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import { Context } from "../../context";
-import {
-  forgotPasswordEmail,
-  userVerificationEmail,
-} from "../../../emails/verification";
+import { forgotPasswordEmail } from "../../../emails/verification";
 import { GraphQLError } from "graphql";
 import { Message } from "../../../@types";
 import { db } from "../../../db/prisma/connect";
@@ -22,7 +19,6 @@ import helpers from "../../../helpers";
 
 const {
   SESSION_NAME,
-  EMAIL_VERIFICATION_SECRET,
   PASSWORD_VERIFICATION_SECRET,
   SESSION_NAME_DEV,
   NODE_ENV,
@@ -42,9 +38,6 @@ const resolvers = {
 
     // hash password
     const pwd = await bcrypt.hash(data.pwd, 12);
-
-    // user role
-    const userCount = await db.user.count();
 
     try {
       const user = await db.user.create({
@@ -93,111 +86,52 @@ const resolvers = {
     }
     return { message: consts.messages.signedOut };
   },
-  VerifyAccount: async (
-    _: any,
-    { email }: { email: string },
-    ctx: Context
-  ): Promise<Message> => {
-    await middleware.checkUser(ctx);
-
-    const user = await db.user.findUnique({ where: { email } });
-
-    if (!!user) {
-      //save token to db
-      const vToken = `${user.id}${Math.floor(1000 + Math.random() * 9000)}`;
-      db.user.update({ where: { id: user.id }, data: { vToken } });
-
-      // send token to email
-      const token = await jwt.sign(
-        vToken,
-        EMAIL_VERIFICATION_SECRET as string,
-        {
-          expiresIn: "24h",
-        }
-      );
-      await userVerificationEmail(
-        user.email,
-        `${ctx.req.headers.host}/verify_account?token=${token}`
-      );
-    }
-    return { message: consts.messages.forgotPwdEmail };
-  },
-  VerifyToken: async (
-    _: any,
-    { token }: { token: string }
-  ): Promise<Message> => {
-    const vToken = await helpers.verifyJWT(token, EMAIL_VERIFICATION_SECRET);
-    if (!vToken) {
-      throw new GraphQLError(consts.errors.invalidToken, {
-        extensions: {
-          statusCode: 400,
-        },
-      });
-    }
-
-    const user = await db.user.findFirst({
-      where: { vToken: vToken as string },
-    });
-    if (!user) {
-      throw new GraphQLError(consts.errors.invalidToken, {
-        extensions: {
-          statusCode: 400,
-        },
-      });
-    }
-
-    if (user.verified) {
-      throw new GraphQLError(consts.errors.invalidToken, {
-        extensions: {
-          statusCode: 400,
-        },
-      });
-    }
-
-    db.user.update({
-      where: { id: user.id },
-      data: { vToken: null, verified: true },
-    });
-    return { message: consts.messages.emailVerified };
-  },
   ForgotPassword: async (
     _: any,
     { email }: { email: string },
     ctx: Context
-  ): Promise<Message> => {
+  ) => {
     await middleware.alreadySignedIn(ctx);
 
-    const user = await db.user.findUnique({
-      where: { email: email },
-    });
-    if (!!user) {
-      //save token to db
-      const pwdToken = `${user.id}${Math.floor(1000 + Math.random() * 9000)}`;
-      db.user.update({ where: { id: user.id }, data: { pwdToken } });
-      // send token to email
-      const token = await jwt.sign(
-        pwdToken,
-        PASSWORD_VERIFICATION_SECRET as string,
-        {
-          expiresIn: "24h",
-        }
-      );
-      await forgotPasswordEmail(
-        email as string,
-        `${ctx.req.headers.host}/forgot_pwd?token=${token}`
-      );
+    try {
+      const user = await db.user.findUnique({
+        where: { email: email },
+      });
+
+      if (!!user) {
+        //save token to db
+        const pwdToken = `${user.id}${Math.floor(1000 + Math.random() * 9000)}`;
+        db.user.update({ where: { id: user.id }, data: { pwdToken } });
+        // send token to email
+        const token = await jwt.sign(
+          pwdToken,
+          PASSWORD_VERIFICATION_SECRET as string,
+          {
+            expiresIn: "6h",
+          }
+        );
+        await forgotPasswordEmail(
+          email as string,
+          `${ctx.req.protocol}://${ctx.req.headers.host}/forgot_pwd?token=${token}`
+        );
+      }
+      return { message: consts.messages.forgotPwdEmail };
+    } catch (error) {
+      helpers.error(error);
     }
-    return { message: consts.messages.forgotPwdEmail };
   },
   VerifyPasswordToken: async (
     _: any,
-    { token }: { token: string },
+    { token, password }: { token: string; password: string },
     ctx: Context
   ) => {
+    await middleware.alreadySignedIn(ctx);
+
     const pwdToken = await helpers.verifyJWT(
       token,
       PASSWORD_VERIFICATION_SECRET
     );
+
     if (!pwdToken) {
       throw new GraphQLError(consts.errors.invalidToken, {
         extensions: {
@@ -206,22 +140,30 @@ const resolvers = {
       });
     }
 
-    const user = await db.user.findFirst({
-      where: { pwdToken: pwdToken as string },
-    });
-    if (!user) {
-      throw new GraphQLError(consts.errors.invalidToken, {
-        extensions: {
-          statusCode: 400,
-        },
+    try {
+      const user = await db.user.findFirst({
+        where: { pwdToken: pwdToken as string },
       });
-    }
 
-    db.user.update({
-      where: { id: user.id },
-      data: { pwdToken: null },
-    });
-    return { message: consts.messages.emailVerified };
+      if (!user) {
+        throw new GraphQLError(consts.errors.invalidToken, {
+          extensions: {
+            statusCode: 400,
+          },
+        });
+      }
+
+      await validator.pwd.validate(password);
+      const pwd = await bcrypt.hash(password, 12);
+
+      db.user.update({
+        where: { id: user.id },
+        data: { pwdToken: null, pwd },
+      });
+      return { message: consts.messages.passwordChange };
+    } catch (error) {
+      helpers.error(error);
+    }
   },
   UpdateAddress: async (_: any, { data }: { data: Address }, ctx: Context) => {
     // check if logged_in
@@ -255,10 +197,7 @@ const resolvers = {
 
       return newAddress.id;
     } catch (error) {
-      console.log(error);
-      throw new GraphQLError(consts.errors.server, {
-        extensions: { statusCode: 500 },
-      });
+      helpers.error(error);
     }
   },
 };

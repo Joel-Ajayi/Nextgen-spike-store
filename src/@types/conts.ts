@@ -9,7 +9,7 @@ const consts = {
     unAuthenticated: "unAuthenticated",
     userAlreadyExist: "User already exist",
     server: "An error occured",
-    invalidToken: "Invalid token",
+    invalidToken: "Invalid password reset link",
     files: {
       inCorrectImageFormat: "Image file format not supported",
       inCorrectVideoFormat: "Video file format not supported",
@@ -80,10 +80,8 @@ const consts = {
     signedIn: "Signed in",
     signedOut: "Signed out",
     signedUp: "Account created",
-    emailVerification:
-      "If email exist, an email has been sent to validate account",
-    emailVerified: "Email has been verified",
-    forgotPwdEmail: "If email exist, an email has been sent to reset password",
+    forgotPwdEmail:
+      "If user enial exist, an email has been sent to reset password",
     passwordChange: "Password has been Changed. Please SignIn",
   },
 };

@@ -6,6 +6,7 @@ import { GraphQLError } from "graphql";
 import colours from "../db/colours";
 import { Types } from "mongoose";
 import { OrderStatus, PaymentStatus } from "../@types/products";
+import { ValidationError } from "yup";
 
 class Helpers {
   public verifyJWT = async (token: any, secret: any) => {
@@ -203,6 +204,10 @@ class Helpers {
     if (error instanceof GraphQLError) {
       throw new GraphQLError(error.message, {
         extensions: { statusCode: error.extensions.statusCode },
+      });
+    } else if (error instanceof ValidationError) {
+      throw new GraphQLError(error.message, {
+        extensions: { statusCode: 400 },
       });
     } else {
       throw new GraphQLError(consts.errors.server, {

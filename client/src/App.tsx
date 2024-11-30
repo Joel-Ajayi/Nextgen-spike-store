@@ -10,6 +10,7 @@ import {
 } from "react-router-dom";
 import SignInPage from "./pages/SignIn";
 import HomePage from "./pages/Home";
+import ForgotPassPage from "./pages/ForgotPass";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
 import userSlice from "./store/userState";
 import appSlice from "./store/appState";
@@ -105,6 +106,10 @@ function Routes() {
         <Route element={<GetUser />} errorElement={<ErrorElement />}>
           <Route path={Paths.Home} element={<HomePage />} />
           <Route path={Paths.SignIn} element={<SignInPage />} />
+          <Route
+            path={`${Paths.ForgotPass}/:token?`}
+            element={<ForgotPassPage />}
+          />
           <Route path={`${Paths.Catalog}/`} element={<Catalog />} />
           <Route path={`${Paths.Product}/:prd_id`} element={<Product />} />
           <Route path={Paths.Cart} element={<Cart />} />
