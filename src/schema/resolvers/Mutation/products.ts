@@ -420,16 +420,21 @@ const resolvers = {
         update: newReview,
       });
 
-      let totalRating = data.rating;
       const reviews = prd.reviews.filter((r) => r.userId !== ctx.user.id);
-      reviews.forEach((r) => {
-        totalRating += r.rating;
-      });
+      let ratersCount = newReview.rating ? 1 : 0;
+      const ratingsSum =
+        (newReview?.rating || 0) +
+        reviews.reduce((curr, review) => {
+          if (review.rating) {
+            ratersCount += 1;
+          }
+          return curr + review.rating;
+        }, 0);
 
       await ctx.db.product.update({
         where: { id: data.prd_id },
         data: {
-          rating: Number((totalRating / (reviews.length + 1)).toFixed(1)),
+          rating: parseFloat((ratingsSum / ratersCount).toFixed(1)),
         },
       });
       return { message: "Review Updated" };

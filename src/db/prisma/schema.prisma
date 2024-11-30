@@ -95,7 +95,7 @@ model Product {
   description  String
   price        Float //Naira
   images       String[]
-  rating       Int              @default(0)
+  rating       Float            @default(0)
   count        Int              @default(0)
   paymentType  Int //PAYMENTMETHOD
   brdId        String           @db.ObjectId
