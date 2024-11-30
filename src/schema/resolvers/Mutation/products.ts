@@ -425,9 +425,7 @@ const resolvers = {
       const ratingsSum =
         (newReview?.rating || 0) +
         reviews.reduce((curr, review) => {
-          if (review.rating) {
-            ratersCount += 1;
-          }
+          if (review.rating) ratersCount += 1;
           return curr + review.rating;
         }, 0);
 
@@ -450,18 +448,35 @@ const resolvers = {
     middleware.checkUser(ctx);
 
     try {
-      let review = await ctx.db.reviews.findFirst({
-        where: { userId: ctx.user.id, productId: prd_id },
-        select: { id: true },
+      let reviews = await ctx.db.reviews.findMany({
+        where: { productId: prd_id },
+        select: { id: true, rating: true, userId: true },
       });
 
-      if (!review) {
-        throw new GraphQLError("Review not found", {
+      if (!reviews.length) {
+        throw new GraphQLError("Reviews not found", {
           extensions: { statusCode: 400 },
         });
       }
 
-      await ctx.db.reviews.delete({ where: { id: review.id } });
+      const reviewToDelete = reviews.find((r) => r.userId === ctx.user.id);
+      if (reviewToDelete) {
+        let ratersCount = 0;
+        const currReviews = reviews.filter((r) => r.userId !== ctx.user.id);
+        const ratingsSum = currReviews.reduce((curr, review) => {
+          if (review.rating) ratersCount += 1;
+          return curr + review.rating;
+        }, 0);
+
+        await ctx.db.reviews.delete({ where: { id: reviewToDelete.id } });
+        await ctx.db.product.update({
+          where: { id: prd_id },
+          data: {
+            rating: parseFloat((ratingsSum / ratersCount).toFixed(1)),
+          },
+        });
+      }
+
       return { message: "Review Deleted" };
     } catch (error) {
       helpers.error(error);

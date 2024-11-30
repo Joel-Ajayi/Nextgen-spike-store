@@ -290,7 +290,7 @@ type Product {
   name: String!
   price: Int!
   numReviews:Int!
-  rating: Int!
+  rating: Float!
   brand: String!
   cId: Int!
   count:Int!
@@ -318,7 +318,7 @@ type ProductMini {
   count: Int!
   numSold:Int!
   numReviews:Int!
-  rating: Int!
+  rating: Float!
 }
 
 type ProductUpdateReturn {
@@ -512,7 +512,7 @@ type OrderAddress {
     qty:Int!
     price:Int!
     name:String!
-    rating:Int!
+    rating:Float!
   }
 
 
