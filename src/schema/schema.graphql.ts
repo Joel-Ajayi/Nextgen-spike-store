@@ -409,7 +409,7 @@ type CartItem {
   name: String!
   price: Int!
   discountPrice:Int!
-  rating: Int!
+  rating: Float!
   count:Int!
   discount: Int!
   image: String!
